@@ -17,7 +17,7 @@ class DayCounter(commands.Cog):
         '''Muestra el número de días pasados desde la fecha de inicio.'''
         start_date_str = await self.config.guild(ctx.guild).start_date()
         if start_date_str is None:
-            await ctx.send("La fecha de inicio no está establecida. Usa el comando `!establecer_fecha_inicio` para establecerla.")
+            await ctx.send("La fecha de inicio no está establecida. Usa el comando `!establecer_fecha` para establecerla.")
             return
         
         start_date = datetime.fromisoformat(start_date_str).replace(tzinfo=timezone.utc) + timedelta(hours=2)
