@@ -14,9 +14,10 @@ class DayCounter(commands.Cog):
     @commands.command()
     async def contador_dias(self, ctx):
         '''Incrementa y muestra el contador de días.'''
-        async with self.config.guild(ctx.guild).day_counter() as day_counter:
-            day_counter += 1
-            await ctx.send(f"Estamos en el día {day_counter}")
+        day_counter = await self.config.guild(ctx.guild).day_counter()
+        day_counter += 1
+        await self.config.guild(ctx.guild).day_counter.set(day_counter)
+        await ctx.send(f"Estamos en el día {day_counter}")
 
     @commands.guild_only()
     @commands.command()
