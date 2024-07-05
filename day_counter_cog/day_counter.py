@@ -1,28 +1,26 @@
 import discord
-from discord.ext import commands
-import os
+from redbot.core import commands, Config
 
 class DayCounter(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.file_path = "data/day_counter_cog/day_counter.txt"
-        self.current_day = self.read_day_counter()
+        self.config = Config.get_conf(self, identifier=1234567890)
+        default_guild = {
+            "day_counter": 0
+        }
+        self.config.register_guild(**default_guild)
 
-    def read_day_counter(self):
-        if os.path.exists(self.file_path):
-            with open(self.file_path, "r") as file:
-                return int(file.read().strip())
-        return 1
-
-    def write_day_counter(self):
-        with open(self.file_path, "w") as file:
-            file.write(str(self.current_day))
-
+    @commands.guild_only()
     @commands.command()
     async def contador_dias(self, ctx):
-        self.current_day += 1
-        self.write_day_counter()
-        await ctx.send(f"Hoy es el día {self.current_day}. Mañana será el día {self.current_day + 1}.")
+        '''Incrementa y muestra el contador de días.'''
+        async with self.config.guild(ctx.guild).day_counter() as day_counter:
+            day_counter += 1
+            await ctx.send(f"Estamos en el día {day_counter}")
 
-def setup(bot):
-    bot.add_cog(DayCounter(bot))
+    @commands.guild_only()
+    @commands.command()
+    async def resetear_contador(self, ctx):
+        '''Resetea el contador de días a 0.'''
+        await self.config.guild(ctx.guild).day_counter.set(0)
+        await ctx.send("El contador de días ha sido reseteado a 0.")
