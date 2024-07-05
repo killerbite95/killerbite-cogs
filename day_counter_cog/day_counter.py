@@ -13,7 +13,7 @@ class DayCounter(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def contador_dias(self, ctx):
+    async def dias(self, ctx):
         '''Muestra el número de días pasados desde la fecha de inicio.'''
         start_date_str = await self.config.guild(ctx.guild).start_date()
         if start_date_str is None:
@@ -28,7 +28,7 @@ class DayCounter(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def establecer_fecha_inicio(self, ctx, year: int, month: int, day: int):
+    async def establecer_fecha(self, ctx, year: int, month: int, day: int):
         '''Establece la fecha de inicio en formato año, mes, día.'''
         start_date = datetime(year, month, day, tzinfo=timezone.utc) - timedelta(hours=2)
         await self.config.guild(ctx.guild).start_date.set(start_date.isoformat())
@@ -36,7 +36,7 @@ class DayCounter(commands.Cog):
 
     @commands.guild_only()
     @commands.command()
-    async def resetear_contador(self, ctx):
+    async def resetear_dias(self, ctx):
         '''Resetea la fecha de inicio.'''
         await self.config.guild(ctx.guild).start_date.set(None)
         await ctx.send("La fecha de inicio ha sido reseteada.")
