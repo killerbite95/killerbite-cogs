@@ -8,7 +8,7 @@ class F1(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        fastf1.Cache.enable_cache('~/.fastf1_cache')  # habilitar caché
+        fastf1.Cache.enable_cache('/root/.fastf1_cache')  # habilitar caché
 
     @commands.command()
     async def pilotos(self, ctx):
