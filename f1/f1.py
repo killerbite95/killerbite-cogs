@@ -1,83 +1,94 @@
 import discord
 from redbot.core import commands
 import fastf1
-from datetime import datetime
 
 class F1(commands.Cog):
-    """Cog de Fórmula 1 para Red Discord Bot usando FastF1"""
-
     def __init__(self, bot):
         self.bot = bot
         fastf1.Cache.enable_cache('/root/.fastf1_cache')  # habilitar caché
 
     @commands.command()
-    async def pilotos(self, ctx):
-        """Obtiene la clasificación de pilotos"""
-        current_year = datetime.now().year
-        try:
-            drivers = fastf1.get_driver_standings(current_year)
-            if drivers is not None:
-                embed = discord.Embed(title="Clasificación de Pilotos", color=discord.Color.blue())
-                for driver in drivers.iterrows():
-                    driver_name = f"{driver[1]['Driver']['givenName']} {driver[1]['Driver']['familyName']}"
-                    points = driver[1]['points']
-                    embed.add_field(name=f"{driver[1]['position']}. {driver_name}", value=f"Puntos: {points}", inline=False)
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send("No se pudo obtener la clasificación de pilotos.")
-        except Exception as e:
-            await ctx.send(f"Error al obtener la clasificación de pilotos: {e}")
-
-    @commands.command()
-    async def constructores(self, ctx):
-        """Obtiene la clasificación de constructores"""
-        current_year = datetime.now().year
-        try:
-            constructors = fastf1.get_constructor_standings(current_year)
-            if constructors is not None:
-                embed = discord.Embed(title="Clasificación de Constructores", color=discord.Color.green())
-                for constructor in constructors.iterrows():
-                    name = constructor[1]['Constructor']['name']
-                    points = constructor[1]['points']
-                    embed.add_field(name=f"{constructor[1]['position']}. {name}", value=f"Puntos: {points}", inline=False)
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send("No se pudo obtener la clasificación de constructores.")
-        except Exception as e:
-            await ctx.send(f"Error al obtener la clasificación de constructores: {e}")
-
-    @commands.command()
-    async def calendario(self, ctx):
-        """Obtiene el calendario de carreras"""
-        current_year = datetime.now().year
-        try:
-            schedule = fastf1.get_event_schedule(current_year)
-            if schedule is not None:
-                embed = discord.Embed(title="Calendario de Carreras", color=discord.Color.red())
-                for event in schedule.iterrows():
-                    race_date = event[1]['Date']
-                    embed.add_field(name=event[1]['EventName'], value=f"Fecha: {race_date.strftime('%d/%m/%Y')}\nCircuito: {event[1]['Circuit']['Location']['longName']}", inline=False)
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send("No se pudo obtener el calendario de carreras.")
-        except Exception as e:
-            await ctx.send(f"Error al obtener el calendario de carreras: {e}")
-
-    @commands.command()
     async def carrera_actual(self, ctx):
-        """Obtiene información de la carrera actual"""
-        current_year = datetime.now().year
+        '''Muestra información sobre la carrera actual.'''
         try:
-            next_event = fastf1.get_event_schedule(current_year).iloc[0]
-            if next_event is not None:
-                race_date = next_event['Date']
-                embed = discord.Embed(title="Carrera Actual", color=discord.Color.purple())
-                embed.add_field(name=next_event['EventName'], value=f"Fecha: {race_date.strftime('%d/%m/%Y')}\nCircuito: {next_event['Circuit']['Location']['longName']}", inline=False)
-                await ctx.send(embed=embed)
-            else:
-                await ctx.send("No se pudo obtener la información de la carrera actual.")
+            # Obtener el calendario de eventos del año actual
+            schedule = fastf1.get_event_schedule(2023)
+            
+            # Encontrar el próximo evento
+            next_event = schedule.loc[schedule['EventDate'] >= pd.Timestamp.now()].iloc[0]
+            
+            await ctx.send(f"Próxima carrera: {next_event['EventName']} en {next_event['Location']} el {next_event['EventDate'].date()}")
         except Exception as e:
-            await ctx.send(f"Error al obtener la información de la carrera actual: {e}")
+            await ctx.send("No se pudo obtener la información de la carrera actual.")
+            await ctx.send(f"Error: {str(e)}")
 
-async def setup(bot):
-    await bot.add_cog(F1(bot))
+    @commands.command()
+    async def pilotos(self, ctx):
+        '''Muestra la clasificación actual de pilotos.'''
+        try:
+            # Obtener la lista de eventos del año actual
+            events = fastf1.get_event_schedule(2023)
+            
+            # Tomar el último evento completado
+            last_event = None
+            for _, event in events.iterrows():
+                if event['EventType'] == 'Race' and event['EventDate'] <= pd.Timestamp.now():
+                    last_event = event
+                    break
+
+            if not last_event:
+                await ctx.send("No se pudo obtener la clasificación de pilotos: No hay eventos completados.")
+                return
+
+            # Obtener la sesión de carrera del último evento completado
+            session = fastf1.get_session(last_event['EventYear'], last_event['EventName'], 'R')
+            session.load()
+
+            # Obtener la clasificación de pilotos a partir de los resultados de la carrera
+            driver_standings = session.results[['DriverNumber', 'FullName', 'TeamName', 'Points']].sort_values(by='Points', ascending=False)
+
+            standings_message = "Clasificación actual de pilotos:\n"
+            for index, row in driver_standings.iterrows():
+                standings_message += f"{row['FullName']} ({row['TeamName']}): {row['Points']} puntos\n"
+
+            await ctx.send(standings_message)
+        except Exception as e:
+            await ctx.send("Error al obtener la clasificación de pilotos.")
+            await ctx.send(f"Error: {str(e)}")
+
+    @commands.command()
+    async def constructor(self, ctx):
+        '''Muestra la clasificación actual de constructores.'''
+        try:
+            # Obtener la lista de eventos del año actual
+            events = fastf1.get_event_schedule(2023)
+            
+            # Tomar el último evento completado
+            last_event = None
+            for _, event in events.iterrows():
+                if event['EventType'] == 'Race' and event['EventDate'] <= pd.Timestamp.now():
+                    last_event = event
+                    break
+
+            if not last_event:
+                await ctx.send("No se pudo obtener la clasificación de constructores: No hay eventos completados.")
+                return
+
+            # Obtener la sesión de carrera del último evento completado
+            session = fastf1.get_session(last_event['EventYear'], last_event['EventName'], 'R')
+            session.load()
+
+            # Obtener la clasificación de constructores a partir de los resultados de la carrera
+            constructor_standings = session.results[['TeamName', 'Points']].groupby('TeamName').sum().sort_values(by='Points', ascending=False)
+
+            standings_message = "Clasificación actual de constructores:\n"
+            for index, row in constructor_standings.iterrows():
+                standings_message += f"{index}: {row['Points']} puntos\n"
+
+            await ctx.send(standings_message)
+        except Exception as e:
+            await ctx.send("Error al obtener la clasificación de constructores.")
+            await ctx.send(f"Error: {str(e)}")
+
+def setup(bot):
+    bot.add_cog(F1(bot))
