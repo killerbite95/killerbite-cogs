@@ -77,7 +77,7 @@ class F1(commands.Cog):
             embed.add_field(name="Localización", value=f"{race['circuit']['location']['locality']}, {race['circuit']['location']['country']}", inline=False)
             await ctx.send(embed=embed)
         else:
-            await ctx.send("No se pudo obtener la información de la carrera actual..")
+            await ctx.send("No se pudo obtener la información de la carrera actual.")
 
-def setup(bot):
-    bot.add_cog(F1(bot))
+async def setup(bot):
+    await bot.add_cog(F1(bot))
