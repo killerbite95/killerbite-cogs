@@ -1,12 +1,11 @@
 import discord
-from discord.ext import commands
+from redbot.core import commands, Config
 import requests
 
 class F1(commands.Cog):
-    """Cog para obtener información de Fórmula 1 usando la API de openf1.org."""
-
     def __init__(self, bot):
         self.bot = bot
+        self.config = Config.get_conf(self, identifier=9876543210)
         self.api_base_url = "https://api.openf1.org/v1/"
 
     def get_data_from_api(self, endpoint):
@@ -18,6 +17,7 @@ class F1(commands.Cog):
         else:
             return None
 
+    @commands.guild_only()
     @commands.command(name="pilotos")
     async def get_driver_standings(self, ctx):
         """Obtener la clasificación de pilotos."""
@@ -34,6 +34,7 @@ class F1(commands.Cog):
         else:
             await ctx.send("No se pudo obtener la información de la clasificación de pilotos.")
 
+    @commands.guild_only()
     @commands.command(name="constructores")
     async def get_constructor_standings(self, ctx):
         """Obtener la clasificación de constructores."""
@@ -50,6 +51,7 @@ class F1(commands.Cog):
         else:
             await ctx.send("No se pudo obtener la información de la clasificación de constructores.")
 
+    @commands.guild_only()
     @commands.command(name="calendario")
     async def get_race_schedule(self, ctx):
         """Obtener el calendario de carreras."""
@@ -66,6 +68,7 @@ class F1(commands.Cog):
         else:
             await ctx.send("No se pudo obtener la información del calendario de carreras.")
 
+    @commands.guild_only()
     @commands.command(name="carrera_actual")
     async def get_current_race(self, ctx):
         """Obtener información de la carrera actual."""
@@ -78,6 +81,3 @@ class F1(commands.Cog):
             await ctx.send(embed=embed)
         else:
             await ctx.send("No se pudo obtener la información de la carrera actual.")
-
-async def setup(bot):
-    await bot.add_cog(F1(bot))
