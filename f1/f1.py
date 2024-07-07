@@ -1,6 +1,7 @@
 import discord
 from redbot.core import commands
 import fastf1
+import pandas as pd
 
 class F1(commands.Cog):
     def __init__(self, bot):
@@ -14,6 +15,9 @@ class F1(commands.Cog):
             # Obtener el calendario de eventos del año actual
             schedule = fastf1.get_event_schedule(2023)
             
+            # Inspeccionar las columnas disponibles en el calendario de eventos
+            await ctx.send(f"Columnas disponibles: {schedule.columns.tolist()}")
+
             # Encontrar el próximo evento
             next_event = schedule.loc[schedule['EventDate'] >= pd.Timestamp.now()].iloc[0]
             
@@ -28,11 +32,14 @@ class F1(commands.Cog):
         try:
             # Obtener la lista de eventos del año actual
             events = fastf1.get_event_schedule(2023)
+
+            # Inspeccionar las columnas disponibles en el calendario de eventos
+            await ctx.send(f"Columnas disponibles: {events.columns.tolist()}")
             
             # Tomar el último evento completado
             last_event = None
             for _, event in events.iterrows():
-                if event['EventType'] == 'Race' and event['EventDate'] <= pd.Timestamp.now():
+                if event['EventDate'] <= pd.Timestamp.now():
                     last_event = event
                     break
 
@@ -63,10 +70,13 @@ class F1(commands.Cog):
             # Obtener la lista de eventos del año actual
             events = fastf1.get_event_schedule(2023)
             
+            # Inspeccionar las columnas disponibles en el calendario de eventos
+            await ctx.send(f"Columnas disponibles: {events.columns.tolist()}")
+            
             # Tomar el último evento completado
             last_event = None
             for _, event in events.iterrows():
-                if event['EventType'] == 'Race' and event['EventDate'] <= pd.Timestamp.now():
+                if event['EventDate'] <= pd.Timestamp.now():
                     last_event = event
                     break
 
