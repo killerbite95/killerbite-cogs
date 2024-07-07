@@ -1,83 +1,71 @@
 import discord
-from redbot.core import commands, Config
-import requests
+from discord.ext import commands
+import fastf1
+from datetime import datetime
 
 class F1(commands.Cog):
+    """Cog de Fórmula 1 para Red Discord Bot usando FastF1"""
+
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=9876543210)
-        self.api_base_url = "https://api.openf1.org/v1/"
+        fastf1.Cache.enable_cache('~/.fastf1_cache')  # habilitar caché
 
-    def get_data_from_api(self, endpoint):
-        """Función para obtener datos de la API de openf1.org."""
-        url = f"{self.api_base_url}{endpoint}"
-        response = requests.get(url)
-        if response.status_code == 200:
-            return response.json()
-        else:
-            return None
-
-    @commands.guild_only()
-    @commands.command(name="pilotos")
-    async def get_driver_standings(self, ctx):
-        """Obtener la clasificación de pilotos."""
-        data = self.get_data_from_api("driverStandings")
-        if data:
+    @commands.command()
+    async def pilotos(self, ctx):
+        """Obtiene la clasificación de pilotos"""
+        current_year = datetime.now().year
+        drivers = fastf1.get_driver_standings(current_year)
+        if drivers:
             embed = discord.Embed(title="Clasificación de Pilotos", color=discord.Color.blue())
-            for driver in data["standings"]:
-                embed.add_field(
-                    name=f"{driver['position']}. {driver['driver']['givenName']} {driver['driver']['familyName']}",
-                    value=f"Puntos: {driver['points']}",
-                    inline=False
-                )
+            for driver in drivers.iterrows():
+                driver_name = f"{driver[1]['Driver']['givenName']} {driver[1]['Driver']['familyName']}"
+                points = driver[1]['points']
+                embed.add_field(name=f"{driver[1]['position']}. {driver_name}", value=f"Puntos: {points}", inline=False)
             await ctx.send(embed=embed)
         else:
-            await ctx.send("No se pudo obtener la información de la clasificación de pilotos.")
+            await ctx.send("No se pudo obtener la clasificación de pilotos.")
 
-    @commands.guild_only()
-    @commands.command(name="constructores")
-    async def get_constructor_standings(self, ctx):
-        """Obtener la clasificación de constructores."""
-        data = self.get_data_from_api("constructorStandings")
-        if data:
+    @commands.command()
+    async def constructores(self, ctx):
+        """Obtiene la clasificación de constructores"""
+        current_year = datetime.now().year
+        constructors = fastf1.get_constructor_standings(current_year)
+        if constructors:
             embed = discord.Embed(title="Clasificación de Constructores", color=discord.Color.green())
-            for constructor in data["standings"]:
-                embed.add_field(
-                    name=f"{constructor['position']}. {constructor['constructor']['name']}",
-                    value=f"Puntos: {constructor['points']}",
-                    inline=False
-                )
+            for constructor in constructors.iterrows():
+                name = constructor[1]['Constructor']['name']
+                points = constructor[1]['points']
+                embed.add_field(name=f"{constructor[1]['position']}. {name}", value=f"Puntos: {points}", inline=False)
             await ctx.send(embed=embed)
         else:
-            await ctx.send("No se pudo obtener la información de la clasificación de constructores.")
+            await ctx.send("No se pudo obtener la clasificación de constructores.")
 
-    @commands.guild_only()
-    @commands.command(name="calendario")
-    async def get_race_schedule(self, ctx):
-        """Obtener el calendario de carreras."""
-        data = self.get_data_from_api("races")
-        if data:
+    @commands.command()
+    async def calendario(self, ctx):
+        """Obtiene el calendario de carreras"""
+        current_year = datetime.now().year
+        schedule = fastf1.get_event_schedule(current_year)
+        if schedule:
             embed = discord.Embed(title="Calendario de Carreras", color=discord.Color.red())
-            for race in data["races"]:
-                embed.add_field(
-                    name=f"{race['raceName']} - {race['date']}",
-                    value=f"Circuito: {race['circuit']['circuitName']}",
-                    inline=False
-                )
+            for event in schedule.iterrows():
+                race_date = event[1]['Date']
+                embed.add_field(name=event[1]['EventName'], value=f"Fecha: {race_date.strftime('%d/%m/%Y')}\nCircuito: {event[1]['Circuit']['Location']['longName']}", inline=False)
             await ctx.send(embed=embed)
         else:
-            await ctx.send("No se pudo obtener la información del calendario de carreras.")
+            await ctx.send("No se pudo obtener el calendario de carreras.")
 
-    @commands.guild_only()
-    @commands.command(name="carrera_actual")
-    async def get_current_race(self, ctx):
-        """Obtener información de la carrera actual."""
-        data = self.get_data_from_api("currentRace")
-        if data:
-            race = data["race"]
-            embed = discord.Embed(title=f"{race['raceName']} - {race['date']}", color=discord.Color.purple())
-            embed.add_field(name="Circuito", value=race['circuit']['circuitName'], inline=False)
-            embed.add_field(name="Localización", value=f"{race['circuit']['location']['locality']}, {race['circuit']['location']['country']}", inline=False)
+    @commands.command()
+    async def carrera_actual(self, ctx):
+        """Obtiene información de la carrera actual"""
+        current_year = datetime.now().year
+        next_event = fastf1.get_event_schedule(current_year).iloc[0]
+        if next_event:
+            race_date = next_event['Date']
+            embed = discord.Embed(title="Carrera Actual", color=discord.Color.purple())
+            embed.add_field(name=next_event['EventName'], value=f"Fecha: {race_date.strftime('%d/%m/%Y')}\nCircuito: {next_event['Circuit']['Location']['longName']}", inline=False)
             await ctx.send(embed=embed)
         else:
             await ctx.send("No se pudo obtener la información de la carrera actual.")
+
+async def setup(bot):
+    await bot.add_cog(F1(bot))
