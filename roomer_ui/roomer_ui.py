@@ -59,12 +59,12 @@ class RoomerUI(commands.Cog):
         view = View()
         for label, style in buttons:
             button = Button(label=label, style=style)
-            view.add_item(button)
 
             async def button_callback(interaction, label=label):
                 await interaction.response.send_message(f"Función `{label}` seleccionada.", ephemeral=True)
 
             button.callback = button_callback
+            view.add_item(button)
 
         await channel.send(embed=embed, view=view)
 
@@ -203,59 +203,59 @@ class RoomerUI(commands.Cog):
             await channel.set_permissions(user, overwrite=overwrite)
             await ctx.send(f"{user.name} ha sido desbloqueado del canal.")
 
-        async def claim_callback(interaction):
-            await interaction.response.send_message(f"Reclamando el canal {channel.name}.", ephemeral=True)
-            self.temp_channels[channel.id] = channel
-            await ctx.send(f"Canal '{channel.name}' ha sido reclamado.")
+            async def claim_callback(interaction):
+        await interaction.response.send_message(f"Reclamando el canal {channel.name}.", ephemeral=True)
+        self.temp_channels[channel.id] = channel
+        await ctx.send(f"Canal '{channel.name}' ha sido reclamado.")
 
-        async def delete_callback(interaction):
-            await interaction.response.send_message(f"Eliminando el canal {channel.name}.", ephemeral=True)
-            await channel.delete()
-            del self.temp_channels[channel.id]
-            await ctx.send(f"Canal '{channel.name}' ha sido eliminado.")
+    async def delete_callback(interaction):
+        await interaction.response.send_message(f"Eliminando el canal {channel.name}.", ephemeral=True)
+        await channel.delete()
+        del self.temp_channels[channel.id]
+        await ctx.send(f"Canal '{channel.name}' ha sido eliminado.")
 
-        # Asignar los callbacks a los botones
-        name_button.callback = name_callback
-        limit_button.callback = limit_callback
-        privacy_button.callback = privacy_callback
-        invite_button.callback = invite_callback
-        kick_button.callback = kick_callback
-        region_button.callback = region_callback
-        block_button.callback = block_callback
-        unblock_button.callback = unblock_callback
-        claim_button.callback = claim_callback
-        delete_button.callback = delete_callback
+    # Asignar los callbacks a los botones
+    name_button.callback = name_callback
+    limit_button.callback = limit_callback
+    privacy_button.callback = privacy_callback
+    invite_button.callback = invite_callback
+    kick_button.callback = kick_callback
+    region_button.callback = region_callback
+    block_button.callback = block_callback
+    unblock_button.callback = unblock_callback
+    claim_button.callback = claim_callback
+    delete_button.callback = delete_callback
 
-        await ctx.send(embed=embed, view=view)
+    await ctx.send(embed=embed, view=view)
 
-    @commands.command(name="setrole")
-    @commands.has_permissions(administrator=True)
-    async def set_required_role(self, ctx, role: discord.Role):
-        """
-        Comando para establecer el rol requerido para usar los botones.
-        """
-        self.required_role = role.id
-        await ctx.send(f"Rol requerido para usar los botones establecido en {role.name}")
+@commands.command(name="setrole")
+@commands.has_permissions(administrator=True)
+async def set_required_role(self, ctx, role: discord.Role):
+    """
+    Comando para establecer el rol requerido para usar los botones.
+    """
+    self.required_role = role.id
+    await ctx.send(f"Rol requerido para usar los botones establecido en {role.name}")
 
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        """
-        Listener para eliminar canales de voz temporales cuando ya no están en uso.
-        """
-        if before.channel and before.channel.id in self.temp_channels and len(before.channel.members) == 0:
-            await before.channel.delete()
-            del self.temp_channels[before.channel.id]
+@commands.Cog.listener()
+async def on_voice_state_update(self, member, before, after):
+    """
+    Listener para eliminar canales de voz temporales cuando ya no están en uso.
+    """
+    if before.channel and before.channel.id in self.temp_channels and len(before.channel.members) == 0:
+        await before.channel.delete()
+        del self.temp_channels[before.channel.id]
 
-    async def cog_check(self, ctx):
-        """
-        Verifica si el usuario tiene el rol requerido para usar los comandos del cog.
-        """
-        if self.required_role:
-            role = ctx.guild.get_role(self.required_role)
-            if role and role not in ctx.author.roles:
-                await ctx.send("No tienes el rol requerido para usar este comando.")
-                return False
-        return True
+async def cog_check(self, ctx):
+    """
+    Verifica si el usuario tiene el rol requerido para usar los comandos del cog.
+    """
+    if self.required_role:
+        role = ctx.guild.get_role(self.required_role)
+        if role and role not in ctx.author.roles:
+            await ctx.send("No tienes el rol requerido para usar este comando.")
+            return False
+    return True
 
 def setup(bot):
     bot.add_cog(RoomerUI(bot))
