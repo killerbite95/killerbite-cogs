@@ -3,10 +3,6 @@ from redbot.core import commands, Config
 from discord.ui import Button, View
 
 class RoomerUI(commands.Cog):
-    """
-    Cog que permite la creación y gestión de canales de voz temporales mediante una interfaz visual.
-    """
-
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
@@ -20,18 +16,12 @@ class RoomerUI(commands.Cog):
     @commands.command(name="setchannel")
     @commands.admin_or_permissions(administrator=True)
     async def set_interface_channel(self, ctx, channel: discord.TextChannel):
-        """
-        Comando para establecer el canal donde se enviará la interfaz de gestión.
-        """
         await self.config.guild(ctx.guild).interface_channel_id.set(channel.id)
         await ctx.send(f"Canal de interfaz establecido en {channel.mention}")
 
     @commands.command(name="sendUI")
     @commands.admin_or_permissions(administrator=True)
     async def send_ui(self, ctx):
-        """
-        Comando para enviar la interfaz de gestión de canales de voz temporales.
-        """
         interface_channel_id = await self.config.guild(ctx.guild).interface_channel_id()
         if interface_channel_id is None:
             await ctx.send("No se ha establecido un canal para la interfaz. Usa !setchannel para establecerlo.")
@@ -65,8 +55,8 @@ class RoomerUI(commands.Cog):
         for label, style in buttons:
             button = Button(label=label, style=style)
 
-            async def button_callback(interaction, label=label):
-                await interaction.response.send_message(f"Función `{label}` seleccionada.", ephemeral=True)
+            async def button_callback(interaction):
+                await interaction.response.send_message(f"Función `{interaction.component.label}` seleccionada.", ephemeral=True)
 
             button.callback = button_callback
             view.add_item(button)
@@ -76,9 +66,6 @@ class RoomerUI(commands.Cog):
     @commands.command(name="createroom")
     @commands.admin_or_permissions(administrator=True)
     async def create_temp_voice(self, ctx):
-        """
-        Comando para crear un canal de voz temporal.
-        """
         embed = discord.Embed(
             title="Crear Canal de Voz Temporal",
             description="Haz clic en el botón para crear un canal de voz temporal.",
@@ -104,9 +91,6 @@ class RoomerUI(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     async def manage_temp_voice(self, ctx, channel):
-        """
-        Genera la interfaz completa para gestionar un canal de voz temporal.
-        """
         embed = discord.Embed(
             title="Gestionar Canal de Voz Temporal",
             description="Usa los botones para administrar tu canal.",
@@ -128,8 +112,6 @@ class RoomerUI(commands.Cog):
         buttons = [name_button, limit_button, privacy_button, invite_button, kick_button, region_button, block_button, unblock_button, claim_button, delete_button]
         for button in buttons:
             view.add_item(button)
-
-        # Callbacks para cada botón
 
         async def name_callback(interaction):
             def check(m):
@@ -196,7 +178,7 @@ class RoomerUI(commands.Cog):
             overwrite = channel.overwrites_for(user)
             overwrite.connect = False
             await channel.set_permissions(user, overwrite=overwrite)
-            await ctx.send(f"{user.name} ha sido bloqueado del canal.")
+            await interaction.followup.send(f"{user.name} ha sido bloqueado del canal.")
 
         async def unblock_callback(interaction):
             def check(m):
@@ -207,7 +189,7 @@ class RoomerUI(commands.Cog):
             overwrite = channel.overwrites_for(user)
             overwrite.connect = True
             await channel.set_permissions(user, overwrite=overwrite)
-            await ctx.send(f"{user.name} ha sido desbloqueado del canal.")
+            await interaction.followup.send(f"{user.name} ha sido desbloqueado del canal.")
 
         async def claim_callback(interaction):
             await interaction.response.send_message(f"Reclamando el canal {channel.name}.", ephemeral=True)
@@ -233,35 +215,3 @@ class RoomerUI(commands.Cog):
         delete_button.callback = delete_callback
 
         await ctx.send(embed=embed, view=view)
-
-    @commands.command(name="setrole")
-    @commands.admin_or_permissions(administrator=True)
-    async def set_required_role(self, ctx, role: discord.Role):
-        """
-        Comando para establecer el rol requerido para usar los botones.
-        """
-        self.required_role = role.id
-        await ctx.send(f"Rol requerido para usar los botones establecido en {role.name}")
-
-    @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        """
-        Listener para eliminar canales de voz temporales cuando ya no están en uso.
-        """
-        if before.channel and before.channel.id in self.temp_channels and len(before.channel.members) == 0:
-            await before.channel.delete()
-            del self.temp_channels[before.channel.id]
-
-    async def cog_check(self, ctx):
-        """
-        Verifica si el usuario tiene el rol requerido para usar los comandos del cog.
-        """
-        if self.required_role:
-            role = ctx.guild.get_role(self.required_role)
-            if role and role not in ctx.author.roles:
-                await ctx.send("No tienes el rol requerido para usar este comando.")
-                return False
-        return True
-
-    def setup(bot):
-        bot.add_cog(RoomerUI(bot))
