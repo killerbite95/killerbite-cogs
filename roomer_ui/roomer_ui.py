@@ -1,5 +1,5 @@
 import discord
-from discord.ext import commands
+from redbot.core import commands, Config
 from discord.ui import Button, View
 
 class RoomerUI(commands.Cog):
@@ -9,36 +9,41 @@ class RoomerUI(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.temp_channels = {}  # Almacenar los canales de voz temporales.
-        self.interface_channel_id = None  # Canal donde se enviará la interfaz.
-        self.required_role = None  # Rol requerido para usar los botones.
+        self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
+        default_guild = {
+            "temp_channels": {},
+            "interface_channel_id": None,
+            "required_role": None,
+        }
+        self.config.register_guild(**default_guild)
 
     @commands.command(name="setchannel")
-    @commands.has_permissions(administrator=True)
+    @commands.admin_or_permissions(administrator=True)
     async def set_interface_channel(self, ctx, channel: discord.TextChannel):
         """
         Comando para establecer el canal donde se enviará la interfaz de gestión.
         """
-        self.interface_channel_id = channel.id
+        await self.config.guild(ctx.guild).interface_channel_id.set(channel.id)
         await ctx.send(f"Canal de interfaz establecido en {channel.mention}")
 
     @commands.command(name="sendUI")
-    @commands.has_permissions(administrator=True)
+    @commands.admin_or_permissions(administrator=True)
     async def send_ui(self, ctx):
         """
         Comando para enviar la interfaz de gestión de canales de voz temporales.
         """
-        if self.interface_channel_id is None:
+        interface_channel_id = await self.config.guild(ctx.guild).interface_channel_id()
+        if interface_channel_id is None:
             await ctx.send("No se ha establecido un canal para la interfaz. Usa !setchannel para establecerlo.")
             return
 
-        channel = self.bot.get_channel(self.interface_channel_id)
+        channel = self.bot.get_channel(interface_channel_id)
         if channel is None:
             await ctx.send("El canal configurado no es válido.")
             return
 
         embed = discord.Embed(
-            title="TempVoice Interface", 
+            title="TempVoice Interface",
             description="Esta interfaz se puede usar para gestionar canales de voz temporales. Más opciones están disponibles con comandos prefijados.",
             color=0x00ff00
         )
@@ -69,14 +74,14 @@ class RoomerUI(commands.Cog):
         await channel.send(embed=embed, view=view)
 
     @commands.command(name="createroom")
-    @commands.has_permissions(administrator=True)
+    @commands.admin_or_permissions(administrator=True)
     async def create_temp_voice(self, ctx):
         """
         Comando para crear un canal de voz temporal.
         """
         embed = discord.Embed(
-            title="Crear Canal de Voz Temporal", 
-            description="Haz clic en el botón para crear un canal de voz temporal.", 
+            title="Crear Canal de Voz Temporal",
+            description="Haz clic en el botón para crear un canal de voz temporal.",
             color=0x00ff00
         )
         button = Button(label="Crear Canal", style=discord.ButtonStyle.green)
@@ -89,7 +94,8 @@ class RoomerUI(commands.Cog):
                 category = await ctx.guild.create_category("Temporary Channels")
 
             channel = await ctx.guild.create_voice_channel(name=f"Canal de {ctx.author.name}", category=category)
-            self.temp_channels[channel.id] = channel
+            async with self.config.guild(ctx.guild).temp_channels() as temp_channels:
+                temp_channels[channel.id] = channel.id
 
             await interaction.response.send_message(f"Canal de voz '{channel.name}' creado con éxito.", ephemeral=True)
             await self.manage_temp_voice(ctx, channel)
@@ -102,8 +108,8 @@ class RoomerUI(commands.Cog):
         Genera la interfaz completa para gestionar un canal de voz temporal.
         """
         embed = discord.Embed(
-            title="Gestionar Canal de Voz Temporal", 
-            description="Usa los botones para administrar tu canal.", 
+            title="Gestionar Canal de Voz Temporal",
+            description="Usa los botones para administrar tu canal.",
             color=0x00ff00
         )
 
@@ -203,7 +209,6 @@ class RoomerUI(commands.Cog):
             await channel.set_permissions(user, overwrite=overwrite)
             await ctx.send(f"{user.name} ha sido desbloqueado del canal.")
 
-
         async def claim_callback(interaction):
             await interaction.response.send_message(f"Reclamando el canal {channel.name}.", ephemeral=True)
             self.temp_channels[channel.id] = channel
@@ -230,7 +235,7 @@ class RoomerUI(commands.Cog):
         await ctx.send(embed=embed, view=view)
 
     @commands.command(name="setrole")
-    @commands.has_permissions(administrator=True)
+    @commands.admin_or_permissions(administrator=True)
     async def set_required_role(self, ctx, role: discord.Role):
         """
         Comando para establecer el rol requerido para usar los botones.
