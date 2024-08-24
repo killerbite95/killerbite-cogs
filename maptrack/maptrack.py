@@ -48,6 +48,23 @@ class MapTrack(commands.Cog):
             else:
                 await ctx.send(f"No se encontró el seguimiento para el servidor {server_ip}")
 
+    @commands.command(name="maptracks")
+    @commands.admin_or_permissions(administrator=True)
+    async def list_map_tracks(self, ctx):
+        """Listar todos los servidores que tienen seguimiento de mapas."""
+        tracked_servers = await self.config.guild(ctx.guild).tracked_servers()
+        if not tracked_servers:
+            await ctx.send("No hay ningún seguimiento de mapas configurado.")
+            return
+
+        embed = discord.Embed(title="MapTracks Activos", color=discord.Color.blue())
+        for server_ip, info in tracked_servers.items():
+            channel = self.bot.get_channel(info["channel_id"])
+            channel_name = channel.mention if channel else "Canal no encontrado"
+            embed.add_field(name=server_ip, value=f"Canal: {channel_name}", inline=False)
+
+        await ctx.send(embed=embed)
+
     async def track_maps(self):
         await self.bot.wait_until_ready()
         while True:
@@ -75,3 +92,6 @@ class MapTrack(commands.Cog):
                 await channel.send(
                     f"¡Cambio de mapa detectado!\nServidor: {server_ip}\nMapa: {map_name}\nJugadores: {players}/{max_players}\n[Únete al servidor](steam://connect/{server_ip})"
                 )
+
+def setup(bot):
+    bot.add_cog(MapTrack(bot))
