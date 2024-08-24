@@ -1,7 +1,7 @@
 import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
-from opengsq.protocols import Source, Minecraft, FiveM, Rust
+from opengsq.protocols import Source, Minecraft, FiveM
 import datetime
 
 class GameServerMonitor(commands.Cog):
@@ -73,24 +73,20 @@ class GameServerMonitor(commands.Cog):
                 return
 
             # Determinar protocolo según el juego
-            if game == "cs2":
+            if game in ["cs2", "css", "gmod", "rust"]:
                 source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                game_name = "Counter-Strike 2"
-            elif game == "css":
-                source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                game_name = "Counter-Strike: Source"
-            elif game == "gmod":
-                source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                game_name = "Garry's Mod"
+                game_name = {
+                    "cs2": "Counter-Strike 2",
+                    "css": "Counter-Strike: Source",
+                    "gmod": "Garry's Mod",
+                    "rust": "Rust"
+                }[game]
             elif game == "minecraft":
                 source = Minecraft(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
                 game_name = "Minecraft"
             elif game == "fivem":
                 source = FiveM(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
                 game_name = "FiveM"
-            elif game == "rust":
-                source = Rust(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                game_name = "Rust"
             else:
                 await channel.send(f"Juego {game} no soportado.")
                 return
