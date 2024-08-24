@@ -102,7 +102,7 @@ class MapTrack(commands.Cog):
                     )
                     embed.add_field(name="Map", value=map_name, inline=False)
                     embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
-                    embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
+                    embed.add_field(name="Connect to server", value=f"[Connect]({connect_url})", inline=False)
                     
                     await channel.send(embed=embed)
                     
