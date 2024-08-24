@@ -29,24 +29,31 @@ class MapTrack(commands.Cog):
 
     @commands.command(name="borrarmaptrack")
     @commands.admin_or_permissions(administrator=True)
-    async def remove_map_track(self, ctx, server_ip: str):
-        """Eliminar un servidor del seguimiento de cambios de mapa."""
+    async def remove_map_track(self, ctx, channel: discord.TextChannel = None):
+        """Eliminar todos los servidores del seguimiento de cambios de mapa en un canal específico."""
+        if channel is None:
+            channel = ctx.channel
+
         async with self.config.guild(ctx.guild).tracked_servers() as tracked_servers:
-            if server_ip in tracked_servers:
-                del tracked_servers[server_ip]
-                await ctx.send(f"Seguimiento de mapa eliminado para el servidor {server_ip}")
-            else:
-                await ctx.send(f"No se encontró el seguimiento para el servidor {server_ip}")
+            to_remove = [ip for ip, info in tracked_servers.items() if info["channel_id"] == channel.id]
+            for ip in to_remove:
+                del tracked_servers[ip]
+
+        if to_remove:
+            await ctx.send(f"Se han eliminado los seguimientos de mapa en el canal {channel.mention}")
+        else:
+            await ctx.send(f"No se encontraron seguimientos de mapa en el canal {channel.mention}")
 
     @commands.command(name="forzarmaptrack")
     @commands.admin_or_permissions(administrator=True)
-    async def force_map_track(self, ctx, server_ip: str):
-        """Forzar el envío de un mensaje de cambio de mapa para probar."""
-        async with self.config.guild(ctx.guild).tracked_servers() as tracked_servers:
-            if server_ip in tracked_servers:
+    async def force_map_track(self, ctx):
+        """Forzar el envío de un mensaje de cambio de mapa en el canal actual."""
+        tracked_servers = await self.config.guild(ctx.guild).tracked_servers()
+        for server_ip, info in tracked_servers.items():
+            if info["channel_id"] == ctx.channel.id:
                 await self.send_map_update(ctx.guild, server_ip)
-            else:
-                await ctx.send(f"No se encontró el seguimiento para el servidor {server_ip}")
+                return
+        await ctx.send("No se encontró ningún seguimiento de mapas activo en este canal.")
 
     @commands.command(name="maptracks")
     @commands.admin_or_permissions(administrator=True)
