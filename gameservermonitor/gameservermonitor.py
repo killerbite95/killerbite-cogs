@@ -95,8 +95,8 @@ class GameServerMonitor(commands.Cog):
                 info = await source.get_info()
                 players = info.players
                 max_players = info.max_players
-                map_name = info.get("map", "N/A")
-                hostname = info.get("hostname", "Unknown Server")
+                map_name = info.map if hasattr(info, "map") else "N/A"
+                hostname = info.name if hasattr(info, "name") else "Unknown Server"
 
                 # Reemplazar la IP interna con la IP pública
                 public_ip = server_ip.replace("10.0.0.", "178.33.160.187")
