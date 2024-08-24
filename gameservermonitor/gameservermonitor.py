@@ -1,7 +1,7 @@
 import discord
 from discord.ext import tasks, commands
 from redbot.core import Config, checks
-from opengsq.protocols import Source, Minecraft, FiveM  # Importa los protocolos necesarios
+from opengsq.protocols import Source, Minecraft, FiveM
 import datetime
 import pytz
 
@@ -9,6 +9,7 @@ class GameServerMonitor(commands.Cog):
     """Monitoreo de servidores de juegos en Discord."""
 
     def __init__(self, bot):
+        super().__init__()
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_guild = {
@@ -23,7 +24,7 @@ class GameServerMonitor(commands.Cog):
     async def set_timezone(self, ctx, timezone: str):
         """Establece la zona horaria para el servidor."""
         try:
-            pytz.timezone(timezone)  # Verifica si la zona horaria es válida
+            pytz.timezone(timezone)
             await self.config.guild(ctx.guild).timezone.set(timezone)
             await ctx.send(f"Zona horaria establecida en {timezone}.")
         except pytz.UnknownTimeZoneError:
