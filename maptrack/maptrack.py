@@ -58,14 +58,18 @@ class MapTrack(commands.Cog):
             await asyncio.sleep(30)
 
     async def send_map_update(self, guild, server_ip):
-        channel = self.bot.get_channel(guild.get_channel(int(server_ip.split(":")[1])).id)
-        source = Source(server_ip.split(":")[0], int(server_ip.split(":")[1]))
-        info = await source.get_info()
-        map_name = info.get("map", "Desconocido")
-        players = info.get("players", 0)
-        max_players = info.get("max_players", 0)
-
         async with self.config.guild(guild).tracked_servers() as tracked_servers:
+            channel_id = tracked_servers[server_ip]["channel_id"]
+            channel = self.bot.get_channel(channel_id)
+            if channel is None:
+                return
+
+            source = Source(server_ip.split(":")[0], int(server_ip.split(":")[1]))
+            info = await source.get_info()
+            map_name = info.get("map", "Desconocido")
+            players = info.get("players", 0)
+            max_players = info.get("max_players", 0)
+
             if map_name != tracked_servers[server_ip]["last_map"]:
                 tracked_servers[server_ip]["last_map"] = map_name
                 await channel.send(
