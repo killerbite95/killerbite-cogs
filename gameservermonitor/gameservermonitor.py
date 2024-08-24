@@ -162,8 +162,35 @@ class GameServerMonitor(commands.Cog):
                         message = await channel.send(embed=embed)
                         servers[server_ip]["message_id"] = message.id
 
-            except Exception as e:
-                await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
+            except Exception:
+                # Manejar el caso cuando el servidor no responde
+                internal_ip, port = server_ip.split(":")
+                if internal_ip.startswith("10.0.0."):
+                    public_ip = "178.33.160.187"
+                else:
+                    public_ip = internal_ip
+                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+
+                embed = discord.Embed(
+                    title="Server Status - Offline",
+                    color=discord.Color.red()
+                )
+                embed.add_field(name="Game", value=game_name, inline=True)
+                embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
+                embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
+                embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
+                embed.set_footer(text="Game Server Monitor")
+
+                if first_time or not message_id:
+                    message = await channel.send(embed=embed)
+                    servers[server_ip]["message_id"] = message.id
+                else:
+                    try:
+                        message = await channel.fetch_message(message_id)
+                        await message.edit(embed=embed)
+                    except discord.NotFound:
+                        message = await channel.send(embed=embed)
+                        servers[server_ip]["message_id"] = message.id
 
     def cog_unload(self):
         self.server_monitor.cancel()
