@@ -1,53 +1,73 @@
 import discord
 from redbot.core import commands, Config
-from redbot.core.bot import Red
 from opengsq.protocols import Source
 import asyncio
 
 class MapTrack(commands.Cog):
-    def __init__(self, bot: Red):
+    def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
-        self.tracked_servers = {}
-        self.task = self.bot.loop.create_task(self.track_servers())
+        self.config = Config.get_conf(self, identifier=1234567890)
+        self.config.register_guild(tracked_servers={})
+        self.loop = asyncio.create_task(self.track_maps())
 
-    async def track_servers(self):
-        await self.bot.wait_until_red_ready()
-        while True:
-            for channel_id, servers in self.tracked_servers.items():
-                channel = self.bot.get_channel(channel_id)
-                for server_info in servers:
-                    ip, port, last_map = server_info
-                    query = Source(ip, port)
-                    try:
-                        info = await query.get_info()
-                        if info['map'] != last_map:
-                            await channel.send(f"Map changed to {info['map']} with {info['players']} players. [Join](steam://connect/{ip}:{port})")
-                            server_info[2] = info['map']
-                    except Exception as e:
-                        await channel.send(f"Failed to query server {ip}:{port}: {e}")
-            await asyncio.sleep(30)
+    def cog_unload(self):
+        self.loop.cancel()
 
     @commands.command(name="añadirmaptrack")
     @commands.admin_or_permissions(administrator=True)
-    async def add_maptrack(self, ctx: commands.Context, ip: str, port: int):
-        """Añade un servidor para hacer seguimiento de los cambios de mapa en este canal."""
-        channel_id = ctx.channel.id
-        if channel_id not in self.tracked_servers:
-            self.tracked_servers[channel_id] = []
-        self.tracked_servers[channel_id].append([ip, port, None])
-        await ctx.send(f"Added map tracking for {ip}:{port} in this channel.")
+    async def add_map_track(self, ctx, server_ip: str, channel: discord.TextChannel = None):
+        """Añadir un servidor para hacerle seguimiento de cambios de mapa."""
+        if channel is None:
+            channel = ctx.channel
+
+        async with self.config.guild(ctx.guild).tracked_servers() as tracked_servers:
+            tracked_servers[server_ip] = {
+                "channel_id": channel.id,
+                "last_map": None
+            }
+        await ctx.send(f"Seguimiento de mapa añadido para el servidor {server_ip} en el canal {channel.mention}")
 
     @commands.command(name="borrarmaptrack")
     @commands.admin_or_permissions(administrator=True)
-    async def remove_maptrack(self, ctx: commands.Context):
-        """Borra el seguimiento de mapas para este canal."""
-        channel_id = ctx.channel.id
-        if channel_id in self.tracked_servers:
-            del self.tracked_servers[channel_id]
-            await ctx.send("Removed all map tracking for this channel.")
-        else:
-            await ctx.send("No map tracking found for this channel.")
+    async def remove_map_track(self, ctx, server_ip: str):
+        """Eliminar un servidor del seguimiento de cambios de mapa."""
+        async with self.config.guild(ctx.guild).tracked_servers() as tracked_servers:
+            if server_ip in tracked_servers:
+                del tracked_servers[server_ip]
+                await ctx.send(f"Seguimiento de mapa eliminado para el servidor {server_ip}")
+            else:
+                await ctx.send(f"No se encontró el seguimiento para el servidor {server_ip}")
 
-    def cog_unload(self):
-        self.task.cancel()
+    @commands.command(name="forzarmaptrack")
+    @commands.admin_or_permissions(administrator=True)
+    async def force_map_track(self, ctx, server_ip: str):
+        """Forzar el envío de un mensaje de cambio de mapa para probar."""
+        async with self.config.guild(ctx.guild).tracked_servers() as tracked_servers:
+            if server_ip in tracked_servers:
+                await self.send_map_update(ctx.guild, server_ip)
+            else:
+                await ctx.send(f"No se encontró el seguimiento para el servidor {server_ip}")
+
+    async def track_maps(self):
+        await self.bot.wait_until_ready()
+        while True:
+            guilds = await self.config.all_guilds()
+            for guild_id, data in guilds.items():
+                for server_ip, info in data["tracked_servers"].items():
+                    await self.send_map_update(self.bot.get_guild(guild_id), server_ip)
+            await asyncio.sleep(30)
+
+    async def send_map_update(self, guild, server_ip):
+        channel = self.bot.get_channel(guild.get_channel(int(server_ip.split(":")[1])).id)
+        source = Source(server_ip.split(":")[0], int(server_ip.split(":")[1]))
+        info = await source.get_info()
+        map_name = info.get("map", "Desconocido")
+        players = info.get("players", 0)
+        max_players = info.get("max_players", 0)
+
+        async with self.config.guild(guild).tracked_servers() as tracked_servers:
+            if map_name != tracked_servers[server_ip]["last_map"]:
+                tracked_servers[server_ip]["last_map"] = map_name
+                await channel.send(
+                    f"¡Cambio de mapa detectado!\nServidor: {server_ip}\nMapa: {map_name}\nJugadores: {players}/{max_players}\n[Únete al servidor](steam://connect/{server_ip})"
+                )
