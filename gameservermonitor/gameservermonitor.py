@@ -2,9 +2,11 @@ import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from opengsq.protocols import Source, Minecraft, FiveM
+import datetime
+import pytz
 
 class GameServerMonitor(commands.Cog):
-    """Monitorea el estado de servidores de juegos y actualiza el canal correspondiente."""
+    """Monitoriza servidores de juegos y actualiza su estado en Discord."""
 
     def __init__(self, bot):
         self.bot = bot
@@ -14,38 +16,39 @@ class GameServerMonitor(commands.Cog):
             "timezone": "UTC"
         }
         self.config.register_guild(**default_guild)
-        self.server_check.start()
+        self.server_monitor.start()
+
+    @commands.command(name="settimezone")
+    @checks.admin_or_permissions(administrator=True)
+    async def set_timezone(self, ctx, timezone: str):
+        """Establece la zona horaria para las actualizaciones."""
+        await self.config.guild(ctx.guild).timezone.set(timezone)
+        await ctx.send(f"Zona horaria establecida en {timezone}")
 
     @commands.command(name="addserver")
     @checks.admin_or_permissions(administrator=True)
     async def add_server(self, ctx, server_ip: str, game: str, channel: discord.TextChannel = None):
-        """Añade un servidor para monitorear."""
+        """Añade un servidor para monitorear su estado."""
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).servers() as servers:
             servers[server_ip] = {
                 "game": game,
                 "channel_id": channel.id,
-                "message_id": None
+                "message_id": None  # Inicialmente sin mensaje
             }
-        await ctx.send(f"Servidor añadido para monitoreo: {server_ip} en {channel.mention}")
+        await ctx.send(f"Servidor {server_ip} añadido para el juego {game} en {channel.mention}")
+        await self.update_server_status(ctx.guild, server_ip, first_time=True)
 
     @commands.command(name="removeserver")
     @checks.admin_or_permissions(administrator=True)
     async def remove_server(self, ctx, server_ip: str):
-        """Elimina un servidor del monitoreo."""
+        """Elimina el monitoreo de un servidor."""
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_ip in servers:
                 del servers[server_ip]
-                await ctx.send(f"Servidor {server_ip} eliminado del monitoreo.")
+                await ctx.send(f"Monitoreo del servidor {server_ip} eliminado.")
             else:
-                await ctx.send(f"Servidor {server_ip} no encontrado en el monitoreo.")
-
-    @commands.command(name="settimezone")
-    @checks.admin_or_permissions(administrator=True)
-    async def set_timezone(self, ctx, timezone: str):
-        """Establece la zona horaria para mostrar en los mensajes."""
-        await self.config.guild(ctx.guild).timezone.set(timezone)
-        await ctx.send(f"Zona horaria establecida a {timezone}")
+                await ctx.send(f"No se encontró un servidor con IP {server_ip} en la lista.")
 
     @commands.command(name="forzarstatus")
     async def force_status(self, ctx):
@@ -53,7 +56,7 @@ class GameServerMonitor(commands.Cog):
         servers = await self.config.guild(ctx.guild).servers()
         for server_ip, data in servers.items():
             if data["channel_id"] == ctx.channel.id:
-                await self.update_server_status(ctx.guild, server_ip, force=True)
+                await self.update_server_status(ctx.guild, server_ip, first_time=True)
                 return
         await ctx.send("No hay servidores monitoreados en este canal.")
 
@@ -73,56 +76,66 @@ class GameServerMonitor(commands.Cog):
         await ctx.send(message)
 
     @tasks.loop(minutes=1)
-    async def server_check(self):
-        """Verifica el estado de los servidores cada minuto."""
+    async def server_monitor(self):
+        """Verifica cada minuto el estado de los servidores monitoreados."""
         for guild in self.bot.guilds:
             servers = await self.config.guild(guild).servers()
             for server_ip in servers.keys():
                 await self.update_server_status(guild, server_ip)
 
-    async def update_server_status(self, guild, server_ip, force=False):
-        """Actualiza el estado del servidor en el canal correspondiente."""
+    async def update_server_status(self, guild, server_ip, first_time=False):
+        """Actualiza el estado del servidor y edita el mensaje en Discord."""
         async with self.config.guild(guild).servers() as servers:
-            data = servers[server_ip]
-            channel_id = data["channel_id"]
+            server_info = servers.get(server_ip)
+            if not server_info:
+                return
+
+            game = server_info.get("game")
+            channel_id = server_info.get("channel_id")
+            message_id = server_info.get("message_id")
             channel = self.bot.get_channel(channel_id)
+
             if not channel:
                 return
 
-            try:
-                game = data["game"].lower()
-                if game in ["cs2", "css", "gmod", "rust"]:
-                    protocol = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                elif game == "minecraft":
-                    protocol = Minecraft(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                elif game == "fivem":
-                    protocol = FiveM(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
-                else:
-                    await channel.send(f"Juego no soportado: {data['game']}")
-                    return
-
-                info = await protocol.get_info()
-                players = info.players
-                max_players = info.max_players
-                map_name = info.get("map", "Desconocido")
-                hostname = info.get("name", "Servidor")
+            # Determinar protocolo según el juego
+            if game in ["cs2", "css", "gmod", "rust"]:
+                source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
                 game_name = {
                     "cs2": "Counter-Strike 2",
                     "css": "Counter-Strike: Source",
                     "gmod": "Garry's Mod",
-                    "rust": "Rust",
-                    "minecraft": "Minecraft",
-                    "fivem": "FiveM"
-                }.get(game, "Juego desconocido")
+                    "rust": "Rust"
+                }[game]
+            elif game == "minecraft":
+                source = Minecraft(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "Minecraft"
+            elif game == "fivem":
+                source = FiveM(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "FiveM"
+            else:
+                await channel.send(f"Juego {game} no soportado.")
+                return
 
-                timezone = await self.config.guild(guild).timezone()
-                local_time = discord.utils.utcnow().astimezone(discord.utils.timezone(timezone)).strftime('%Y-%m-%d %H:%M:%S %Z')
+            try:
+                info = await source.get_info()
+                players = info.players
+                max_players = info.max_players
+                map_name = info.map if hasattr(info, "map") else "N/A"
+                hostname = info.name if hasattr(info, "name") else "Unknown Server"
 
+                # Reemplazar la IP interna con la IP pública
                 public_ip = server_ip.replace("10.0.0.", "178.33.160.187")
                 connect_url = f"https://vauff.com/connect.php?ip={public_ip}"
 
+                # Obtener la zona horaria y la hora local utilizando pytz
+                timezone = await self.config.guild(guild).timezone()
+                tz = pytz.timezone(timezone)
+                now = datetime.datetime.now(tz)
+                local_time = now.strftime("%Y-%m-%d %H:%M:%S")
+
                 embed = discord.Embed(
-                    title=hostname,
+                    title=f"{hostname} - Server Status" if not first_time else f"{hostname} - Initial Server Status",
                     color=discord.Color.green()
                 )
                 embed.add_field(name="Game", value=game_name, inline=True)
@@ -133,18 +146,23 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor | Last update: {local_time}")
 
-                if data["message_id"]:
-                    message = await channel.fetch_message(data["message_id"])
-                    await message.edit(embed=embed)
-                else:
+                if first_time or not message_id:
                     message = await channel.send(embed=embed)
                     servers[server_ip]["message_id"] = message.id
+                else:
+                    try:
+                        message = await channel.fetch_message(message_id)
+                        await message.edit(embed=embed)
+                    except discord.NotFound:
+                        # Si el mensaje no se encuentra, envía uno nuevo
+                        message = await channel.send(embed=embed)
+                        servers[server_ip]["message_id"] = message.id
 
             except Exception as e:
                 await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
 
     def cog_unload(self):
-        self.server_check.cancel()
+        self.server_monitor.cancel()
 
 def setup(bot):
     bot.add_cog(GameServerMonitor(bot))
