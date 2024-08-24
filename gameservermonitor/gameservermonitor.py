@@ -3,6 +3,7 @@ from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from opengsq.protocols import Source, Minecraft, FiveM
 import datetime
+import pytz
 
 class GameServerMonitor(commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord."""
@@ -102,9 +103,10 @@ class GameServerMonitor(commands.Cog):
                 public_ip = server_ip.replace("10.0.0.", "178.33.160.187")
                 connect_url = f"https://vauff.com/connect.php?ip={public_ip}"
 
-                # Obtener la zona horaria y la hora local
+                # Obtener la zona horaria y la hora local utilizando pytz
                 timezone = await self.config.guild(guild).timezone()
-                now = datetime.datetime.now(datetime.timezone.utc).astimezone(datetime.timezone(datetime.timedelta(hours=int(timezone))))
+                tz = pytz.timezone(timezone)
+                now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
                 embed = discord.Embed(
