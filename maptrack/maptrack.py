@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands, tasks
-from redbot.core import Config
+from redbot.core import Config, checks
 from opengsq.protocols import Source
 
 class MapTrack(commands.Cog):
@@ -14,7 +14,7 @@ class MapTrack(commands.Cog):
         self.map_check.start()  # Inicia la tarea de verificación de mapas
 
     @commands.command(name="añadirmaptrack")
-    @commands.admin_or_permissions(administrator=True)
+    @checks.admin_or_permissions(administrator=True)
     async def add_map_track(self, ctx, server_ip: str, channel: discord.TextChannel = None):
         """Añade un servidor para rastrear cambios de mapa."""
         channel = channel or ctx.channel
@@ -23,7 +23,7 @@ class MapTrack(commands.Cog):
         await ctx.send(f"Map track añadido para el servidor {server_ip} en {channel.mention}")
 
     @commands.command(name="borrarmaptrack")
-    @commands.admin_or_permissions(administrator=True)
+    @checks.admin_or_permissions(administrator=True)
     async def remove_map_track(self, ctx, channel: discord.TextChannel):
         """Elimina todos los map track de un canal."""
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
