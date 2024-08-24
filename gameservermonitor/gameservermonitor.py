@@ -125,7 +125,8 @@ class GameServerMonitor(commands.Cog):
                 hostname = info.name if hasattr(info, "name") else "Unknown Server"
 
                 # Reemplazar la IP interna con la IP pública
-                public_ip = server_ip.replace("10.0.0.", "178.33.160.187")
+                public_ip = server_ip.split(":")[0].replace("10.0.0.", "178.33.160.187")
+                public_ip = f"{public_ip}:{server_ip.split(':')[1]}"
                 connect_url = f"https://vauff.com/connect.php?ip={public_ip}"
 
                 # Obtener la zona horaria y la hora local utilizando pytz
