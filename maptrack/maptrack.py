@@ -11,6 +11,7 @@ class MapTrack(commands.Cog):
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_guild = {
             "map_track_channels": {},
+            "last_maps": {}
         }
         self.config.register_guild(**default_guild)
         self.map_check.start()
@@ -80,18 +81,34 @@ class MapTrack(commands.Cog):
             map_name = info.map
             players = info.players
             max_players = info.max_players
-            channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
-            channel = self.bot.get_channel(channel_id)
             
-            if channel:
-                message = (f"Map has changed!\n"
-                           f"**Map**: {map_name}\n"
-                           f"**Players**: {players}/{max_players}\n"
-                           f"**Connect**: steam://connect/{server_ip}")
-                await channel.send(message)
+            last_maps = await self.config.guild(guild).last_maps()
+            last_map = last_maps.get(server_ip)
+            
+            if last_map != map_name:
+                channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
+                channel = self.bot.get_channel(channel_id)
+                
+                if channel:
+                    embed = discord.Embed(
+                        title="Map Change Detected!",
+                        color=discord.Color.green()
+                    )
+                    embed.add_field(name="Map", value=map_name, inline=False)
+                    embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
+                    embed.add_field(name="Connect", value=f"steam://connect/{server_ip}", inline=False)
+                    
+                    await channel.send(embed=embed)
+                    
+                # Almacenar el nuevo mapa como el último mapa
+                async with self.config.guild(guild).last_maps() as last_maps:
+                    last_maps[server_ip] = map_name
         
         except Exception as e:
-            await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
+            channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
+            channel = self.bot.get_channel(channel_id)
+            if channel:
+                await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
 
     def cog_unload(self):
         self.map_check.cancel()
