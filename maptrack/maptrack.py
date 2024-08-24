@@ -11,7 +11,8 @@ class MapTrack(commands.Cog):
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_guild = {
             "map_track_channels": {},
-            "last_maps": {}
+            "last_maps": {},
+            "offline_status": {}
         }
         self.config.register_guild(**default_guild)
         self.map_check.start()
@@ -87,7 +88,16 @@ class MapTrack(commands.Cog):
             last_maps = await self.config.guild(guild).last_maps()
             last_map = last_maps.get(server_ip)
             
-            if first_time or force or last_map != map_name:
+            offline_status = await self.config.guild(guild).offline_status()
+            was_offline = offline_status.get(server_ip, False)
+            
+            if was_offline:
+                async with self.config.guild(guild).offline_status() as offline_status:
+                    offline_status[server_ip] = False  # Marcar como online de nuevo
+                # El servidor volvió en línea
+                await self.send_online_message(guild, server_ip, map_name, players, max_players, first_time)
+
+            elif first_time, force, or last_map != map_name:
                 channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
                 channel = self.bot.get_channel(channel_id)
                 
@@ -101,12 +111,12 @@ class MapTrack(commands.Cog):
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
                     embed = discord.Embed(
-                        title="Map Change Detected!" if not first_time else "Initial Map State",
+                        title="Cambio de mapa detectado!" if not first_time else "Estado inicial del mapa",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="Map", value=map_name, inline=False)
-                    embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
-                    embed.add_field(name="Connect to server", value=f"[Connect]({connect_url})", inline=False)
+                    embed.add_field(name="Mapa", value=map_name, inline=False)
+                    embed.add_field(name="Jugadores", value=f"{players}/{max_players}", inline=False)
+                    embed.add_field(name="Conectarse al servidor", value=f"[Conectar]({connect_url})", inline=False)
                     
                     await channel.send(embed=embed)
                     
@@ -114,11 +124,61 @@ class MapTrack(commands.Cog):
                 async with self.config.guild(guild).last_maps() as last_maps:
                     last_maps[server_ip] = map_name
         
-        except Exception as e:
-            channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
-            channel = self.bot.get_channel(channel_id)
-            if channel:
-                await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
+        except Exception:
+            # Si el servidor está caído y no estaba marcado como offline
+            offline_status = await self.config.guild(guild).offline_status()
+            if not offline_status.get(server_ip, False):
+                await self.send_offline_message(guild, server_ip)
+                async with self.config.guild(guild).offline_status() as offline_status:
+                    offline_status[server_ip] = True  # Marcar como offline
+
+    async def send_online_message(self, guild, server_ip, map_name, players, max_players, first_time):
+        """Envía un mensaje cuando el servidor vuelve a estar en línea."""
+        channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
+        channel = self.bot.get_channel(channel_id)
+        
+        if channel:
+            # Reemplazar la IP interna con la IP pública
+            internal_ip, port = server_ip.split(":")
+            if internal_ip.startswith("10.0.0."):
+                public_ip = "178.33.160.187"
+            else:
+                public_ip = internal_ip
+            connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+
+            embed = discord.Embed(
+                title="¡El servidor está de nuevo en línea!" if not first_time else "Estado inicial del mapa",
+                color=discord.Color.green()
+            )
+            embed.add_field(name="Mapa", value=map_name, inline=False)
+            embed.add_field(name="Jugadores", value=f"{players}/{max_players}", inline=False)
+            embed.add_field(name="Conectarse al servidor", value=f"[Conectar]({connect_url})", inline=False)
+            
+            await channel.send(embed=embed)
+
+    async def send_offline_message(self, guild, server_ip):
+        """Envía un mensaje cuando el servidor se va offline."""
+        channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
+        channel = self.bot.get_channel(channel_id)
+        
+        if channel:
+            # Reemplazar la IP interna con la IP pública
+            internal_ip, port = server_ip.split(":")
+            if internal_ip.startswith("10.0.0."):
+                public_ip = "178.33.160.187"
+            else:
+                public_ip = internal_ip
+            connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+
+            embed = discord.Embed(
+                title="Estado del servidor - Offline",
+                color=discord.Color.red()
+            )
+            embed.add_field(name="Estado", value=":red_circle: Offline", inline=True)
+            embed.add_field(name="Conectarse al servidor", value=f"[Conectar]({connect_url})", inline=False)
+            embed.add_field(name="Dirección:Puerto", value=f"{public_ip}:{port}", inline=True)
+            
+            await channel.send(embed=embed)
 
     def cog_unload(self):
         self.map_check.cancel()
