@@ -1,9 +1,11 @@
 import discord
-from discord.ext import commands, tasks
-from redbot.core import Config, checks
+from discord.ext import tasks
+from redbot.core import commands, Config, checks
 from opengsq.protocols import Source
 
 class MapTrack(commands.Cog):
+    """Cog para rastrear cambios de mapa en servidores de juegos."""
+
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
@@ -11,7 +13,7 @@ class MapTrack(commands.Cog):
             "map_track_channels": {},
         }
         self.config.register_guild(**default_guild)
-        self.map_check.start()  # Inicia la tarea de verificación de mapas
+        self.map_check.start()
 
     @commands.command(name="añadirmaptrack")
     @checks.admin_or_permissions(administrator=True)
@@ -75,7 +77,7 @@ class MapTrack(commands.Cog):
         
         try:
             info = await source.get_info()
-            map_name = info.map_name
+            map_name = info.map
             players = info.players
             max_players = info.max_players
             channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
@@ -90,6 +92,9 @@ class MapTrack(commands.Cog):
         
         except Exception as e:
             await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
+
+    def cog_unload(self):
+        self.map_check.cancel()
 
 def setup(bot):
     bot.add_cog(MapTrack(bot))
