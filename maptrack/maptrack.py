@@ -90,13 +90,19 @@ class MapTrack(commands.Cog):
                 channel = self.bot.get_channel(channel_id)
                 
                 if channel:
+                    # Reemplazar IP local por IP pública solo en el mensaje
+                    if host.startswith("10.0.0."):
+                        display_ip = f"178.33.160.187:{port}"
+                    else:
+                        display_ip = server_ip
+                    
                     embed = discord.Embed(
                         title="Map Change Detected!",
                         color=discord.Color.green()
                     )
                     embed.add_field(name="Map", value=map_name, inline=False)
                     embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
-                    embed.add_field(name="Connect", value=f"steam://connect/{server_ip}", inline=False)
+                    embed.add_field(name="Connect", value=f"steam://connect/{display_ip}", inline=False)
                     
                     await channel.send(embed=embed)
                     
