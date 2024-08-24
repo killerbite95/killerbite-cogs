@@ -24,6 +24,8 @@ class MapTrack(commands.Cog):
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             map_track_channels[server_ip] = channel.id
         await ctx.send(f"Map track añadido para el servidor {server_ip} en {channel.mention}")
+        # Enviar un primer mensaje con el estado actual
+        await self.send_map_update(ctx.guild, server_ip, first_time=True)
 
     @commands.command(name="borrarmaptrack")
     @checks.admin_or_permissions(administrator=True)
@@ -59,7 +61,7 @@ class MapTrack(commands.Cog):
                 server_ip = ip
                 break
         if server_ip:
-            await self.send_map_update(ctx.guild, server_ip)
+            await self.send_map_update(ctx.guild, server_ip, force=True)
         else:
             await ctx.send("No hay map track activo en este canal.")
 
@@ -71,7 +73,7 @@ class MapTrack(commands.Cog):
             for server_ip in map_track_channels.keys():
                 await self.send_map_update(guild, server_ip)
 
-    async def send_map_update(self, guild, server_ip):
+    async def send_map_update(self, guild, server_ip, first_time=False, force=False):
         """Envía una actualización de mapa si hay un cambio."""
         host, port = server_ip.split(":")
         source = Source(host=host, port=int(port))
@@ -85,24 +87,18 @@ class MapTrack(commands.Cog):
             last_maps = await self.config.guild(guild).last_maps()
             last_map = last_maps.get(server_ip)
             
-            if last_map != map_name:
+            if first_time or force or last_map != map_name:
                 channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
                 channel = self.bot.get_channel(channel_id)
                 
                 if channel:
-                    # Reemplazar IP local por IP pública solo en el mensaje
-                    if host.startswith("10.0.0."):
-                        display_ip = f"178.33.160.187:{port}"
-                    else:
-                        display_ip = server_ip
-                    
                     embed = discord.Embed(
-                        title="Map Change Detected!",
+                        title="Map Change Detected!" if not first_time else "Initial Map State",
                         color=discord.Color.green()
                     )
                     embed.add_field(name="Map", value=map_name, inline=False)
                     embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
-                    embed.add_field(name="Connect", value=f"steam://connect/{display_ip}", inline=False)
+                    embed.add_field(name="Connect", value=f"steam://connect/{server_ip}", inline=False)
                     
                     await channel.send(embed=embed)
                     
