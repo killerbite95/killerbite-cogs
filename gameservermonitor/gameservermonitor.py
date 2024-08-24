@@ -73,14 +73,24 @@ class GameServerMonitor(commands.Cog):
                 return
 
             # Determinar protocolo según el juego
-            if game == "cs2" or game == "css" or game == "gmod":
+            if game == "cs2":
                 source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "Counter-Strike 2"
+            elif game == "css":
+                source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "Counter-Strike: Source"
+            elif game == "gmod":
+                source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "Garry's Mod"
             elif game == "minecraft":
                 source = Minecraft(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "Minecraft"
             elif game == "fivem":
                 source = FiveM(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "FiveM"
             elif game == "rust":
                 source = Rust(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
+                game_name = "Rust"
             else:
                 await channel.send(f"Juego {game} no soportado.")
                 return
@@ -90,6 +100,7 @@ class GameServerMonitor(commands.Cog):
                 players = info.players
                 max_players = info.max_players
                 map_name = info.get("map", "N/A")
+                hostname = info.get("hostname", "Unknown Server")
 
                 # Reemplazar la IP interna con la IP pública
                 public_ip = server_ip.replace("10.0.0.", "178.33.160.187")
@@ -101,9 +112,10 @@ class GameServerMonitor(commands.Cog):
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
                 embed = discord.Embed(
-                    title=f"{game.upper()} Server Status",
+                    title=f"{hostname} - Server Status" if not first_time else f"{hostname} - Initial Server Status",
                     color=discord.Color.green()
                 )
+                embed.add_field(name="Game", value=game_name, inline=True)
                 embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
                 embed.add_field(name="Status", value=":green_circle: Online", inline=True)
                 embed.add_field(name="Address:Port", value=f"{public_ip}", inline=True)
@@ -113,4 +125,21 @@ class GameServerMonitor(commands.Cog):
 
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
-    
+                    servers[server_ip]["message_id"] = message.id
+                else:
+                    try:
+                        message = await channel.fetch_message(message_id)
+                        await message.edit(embed=embed)
+                    except discord.NotFound:
+                        # Si el mensaje no se encuentra, envía uno nuevo
+                        message = await channel.send(embed=embed)
+                        servers[server_ip]["message_id"] = message.id
+
+            except Exception as e:
+                await channel.send(f"Error al obtener información del servidor {server_ip}: {e}")
+
+    def cog_unload(self):
+        self.server_monitor.cancel()
+
+def setup(bot):
+    bot.add_cog(GameServerMonitor(bot))
