@@ -1,7 +1,7 @@
 import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
-from opengsq.protocols import Source, Minecraft, FiveM, DayZ
+from opengsq.protocols import Source, Minecraft, FiveM
 
 class GameServerMonitor(commands.Cog):
     """Cog para monitorear servidores de juegos y mostrar el estado en Discord."""
