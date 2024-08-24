@@ -90,9 +90,9 @@ class MapTrack(commands.Cog):
 
             source = Source(server_ip.split(":")[0], int(server_ip.split(":")[1]))
             info = await source.get_info()
-            map_name = info.get("map", "Desconocido")
-            players = info.get("players", 0)
-            max_players = info.get("max_players", 0)
+            map_name = info.map_name  # Cambiado a 'map_name' en lugar de 'map'
+            players = info.players
+            max_players = info.max_players
 
             if map_name != tracked_servers[server_ip]["last_map"]:
                 tracked_servers[server_ip]["last_map"] = map_name
