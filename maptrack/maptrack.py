@@ -94,6 +94,7 @@ class MapTrack(commands.Cog):
                 if channel:
                     # Reemplazar la IP interna con la IP pública
                     public_ip = server_ip.replace("10.0.0.", "178.33.160.187")
+                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}"
 
                     embed = discord.Embed(
                         title="Map Change Detected!" if not first_time else "Initial Map State",
@@ -101,7 +102,7 @@ class MapTrack(commands.Cog):
                     )
                     embed.add_field(name="Map", value=map_name, inline=False)
                     embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
-                    embed.add_field(name="Connect", value=f"https://vauff.com/connect.php?ip={public_ip}", inline=False)
+                    embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
                     
                     await channel.send(embed=embed)
                     
