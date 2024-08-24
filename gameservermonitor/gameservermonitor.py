@@ -126,7 +126,10 @@ class GameServerMonitor(commands.Cog):
 
                 # Reemplazar la IP interna con la IP pública
                 internal_ip, port = server_ip.split(":")
-                public_ip = internal_ip.replace("10.0.0.", "178.33.160.187")
+                if internal_ip.startswith("10.0.0."):
+                    public_ip = "178.33.160.187"
+                else:
+                    public_ip = internal_ip
                 connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
                 # Obtener la zona horaria y la hora local utilizando pytz
