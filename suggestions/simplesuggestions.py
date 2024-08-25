@@ -119,7 +119,7 @@ class SimpleSuggestions(commands.Cog):
         """Activa o desactiva la creación de hilos para nuevas sugerencias."""
         current = await self.config.guild(ctx.guild).suggestion_threads()
         await self.config.guild(ctx.guild).suggestion_threads.set(not current)
-        state = "activado" si no current else "desactivado"
+        state = "activado" if not current else "desactivado"
         await ctx.send(f"La creación de hilos para nuevas sugerencias ha sido {state}.")
 
     @commands.command(name="togglethreadarchive")
@@ -128,7 +128,7 @@ class SimpleSuggestions(commands.Cog):
         """Activa o desactiva el archivado automático de hilos creados para sugerencias."""
         current = await self.config.guild(ctx.guild).thread_auto_archive()
         await self.config.guild(ctx.guild).thread_auto_archive.set(not current)
-        state = "activado" si no current else "desactivado"
+        state = "activado" if not current else "desactivado"
         await ctx.send(f"El archivado automático de hilos ha sido {state}.")
 
     @commands.command(name="editsuggest")
@@ -152,3 +152,6 @@ class SimpleSuggestions(commands.Cog):
             await ctx.send("Tu sugerencia ha sido editada.")
         except discord.NotFound:
             await ctx.send("No se encontró un mensaje con ese ID en el canal de sugerencias.")
+
+def setup(bot):
+    bot.add_cog(SimpleSuggestions(bot))
