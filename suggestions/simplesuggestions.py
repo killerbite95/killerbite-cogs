@@ -1,26 +1,32 @@
 import discord
-from discord.ext import commands
-from redbot.core import Config, checks
+from redbot.core import commands, Config, checks
 
 class SimpleSuggestions(commands.Cog):
-    """Simple Suggestions System"""
+    """Cog simplificado para gestionar sugerencias."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=9876543210, force_registration=True)
+        self.config = Config.get_conf(self, identifier=1234567891, force_registration=True)
+        
         default_guild = {
             "suggestions_channel": None,
             "log_channel": None,
             "dm_responses": True,
-            "anonymous_suggestions": False,
-            "create_threads": True,
-            "keep_logs": True
+            "suggestion_threads": True,
+            "keep_logs": True,
+            "anonymous_suggestions": True,
+            "auto_archive_threads": False,
+            "images_in_suggestions": True,
+            "ping_in_threads": True,
+            "queue_channel": None,
+            "queue_rejection_channel": None,
         }
+        
         self.config.register_guild(**default_guild)
 
-    @commands.command(name="setsuggestionschannel")
+    @commands.command(name="setchannel")
     @checks.admin_or_permissions(administrator=True)
-    async def set_suggestions_channel(self, ctx, channel: discord.TextChannel):
+    async def set_channel(self, ctx, channel: discord.TextChannel):
         """Establece el canal de sugerencias."""
         await self.config.guild(ctx.guild).suggestions_channel.set(channel.id)
         await ctx.send(f"Canal de sugerencias establecido en {channel.mention}")
@@ -28,101 +34,56 @@ class SimpleSuggestions(commands.Cog):
     @commands.command(name="setlogchannel")
     @checks.admin_or_permissions(administrator=True)
     async def set_log_channel(self, ctx, channel: discord.TextChannel):
-        """Establece el canal de registro."""
+        """Establece el canal de logs."""
         await self.config.guild(ctx.guild).log_channel.set(channel.id)
-        await ctx.send(f"Canal de registro establecido en {channel.mention}")
+        await ctx.send(f"Canal de logs establecido en {channel.mention}")
 
-    @commands.command(name="setsuggestion")
-    async def set_suggestion(self, ctx, *, suggestion: str):
-        """Envía una sugerencia."""
+    @commands.command(name="suggest")
+    async def suggest(self, ctx, *, suggestion: str):
+        """Envía una sugerencia al canal configurado."""
         guild_settings = await self.config.guild(ctx.guild).all()
         channel_id = guild_settings["suggestions_channel"]
+
         if not channel_id:
-            await ctx.send("No se ha establecido un canal de sugerencias.")
-            return
+            return await ctx.send("No se ha configurado un canal de sugerencias.")
 
         channel = self.bot.get_channel(channel_id)
         if not channel:
-            await ctx.send("El canal de sugerencias no es válido.")
-            return
+            return await ctx.send("No se encontró el canal de sugerencias.")
 
         embed = discord.Embed(
             title="Nueva Sugerencia",
             description=suggestion,
             color=discord.Color.blue()
         )
+        embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.avatar_url)
+
         if guild_settings["anonymous_suggestions"]:
-            embed.set_footer(text="Enviado de forma anónima")
-        else:
-            embed.set_footer(text=f"Sugerido por {ctx.author.name}")
+            embed.set_author(name="Anónimo")
 
-        suggestion_message = await channel.send(embed=embed)
+        if guild_settings["images_in_suggestions"] and ctx.message.attachments:
+            embed.set_image(url=ctx.message.attachments[0].url)
 
-        if guild_settings["create_threads"]:
-            await suggestion_message.create_thread(name=f"Sugerencia de {ctx.author.name}")
+        message = await channel.send(embed=embed)
+
+        if guild_settings["suggestion_threads"]:
+            await message.create_thread(name=f"Sugerencia de {ctx.author.display_name}")
 
         if guild_settings["dm_responses"]:
-            try:
-                await ctx.author.send("Tu sugerencia ha sido enviada.")
-            except discord.Forbidden:
-                pass
+            await ctx.author.send(f"Tu sugerencia ha sido enviada a {channel.mention}")
 
-        if guild_settings["log_channel"]:
-            log_channel = self.bot.get_channel(guild_settings["log_channel"])
-            if log_channel:
-                await log_channel.send(f"Sugerencia enviada por {ctx.author.mention}: {suggestion}")
-
-    @commands.command(name="approvesuggestion")
+    @commands.command(name="setdmresponses")
     @checks.admin_or_permissions(administrator=True)
-    async def approve_suggestion(self, ctx, message_id: int):
-        """Aprueba una sugerencia."""
-        guild_settings = await self.config.guild(ctx.guild).all()
-        channel_id = guild_settings["suggestions_channel"]
-        channel = self.bot.get_channel(channel_id)
-        if not channel:
-            await ctx.send("No se ha establecido un canal de sugerencias.")
-            return
+    async def set_dm_responses(self, ctx, status: bool):
+        """Activa o desactiva las respuestas por DM."""
+        await self.config.guild(ctx.guild).dm_responses.set(status)
+        status_str = "activadas" if status else "desactivadas"
+        await ctx.send(f"Respuestas por DM {status_str}")
 
-        try:
-            message = await channel.fetch_message(message_id)
-            embed = message.embeds[0]
-            embed.color = discord.Color.green()
-            embed.add_field(name="Estado", value="Aprobado")
-            await message.edit(embed=embed)
-
-            if guild_settings["log_channel"]:
-                log_channel = self.bot.get_channel(guild_settings["log_channel"])
-                if log_channel:
-                    await log_channel.send(f"La sugerencia {message_id} ha sido aprobada.")
-
-        except discord.NotFound:
-            await ctx.send("No se encontró la sugerencia especificada.")
-
-    @commands.command(name="denysuggestion")
+    @commands.command(name="setanonymous")
     @checks.admin_or_permissions(administrator=True)
-    async def deny_suggestion(self, ctx, message_id: int):
-        """Rechaza una sugerencia."""
-        guild_settings = await self.config.guild(ctx.guild).all()
-        channel_id = guild_settings["suggestions_channel"]
-        channel = self.bot.get_channel(channel_id)
-        if not channel:
-            await ctx.send("No se ha establecido un canal de sugerencias.")
-            return
-
-        try:
-            message = await channel.fetch_message(message_id)
-            embed = message.embeds[0]
-            embed.color = discord.Color.red()
-            embed.add_field(name="Estado", value="Rechazado")
-            await message.edit(embed=embed)
-
-            if guild_settings["log_channel"]:
-                log_channel = self.bot.get_channel(guild_settings["log_channel"])
-                if log_channel:
-                    await log_channel.send(f"La sugerencia {message_id} ha sido rechazada.")
-
-        except discord.NotFound:
-            await ctx.send("No se encontró la sugerencia especificada.")
-
-def setup(bot):
-    bot.add_cog(SimpleSuggestions(bot))
+    async def set_anonymous_suggestions(self, ctx, status: bool):
+        """Activa o desactiva las sugerencias anónimas."""
+        await self.config.guild(ctx.guild).anonymous_suggestions.set(status)
+        status_str = "activadas" if status else "desactivadas"
+        await ctx.send(f"Sugerencias anónimas {status_str}")
