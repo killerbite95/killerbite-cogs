@@ -122,9 +122,9 @@ class SimpleSuggestions(commands.Cog):
     async def toggle_thread_archive(self, ctx):
         """Activa o desactiva el archivado automático de hilos creados para sugerencias."""
         current = await self.config.guild(ctx.guild).thread_auto_archive()
-        await self.config.guild(ctx.guild).thread_auto_archive.set(!current)
-        state = "activado" si no actual es "desactivado"
-        await ctx.send(f"El archivado automático de hilos ha sido {estado}.")
+        await self.config.guild(ctx.guild).thread_auto_archive.set(not current)
+        state = "activado" si no current else "desactivado"
+        await ctx.send(f"El archivado automático de hilos ha sido {state}.")
 
     def cog_unload(self):
         pass
