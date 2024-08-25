@@ -142,7 +142,9 @@ class SimpleSuggestions(commands.Cog):
 
         try:
             message = await suggestion_channel.fetch_message(message_id)
-            if message.author != self.bot.user or message.embeds[0].author.name != ctx.author.display_name:
+            embed = message.embeds[0]
+
+            if message.author != self.bot.user or embed.author.name != ctx.author.display_name:
                 await ctx.send("No puedes editar esta sugerencia porque no eres el autor.")
                 return
 
@@ -151,7 +153,6 @@ class SimpleSuggestions(commands.Cog):
                 await ctx.send("No puedes editar una sugerencia que ya ha sido aprobada o rechazada.")
                 return
 
-            embed = message.embeds[0]
             embed.description = new_suggestion
             await message.edit(embed=embed)
             await ctx.send("Tu sugerencia ha sido editada.")
