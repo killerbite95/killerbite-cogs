@@ -1,9 +1,8 @@
 import discord
-from discord.ext import commands
-from redbot.core import Config, checks
+from redbot.core import commands, Config, checks
 
 class SimpleSuggestions(commands.Cog):
-    """Cog para gestionar sugerencias con hilos y administración."""
+    """Cog para gestionar sugerencias en un canal de Discord."""
 
     def __init__(self, bot):
         self.bot = bot
@@ -11,54 +10,54 @@ class SimpleSuggestions(commands.Cog):
         default_guild = {
             "suggestion_channel": None,
             "log_channel": None,
-            "dm_responses": True,
-            "suggestion_threads": True,
+            "suggestion_threads": False,
             "thread_auto_archive": False,
+            "suggestion_id": 1
         }
         self.config.register_guild(**default_guild)
 
     @commands.command(name="setsuggestionchannel")
     @checks.admin_or_permissions(administrator=True)
     async def set_suggestion_channel(self, ctx, channel: discord.TextChannel):
-        """Establece el canal para las sugerencias."""
+        """Establece el canal de sugerencias."""
         await self.config.guild(ctx.guild).suggestion_channel.set(channel.id)
-        await ctx.send(f"Canal de sugerencias establecido en {channel.mention}")
+        await ctx.send(f"Canal de sugerencias establecido en {channel.mention}.")
 
     @commands.command(name="setlogchannel")
     @checks.admin_or_permissions(administrator=True)
     async def set_log_channel(self, ctx, channel: discord.TextChannel):
-        """Establece el canal de logs."""
+        """Establece el canal de logs de sugerencias."""
         await self.config.guild(ctx.guild).log_channel.set(channel.id)
-        await ctx.send(f"Canal de logs establecido en {channel.mention}")
+        await ctx.send(f"Canal de logs de sugerencias establecido en {channel.mention}.")
 
     @commands.command(name="suggest")
     async def suggest(self, ctx, *, suggestion: str):
-        """Envía una sugerencia."""
+        """Envía una sugerencia al canal designado."""
         suggestion_channel_id = await self.config.guild(ctx.guild).suggestion_channel()
-        suggestion_channel = self.bot.get_channel(suggestion_channel_id)
-        if not suggestion_channel:
-            await ctx.send("El canal de sugerencias no está configurado.")
+        if suggestion_channel_id is None:
+            await ctx.send("El canal de sugerencias no ha sido configurado.")
             return
 
-        embed = discord.Embed(title="Nueva Sugerencia", description=suggestion, color=discord.Color.blue())
-        embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
-        embed.set_footer(text=f"Sugerencia de {ctx.author.id}")
+        suggestion_channel = self.bot.get_channel(suggestion_channel_id)
+        if suggestion_channel is None:
+            await ctx.send("El canal de sugerencias configurado no es válido.")
+            return
 
+        suggestion_id = await self.config.guild(ctx.guild).suggestion_id()
+        embed = discord.Embed(
+            title=f"Sugerencia #{suggestion_id}",
+            description=suggestion,
+            color=discord.Color.blue()
+        )
+        embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         message = await suggestion_channel.send(embed=embed)
-        await message.add_reaction("👍")
-        await message.add_reaction("👎")
+        
+        await self.config.guild(ctx.guild).suggestion_id.set(suggestion_id + 1)
 
         if await self.config.guild(ctx.guild).suggestion_threads():
-            thread = await message.create_thread(name=f"Sugerencia de {ctx.author.display_name}", auto_archive_duration=10080)
-            await thread.send(f"Discusión sobre la sugerencia: {suggestion}")
+            await message.create_thread(name=f"Sugerencia #{suggestion_id}", auto_archive_duration=1440)
 
-        if await self.config.guild(ctx.guild).dm_responses():
-            try:
-                await ctx.author.send(f"Tu sugerencia ha sido enviada: {suggestion}")
-            except discord.Forbidden:
-                pass
-
-        await ctx.send("Sugerencia enviada.")
+        await ctx.send("Tu sugerencia ha sido enviada.")
 
     @commands.command(name="approve")
     @checks.admin_or_permissions(administrator=True)
@@ -66,23 +65,19 @@ class SimpleSuggestions(commands.Cog):
         """Aprueba una sugerencia."""
         suggestion_channel_id = await self.config.guild(ctx.guild).suggestion_channel()
         suggestion_channel = self.bot.get_channel(suggestion_channel_id)
-        if not suggestion_channel:
-            await ctx.send("El canal de sugerencias no está configurado.")
+        if suggestion_channel is None:
+            await ctx.send("El canal de sugerencias configurado no es válido.")
             return
 
         try:
             message = await suggestion_channel.fetch_message(message_id)
             embed = message.embeds[0]
             embed.color = discord.Color.green()
-            embed.add_field(name="Estado", value="Aprobado", inline=False)
+            embed.set_footer(text="Aprobado")
             await message.edit(embed=embed)
-
-            if await self.config.guild(ctx.guild).log_channel():
-                log_channel = self.bot.get_channel(await self.config.guild(ctx.guild).log_channel())
-                if log_channel:
-                    await log_channel.send(f"La sugerencia `{message_id}` ha sido aprobada por {ctx.author.mention}.")
+            await ctx.send("Sugerencia aprobada.")
         except discord.NotFound:
-            await ctx.send("No se encontró el mensaje con esa ID.")
+            await ctx.send("No se encontró un mensaje con ese ID en el canal de sugerencias.")
 
     @commands.command(name="deny")
     @checks.admin_or_permissions(administrator=True)
@@ -90,23 +85,19 @@ class SimpleSuggestions(commands.Cog):
         """Rechaza una sugerencia."""
         suggestion_channel_id = await self.config.guild(ctx.guild).suggestion_channel()
         suggestion_channel = self.bot.get_channel(suggestion_channel_id)
-        if not suggestion_channel:
-            await ctx.send("El canal de sugerencias no está configurado.")
+        if suggestion_channel is None:
+            await ctx.send("El canal de sugerencias configurado no es válido.")
             return
 
         try:
             message = await suggestion_channel.fetch_message(message_id)
             embed = message.embeds[0]
             embed.color = discord.Color.red()
-            embed.add_field(name="Estado", value="Rechazado", inline=False)
+            embed.set_footer(text="Rechazado")
             await message.edit(embed=embed)
-
-            if await self.config.guild(ctx.guild).log_channel():
-                log_channel = self.bot.get_channel(await self.config.guild(ctx.guild).log_channel())
-                if log_channel:
-                    await log_channel.send(f"La sugerencia `{message_id}` ha sido rechazada por {ctx.author.mention}.")
+            await ctx.send("Sugerencia rechazada.")
         except discord.NotFound:
-            await ctx.send("No se encontró el mensaje con esa ID.")
+            await ctx.send("No se encontró un mensaje con ese ID en el canal de sugerencias.")
 
     @commands.command(name="togglesuggestionthreads")
     @checks.admin_or_permissions(administrator=True)
@@ -114,8 +105,8 @@ class SimpleSuggestions(commands.Cog):
         """Activa o desactiva la creación de hilos para nuevas sugerencias."""
         current = await self.config.guild(ctx.guild).suggestion_threads()
         await self.config.guild(ctx.guild).suggestion_threads.set(not current)
-        state = "activada" if not current else "desactivada"
-        await ctx.send(f"La creación de hilos para sugerencias ha sido {state}.")
+        state = "activado" if not current else "desactivado"
+        await ctx.send(f"La creación de hilos para nuevas sugerencias ha sido {state}.")
 
     @commands.command(name="togglethreadarchive")
     @checks.admin_or_permissions(administrator=True)
@@ -123,11 +114,8 @@ class SimpleSuggestions(commands.Cog):
         """Activa o desactiva el archivado automático de hilos creados para sugerencias."""
         current = await self.config.guild(ctx.guild).thread_auto_archive()
         await self.config.guild(ctx.guild).thread_auto_archive.set(not current)
-        state = "activado" si no current else "desactivado"
+        state = "activado" if not current else "desactivado"
         await ctx.send(f"El archivado automático de hilos ha sido {state}.")
-
-    def cog_unload(self):
-        pass
 
 def setup(bot):
     bot.add_cog(SimpleSuggestions(bot))
