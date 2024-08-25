@@ -27,15 +27,14 @@ class GameServerMonitor(commands.Cog):
 
     @commands.command(name="addserver")
     @checks.admin_or_permissions(administrator=True)
-    async def add_server(self, ctx, server_ip: str, game: str, cfx_link: str = None, channel: discord.TextChannel = None):
-        """Añade un servidor para monitorear su estado. Para FiveM, también provee el enlace cfx.re/join/XXXXX."""
+    async def add_server(self, ctx, server_ip: str, game: str, channel: discord.TextChannel = None):
+        """Añade un servidor para monitorear su estado."""
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).servers() as servers:
             servers[server_ip] = {
                 "game": game,
                 "channel_id": channel.id,
-                "message_id": None,  # Inicialmente sin mensaje
-                "cfx_link": cfx_link if game.lower() == "fivem" else None  # Guardar el enlace de FiveM si aplica
+                "message_id": None  # Inicialmente sin mensaje
             }
         await ctx.send(f"Servidor {server_ip} añadido para el juego {game} en {channel.mention}")
         await self.update_server_status(ctx.guild, server_ip, first_time=True)
@@ -94,7 +93,6 @@ class GameServerMonitor(commands.Cog):
             game = server_info.get("game")
             channel_id = server_info.get("channel_id")
             message_id = server_info.get("message_id")
-            cfx_link = server_info.get("cfx_link")
             channel = self.bot.get_channel(channel_id)
 
             if not channel:
@@ -126,16 +124,13 @@ class GameServerMonitor(commands.Cog):
                 map_name = info.map if hasattr(info, "map") else "N/A"
                 hostname = info.name if hasattr(info, "name") else "Unknown Server"
 
-                # Para FiveM, usa el enlace cfx.re en lugar de la IP
-                if game == "fivem" and cfx_link:
-                    connect_url = cfx_link
+                # Reemplazar la IP interna con la IP pública
+                internal_ip, port = server_ip.split(":")
+                if internal_ip.startswith("10.0.0."):
+                    public_ip = "178.33.160.187"
                 else:
-                    internal_ip, port = server_ip.split(":")
-                    if internal_ip.startswith("10.0.0."):
-                        public_ip = "178.33.160.187"
-                    else:
-                        public_ip = internal_ip
-                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+                    public_ip = internal_ip
+                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
                 # Obtener la zona horaria y la hora local utilizando pytz
                 timezone = await self.config.guild(guild).timezone()
@@ -169,15 +164,12 @@ class GameServerMonitor(commands.Cog):
 
             except Exception:
                 # Manejar el caso cuando el servidor no responde
-                if game == "fivem" and cfx_link:
-                    connect_url = cfx_link
+                internal_ip, port = server_ip.split(":")
+                if internal_ip.startswith("10.0.0."):
+                    public_ip = "178.33.160.187"
                 else:
-                    internal_ip, port = server_ip.split(":")
-                    if internal_ip.startswith("10.0.0."):
-                        public_ip = "178.33.160.187"
-                    else:
-                        public_ip = internal_ip
-                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+                    public_ip = internal_ip
+                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
                 embed = discord.Embed(
                     title="Server Status - Offline",
@@ -188,7 +180,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
                 embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
                 embed.set_footer(text="Game Server Monitor")
-                
+
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
                     servers[server_ip]["message_id"] = message.id
