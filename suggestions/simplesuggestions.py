@@ -146,6 +146,11 @@ class SimpleSuggestions(commands.Cog):
                 await ctx.send("No puedes editar esta sugerencia porque no eres el autor.")
                 return
 
+            # Verificar si la sugerencia ya ha sido aprobada o rechazada
+            if "Aprobado" in embed.footer.text or "Rechazado" in embed.footer.text:
+                await ctx.send("No puedes editar una sugerencia que ya ha sido aprobada o rechazada.")
+                return
+
             embed = message.embeds[0]
             embed.description = new_suggestion
             await message.edit(embed=embed)
