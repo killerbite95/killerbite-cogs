@@ -52,6 +52,10 @@ class SimpleSuggestions(commands.Cog):
         embed.set_author(name=ctx.author.display_name, icon_url=ctx.author.display_avatar.url)
         message = await suggestion_channel.send(embed=embed)
         
+        # Añadir reacciones 👍 y 👎
+        await message.add_reaction("👍")
+        await message.add_reaction("👎")
+        
         await self.config.guild(ctx.guild).suggestion_id.set(suggestion_id + 1)
 
         if await self.config.guild(ctx.guild).suggestion_threads():
@@ -105,7 +109,7 @@ class SimpleSuggestions(commands.Cog):
         """Activa o desactiva la creación de hilos para nuevas sugerencias."""
         current = await self.config.guild(ctx.guild).suggestion_threads()
         await self.config.guild(ctx.guild).suggestion_threads.set(not current)
-        state = "activado" if not current else "desactivado"
+        state = "activado" si no current else "desactivado"
         await ctx.send(f"La creación de hilos para nuevas sugerencias ha sido {state}.")
 
     @commands.command(name="togglethreadarchive")
@@ -114,7 +118,7 @@ class SimpleSuggestions(commands.Cog):
         """Activa o desactiva el archivado automático de hilos creados para sugerencias."""
         current = await self.config.guild(ctx.guild).thread_auto_archive()
         await self.config.guild(ctx.guild).thread_auto_archive.set(not current)
-        state = "activado" if not current else "desactivado"
+        state = "activado" si no current else "desactivado"
         await ctx.send(f"El archivado automático de hilos ha sido {state}.")
 
 def setup(bot):
