@@ -149,7 +149,7 @@ class SimpleSuggestions(commands.Cog):
                 return
 
             # Verificar si la sugerencia ya ha sido aprobada o rechazada
-            if "Aprobado" in embed.footer.text or "Rechazado" in embed.footer.text:
+            if embed.footer and (embed.footer.text == "Aprobado" or embed.footer.text == "Rechazado"):
                 await ctx.send("No puedes editar una sugerencia que ya ha sido aprobada o rechazada.")
                 return
 
