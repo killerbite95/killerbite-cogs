@@ -13,7 +13,8 @@ class GameServerMonitor(commands.Cog):
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_guild = {
             "servers": {},
-            "timezone": "UTC"
+            "timezone": "UTC",
+            "refresh_time": 60  # Tiempo de actualización por defecto en segundos
         }
         self.config.register_guild(**default_guild)
         self.server_monitor.start()
@@ -75,13 +76,28 @@ class GameServerMonitor(commands.Cog):
 
         await ctx.send(message)
 
-    @tasks.loop(minutes=1)
+    @commands.command(name="refreshtime")
+    @checks.admin_or_permissions(administrator=True)
+    async def refresh_time(self, ctx, seconds: int):
+        """Establece el tiempo de actualización en segundos."""
+        await self.config.guild(ctx.guild).refresh_time.set(seconds)
+        self.server_monitor.change_interval(seconds=seconds)
+        await ctx.send(f"Tiempo de actualización establecido en {seconds} segundos.")
+
+    @tasks.loop(seconds=60)
     async def server_monitor(self):
-        """Verifica cada minuto el estado de los servidores monitoreados."""
+        """Verifica el estado de los servidores monitoreados."""
         for guild in self.bot.guilds:
             servers = await self.config.guild(guild).servers()
             for server_ip in servers.keys():
                 await self.update_server_status(guild, server_ip)
+
+    @server_monitor.before_loop
+    async def before_server_monitor(self):
+        await self.bot.wait_until_ready()
+        for guild in self.bot.guilds:
+            refresh_time = await self.config.guild(guild).refresh_time()
+            self.server_monitor.change_interval(seconds=refresh_time)
 
     async def update_server_status(self, guild, server_ip, first_time=False):
         """Actualiza el estado del servidor y edita el mensaje en Discord."""
@@ -149,6 +165,37 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Current Map", value=map_name, inline=True)
                 embed.add_field(name="Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor | Last update: {local_time}")
+
+                if first_time or not message_id:
+                    message = await channel.send(embed=embed)
+                    servers[server_ip]["message_id"] = message.id
+                else:
+                    try:
+                        message = await channel.fetch_message(message_id)
+                        await message.edit(embed=embed)
+                    except discord.NotFound:
+                        # Si el mensaje no se encuentra, envía uno nuevo
+                        message = await channel.send(embed=embed)
+                        servers[server_ip]["message_id"] = message.id
+
+            except Exception:
+                # Manejar el caso cuando el servidor no responde
+                internal_ip, port = server_ip.split(":")
+                if internal_ip.startswith("10.0.0."):
+                    public_ip = "178.33.160.187"
+                else:
+                    public_ip = internal_ip
+                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+
+                embed = discord.Embed(
+                    title="Server Status - Offline",
+                    color=discord.Color.red()
+                )
+                embed.add_field(name="Game", value=game_name, inline=True)
+                embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
+                embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
+                embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
+                embed.set_footer(text="Game Server Monitor")
 
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
