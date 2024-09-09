@@ -4,7 +4,7 @@ from redbot.core import commands, Config
 import discord
 
 class ColaCoins(commands.Cog):
-    """Gestiona las ColaCoins para los usuarios."""
+    """Manage ColaCoins for users."""
 
     def __init__(self, bot):
         self.bot = bot
@@ -30,39 +30,66 @@ class ColaCoins(commands.Cog):
         await self.load_data()
 
     @commands.admin_or_permissions(administrator=True)
-    @commands.command(name="givecolacoins")
+    @commands.command(name="givecolacoins", aliases=["darcolacoins"])
     async def give_colacoins(self, ctx, user: discord.Member, amount: int):
-        """Da ColaCoins a un usuario."""
+        """Gives ColaCoins to a user. / Da ColaCoins a un usuario."""
         async with self.config.colacoins() as colacoins:
             if str(user.id) not in colacoins:
                 colacoins[str(user.id)] = 0
             colacoins[str(user.id)] += amount
-            await ctx.send(f"{amount} ColaCoins dados a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} ColaCoins.")
+
+            response = (
+                f"{amount} ColaCoins given to {user.display_name}. They now have {colacoins[str(user.id)]} ColaCoins."
+                if ctx.invoked_with == "givecolacoins" 
+                else f"{amount} ColaCoins dados a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} ColaCoins."
+            )
+            await ctx.send(response)
         await self.save_data()
 
     @commands.admin_or_permissions(administrator=True)
-    @commands.command(name="removecolacoins")
+    @commands.command(name="removecolacoins", aliases=["quitacolacoins"])
     async def remove_colacoins(self, ctx, user: discord.Member, amount: int):
-        """Quita ColaCoins a un usuario."""
+        """Removes ColaCoins from a user. / Quita ColaCoins a un usuario."""
         async with self.config.colacoins() as colacoins:
             if str(user.id) not in colacoins or colacoins[str(user.id)] < amount:
-                await ctx.send(f"No se puede quitar {amount} ColaCoins. {user.display_name} no tiene suficientes ColaCoins.")
+                response = (
+                    f"Cannot remove {amount} ColaCoins. {user.display_name} does not have enough ColaCoins."
+                    if ctx.invoked_with == "removecolacoins" 
+                    else f"No se puede quitar {amount} ColaCoins. {user.display_name} no tiene suficientes ColaCoins."
+                )
+                await ctx.send(response)
                 return
+
             colacoins[str(user.id)] -= amount
-            await ctx.send(f"{amount} ColaCoins quitadas a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} ColaCoins.")
+            response = (
+                f"{amount} ColaCoins removed from {user.display_name}. They now have {colacoins[str(user.id)]} ColaCoins."
+                if ctx.invoked_with == "removecolacoins" 
+                else f"{amount} ColaCoins quitadas a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} ColaCoins."
+            )
+            await ctx.send(response)
         await self.save_data()
 
     @commands.admin_or_permissions(administrator=True)
-    @commands.command(name="vercolacoins")
-    async def ver_colacoins(self, ctx, user: discord.Member):
-        """Verifica la cantidad de ColaCoins de un usuario."""
+    @commands.command(name="viewcolacoins", aliases=["vercolacoins"])
+    async def view_colacoins(self, ctx, user: discord.Member):
+        """Check the amount of ColaCoins a user has. / Verifica la cantidad de ColaCoins de un usuario."""
         colacoins = await self.config.colacoins()
         amount = colacoins.get(str(user.id), 0)
-        await ctx.send(f"{user.display_name} tiene {amount} ColaCoins.")
+        response = (
+            f"{user.display_name} has {amount} ColaCoins."
+            if ctx.invoked_with == "viewcolacoins" 
+            else f"{user.display_name} tiene {amount} ColaCoins."
+        )
+        await ctx.send(response)
 
-    @commands.command(name="colacoins")
+    @commands.command(name="colacoins", aliases=["miscolacoins"])
     async def user_colacoins(self, ctx):
-        """Permite a un usuario ver cuántas ColaCoins tiene."""
+        """Allows a user to see how many ColaCoins they have. / Permite a un usuario ver cuántas ColaCoins tiene."""
         colacoins = await self.config.colacoins()
         amount = colacoins.get(str(ctx.author.id), 0)
-        await ctx.send(f"Tienes {amount} ColaCoins.")
+        response = (
+            f"You have {amount} ColaCoins."
+            if ctx.invoked_with == "colacoins" 
+            else f"Tienes {amount} ColaCoins."
+        )
+        await ctx.send(response)
