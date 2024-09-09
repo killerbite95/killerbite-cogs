@@ -39,7 +39,7 @@ class ColaCoins(commands.Cog):
                 colacoins[str(user.id)] = 0
             colacoins[str(user.id)] += amount
             emoji = await self.config.emoji() or ""
-            await ctx.send(f"{amount}{emoji} ColaCoins dados a {user.display_name}. Ahora tiene {colacoins[str(user.id)]}{emoji} ColaCoins." if ctx.invoked_with == 'darcolacoins' else f"{amount}{emoji} ColaCoins given to {user.display_name}. Now they have {colacoins[str(user.id)]}{emoji} ColaCoins.")
+            await ctx.send(f"{amount} {emoji} ColaCoins dados a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} {emoji} ColaCoins." if ctx.invoked_with == 'darcolacoins' else f"{amount} {emoji} ColaCoins given to {user.display_name}. Now they have {colacoins[str(user.id)]} {emoji} ColaCoins.")
         await self.save_data()
 
     @commands.admin_or_permissions(administrator=True)
@@ -48,11 +48,11 @@ class ColaCoins(commands.Cog):
         """Quita ColaCoins a un usuario. / Remove ColaCoins from a user."""
         async with self.config.colacoins() as colacoins:
             if str(user.id) not in colacoins or colacoins[str(user.id)] < amount:
-                await ctx.send(f"No se puede quitar {amount}{emoji} ColaCoins. {user.display_name} no tiene suficientes ColaCoins." if ctx.invoked_with == 'quitarcolacoins' else f"Cannot remove {amount}{emoji} ColaCoins. {user.display_name} does not have enough ColaCoins.")
+                await ctx.send(f"No se puede quitar {amount} {emoji} ColaCoins. {user.display_name} no tiene suficientes ColaCoins." if ctx.invoked_with == 'quitarcolacoins' else f"Cannot remove {amount} {emoji} ColaCoins. {user.display_name} does not have enough ColaCoins.")
                 return
             colacoins[str(user.id)] -= amount
             emoji = await self.config.emoji() or ""
-            await ctx.send(f"{amount}{emoji} ColaCoins quitadas a {user.display_name}. Ahora tiene {colacoins[str(user.id)]}{emoji} ColaCoins. " if ctx.invoked_with == 'quitarcolacoins' else f"{amount}{emoji} ColaCoins removed from {user.display_name}. Now they have {colacoins[str(user.id)]}{emoji} ColaCoins.")
+            await ctx.send(f"{amount} {emoji} ColaCoins quitadas a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} {emoji} ColaCoins. " if ctx.invoked_with == 'quitarcolacoins' else f"{amount} {emoji} ColaCoins removed from {user.display_name}. Now they have {colacoins[str(user.id)]} {emoji} ColaCoins.")
         await self.save_data()
 
     @commands.admin_or_permissions(administrator=True)
@@ -62,7 +62,7 @@ class ColaCoins(commands.Cog):
         colacoins = await self.config.colacoins()
         amount = colacoins.get(str(user.id), 0)
         emoji = await self.config.emoji() or ""
-        await ctx.send(f"{user.display_name} tiene {amount}{emoji} ColaCoins." if ctx.invoked_with == 'vercolacoins' else f"{user.display_name} has {amount} {emoji} ColaCoins.")
+        await ctx.send(f"{user.display_name} tiene {amount} {emoji} ColaCoins." if ctx.invoked_with == 'vercolacoins' else f"{user.display_name} has {amount}  {emoji} ColaCoins.")
 
     @commands.command(name="colacoins", aliases=["miscolacoins"])
     async def user_colacoins(self, ctx):
@@ -70,7 +70,7 @@ class ColaCoins(commands.Cog):
         colacoins = await self.config.colacoins()
         amount = colacoins.get(str(ctx.author.id), 0)
         emoji = await self.config.emoji() or ""
-        await ctx.send(f"Tienes {amount}{emoji} ColaCoins." if ctx.invoked_with == 'miscolacoins' else f"You have {amount}{emoji} ColaCoins.")
+        await ctx.send(f"Tienes {amount} {emoji} ColaCoins." if ctx.invoked_with == 'miscolacoins' else f"You have {amount} {emoji} ColaCoins.")
 
     @commands.admin_or_permissions(administrator=True)
     @commands.command(name="setcolacoinemoji", aliases=["establecercolacoinemoji"])
