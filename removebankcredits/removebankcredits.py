@@ -2,7 +2,7 @@ import discord
 from redbot.core import commands, bank
 
 class RemoveBankCredits(commands.Cog):
-    """Cog para gestionar la eliminación de créditos de usuarios baneados o ausentes"""
+    """Cog para gestionar la eliminación de créditos de usuarios baneados o ausentes."""
 
     def __init__(self, bot):
         self.bot = bot
