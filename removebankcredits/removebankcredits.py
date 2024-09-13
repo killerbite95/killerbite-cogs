@@ -1,44 +1,41 @@
-from redbot.core import commands, bank
 import discord
-from redbot.core.bot import Red
+from redbot.core import commands, bank
+from redbot.core.errors import BalanceTooHigh, BalanceTooLow, UserNotOwnerError
 
 class RemoveBankCredits(commands.Cog):
-    """Gestión de créditos para usuarios inactivos o baneados."""
+    """Cog para gestionar la eliminación de créditos de usuarios baneados"""
 
-    def __init__(self, bot: Red):
+    def __init__(self, bot):
         self.bot = bot
 
-    @commands.admin_or_permissions(administrator=True)
     @commands.command(name="removeeconomy")
-    async def remove_economy(self, ctx: commands.Context, user_id: int, amount: int):
-        """Quita créditos de un usuario por su ID.
+    @commands.admin_or_permissions(administrator=True)
+    async def remove_economy(self, ctx, user_id: int, amount: int):
+        """Elimina una cantidad específica de créditos de la cuenta de un usuario."""
+        user = self.bot.get_user(user_id) or discord.Object(id=user_id)
 
-        Uso: !removeeconomy <user_id> <cantidad>
-        """
         try:
-            # Buscar al usuario por su ID
-            user = self.bot.get_user(user_id) or await self.bot.fetch_user(user_id)
-            if not user:
-                await ctx.send("No se encontró un usuario con ese ID.")
-                return
+            # Intentar obtener el balance para verificar si la cuenta existe
+            balance = await bank.get_balance(user)
+        except ValueError:
+            await ctx.send(f"La cuenta del usuario con ID {user_id} no existe.")
+            return
+        except UserNotOwnerError:
+            await ctx.send("Error al obtener la cuenta del usuario. Intenta nuevamente.")
+            return
 
-            # Verificar si la cuenta está creada; si no, se crea automáticamente
-            if not await bank.is_global():
-                await bank.create_account(user)
+        # Verificar si el usuario tiene suficientes créditos
+        if balance < amount:
+            await ctx.send(f"El usuario no tiene suficientes créditos. Balance actual: {balance}.")
+            return
 
-            if not await bank.has_account(user):
-                await ctx.send("El usuario no tiene una cuenta registrada.")
-                return
-
-            current_balance = await bank.get_balance(user)
-
-            if amount > current_balance:
-                await ctx.send(f"El usuario solo tiene {current_balance} créditos, no se puede eliminar {amount}.")
-                return
-
-            # Eliminar los créditos especificados
+        try:
+            # Remover créditos
             await bank.withdraw_credits(user, amount)
-            await ctx.send(f"Se han eliminado {amount} créditos a {user.name}. Ahora tiene {current_balance - amount} créditos.")
-
+            await ctx.send(f"{amount} créditos removidos de la cuenta de {user_id}.")
+        except BalanceTooLow:
+            await ctx.send("El balance del usuario es insuficiente para esta operación.")
+        except BalanceTooHigh:
+            await ctx.send("El balance es demasiado alto para hacer la operación.")
         except Exception as e:
-            await ctx.send(f"Error: {e}")
+            await ctx.send(f"Ha ocurrido un error: {e}")
