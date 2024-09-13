@@ -1,6 +1,5 @@
 import discord
 from redbot.core import commands, bank
-from redbot.core.errors import BalanceTooHigh, BalanceTooLow, UserNotOwnerError
 
 class RemoveBankCredits(commands.Cog):
     """Cog para gestionar la eliminación de créditos de usuarios baneados"""
@@ -20,9 +19,6 @@ class RemoveBankCredits(commands.Cog):
         except ValueError:
             await ctx.send(f"La cuenta del usuario con ID {user_id} no existe.")
             return
-        except UserNotOwnerError:
-            await ctx.send("Error al obtener la cuenta del usuario. Intenta nuevamente.")
-            return
 
         # Verificar si el usuario tiene suficientes créditos
         if balance < amount:
@@ -33,9 +29,5 @@ class RemoveBankCredits(commands.Cog):
             # Remover créditos
             await bank.withdraw_credits(user, amount)
             await ctx.send(f"{amount} créditos removidos de la cuenta de {user_id}.")
-        except BalanceTooLow:
-            await ctx.send("El balance del usuario es insuficiente para esta operación.")
-        except BalanceTooHigh:
-            await ctx.send("El balance es demasiado alto para hacer la operación.")
         except Exception as e:
             await ctx.send(f"Ha ocurrido un error: {e}")
