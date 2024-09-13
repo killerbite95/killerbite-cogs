@@ -12,7 +12,7 @@ class RemoveBankCredits(commands.Cog):
     @commands.command(name="removeeconomy")
     async def remove_economy(self, ctx: commands.Context, user_id: int, amount: int):
         """Quita créditos de un usuario por su ID.
-        
+
         Uso: !removeeconomy <user_id> <cantidad>
         """
         try:
@@ -22,13 +22,16 @@ class RemoveBankCredits(commands.Cog):
                 await ctx.send("No se encontró un usuario con ese ID.")
                 return
 
-            # Verificar si el usuario tiene una cuenta de banco
-            if not await bank.can_spend(user, 0):
+            # Verificar si la cuenta está creada; si no, se crea automáticamente
+            if not await bank.is_global():
+                await bank.create_account(user)
+
+            if not await bank.has_account(user):
                 await ctx.send("El usuario no tiene una cuenta registrada.")
                 return
 
             current_balance = await bank.get_balance(user)
-                
+
             if amount > current_balance:
                 await ctx.send(f"El usuario solo tiene {current_balance} créditos, no se puede eliminar {amount}.")
                 return
@@ -36,6 +39,6 @@ class RemoveBankCredits(commands.Cog):
             # Eliminar los créditos especificados
             await bank.withdraw_credits(user, amount)
             await ctx.send(f"Se han eliminado {amount} créditos a {user.name}. Ahora tiene {current_balance - amount} créditos.")
-        
+
         except Exception as e:
             await ctx.send(f"Error: {e}")
