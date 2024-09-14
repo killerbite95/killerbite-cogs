@@ -55,14 +55,23 @@ class PruneBans(commands.Cog):
                     await channel.send(f"Error al comprobar los baneos: {str(e)}")
 
     async def execute_prune(self, guild: discord.Guild):
-        """Ejecuta el comando prune en el canal de logs configurado."""
+        """Ejecuta la función prune usando el sistema de comandos internos."""
+        try:
+            ctx = await self.create_context(guild)
+            await ctx.invoke(self.bot.get_command("bankset"), prune=True, local=True, confirmation="yes")
+            await ctx.send("Función prune ejecutada correctamente.")
+        except Exception as e:
+            log_channel_id = await self.config.guild(guild).log_channel()
+            if log_channel_id:
+                log_channel = guild.get_channel(log_channel_id)
+                if log_channel:
+                    await log_channel.send(f"Error al ejecutar prune: {str(e)}")
+
+    async def create_context(self, guild: discord.Guild):
+        """Crea un contexto simulado para ejecutar comandos programáticamente."""
         log_channel_id = await self.config.guild(guild).log_channel()
         if log_channel_id:
             log_channel = guild.get_channel(log_channel_id)
             if log_channel:
-                try:
-                    # Enviar el comando prune al canal de logs
-                    await log_channel.send("!bankset prune local yes")
-                    await log_channel.send("Función prune ejecutada correctamente.")
-                except Exception as e:
-                    await log_channel.send(f"Error al ejecutar prune: {str(e)}")
+                fake_message = discord.Object(id=log_channel_id)
+                return await self.bot.get_context(fake_message)
