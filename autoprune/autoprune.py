@@ -35,13 +35,31 @@ class AutoPrune(commands.Cog):
         await self.config.guild(ctx.guild).log_channel.set(channel.id)
         await ctx.send(f"Canal de logs establecido: {channel.mention}")
 
+    @commands.command(name="forceprune")
+    @commands.admin_or_permissions(administrator=True)
+    async def force_prune(self, ctx):
+        """Fuerza la ejecución de prune manualmente."""
+        guild = ctx.guild
+        log_channel_id = await self.config.guild(guild).log_channel()
+        log_channel = guild.get_channel(log_channel_id) if log_channel_id else None
+
+        try:
+            await bank.prune_accounts(guild, local=True)
+            await ctx.send("Prune forzado ejecutado correctamente.")
+            if log_channel:
+                await log_channel.send("Prune forzado ejecutado sin errores.")
+        except Exception as e:
+            await ctx.send(f"Error al ejecutar prune: {e}")
+            if log_channel:
+                await log_channel.send(f"Error al ejecutar prune: {e}")
+
     @tasks.loop(minutes=10)
     async def check_bans(self):
         for guild in self.bot.guilds:
             prune_channel_id = await self.config.guild(guild).prune_channel()
             log_channel_id = await self.config.guild(guild).log_channel()
             last_bans = await self.config.guild(guild).last_bans()
-            
+
             if not prune_channel_id:
                 continue
 
