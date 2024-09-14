@@ -39,7 +39,7 @@ class PruneBans(commands.Cog):
         """Comprueba los nuevos baneos en el servidor."""
         try:
             last_bans = await self.config.guild(guild).last_bans()
-            current_bans = await guild.bans()
+            current_bans = [ban async for ban in guild.bans()]
             current_ban_ids = [ban_entry.user.id for ban_entry in current_bans]
 
             new_bans = [ban for ban in current_ban_ids if ban not in last_bans]
