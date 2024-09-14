@@ -2,8 +2,6 @@ import discord
 from discord.ext import tasks, commands
 from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
-from redbot.core.utils.chat_formatting import box
-from datetime import datetime
 
 class PruneBans(commands.Cog):
     """Cog para manejar la eliminación de créditos de usuarios baneados automáticamente."""
@@ -57,14 +55,14 @@ class PruneBans(commands.Cog):
                     await channel.send(f"Error al comprobar los baneos: {str(e)}")
 
     async def execute_prune(self, guild: discord.Guild):
-        """Ejecuta la función prune y publica los logs en el canal configurado."""
+        """Ejecuta el comando prune en el canal de logs configurado."""
         log_channel_id = await self.config.guild(guild).log_channel()
         if log_channel_id:
             log_channel = guild.get_channel(log_channel_id)
             if log_channel:
                 try:
-                    # Aquí llamamos directamente a la función de prune
-                    await self.bot.get_cog("Economy").prune_accounts(local=True, confirmed=True)
+                    # Enviar el comando prune al canal de logs
+                    await log_channel.send("!bankset prune local yes")
                     await log_channel.send("Función prune ejecutada correctamente.")
                 except Exception as e:
                     await log_channel.send(f"Error al ejecutar prune: {str(e)}")
