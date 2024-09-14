@@ -27,7 +27,7 @@ class PruneBans(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def force_prune(self, ctx):
         """Fuerza la ejecución de prune sin comprobar los baneos."""
-        await self.execute_prune(ctx.guild)
+        await self.execute_prune(ctx.guild, forced=True)
         await ctx.send("Función de prune forzada ejecutada.")
 
     @tasks.loop(minutes=10)
@@ -55,15 +55,16 @@ class PruneBans(commands.Cog):
                 if channel:
                     await channel.send(f"Error al comprobar los baneos: {str(e)}")
 
-    async def execute_prune(self, guild: discord.Guild):
+    async def execute_prune(self, guild: discord.Guild, forced=False):
         """Ejecuta la función prune usando bank_prune para limpiar cuentas."""
         try:
-            await bank_prune(self.bot, guild=guild)  # Ejecuta la limpieza de cuentas
-            log_channel_id = await self.config.guild(guild).log_channel()
-            if log_channel_id:
-                log_channel = guild.get_channel(log_channel_id)
-                if log_channel:
-                    await log_channel.send("Función prune ejecutada correctamente.")
+            prune_result = await bank_prune(self.bot, guild=guild)
+            if prune_result or forced:
+                log_channel_id = await self.config.guild(guild).log_channel()
+                if log_channel_id:
+                    log_channel = guild.get_channel(log_channel_id)
+                    if log_channel:
+                        await log_channel.send("Función prune ejecutada correctamente.")
         except Exception as e:
             log_channel_id = await self.config.guild(guild).log_channel()
             if log_channel_id:
