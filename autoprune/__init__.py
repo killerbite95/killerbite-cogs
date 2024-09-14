@@ -1,4 +1,4 @@
-from .autoprune import AutoPrune
+from .prunebans import PruneBans
 
 async def setup(bot):
-    bot.add_cog(AutoPrune(bot))
+    await bot.add_cog(PruneBans(bot))
