@@ -102,7 +102,7 @@ async def get_language(cog, member) -> str:
     if language:
         return language
     else:
-        return None
+        return 'es'  # Idioma por defecto
 
 
 async def send_embed_with_image(ctx, embed, image_filename, asset_path):
