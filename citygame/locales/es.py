@@ -16,7 +16,14 @@ translations = {
         "`!juego clasificacion` - Muestra la clasificación de jugadores.\n"
         "`!juego desafiar @usuario` - Desafía a otro jugador.\n"
         "`!juego comprar <objeto>` - Compra un objeto de la tienda.\n"
-        "`!juego inventario` - Muestra tu inventario."
+        "`!juego inventario` - Muestra tu inventario.\n"
+        "\n**Comandos Administrativos:**\n"
+        "`!juego admin cambiar_rol @usuario <rol>` - Cambia el rol de un usuario.\n"
+        "`!juego admin añadir_logro @usuario <logro>` - Añade un logro a un usuario.\n"
+        "`!juego admin quitar_logro @usuario <logro>` - Quita un logro de un usuario.\n"
+        "`!juego admin restablecer_usuario @usuario` - Restablece el progreso de un usuario.\n"
+        "`!juego admin cooldown <comando> <tiempo>` - Cambia el cooldown de un comando.\n"
+        "`!juego admin multiplicador <accion/trabajar> <valor>` - Establece el multiplicador económico."
     ),
     "language_set": "Tu idioma ha sido establecido a '{language}'.",
     "no_role": (
@@ -78,7 +85,8 @@ translations = {
         "y {xp_gain} puntos de experiencia."
     ),
     "challenge_result": "¡{winner} ha ganado el desafío!",
-    # Misiones Diarias
+    "challenge_sent": "Has enviado un desafío a {opponent}.",
+    # Misiones Diarias Mejoradas
     "daily_missions": [
         "Capturar a 5 miembros de la mafia.",
         "Completar 3 trabajos exitosamente.",
@@ -86,6 +94,19 @@ translations = {
         "Alcanzar el nivel 5.",
         "Realizar 10 acciones.",
         "Desafiar y ganar contra otro jugador.",
+        "Comprar 2 objetos en la tienda.",
+        "Ganar 500 monedas en un solo desafío.",
+        "Subir de nivel 2 veces.",
+        "Completar una misión sin fallar.",
     ],
+    # Ayuda Administrativa
+    "admin_help": (
+        "**Comandos Administrativos:**\n"
+        "`!juego admin cambiar_rol @usuario <rol>` - Cambia el rol de un usuario.\n"
+        "`!juego admin añadir_logro @usuario <logro>` - Añade un logro a un usuario.\n"
+        "`!juego admin quitar_logro @usuario <logro>` - Quita un logro de un usuario.\n"
+        "`!juego admin restablecer_usuario @usuario` - Restablece el progreso de un usuario.\n"
+        "`!juego admin cooldown <comando> <tiempo>` - Cambia el cooldown de un comando.\n"
+        "`!juego admin multiplicador <accion/trabajar> <valor>` - Establece el multiplicador económico."
+    ),
 }
-
