@@ -13,7 +13,8 @@ from .utils.helpers import (
     update_experience,
     validate_role,
     get_language,
-    send_embed_with_image,  # Importamos la nueva función auxiliar
+    send_embed_with_image,
+    language_set_required,  # Importamos el decorador
 )
 
 BaseCog = getattr(commands, "Cog", object)
@@ -30,7 +31,7 @@ class CiudadVirtual(commands.Cog):
             "achievements": [],
             "level": 1,
             "xp": 0,
-            "language": None,  # Ahora puede ser None para detectar idioma automáticamente
+            "language": None,  # Ahora puede ser None para requerir establecer idioma
             "skills": {},
             "jail_time": 0,
             "properties": [],
@@ -66,7 +67,27 @@ class CiudadVirtual(commands.Cog):
         # Usamos la función auxiliar para enviar el embed
         await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
 
+    @juego.command(name="establecer_idioma", aliases=["set_language"])
+    async def establecer_idioma(self, ctx, language: str):
+        """Establece tu idioma preferido.
+
+        Args:
+            language: El código del idioma ('es' o 'en').
+        """
+        member = ctx.author
+        supported_languages = ['es', 'en']
+        language = language.lower()
+
+        if language not in supported_languages:
+            await ctx.send(f"El idioma '{language}' no es compatible. Idiomas disponibles: {', '.join(supported_languages)}.")
+            return
+
+        await self.config.member(member).language.set(language)
+        translations = await get_translations(self, member)
+        await ctx.send(translations["language_set"].format(language=language))
+
     @juego.command(name="elegir_rol", aliases=["choose_role"])
+    @language_set_required()
     async def elegir_rol(self, ctx, rol: str):
         """Elige tu rol en el juego: mafia, civil o policía.
 
@@ -92,6 +113,7 @@ class CiudadVirtual(commands.Cog):
 
     @juego.command(name="accion", aliases=["action"])
     @commands.cooldown(1, 60, commands.BucketType.user)
+    @language_set_required()
     async def accion(self, ctx):
         """Realiza una acción dependiendo de tu rol, gana experiencia y monedas.
 
@@ -190,6 +212,7 @@ class CiudadVirtual(commands.Cog):
 
     @juego.command(name="trabajar", aliases=["work"])
     @commands.cooldown(1, 3600, commands.BucketType.user)
+    @language_set_required()
     async def trabajar(self, ctx):
         """Trabaja en tu profesión y gana dinero."""
         member = ctx.author
@@ -223,26 +246,8 @@ class CiudadVirtual(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f"Por favor, espera {int(error.retry_after // 60)} minutos antes de volver a trabajar.")
 
-    # Agregamos el comando 'establecer_idioma'
-
-    @juego.command(name="establecer_idioma", aliases=["set_language"])
-    async def establecer_idioma(self, ctx, language: str):
-        """Establece tu idioma preferido.
-
-        Args:
-            language: El código del idioma ('es' o 'en').
-        """
-        member = ctx.author
-        supported_languages = ['es', 'en']
-        language = language.lower()
-
-        if language not in supported_languages:
-            await ctx.send(f"El idioma '{language}' no es compatible. Idiomas disponibles: {', '.join(supported_languages)}.")
-            return
-
-        await self.config.member(member).language.set(language)
-        translations = await get_translations(self, member)
-        await ctx.send(translations["language_set"].format(language=language))
+    # Continúa implementando los demás comandos siguiendo el mismo patrón...
+    # Asegúrate de aplicar @language_set_required() a los comandos que lo requieran
 
     @tasks.loop(minutes=1)
     async def jail_check(self):
@@ -278,8 +283,6 @@ class CiudadVirtual(commands.Cog):
     async def before_jail_check(self):
         """Espera a que el bot esté listo antes de iniciar la tarea."""
         await self.bot.wait_until_ready()
-
-    # Continúa con el resto de los comandos y métodos...
 
 
 async def setup(bot: Red):

@@ -4,6 +4,7 @@ import importlib
 import os
 import discord
 import logging
+from functools import wraps
 
 log = logging.getLogger("red.citygame")
 
@@ -89,9 +90,6 @@ async def update_experience(cog, member, xp_gain: int, translations):
 async def get_language(cog, member) -> str:
     """Obtiene el idioma preferido del usuario.
 
-    Si el usuario no ha establecido un idioma, intenta detectar el idioma
-    basado en la configuración de Discord.
-
     Args:
         cog: La instancia del cog.
         member: El miembro para quien obtener el idioma.
@@ -103,12 +101,9 @@ async def get_language(cog, member) -> str:
     if language:
         return language
     else:
-        # Intentar detectar el idioma del usuario
-        user_locale = getattr(member, 'locale', 'en-US')
-        language = user_locale[:2]
-        if language not in ['es', 'en']:
-            language = 'en'
-        return language
+        # Si el idioma no está establecido, devuelve None
+        return None
+
 
 async def send_embed_with_image(ctx, embed, image_filename, asset_path):
     """Envía un embed con una imagen opcional.
@@ -128,3 +123,22 @@ async def send_embed_with_image(ctx, embed, image_filename, asset_path):
         # Registrar que la imagen no se encontró
         log.warning(f"Archivo de imagen no encontrado: {file_path}")
         await ctx.send(embed=embed)
+
+
+def language_set_required():
+    """Decorador para verificar que el usuario ha establecido su idioma."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(self, ctx, *args, **kwargs):
+            member = ctx.author
+            language = await self.config.member(member).language()
+            if not language:
+                # Enviar mensaje en español e inglés
+                await ctx.send(
+                    "Por favor, establece tu idioma usando `!juego establecer_idioma es` o `!game set_language en` antes de continuar.\n"
+                    "Please set your language using `!game set_language en` or `!juego establecer_idioma es` before proceeding."
+                )
+                return
+            return await func(self, ctx, *args, **kwargs)
+        return wrapper
+    return decorator
