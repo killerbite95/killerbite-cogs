@@ -44,20 +44,12 @@ class CiudadVirtual(commands.Cog):
             "inventory": [],
             "daily_mission": None,
             "daily_mission_completed": False,
-            "challenge_pending": None,
         }
         self.config.register_member(**default_member)
         default_guild = {
             "leaderboard": {},
-            "economy_multiplier": {
-                "accion": 1.0,
-                "trabajar": 1.0,
-            },
+            "economy_multiplier": 1.0,
             "items": {},
-            "cooldowns": {
-                "accion": 60,
-                "trabajar": 3600,
-            },
         }
         self.config.register_guild(**default_guild)
         self.translations_cache = {}
@@ -146,161 +138,157 @@ class CiudadVirtual(commands.Cog):
             await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
 
     @juego.command(name="accion", aliases=["action"])
+    @commands.cooldown(1, 60, commands.BucketType.user)
     @language_set_required()
     async def accion(self, ctx):
         """Realiza una acción dependiendo de tu rol, gana experiencia y monedas.
 
-        El cooldown de este comando puede ser modificado por un administrador.
+        Este comando tiene un cooldown de 60 segundos por usuario.
         """
-        cooldown = await self.config.guild(ctx.guild).cooldowns.accion()
-        @commands.cooldown(1, cooldown, commands.BucketType.user)
-        async def inner(ctx):
-            try:
-                member = ctx.author
-                member_config = self.config.member(member)
-                translations = await get_translations(self, member)
-                role = await member_config.role()
-                jail_time = await member_config.jail_time()
-                if jail_time > 0:
+        try:
+            member = ctx.author
+            member_config = self.config.member(member)
+            translations = await get_translations(self, member)
+            role = await member_config.role()
+            jail_time = await member_config.jail_time()
+            if jail_time > 0:
+                embed = discord.Embed(
+                    title=safe_get_translation(translations, "in_jail_title"),
+                    description=safe_get_translation(translations, "in_jail").format(time=jail_time),
+                    color=discord.Color.dark_gray()
+                )
+                image_filename = 'en_carcel.png'
+                await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
+                return
+            if not role:
+                await ctx.send(safe_get_translation(translations, "no_role"))
+                return
+
+            multiplier = await self.config.guild(ctx.guild).economy_multiplier()
+            level_multiplier = await get_level_multiplier(self, member)
+            earnings, xp_gain = 0, 0
+
+            if role == 'mafia':
+                earnings = random.randint(100, 200) * multiplier * level_multiplier
+                xp_gain = random.randint(10, 20)
+                event_chance = random.randint(1, 100)
+                if event_chance <= 20:
+                    await member_config.jail_time.set(3)
                     embed = discord.Embed(
-                        title=safe_get_translation(translations, "in_jail_title"),
-                        description=safe_get_translation(translations, "in_jail").format(time=jail_time),
-                        color=discord.Color.dark_gray()
+                        title=safe_get_translation(translations, "caught_title"),
+                        description=safe_get_translation(translations, "caught_by_police"),
+                        color=discord.Color.red()
                     )
                     image_filename = 'en_carcel.png'
                     await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
                     return
-                if not role:
-                    await ctx.send(safe_get_translation(translations, "no_role"))
-                    return
-
-                multiplier = await self.config.guild(ctx.guild).economy_multiplier.accion()
-                level_multiplier = await get_level_multiplier(self, member)
-                earnings, xp_gain = 0, 0
-
-                if role == 'mafia':
-                    earnings = random.randint(100, 200) * multiplier * level_multiplier
-                    xp_gain = random.randint(10, 20)
-                    event_chance = random.randint(1, 100)
-                    if event_chance <= 20:
-                        await member_config.jail_time.set(3)
-                        embed = discord.Embed(
-                            title=safe_get_translation(translations, "caught_title"),
-                            description=safe_get_translation(translations, "caught_by_police"),
-                            color=discord.Color.red()
-                        )
-                        image_filename = 'en_carcel.png'
-                        await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-                        return
-                    await bank.deposit_credits(member, int(earnings))
-                    embed_color = discord.Color.red()
-                    action_desc = safe_get_translation(translations, "action_mafia").format(
-                        earnings=int(earnings),
-                        xp_gain=xp_gain
-                    )
-                    image_filename = 'accion_mafia.png'
-
-                elif role == 'civil':
-                    earnings = random.randint(50, 150) * multiplier * level_multiplier
-                    xp_gain = random.randint(5, 15)
-                    await bank.deposit_credits(member, int(earnings))
-                    embed_color = discord.Color.green()
-                    action_desc = safe_get_translation(translations, "action_civilian").format(
-                        earnings=int(earnings),
-                        xp_gain=xp_gain
-                    )
-                    image_filename = 'accion_civil.png'
-
-                elif role == 'policia':
-                    earnings = random.randint(80, 180) * multiplier * level_multiplier
-                    xp_gain = random.randint(8, 18)
-                    await bank.deposit_credits(member, int(earnings))
-                    embed_color = discord.Color.blue()
-                    action_desc = safe_get_translation(translations, "action_police").format(
-                        earnings=int(earnings),
-                        xp_gain=xp_gain
-                    )
-                    image_filename = 'accion_policia.png'
-
-                else:
-                    await ctx.send(safe_get_translation(translations, "role_invalid"))
-                    return
-
-                embed = discord.Embed(
-                    title=safe_get_translation(translations, "action_title"),
-                    description=action_desc,
-                    color=embed_color
+                await bank.deposit_credits(member, int(earnings))
+                embed_color = discord.Color.red()
+                action_desc = safe_get_translation(translations, "action_mafia").format(
+                    earnings=int(earnings),
+                    xp_gain=xp_gain
                 )
-                await update_experience(self, member, xp_gain, translations)
-                await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-            except KeyError as e:
-                log.error(f"Clave de traducción faltante en 'accion': {e}")
-                await ctx.send(f"Error en las traducciones: {e}")
-            except Exception as e:
-                log.exception(f"Error inesperado en 'accion': {e}")
-                await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+                image_filename = 'accion_mafia.png'
 
-        await inner(ctx)
+            elif role == 'civil':
+                earnings = random.randint(50, 150) * multiplier * level_multiplier
+                xp_gain = random.randint(5, 15)
+                await bank.deposit_credits(member, int(earnings))
+                embed_color = discord.Color.green()
+                action_desc = safe_get_translation(translations, "action_civilian").format(
+                    earnings=int(earnings),
+                    xp_gain=xp_gain
+                )
+                image_filename = 'accion_civil.png'
+
+            elif role == 'policia':
+                earnings = random.randint(80, 180) * multiplier * level_multiplier
+                xp_gain = random.randint(8, 18)
+                await bank.deposit_credits(member, int(earnings))
+                embed_color = discord.Color.blue()
+                action_desc = safe_get_translation(translations, "action_police").format(
+                    earnings=int(earnings),
+                    xp_gain=xp_gain
+                )
+                image_filename = 'accion_policia.png'
+
+            else:
+                await ctx.send(safe_get_translation(translations, "role_invalid"))
+                return
+
+            embed = discord.Embed(
+                title=safe_get_translation(translations, "action_title"),
+                description=action_desc,
+                color=embed_color
+            )
+            await update_experience(self, member, xp_gain, translations)
+            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'accion': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'accion': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
 
     @accion.error
     async def accion_error(self, ctx, error):
-        """Maneja errores del comando accion, como el cooldown."""
+        """Maneja errores del comando accion, como el cooldown.
+
+        Args:
+            ctx: Contexto del comando.
+            error: El error que ocurrió.
+        """
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(
-                f"Por favor, espera {int(error.retry_after)} segundos antes de usar este comando nuevamente."
+                f"Por favor, espera {int(error.retry_after)} "
+                f"segundos antes de usar este comando nuevamente."
             )
 
     @juego.command(name="trabajar", aliases=["work"])
+    @commands.cooldown(1, 3600, commands.BucketType.user)
     @language_set_required()
     async def trabajar(self, ctx):
-        """Trabaja en tu profesión y gana dinero.
+        """Trabaja en tu profesión y gana dinero."""
+        try:
+            member = ctx.author
+            member_config = self.config.member(member)
+            translations = await get_translations(self, member)
+            role = await member_config.role()
+            if not role:
+                await ctx.send(safe_get_translation(translations, "no_role"))
+                return
 
-        El cooldown de este comando puede ser modificado por un administrador.
-        """
-        cooldown = await self.config.guild(ctx.guild).cooldowns.trabajar()
-        @commands.cooldown(1, cooldown, commands.BucketType.user)
-        async def inner(ctx):
-            try:
-                member = ctx.author
-                member_config = self.config.member(member)
-                translations = await get_translations(self, member)
-                role = await member_config.role()
-                if not role:
-                    await ctx.send(safe_get_translation(translations, "no_role"))
-                    return
+            multiplier = await self.config.guild(ctx.guild).economy_multiplier()
+            level_multiplier = await get_level_multiplier(self, member)
+            earnings = random.randint(200, 400) * multiplier * level_multiplier
+            xp_gain = random.randint(20, 40)
+            await bank.deposit_credits(member, int(earnings))
+            await update_experience(self, member, xp_gain, translations)
 
-                multiplier = await self.config.guild(ctx.guild).economy_multiplier.trabajar()
-                level_multiplier = await get_level_multiplier(self, member)
-                earnings = random.randint(200, 400) * multiplier * level_multiplier
-                xp_gain = random.randint(20, 40)
-                await bank.deposit_credits(member, int(earnings))
-                await update_experience(self, member, xp_gain, translations)
-
-                embed = discord.Embed(
-                    title=safe_get_translation(translations, "work_title"),
-                    description=safe_get_translation(translations, "work_success").format(
-                        earnings=int(earnings),
-                        xp_gain=xp_gain
-                    ),
-                    color=discord.Color.gold()
-                )
-                image_filename = 'trabajar.png'
-                await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-            except KeyError as e:
-                log.error(f"Clave de traducción faltante en 'trabajar': {e}")
-                await ctx.send(f"Error en las traducciones: {e}")
-            except Exception as e:
-                log.exception(f"Error inesperado en 'trabajar': {e}")
-                await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-        await inner(ctx)
+            embed = discord.Embed(
+                title=safe_get_translation(translations, "work_title"),
+                description=safe_get_translation(translations, "work_success").format(
+                    earnings=int(earnings),
+                    xp_gain=xp_gain
+                ),
+                color=discord.Color.gold()
+            )
+            image_filename = 'trabajar.png'
+            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'trabajar': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'trabajar': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
 
     @trabajar.error
     async def trabajar_error(self, ctx, error):
         """Maneja errores del comando trabajar, como el cooldown."""
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(
-                f"Por favor, espera {int(error.retry_after // 60)} minutos antes de volver a trabajar."
+                f"Por favor, espera {int(error.retry_after // 60)} "
+                f"minutos antes de volver a trabajar."
             )
 
     @juego.command(name="mision_diaria", aliases=["daily_mission"])
@@ -417,33 +405,22 @@ class CiudadVirtual(commands.Cog):
                 await ctx.send("No puedes desafiar a este usuario.")
                 return
 
-            member_config = self.config.member(member)
-            opponent_config = self.config.member(opponent)
-            member_challenge = await member_config.challenge_pending()
-            opponent_challenge = await opponent_config.challenge_pending()
+            member_level = await self.config.member(member).level()
+            opponent_level = await self.config.member(opponent).level()
 
-            if member_challenge and member_challenge != opponent.id:
-                await ctx.send("Ya tienes un desafío pendiente con otro usuario. Cancelando el desafío anterior.")
-                await member_config.challenge_pending.set(None)
+            if member_level < opponent_level:
+                winner = opponent
+            else:
+                winner = member
 
-            await member_config.challenge_pending.set(opponent.id)
             translations = await get_translations(self, member)
-            await ctx.send(safe_get_translation(translations, "challenge_sent").format(
-                opponent=opponent.display_name
+            await ctx.send(safe_get_translation(translations, "challenge_result").format(
+                winner=winner.display_name
             ))
 
-            # Si el oponente ya te desafió, iniciar el desafío
-            if opponent_challenge == member.id:
-                await member_config.challenge_pending.set(None)
-                await opponent_config.challenge_pending.set(None)
-                # Iniciar desafío
-                winner = random.choice([member, opponent])
-                await ctx.send(safe_get_translation(translations, "challenge_result").format(
-                    winner=winner.display_name
-                ))
-                # Otorgar recompensa al ganador
-                reward = 100 * await get_level_multiplier(self, winner)
-                await bank.deposit_credits(winner, int(reward))
+            # Otorgar recompensa al ganador
+            reward = 100 * await get_level_multiplier(self, winner)
+            await bank.deposit_credits(winner, int(reward))
         except KeyError as e:
             log.error(f"Clave de traducción faltante en 'desafiar': {e}")
             await ctx.send(f"Error en las traducciones: {e}")
@@ -512,106 +489,6 @@ class CiudadVirtual(commands.Cog):
         except Exception as e:
             log.exception(f"Error inesperado en 'inventario': {e}")
             await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @juego.group(name="admin", invoke_without_command=True)
-    @commands.guild_only()
-    @checks.admin()
-    async def admin(self, ctx):
-        """Comandos administrativos para Ciudad Virtual."""
-        translations = await get_translations(self, ctx.author)
-        admin_help = safe_get_translation(translations, "admin_help")
-        await ctx.send(admin_help)
-
-    @admin.command(name="cambiar_rol", aliases=["change_role"])
-    async def cambiar_rol(self, ctx, member: discord.Member, rol: str):
-        """Cambia el rol de un usuario.
-
-        Args:
-            member: El miembro al que cambiar el rol.
-            rol: El nuevo rol para el usuario.
-        """
-        valid_role = validate_role(rol)
-        if not valid_role:
-            await ctx.send("El rol ingresado no es válido.")
-            return
-        await self.config.member(member).role.set(valid_role)
-        await ctx.send(f"El rol de {member.display_name} ha sido cambiado a {valid_role}.")
-
-    @admin.command(name="añadir_logro", aliases=["add_achievement"])
-    async def añadir_logro(self, ctx, member: discord.Member, *, logro: str):
-        """Añade un logro a un usuario.
-
-        Args:
-            member: El miembro al que añadir el logro.
-            logro: El logro a añadir.
-        """
-        achievements = await self.config.member(member).achievements()
-        if logro in achievements:
-            await ctx.send("El usuario ya tiene este logro.")
-            return
-        achievements.append(logro)
-        await self.config.member(member).achievements.set(achievements)
-        await ctx.send(f"Logro '{logro}' añadido a {member.display_name}.")
-
-    @admin.command(name="quitar_logro", aliases=["remove_achievement"])
-    async def quitar_logro(self, ctx, member: discord.Member, *, logro: str):
-        """Quita un logro de un usuario.
-
-        Args:
-            member: El miembro al que quitar el logro.
-            logro: El logro a quitar.
-        """
-        achievements = await self.config.member(member).achievements()
-        if logro not in achievements:
-            await ctx.send("El usuario no tiene este logro.")
-            return
-        achievements.remove(logro)
-        await self.config.member(member).achievements.set(achievements)
-        await ctx.send(f"Logro '{logro}' eliminado de {member.display_name}.")
-
-    @admin.command(name="restablecer_usuario", aliases=["reset_user"])
-    async def restablecer_usuario(self, ctx, member: discord.Member):
-        """Restablece el progreso de un usuario.
-
-        Args:
-            member: El miembro a restablecer.
-        """
-        await self.config.member(member).clear()
-        await ctx.send(f"El progreso de {member.display_name} ha sido restablecido.")
-
-    @admin.command(name="multiplicador", aliases=["multiplier"])
-    async def multiplicador(self, ctx, comando: str, valor: float):
-        """Establece el multiplicador económico para un comando.
-
-        Args:
-            comando: El comando ('accion' o 'trabajar').
-            valor: El valor del multiplicador (0.05 a 2.00 en múltiplos de 0.05).
-        """
-        if comando not in ['accion', 'trabajar']:
-            await ctx.send("Comando inválido. Usa 'accion' o 'trabajar'.")
-            return
-        if not (0.05 <= valor <= 2.00) or (valor * 100) % 5 != 0:
-            await ctx.send("El valor debe estar entre 0.05 y 2.00 en múltiplos de 0.05.")
-            return
-        await self.config.guild(ctx.guild).economy_multiplier.set_raw(comando, value=valor)
-        await ctx.send(f"Multiplicador para '{comando}' establecido en {valor}.")
-
-    @admin.command(name="cooldown")
-    async def admin_cooldown(self, ctx, comando: str, tiempo: int):
-        """Cambia el cooldown de un comando.
-
-        Args:
-            comando: El comando ('accion' o 'trabajar').
-            tiempo: El nuevo tiempo de cooldown en segundos.
-        """
-        if comando not in ['accion', 'trabajar']:
-            await ctx.send("Comando inválido. Usa 'accion' o 'trabajar'.")
-            return
-        if tiempo < 0:
-            await ctx.send("El tiempo de cooldown no puede ser negativo.")
-            return
-        await self.config.guild(ctx.guild).cooldowns.set_raw(comando, value=tiempo)
-        await ctx.send(f"Cooldown para '{comando}' establecido en {tiempo} segundos.")
 
     @tasks.loop(minutes=1)
     async def jail_check(self):
