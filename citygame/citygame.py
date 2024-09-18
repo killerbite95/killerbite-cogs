@@ -55,8 +55,8 @@ class CiudadVirtual(commands.Cog):
             },
             "items": {},
             "cooldowns": {
-                "accion": 60,    # Cooldown en segundos
-                "trabajar": 3600, # Cooldown en segundos (60 minutos)
+                "accion": 60,
+                "trabajar": 3600,
             },
         }
         self.config.register_guild(**default_guild)
@@ -153,7 +153,6 @@ class CiudadVirtual(commands.Cog):
         El cooldown de este comando puede ser modificado por un administrador.
         """
         cooldown = await self.config.guild(ctx.guild).cooldowns.accion()
-        
         @commands.cooldown(1, cooldown, commands.BucketType.user)
         async def inner(ctx):
             try:
@@ -245,12 +244,7 @@ class CiudadVirtual(commands.Cog):
 
     @accion.error
     async def accion_error(self, ctx, error):
-        """Maneja errores del comando accion, como el cooldown.
-
-        Args:
-            ctx: Contexto del comando.
-            error: El error que ocurrió.
-        """
+        """Maneja errores del comando accion, como el cooldown."""
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(
                 f"Por favor, espera {int(error.retry_after)} segundos antes de usar este comando nuevamente."
@@ -264,7 +258,6 @@ class CiudadVirtual(commands.Cog):
         El cooldown de este comando puede ser modificado por un administrador.
         """
         cooldown = await self.config.guild(ctx.guild).cooldowns.trabajar()
-        
         @commands.cooldown(1, cooldown, commands.BucketType.user)
         async def inner(ctx):
             try:
@@ -542,8 +535,7 @@ class CiudadVirtual(commands.Cog):
             await ctx.send("El rol ingresado no es válido.")
             return
         await self.config.member(member).role.set(valid_role)
-        translations = await get_translations(self, ctx.author)
-        await ctx.send(f"{member.display_name} ahora tiene el rol de **{valid_role}**.")
+        await ctx.send(f"El rol de {member.display_name} ha sido cambiado a {valid_role}.")
 
     @admin.command(name="añadir_logro", aliases=["add_achievement"])
     async def añadir_logro(self, ctx, member: discord.Member, *, logro: str):
@@ -559,7 +551,6 @@ class CiudadVirtual(commands.Cog):
             return
         achievements.append(logro)
         await self.config.member(member).achievements.set(achievements)
-        translations = await get_translations(self, ctx.author)
         await ctx.send(f"Logro '{logro}' añadido a {member.display_name}.")
 
     @admin.command(name="quitar_logro", aliases=["remove_achievement"])
@@ -576,7 +567,6 @@ class CiudadVirtual(commands.Cog):
             return
         achievements.remove(logro)
         await self.config.member(member).achievements.set(achievements)
-        translations = await get_translations(self, ctx.author)
         await ctx.send(f"Logro '{logro}' eliminado de {member.display_name}.")
 
     @admin.command(name="restablecer_usuario", aliases=["reset_user"])
@@ -587,7 +577,6 @@ class CiudadVirtual(commands.Cog):
             member: El miembro a restablecer.
         """
         await self.config.member(member).clear()
-        translations = await get_translations(self, ctx.author)
         await ctx.send(f"El progreso de {member.display_name} ha sido restablecido.")
 
     @admin.command(name="multiplicador", aliases=["multiplier"])
@@ -605,7 +594,6 @@ class CiudadVirtual(commands.Cog):
             await ctx.send("El valor debe estar entre 0.05 y 2.00 en múltiplos de 0.05.")
             return
         await self.config.guild(ctx.guild).economy_multiplier.set_raw(comando, value=valor)
-        translations = await get_translations(self, ctx.author)
         await ctx.send(f"Multiplicador para '{comando}' establecido en {valor}.")
 
     @admin.command(name="cooldown")
@@ -623,7 +611,6 @@ class CiudadVirtual(commands.Cog):
             await ctx.send("El tiempo de cooldown no puede ser negativo.")
             return
         await self.config.guild(ctx.guild).cooldowns.set_raw(comando, value=tiempo)
-        translations = await get_translations(self, ctx.author)
         await ctx.send(f"Cooldown para '{comando}' establecido en {tiempo} segundos.")
 
     @tasks.loop(minutes=1)
