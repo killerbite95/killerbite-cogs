@@ -8,6 +8,7 @@ from functools import wraps
 
 log = logging.getLogger("red.citygame")
 
+
 def validate_role(role: str) -> str:
     """Valida y normaliza el rol ingresado por el usuario.
 
@@ -15,7 +16,8 @@ def validate_role(role: str) -> str:
         role: El rol ingresado por el usuario.
 
     Returns:
-        El rol normalizado ('mafia', 'civil', 'policia') o None si es inválido.
+        El rol normalizado ('mafia', 'civil', 'policia') o None
+        si es inválido.
     """
     role = role.lower()
     roles_map = {
@@ -42,10 +44,14 @@ async def get_translations(cog, member):
     language = await get_language(cog, member)
     if language not in cog.translations_cache:
         try:
-            module = importlib.import_module(f"..locales.{language}", package=__package__)
+            module = importlib.import_module(
+                f"..locales.{language}", package=__package__
+            )
             cog.translations_cache[language] = module.translations
         except ImportError:
-            module = importlib.import_module(f"..locales.es", package=__package__)
+            module = importlib.import_module(
+                f"..locales.es", package=__package__
+            )
             cog.translations_cache[language] = module.translations
     return cog.translations_cache[language]
 
@@ -79,8 +85,12 @@ async def update_experience(cog, member, xp_gain: int, translations):
         xp = 0
         await member_config.level.set(level)
         embed = discord.Embed(
-            title=translations["level_up_title"],
-            description=translations["level_up"].format(level=level),
+            title=safe_get_translation(
+                translations, "level_up_title"
+            ),
+            description=safe_get_translation(
+                translations, "level_up"
+            ).format(level=level),
             color=discord.Color.gold()
         )
         await member.send(embed=embed)
@@ -101,11 +111,12 @@ async def get_language(cog, member) -> str:
     if language:
         return language
     else:
-        # Si el idioma no está establecido, devuelve None
         return None
 
 
-async def send_embed_with_image(ctx, embed, image_filename, asset_path):
+async def send_embed_with_image(
+    ctx, embed, image_filename, asset_path
+):
     """Envía un embed con una imagen opcional.
 
     Args:
@@ -120,25 +131,48 @@ async def send_embed_with_image(ctx, embed, image_filename, asset_path):
         file = discord.File(file_path, filename=image_filename)
         await ctx.send(embed=embed, file=file)
     else:
-        # Registrar que la imagen no se encontró
         log.warning(f"Archivo de imagen no encontrado: {file_path}")
         await ctx.send(embed=embed)
 
 
 def language_set_required():
-    """Decorador para verificar que el usuario ha establecido su idioma."""
+    """Decorador para verificar que el usuario ha establecido
+    su idioma."""
     def decorator(func):
         @wraps(func)
         async def wrapper(self, ctx, *args, **kwargs):
             member = ctx.author
             language = await self.config.member(member).language()
             if not language:
-                # Enviar mensaje en español e inglés
                 await ctx.send(
-                    "Por favor, establece tu idioma usando `!juego establecer_idioma es` o `!game set_language en` antes de continuar.\n"
-                    "Please set your language using `!game set_language en` or `!juego establecer_idioma es` before proceeding."
+                    "Por favor, establece tu idioma usando "
+                    "`!juego establecer_idioma es` o "
+                    "`!game set_language en` antes de continuar.\n"
+                    "Please set your language using "
+                    "`!game set_language en` or "
+                    "`!juego establecer_idioma es` before proceeding."
                 )
                 return
             return await func(self, ctx, *args, **kwargs)
         return wrapper
     return decorator
+
+
+def safe_get_translation(translations, key):
+    """Obtiene una traducción de forma segura.
+
+    Args:
+        translations: El diccionario de traducciones.
+        key: La clave de la traducción que se desea obtener.
+
+    Returns:
+        El valor de la traducción correspondiente a la clave.
+
+    Raises:
+        KeyError: Si la clave no existe en el diccionario de
+        traducciones.
+    """
+    try:
+        return translations[key]
+    except KeyError:
+        raise KeyError(f"Falta la clave de traducción: '{key}'")
