@@ -14,7 +14,7 @@ from .utils.helpers import (
     validate_role,
     get_language,
     send_embed_with_image,
-    safe_get_translation,  # Importamos la nueva función
+    safe_get_translation,  # Importamos la función
     language_set_required,
 )
 
@@ -231,7 +231,7 @@ class CiudadVirtual(commands.Cog):
                         ctx, embed, image_filename, self.asset_path
                     )
                     return
-                await bank.deposit_credits(member, earnings)
+                await bank.deposit_credits(member, int(earnings))
                 embed_color = discord.Color.red()
                 action_desc = safe_get_translation(
                     translations, "action_mafia"
@@ -244,7 +244,7 @@ class CiudadVirtual(commands.Cog):
             elif role == 'civil':
                 earnings = random.randint(50, 150) * multiplier
                 xp_gain = random.randint(5, 15)
-                await bank.deposit_credits(member, earnings)
+                await bank.deposit_credits(member, int(earnings))
                 embed_color = discord.Color.green()
                 action_desc = safe_get_translation(
                     translations, "action_civilian"
@@ -257,7 +257,7 @@ class CiudadVirtual(commands.Cog):
             elif role == 'policia':
                 earnings = random.randint(80, 180) * multiplier
                 xp_gain = random.randint(8, 18)
-                await bank.deposit_credits(member, earnings)
+                await bank.deposit_credits(member, int(earnings))
                 embed_color = discord.Color.blue()
                 action_desc = safe_get_translation(
                     translations, "action_police"
@@ -336,7 +336,7 @@ class CiudadVirtual(commands.Cog):
             ).economy_multiplier()
             earnings = random.randint(200, 400) * multiplier
             xp_gain = random.randint(20, 40)
-            await bank.deposit_credits(member, earnings)
+            await bank.deposit_credits(member, int(earnings))
             await update_experience(
                 self, member, xp_gain, translations
             )
