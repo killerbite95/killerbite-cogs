@@ -188,9 +188,6 @@ class CiudadVirtual(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f"Por favor, espera {int(error.retry_after)} segundos antes de usar este comando nuevamente.")
 
-    # Implementación de otros comandos con modificaciones similares
-    # Por ejemplo, el comando 'trabajar':
-
     @juego.command(name="trabajar", aliases=["work"])
     @commands.cooldown(1, 3600, commands.BucketType.user)
     async def trabajar(self, ctx):
@@ -226,7 +223,26 @@ class CiudadVirtual(commands.Cog):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(f"Por favor, espera {int(error.retry_after // 60)} minutos antes de volver a trabajar.")
 
-    # Continua implementando los demás comandos siguiendo el mismo patrón...
+    # Agregamos el comando 'establecer_idioma'
+
+    @juego.command(name="establecer_idioma", aliases=["set_language"])
+    async def establecer_idioma(self, ctx, language: str):
+        """Establece tu idioma preferido.
+
+        Args:
+            language: El código del idioma ('es' o 'en').
+        """
+        member = ctx.author
+        supported_languages = ['es', 'en']
+        language = language.lower()
+
+        if language not in supported_languages:
+            await ctx.send(f"El idioma '{language}' no es compatible. Idiomas disponibles: {', '.join(supported_languages)}.")
+            return
+
+        await self.config.member(member).language.set(language)
+        translations = await get_translations(self, member)
+        await ctx.send(translations["language_set"].format(language=language))
 
     @tasks.loop(minutes=1)
     async def jail_check(self):
@@ -263,7 +279,8 @@ class CiudadVirtual(commands.Cog):
         """Espera a que el bot esté listo antes de iniciar la tarea."""
         await self.bot.wait_until_ready()
 
-    # Continúa con el resto del código...
+    # Continúa con el resto de los comandos y métodos...
 
-def setup(bot: Red):
-    bot.add_cog(CiudadVirtual(bot))
+
+async def setup(bot: Red):
+    await bot.add_cog(CiudadVirtual(bot))
