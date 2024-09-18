@@ -84,10 +84,7 @@ async def update_experience(cog, member, xp_gain: int, translations):
             description=safe_get_translation(translations, "level_up").format(level=level),
             color=discord.Color.gold()
         )
-        try:
-            await member.send(embed=embed)
-        except discord.Forbidden:
-            log.warning(f"No se pudo enviar el mensaje de nivel a {member.display_name}.")
+        await member.send(embed=embed)
     await member_config.xp.set(xp)
 
 
