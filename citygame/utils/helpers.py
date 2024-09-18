@@ -16,8 +16,7 @@ def validate_role(role: str) -> str:
         role: El rol ingresado por el usuario.
 
     Returns:
-        El rol normalizado ('mafia', 'civil', 'policia') o None
-        si es inválido.
+        El rol normalizado ('mafia', 'civil', 'policia') o None si es inválido.
     """
     role = role.lower()
     roles_map = {
@@ -44,14 +43,10 @@ async def get_translations(cog, member):
     language = await get_language(cog, member)
     if language not in cog.translations_cache:
         try:
-            module = importlib.import_module(
-                f"..locales.{language}", package=__package__
-            )
+            module = importlib.import_module(f"..locales.{language}", package=__package__)
             cog.translations_cache[language] = module.translations
         except ImportError:
-            module = importlib.import_module(
-                f"..locales.es", package=__package__
-            )
+            module = importlib.import_module(f"..locales.es", package=__package__)
             cog.translations_cache[language] = module.translations
     return cog.translations_cache[language]
 
@@ -85,12 +80,8 @@ async def update_experience(cog, member, xp_gain: int, translations):
         xp = 0
         await member_config.level.set(level)
         embed = discord.Embed(
-            title=safe_get_translation(
-                translations, "level_up_title"
-            ),
-            description=safe_get_translation(
-                translations, "level_up"
-            ).format(level=level),
+            title=safe_get_translation(translations, "level_up_title"),
+            description=safe_get_translation(translations, "level_up").format(level=level),
             color=discord.Color.gold()
         )
         await member.send(embed=embed)
@@ -114,9 +105,7 @@ async def get_language(cog, member) -> str:
         return None
 
 
-async def send_embed_with_image(
-    ctx, embed, image_filename, asset_path
-):
+async def send_embed_with_image(ctx, embed, image_filename, asset_path):
     """Envía un embed con una imagen opcional.
 
     Args:
@@ -136,8 +125,7 @@ async def send_embed_with_image(
 
 
 def language_set_required():
-    """Decorador para verificar que el usuario ha establecido
-    su idioma."""
+    """Decorador para verificar que el usuario ha establecido su idioma."""
     def decorator(func):
         @wraps(func)
         async def wrapper(self, ctx, *args, **kwargs):
@@ -169,10 +157,23 @@ def safe_get_translation(translations, key):
         El valor de la traducción correspondiente a la clave.
 
     Raises:
-        KeyError: Si la clave no existe en el diccionario de
-        traducciones.
+        KeyError: Si la clave no existe en el diccionario de traducciones.
     """
     try:
         return translations[key]
     except KeyError:
         raise KeyError(f"Falta la clave de traducción: '{key}'")
+
+
+async def get_level_multiplier(cog, member):
+    """Calcula un multiplicador basado en el nivel del usuario.
+
+    Args:
+        cog: La instancia del cog.
+        member: El miembro para quien calcular el multiplicador.
+
+    Returns:
+        Un valor flotante que representa el multiplicador.
+    """
+    level = await cog.config.member(member).level()
+    return 1 + (level - 1) * 0.05  # Por cada nivel, aumenta 5%
