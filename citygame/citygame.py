@@ -31,7 +31,7 @@ class CiudadVirtual(commands.Cog):
 
     def __init__(self, bot: Red):
         self.bot = bot
-        self.config = Config.get_conf(self, identifier=1234567890)
+        self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_member = {
             "role": None,
             "achievements": [],
@@ -46,7 +46,6 @@ class CiudadVirtual(commands.Cog):
             "daily_mission_completed": False,
             "challenge_pending": None,
         }
-        self.config.register_member(**default_member)
         default_guild = {
             "leaderboard": {},
             "economy_multiplier": {
@@ -59,6 +58,7 @@ class CiudadVirtual(commands.Cog):
                 "trabajar": 3600, # Cooldown en segundos (60 minutos)
             },
         }
+        self.config.register_member(**default_member)
         self.config.register_guild(**default_guild)
         self.translations_cache = {}
         self.asset_path = os.path.join(os.path.dirname(__file__), 'assets')
@@ -153,6 +153,7 @@ class CiudadVirtual(commands.Cog):
         El cooldown de este comando puede ser modificado por un administrador.
         """
         cooldown = await self.config.guild(ctx.guild).cooldowns.accion()
+
         @commands.cooldown(1, cooldown, commands.BucketType.user)
         async def inner(ctx):
             try:
@@ -258,6 +259,7 @@ class CiudadVirtual(commands.Cog):
         El cooldown de este comando puede ser modificado por un administrador.
         """
         cooldown = await self.config.guild(ctx.guild).cooldowns.trabajar()
+
         @commands.cooldown(1, cooldown, commands.BucketType.user)
         async def inner(ctx):
             try:
@@ -579,23 +581,6 @@ class CiudadVirtual(commands.Cog):
         await self.config.member(member).clear()
         await ctx.send(f"El progreso de {member.display_name} ha sido restablecido.")
 
-    @admin.command(name="cooldown")
-    async def admin_cooldown(self, ctx, comando: str, tiempo: int):
-        """Cambia el cooldown de un comando.
-
-        Args:
-            comando: El comando ('accion' o 'trabajar').
-            tiempo: El nuevo tiempo de cooldown en segundos.
-        """
-        if comando not in ['accion', 'trabajar']:
-            await ctx.send("Comando inválido. Usa 'accion' o 'trabajar'.")
-            return
-        if tiempo < 0:
-            await ctx.send("El tiempo de cooldown no puede ser negativo.")
-            return
-        await self.config.guild(ctx.guild).cooldowns.set_raw(comando, value=tiempo)
-        await ctx.send(f"Cooldown para '{comando}' establecido en {tiempo} segundos.")
-
     @admin.command(name="multiplicador", aliases=["multiplier"])
     async def multiplicador(self, ctx, comando: str, valor: float):
         """Establece el multiplicador económico para un comando.
@@ -612,6 +597,23 @@ class CiudadVirtual(commands.Cog):
             return
         await self.config.guild(ctx.guild).economy_multiplier.set_raw(comando, value=valor)
         await ctx.send(f"Multiplicador para '{comando}' establecido en {valor}.")
+
+    @admin.command(name="cooldown")
+    async def admin_cooldown(self, ctx, comando: str, tiempo: int):
+        """Cambia el cooldown de un comando.
+
+        Args:
+            comando: El comando ('accion' o 'trabajar').
+            tiempo: El nuevo tiempo de cooldown en segundos.
+        """
+        if comando not in ['accion', 'trabajar']:
+            await ctx.send("Comando inválido. Usa 'accion' o 'trabajar'.")
+            return
+        if tiempo < 0:
+            await ctx.send("El tiempo de cooldown no puede ser negativo.")
+            return
+        await self.config.guild(ctx.guild).cooldowns.set_raw(comando, value=tiempo)
+        await ctx.send(f"Cooldown para '{comando}' establecido en {tiempo} segundos.")
 
     @tasks.loop(minutes=1)
     async def jail_check(self):
