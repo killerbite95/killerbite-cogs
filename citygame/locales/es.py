@@ -109,4 +109,6 @@ translations = {
         "`!juego admin cooldown <comando> <tiempo>` - Cambia el cooldown de un comando.\n"
         "`!juego admin multiplicador <accion/trabajar> <valor>` - Establece el multiplicador económico."
     ),
+    # New Translation for Admin Release
+    "released_admin": "Ha sido puesto en libertad por un administrador."
 }
