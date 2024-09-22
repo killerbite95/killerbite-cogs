@@ -45,7 +45,9 @@ async def get_translations(cog, member):
         try:
             module = importlib.import_module(f"..locales.{language}", package=__package__)
             cog.translations_cache[language] = module.translations
+            log.debug(f"Traducciones cargadas para el idioma: {language}")
         except ImportError:
+            log.warning(f"Traducciones para '{language}' no encontradas. Usando 'es' por defecto.")
             module = importlib.import_module(f"..locales.es", package=__package__)
             cog.translations_cache[language] = module.translations
     return cog.translations_cache[language]
@@ -84,7 +86,11 @@ async def update_experience(cog, member, xp_gain: int, translations):
             description=safe_get_translation(translations, "level_up").format(level=level),
             color=discord.Color.gold()
         )
-        await member.send(embed=embed)
+        try:
+            await member.send(embed=embed)
+            log.info(f"{member} ha subido al nivel {level}.")
+        except discord.Forbidden:
+            log.warning(f"No se pudo enviar el mensaje de nivel a {member}.")
     await member_config.xp.set(xp)
 
 
@@ -99,10 +105,7 @@ async def get_language(cog, member) -> str:
         Una cadena con el código del idioma ('es' o 'en').
     """
     language = await cog.config.member(member).language()
-    if language:
-        return language
-    else:
-        return 'es'  # Idioma por defecto
+    return language if language else 'es'  # Idioma por defecto
 
 
 async def send_embed_with_image(ctx, embed, image_filename, asset_path):
@@ -117,8 +120,13 @@ async def send_embed_with_image(ctx, embed, image_filename, asset_path):
     file_path = os.path.join(asset_path, image_filename)
     if os.path.isfile(file_path):
         embed.set_thumbnail(url=get_asset(image_filename))
-        file = discord.File(file_path, filename=image_filename)
-        await ctx.send(embed=embed, file=file)
+        try:
+            file = discord.File(file_path, filename=image_filename)
+            await ctx.send(embed=embed, file=file)
+            log.debug(f"Imagen '{image_filename}' enviada en el embed.")
+        except Exception as e:
+            log.error(f"No se pudo enviar la imagen '{image_filename}': {e}")
+            await ctx.send(embed=embed)
     else:
         log.warning(f"Archivo de imagen no encontrado: {file_path}")
         await ctx.send(embed=embed)
@@ -134,11 +142,11 @@ def language_set_required():
             if not language:
                 await ctx.send(
                     "Por favor, establece tu idioma usando "
-                    "`!juego establecer_idioma es` o "
-                    "`!game set_language en` antes de continuar.\n"
+                    "!juego establecer_idioma es o "
+                    "!game set_language en antes de continuar.\n"
                     "Please set your language using "
-                    "`!game set_language en` or "
-                    "`!juego establecer_idioma es` before proceeding."
+                    "!game set_language en or "
+                    "!juego establecer_idioma es before proceeding."
                 )
                 return
             return await func(self, ctx, *args, **kwargs)
