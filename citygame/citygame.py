@@ -18,13 +18,15 @@ from .utils.helpers import (
     language_set_required,
     get_level_multiplier,
 )
+from .utils.items import ITEMS  # Importar los objetos
 
 import logging
+import asyncio
+import datetime
 
 log = logging.getLogger("red.citygame")
 
 BaseCog = getattr(commands, "Cog", object)
-
 
 class CiudadVirtual(commands.Cog):
     """Un juego de roles donde los usuarios pueden ser mafia, civil o policía."""
@@ -39,17 +41,21 @@ class CiudadVirtual(commands.Cog):
             "xp": 0,
             "language": None,
             "skills": {},
-            "jail_time": 0,
+            "jail_time": None,  # Almacenar como timestamp
             "properties": [],
             "inventory": [],
             "daily_mission": None,
             "daily_mission_completed": False,
         }
         self.config.register_member(**default_member)
+        
+        # Convertir la lista de ITEMS a un diccionario para facilitar el acceso
+        default_items = {item["name_key"]: {"price": item["price"], "description_key": item["description_key"], "roles": item["roles"]} for item in ITEMS}
+        
         default_guild = {
             "leaderboard": {},
             "economy_multiplier": 1.0,
-            "items": {},
+            "items": default_items,
         }
         self.config.register_guild(**default_guild)
         self.translations_cache = {}
@@ -60,76 +66,44 @@ class CiudadVirtual(commands.Cog):
         """Se llama cuando el cog se descarga."""
         self.jail_check.cancel()
 
-    @commands.group(name="juego", aliases=["game"], invoke_without_command=True)
-    async def juego(self, ctx):
-        """Comando principal para Ciudad Virtual.
-
-        Muestra el mensaje de ayuda con todos los comandos disponibles.
-        """
-        try:
-            translations = await get_translations(self, ctx.author)
-            help_text = safe_get_translation(translations, "help_text")
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "help_title"),
-                description=help_text,
-                color=discord.Color.blue()
-            )
-            image_filename = 'ciudad_virtual_bienvenida.png'
-            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'juego': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'juego': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @juego.command(name="establecer_idioma", aliases=["set_language"])
-    async def establecer_idioma(self, ctx, language: str):
-        """Establece tu idioma preferido.
-
-        Args:
-            language: El código del idioma ('es' o 'en').
-        """
-        member = ctx.author
-        supported_languages = ['es', 'en']
-        language = language.lower()
-
-        if language not in supported_languages:
-            await ctx.send(
-                f"El idioma '{language}' no es compatible. "
-                f"Idiomas disponibles: {', '.join(supported_languages)}."
-            )
-            return
-
-        await self.config.member(member).language.set(language)
-        translations = await get_translations(self, member)
-        await ctx.send(
-            safe_get_translation(translations, "language_set").format(language=language)
-        )
+    @tasks.loop(seconds=60)
+    async def jail_check(self):
+        """Verifica periódicamente si los usuarios deben ser liberados de la cárcel."""
+        now = datetime.datetime.utcnow().timestamp()
+        async with self.config.all_guilds() as guilds:
+            for guild_id, guild_data in guilds.items():
+                guild = self.bot.get_guild(guild_id)
+                if not guild:
+                    continue
+                members = guild.members
+                for member in members:
+                    jail_time = await self.config.member(member).jail_time()
+                    if jail_time and jail_time <= now:
+                        await self.config.member(member).jail_time.set(None)
+                        # Enviar mensaje de liberación
+                        try:
+                            await member.send(safe_get_translation(await get_translations(self, member), "liberado_jail"))
+                        except discord.Forbidden:
+                            pass  # No se pudo enviar mensaje al usuario
 
     @juego.command(name="elegir_rol", aliases=["choose_role"])
-    @language_set_required()
-    async def elegir_rol(self, ctx, rol: str):
-        """Elige tu rol en el juego: mafia, civil o policía.
+    async def elegir_rol(self, ctx, role: str):
+        """Permite al usuario elegir su rol en el juego.
 
         Args:
-            rol: El rol que el usuario desea elegir.
+            role: El rol que desea elegir ('mafia', 'policia', 'civil').
         """
         try:
             member = ctx.author
             translations = await get_translations(self, member)
-            valid_role = validate_role(rol)
-            if not valid_role:
+            validated_role = validate_role(role)
+
+            if not validated_role:
                 await ctx.send(safe_get_translation(translations, "role_invalid"))
                 return
-            await self.config.member(member).role.set(valid_role)
-            image_filename = f'rol_{valid_role}.png'
-            embed = discord.Embed(
-                description=safe_get_translation(translations, "role_selected").format(role=valid_role),
-                color=discord.Color.green()
-            )
-            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-            await ctx.message.add_reaction("✅")
+
+            await self.config.member(member).role.set(validated_role)
+            await ctx.send(safe_get_translation(translations, "role_selected").format(role=validated_role.capitalize()))
         except KeyError as e:
             log.error(f"Clave de traducción faltante en 'elegir_rol': {e}")
             await ctx.send(f"Error en las traducciones: {e}")
@@ -137,300 +111,9 @@ class CiudadVirtual(commands.Cog):
             log.exception(f"Error inesperado en 'elegir_rol': {e}")
             await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
 
-    @juego.command(name="accion", aliases=["action"])
-    @commands.cooldown(1, 60, commands.BucketType.user)
-    @language_set_required()
-    async def accion(self, ctx):
-        """Realiza una acción dependiendo de tu rol, gana experiencia y monedas.
-
-        Este comando tiene un cooldown de 60 segundos por usuario.
-        """
-        try:
-            member = ctx.author
-            member_config = self.config.member(member)
-            translations = await get_translations(self, member)
-            role = await member_config.role()
-            jail_time = await member_config.jail_time()
-            if jail_time > 0:
-                embed = discord.Embed(
-                    title=safe_get_translation(translations, "in_jail_title"),
-                    description=safe_get_translation(translations, "in_jail").format(time=jail_time),
-                    color=discord.Color.dark_gray()
-                )
-                image_filename = 'en_carcel.png'
-                await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-                return
-            if not role:
-                await ctx.send(safe_get_translation(translations, "no_role"))
-                return
-
-            multiplier = await self.config.guild(ctx.guild).economy_multiplier()
-            level_multiplier = await get_level_multiplier(self, member)
-            earnings, xp_gain = 0, 0
-
-            if role == 'mafia':
-                earnings = random.randint(100, 200) * multiplier * level_multiplier
-                xp_gain = random.randint(10, 20)
-                event_chance = random.randint(1, 100)
-                if event_chance <= 20:
-                    await member_config.jail_time.set(3)
-                    embed = discord.Embed(
-                        title=safe_get_translation(translations, "caught_title"),
-                        description=safe_get_translation(translations, "caught_by_police"),
-                        color=discord.Color.red()
-                    )
-                    image_filename = 'en_carcel.png'
-                    await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-                    return
-                await bank.deposit_credits(member, int(earnings))
-                embed_color = discord.Color.red()
-                action_desc = safe_get_translation(translations, "action_mafia").format(
-                    earnings=int(earnings),
-                    xp_gain=xp_gain
-                )
-                image_filename = 'accion_mafia.png'
-
-            elif role == 'civil':
-                earnings = random.randint(50, 150) * multiplier * level_multiplier
-                xp_gain = random.randint(5, 15)
-                await bank.deposit_credits(member, int(earnings))
-                embed_color = discord.Color.green()
-                action_desc = safe_get_translation(translations, "action_civilian").format(
-                    earnings=int(earnings),
-                    xp_gain=xp_gain
-                )
-                image_filename = 'accion_civil.png'
-
-            elif role == 'policia':
-                earnings = random.randint(80, 180) * multiplier * level_multiplier
-                xp_gain = random.randint(8, 18)
-                await bank.deposit_credits(member, int(earnings))
-                embed_color = discord.Color.blue()
-                action_desc = safe_get_translation(translations, "action_police").format(
-                    earnings=int(earnings),
-                    xp_gain=xp_gain
-                )
-                image_filename = 'accion_policia.png'
-
-            else:
-                await ctx.send(safe_get_translation(translations, "role_invalid"))
-                return
-
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "action_title"),
-                description=action_desc,
-                color=embed_color
-            )
-            await update_experience(self, member, xp_gain, translations)
-            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'accion': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'accion': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @accion.error
-    async def accion_error(self, ctx, error):
-        """Maneja errores del comando accion, como el cooldown.
-
-        Args:
-            ctx: Contexto del comando.
-            error: El error que ocurrió.
-        """
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(
-                f"Por favor, espera {int(error.retry_after)} "
-                f"segundos antes de usar este comando nuevamente."
-            )
-
-    @juego.command(name="trabajar", aliases=["work"])
-    @commands.cooldown(1, 3600, commands.BucketType.user)
-    @language_set_required()
-    async def trabajar(self, ctx):
-        """Trabaja en tu profesión y gana dinero."""
-        try:
-            member = ctx.author
-            member_config = self.config.member(member)
-            translations = await get_translations(self, member)
-            role = await member_config.role()
-            if not role:
-                await ctx.send(safe_get_translation(translations, "no_role"))
-                return
-
-            multiplier = await self.config.guild(ctx.guild).economy_multiplier()
-            level_multiplier = await get_level_multiplier(self, member)
-            earnings = random.randint(200, 400) * multiplier * level_multiplier
-            xp_gain = random.randint(20, 40)
-            await bank.deposit_credits(member, int(earnings))
-            await update_experience(self, member, xp_gain, translations)
-
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "work_title"),
-                description=safe_get_translation(translations, "work_success").format(
-                    earnings=int(earnings),
-                    xp_gain=xp_gain
-                ),
-                color=discord.Color.gold()
-            )
-            image_filename = 'trabajar.png'
-            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'trabajar': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'trabajar': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @trabajar.error
-    async def trabajar_error(self, ctx, error):
-        """Maneja errores del comando trabajar, como el cooldown."""
-        if isinstance(error, commands.CommandOnCooldown):
-            await ctx.send(
-                f"Por favor, espera {int(error.retry_after // 60)} "
-                f"minutos antes de volver a trabajar."
-            )
-
-    @juego.command(name="mision_diaria", aliases=["daily_mission"])
-    @language_set_required()
-    async def mision_diaria(self, ctx):
-        """Obtiene tu misión diaria."""
-        try:
-            member = ctx.author
-            member_config = self.config.member(member)
-            translations = await get_translations(self, member)
-            daily_mission = await member_config.daily_mission()
-            daily_completed = await member_config.daily_mission_completed()
-
-            if daily_completed:
-                await ctx.send(safe_get_translation(translations, "daily_mission_completed"))
-                return
-
-            if daily_mission:
-                await ctx.send(safe_get_translation(translations, "daily_mission_in_progress").format(
-                    mission=daily_mission))
-                return
-
-            # Generar una nueva misión diaria
-            missions = safe_get_translation(translations, "daily_missions")
-            mission = random.choice(missions)
-            await member_config.daily_mission.set(mission)
-            await ctx.send(safe_get_translation(translations, "daily_mission_assigned").format(
-                mission=mission))
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'mision_diaria': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'mision_diaria': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @juego.command(name="logros", aliases=["achievements"])
-    @language_set_required()
-    async def logros(self, ctx):
-        """Muestra tus logros obtenidos."""
-        try:
-            member = ctx.author
-            member_config = self.config.member(member)
-            achievements = await member_config.achievements()
-            translations = await get_translations(self, member)
-
-            if not achievements:
-                await ctx.send(safe_get_translation(translations, "no_achievements"))
-                return
-
-            achievements_text = "\n".join(achievements)
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "achievements_title"),
-                description=achievements_text,
-                color=discord.Color.purple()
-            )
-            await ctx.send(embed=embed)
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'logros': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'logros': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @juego.command(name="clasificacion", aliases=["leaderboard"])
-    @language_set_required()
-    async def clasificacion(self, ctx):
-        """Muestra la clasificación de jugadores."""
-        try:
-            guild_members = await self.config.all_members(ctx.guild)
-            translations = await get_translations(self, ctx.author)
-
-            leaderboard = []
-            for member_id, data in guild_members.items():
-                member = ctx.guild.get_member(member_id)
-                if member:
-                    level = data.get("level", 1)
-                    xp = data.get("xp", 0)
-                    leaderboard.append((member.name, level, xp))
-
-            if not leaderboard:
-                await ctx.send(safe_get_translation(translations, "no_leaderboard_data"))
-                return
-
-            # Ordenar por nivel y experiencia
-            leaderboard.sort(key=lambda x: (x[1], x[2]), reverse=True)
-            leaderboard_text = ""
-            for idx, (name, level, xp) in enumerate(leaderboard[:10], start=1):
-                leaderboard_text += f"{idx}. {name} - Nivel {level}, XP {xp}\n"
-
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "leaderboard_title"),
-                description=leaderboard_text,
-                color=discord.Color.dark_gold()
-            )
-            await ctx.send(embed=embed)
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'clasificacion': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'clasificacion': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @juego.command(name="desafiar", aliases=["challenge"])
-    @language_set_required()
-    async def desafiar(self, ctx, opponent: discord.Member):
-        """Desafía a otro jugador.
-
-        Args:
-            opponent: El miembro al que deseas desafiar.
-        """
-        try:
-            member = ctx.author
-            if opponent.bot or opponent == member:
-                await ctx.send("No puedes desafiar a este usuario.")
-                return
-
-            member_level = await self.config.member(member).level()
-            opponent_level = await self.config.member(opponent).level()
-
-            if member_level < opponent_level:
-                winner = opponent
-            else:
-                winner = member
-
-            translations = await get_translations(self, member)
-            await ctx.send(safe_get_translation(translations, "challenge_result").format(
-                winner=winner.display_name
-            ))
-
-            # Otorgar recompensa al ganador
-            reward = 100 * await get_level_multiplier(self, winner)
-            await bank.deposit_credits(winner, int(reward))
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'desafiar': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'desafiar': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
     @juego.command(name="comprar", aliases=["buy"])
     @language_set_required()
-    async def comprar(self, ctx, item_name: str):
+    async def comprar(self, ctx, *, item_name: str):
         """Compra un objeto de la tienda.
 
         Args:
@@ -438,24 +121,44 @@ class CiudadVirtual(commands.Cog):
         """
         try:
             member = ctx.author
+            guild = ctx.guild
             translations = await get_translations(self, member)
-            guild_items = await self.config.guild(ctx.guild).items()
-            item = guild_items.get(item_name.lower())
+            guild_items = await self.config.guild(guild).items()
+            item_key = item_name.lower()
+            item = guild_items.get(item_key)
 
             if not item:
                 await ctx.send(safe_get_translation(translations, "item_not_found"))
                 return
 
-            price = item.get("price")
+            price = item.get("price", 50)
+            description_key = item.get("description_key", "")
+            roles_allowed = item.get("roles", [])
+
+            # Verificar si el objeto es permitido para el rol del usuario
+            user_role = await self.config.member(member).role()
+            if user_role not in roles_allowed:
+                await ctx.send(safe_get_translation(translations, "item_not_allowed").format(item=item_name.capitalize(), role=user_role))
+                return
+
+            # Definir ítems únicos o limitados
+            unique_items = ["item_contraseña_secreta"]  # Usar name_key
+            max_quantity = 1
+
+            member_inventory = await self.config.member(member).inventory()
+            if item_key in unique_items:
+                if member_inventory.count(item_key) >= max_quantity:
+                    await ctx.send(safe_get_translation(translations, "item_limit_reached").format(item=item_name.capitalize()))
+                    return
+
             if not await bank.can_spend(member, price):
                 await ctx.send(safe_get_translation(translations, "not_enough_money"))
                 return
 
             await bank.withdraw_credits(member, price)
-            member_inventory = await self.config.member(member).inventory()
-            member_inventory.append(item_name)
+            member_inventory.append(item_key)
             await self.config.member(member).inventory.set(member_inventory)
-            await ctx.send(safe_get_translation(translations, "item_purchased").format(item=item_name))
+            await ctx.send(safe_get_translation(translations, "item_purchased").format(item=item_name.capitalize()))
         except KeyError as e:
             log.error(f"Clave de traducción faltante en 'comprar': {e}")
             await ctx.send(f"Error en las traducciones: {e}")
@@ -469,6 +172,7 @@ class CiudadVirtual(commands.Cog):
         """Muestra tu inventario."""
         try:
             member = ctx.author
+            guild = ctx.guild
             member_inventory = await self.config.member(member).inventory()
             translations = await get_translations(self, member)
 
@@ -476,7 +180,20 @@ class CiudadVirtual(commands.Cog):
                 await ctx.send(safe_get_translation(translations, "inventory_empty"))
                 return
 
-            inventory_text = "\n".join(member_inventory)
+            guild_items = await self.config.guild(guild).items()
+            inventory_dict = {}
+            for item in member_inventory:
+                inventory_dict[item] = inventory_dict.get(item, 0) + 1  # Contar la cantidad de cada ítem
+
+            inventory_text = ""
+            for item, quantity in inventory_dict.items():
+                item_info = guild_items.get(item, {})
+                name_key = item_info.get("name_key", "item_unknown")
+                description_key = item_info.get("description_key", "item_unknown_desc")
+                translated_name = safe_get_translation(translations, name_key)
+                translated_description = safe_get_translation(translations, description_key)
+                inventory_text += f"**{translated_name}** x{quantity}: {translated_description}\n"
+
             embed = discord.Embed(
                 title=safe_get_translation(translations, "inventory_title"),
                 description=inventory_text,
@@ -490,40 +207,267 @@ class CiudadVirtual(commands.Cog):
             log.exception(f"Error inesperado en 'inventario': {e}")
             await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
 
-    @tasks.loop(minutes=1)
-    async def jail_check(self):
-        """Tarea en segundo plano que reduce el tiempo en la cárcel de los usuarios.
+    @juego.command(name="trabajar", aliases=["work"])
+    @language_set_required()
+    async def trabajar(self, ctx):
+        """Permite al usuario trabajar para ganar monedas."""
+        try:
+            member = ctx.author
+            guild = ctx.guild
+            translations = await get_translations(self, member)
+            user_role = await self.config.member(member).role()
+            member_inventory = await self.config.member(member).inventory()
+            guild_items = await self.config.guild(guild).items()
 
-        Se ejecuta cada minuto.
+            base_earnings = random.randint(100, 200)
+            multiplier = 1.0
+
+            # Aplicar efectos pasivos de los objetos
+            if "item_herramientas_robo" in member_inventory and user_role == "mafia":
+                multiplier += 0.5  # 50% de aumento
+            if "item_kit_supervivencia" in member_inventory and user_role == "civil":
+                multiplier += 0.3  # 30% de aumento
+
+            earnings = int(base_earnings * multiplier)
+            await bank.deposit_credits(member, earnings)
+
+            await ctx.send(safe_get_translation(translations, "trabajar_realizado").format(earnings=earnings))
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'trabajar': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'trabajar': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    @juego.command(name="accion", aliases=["action"])
+    @language_set_required()
+    async def accion(self, ctx):
+        """Permite al usuario realizar una acción según su rol."""
+        try:
+            member = ctx.author
+            guild = ctx.guild
+            translations = await get_translations(self, member)
+            user_role = await self.config.member(member).role()
+            member_inventory = await self.config.member(member).inventory()
+            guild_items = await self.config.guild(guild).items()
+
+            if not user_role:
+                await ctx.send(safe_get_translation(translations, "role_not_set"))
+                return
+
+            if user_role == "mafia":
+                # Realizar acción de mafia
+                base_earnings = random.randint(200, 400)
+                multiplier = 1.0
+
+                # Aplicar efectos pasivos de los objetos
+                if "item_herramientas_robo" in member_inventory:
+                    multiplier += 0.5  # 50% de aumento
+                if "item_camuflaje" in member_inventory:
+                    # Reducir la probabilidad de ser detectado (ejemplo)
+                    pass  # Implementar lógica de camuflaje
+
+                earnings = int(base_earnings * multiplier)
+                await bank.deposit_credits(member, earnings)
+
+                await ctx.send(safe_get_translation(translations, "accion_mafia_realizada").format(earnings=earnings))
+            
+            elif user_role == "policia":
+                # Realizar acción de policía
+                base_earnings = random.randint(150, 300)
+                multiplier = 1.0
+
+                # Aplicar efectos pasivos de los objetos
+                if "item_uniform_policia" in member_inventory:
+                    multiplier += 0.4  # 40% de aumento
+                if "item_binoculares" in member_inventory:
+                    # Implementar ventaja de binoculares (ejemplo)
+                    pass  # Implementar lógica de binoculares
+
+                earnings = int(base_earnings * multiplier)
+                await bank.deposit_credits(member, earnings)
+
+                await ctx.send(safe_get_translation(translations, "accion_policia_realizada").format(earnings=earnings))
+            
+            elif user_role == "civil":
+                # Realizar acción de civil
+                base_earnings = random.randint(80, 150)
+                multiplier = 1.0
+
+                # Aplicar efectos pasivos de los objetos
+                if "item_kit_supervivencia" in member_inventory:
+                    multiplier += 0.3  # 30% de aumento
+
+                earnings = int(base_earnings * multiplier)
+                await bank.deposit_credits(member, earnings)
+
+                await ctx.send(safe_get_translation(translations, "accion_civil_realizada").format(earnings=earnings))
+            
+            else:
+                await ctx.send(safe_get_translation(translations, "role_invalid_action"))
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'accion': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'accion': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    @juego.group(name="admin", aliases=["administrativo"], invoke_without_command=True)
+    @commands.has_permissions(manage_guild=True)
+    async def admin(self, ctx):
+        """Comandos administrativos para gestionar el juego."""
+        translations = await get_translations(self, ctx.author)
+        await ctx.send(safe_get_translation(translations, "admin_help"))
+
+    @admin.command(name="add_item", aliases=["añadir_objeto"])
+    async def add_item(self, ctx, item_name: str, price: int, *, description: str, roles: str):
+        """Añade un nuevo ítem a la tienda.
+
+        Args:
+            item_name: El nombre del ítem.
+            price: El precio del ítem.
+            description: La descripción del ítem.
+            roles: Los roles que pueden usar el ítem, separados por comas (e.g., mafia,policia).
         """
-        all_members = await self.config.all_members()
-        for guild_id, members in all_members.items():
-            for member_id, data in members.items():
-                jail_time = data.get("jail_time", 0)
-                if jail_time > 0:
-                    jail_time -= 1
-                    user = self.bot.get_user(member_id)
-                    if jail_time == 0 and user:
-                        translations = await get_translations(self, user)
-                        embed = discord.Embed(
-                            title=safe_get_translation(translations, "released_title"),
-                            description=safe_get_translation(translations, "released_from_jail"),
-                            color=discord.Color.green()
-                        )
-                        image_filename = 'liberado.png'
-                        try:
-                            await user.send(
-                                embed=embed,
-                                file=discord.File(
-                                    os.path.join(self.asset_path, image_filename),
-                                    filename=image_filename
-                                )
-                            )
-                        except FileNotFoundError:
-                            await user.send(embed=embed)
-                    await self.config.member_from_ids(guild_id, member_id).jail_time.set(jail_time)
+        try:
+            guild_items = await self.config.guild(ctx.guild).items()
+            name_key = f"item_{item_name.lower().replace(' ', '_')}"
+            description_key = f"{name_key}_desc"
+            item_key = name_key
 
-    @jail_check.before_loop
-    async def before_jail_check(self):
-        """Espera a que el bot esté listo antes de iniciar la tarea."""
-        await self.bot.wait_until_ready()
+            if item_key in guild_items:
+                await ctx.send(safe_get_translation(await get_translations(self, ctx.author), "item_already_exists"))
+                return
+
+            roles_list = [role.strip().lower() for role in roles.split(",")]
+
+            guild_items[item_key] = {
+                "price": price,
+                "description_key": description_key,
+                "roles": roles_list,
+                "name_key": name_key  # Añadido para facilitar traducciones en el inventario
+            }
+            await self.config.guild(ctx.guild).items.set(guild_items)
+
+            translations = await get_translations(self, ctx.author)
+            await ctx.send(safe_get_translation(translations, "item_added").format(item=item_name.capitalize(), price=price))
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'add_item': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'add_item': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    @admin.command(name="remove_item", aliases=["quitar_objeto"])
+    async def remove_item(self, ctx, *, item_name: str):
+        """Quita un ítem de la tienda.
+
+        Args:
+            item_name: El nombre del ítem.
+        """
+        try:
+            guild_items = await self.config.guild(ctx.guild).items()
+            name_key = f"item_{item_name.lower().replace(' ', '_')}"
+            item_key = name_key
+
+            if item_key not in guild_items:
+                await ctx.send(safe_get_translation(await get_translations(self, ctx.author), "item_not_found"))
+                return
+
+            del guild_items[item_key]
+            await self.config.guild(ctx.guild).items.set(guild_items)
+
+            translations = await get_translations(self, ctx.author)
+            await ctx.send(safe_get_translation(translations, "item_removed").format(item=item_name.capitalize()))
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'remove_item': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'remove_item': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    @admin.command(name="update_item", aliases=["actualizar_objeto"])
+    async def update_item(self, ctx, item_name: str, price: int = None, *, description: str = None):
+        """Actualiza el precio y/o descripción de un ítem existente en la tienda.
+
+        Args:
+            item_name: El nombre del ítem.
+            price: El nuevo precio del ítem (opcional).
+            description: La nueva descripción del ítem (opcional).
+        """
+        try:
+            guild_items = await self.config.guild(ctx.guild).items()
+            name_key = f"item_{item_name.lower().replace(' ', '_')}"
+            item_key = name_key
+
+            if item_key not in guild_items:
+                await ctx.send(safe_get_translation(await get_translations(self, ctx.author), "item_not_found"))
+                return
+
+            if price is not None:
+                guild_items[item_key]["price"] = price
+            if description is not None:
+                guild_items[item_key]["description_key"] = f"{item_key}_desc"
+                # Aquí, necesitarás añadir las traducciones correspondientes en los archivos de traducción.
+
+            await self.config.guild(ctx.guild).items.set(guild_items)
+
+            translations = await get_translations(self, ctx.author)
+            await ctx.send(safe_get_translation(translations, "item_updated").format(item=item_name.capitalize()))
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'update_item': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'update_item': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    @juego.command(name="set_language", aliases=["establecer_idioma"])
+    async def set_language(self, ctx, language: str):
+        """Establece el idioma preferido del usuario.
+
+        Args:
+            language: El idioma que deseas establecer ('en' o 'es').
+        """
+        try:
+            member = ctx.author
+            translations = await get_translations(self, member)
+            if language.lower() not in ["en", "es"]:
+                await ctx.send(safe_get_translation(translations, "language_invalid"))
+                return
+
+            await self.config.member(member).language.set(language.lower())
+            await ctx.send(safe_get_translation(translations, "language_set").format(language=language.upper()))
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'set_language': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'set_language': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    @juego.command(name="help", aliases=["ayuda"])
+    async def help_command(self, ctx):
+        """Muestra la ayuda del juego."""
+        try:
+            member = ctx.author
+            translations = await get_translations(self, member)
+            help_title = safe_get_translation(translations, "help_title")
+            help_text = safe_get_translation(translations, "help_text")
+
+            embed = discord.Embed(
+                title=help_title,
+                description=help_text,
+                color=discord.Color.blue()
+            )
+            await ctx.send(embed=embed)
+        except KeyError as e:
+            log.error(f"Clave de traducción faltante en 'help': {e}")
+            await ctx.send(f"Error en las traducciones: {e}")
+        except Exception as e:
+            log.exception(f"Error inesperado en 'help': {e}")
+            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
+
+    def cog_command_error(self, ctx, error):
+        """Maneja los errores de los comandos del cog."""
+        if isinstance(error, commands.MissingPermissions):
+            return  # Puedes manejar este error si lo deseas
+        log.error(f"Error en el comando {ctx.command}: {error}")
