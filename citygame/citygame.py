@@ -6,6 +6,7 @@ import discord
 import random
 import os
 from discord.ext import tasks
+from datetime import datetime, timedelta
 
 from .utils.helpers import (
     get_translations,
@@ -488,84 +489,6 @@ class CiudadVirtual(commands.Cog):
             log.exception(f"Error inesperado en 'inventario': {e}")
             await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
 
-    @juego.group(name="admin", aliases=["administrar"], invoke_without_command=True)
-    @checks.admin()
-    async def admin(self, ctx):
-        """Comandos administrativos para Ciudad Virtual."""
-        await ctx.send_help(ctx.command)
-
-    @admin.command(name="liberar", aliases=["release"])
-    @checks.admin()
-    async def liberar(self, ctx, member: discord.Member):
-        """Libera a un usuario de la cárcel manualmente.
-
-        Args:
-            member: El miembro que deseas liberar.
-        """
-        try:
-            member_config = self.config.member(member)
-            jail_time = await member_config.jail_time()
-            if jail_time <= 0:
-                await ctx.send(f"{member.display_name} no está en la cárcel.")
-                return
-
-            await member_config.jail_time.set(0)
-            translations = await get_translations(self, ctx.author)
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "released_title"),
-                description=safe_get_translation(translations, "released_admin"),
-                color=discord.Color.green()
-            )
-            image_filename = 'liberado.png'
-            await send_embed_with_image(ctx, embed, image_filename, self.asset_path)
-            await ctx.send(f"{member.mention} ha sido liberado de la cárcel por un administrador.")
-            log.info(f"{member} ha sido liberado de la cárcel por {ctx.author}.")
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'liberar': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'liberar': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
-    @juego.command(name="clasificacion", aliases=["leaderboard"])
-    @language_set_required()
-    async def clasificacion(self, ctx):
-        """Muestra la clasificación de jugadores."""
-        try:
-            guild_members = await self.config.all_members(ctx.guild)
-            translations = await get_translations(self, ctx.author)
-
-            leaderboard = []
-            for member_id, data in guild_members.items():
-                member = ctx.guild.get_member(member_id)
-                if member:
-                    level = data.get("level", 1)
-                    xp = data.get("xp", 0)
-                    leaderboard.append((member.name, level, xp))
-
-            if not leaderboard:
-                await ctx.send(safe_get_translation(translations, "no_leaderboard_data"))
-                return
-
-            # Ordenar por nivel y experiencia
-            leaderboard.sort(key=lambda x: (x[1], x[2]), reverse=True)
-            leaderboard_text = ""
-            for idx, (name, level, xp) in enumerate(leaderboard[:10], start=1):
-                leaderboard_text += f"{idx}. {name} - Nivel {level}, XP {xp}\n"
-
-            embed = discord.Embed(
-                title=safe_get_translation(translations, "leaderboard_title"),
-                description=leaderboard_text,
-                color=discord.Color.dark_gold()
-            )
-            await ctx.send(embed=embed)
-        except KeyError as e:
-            log.error(f"Clave de traducción faltante en 'clasificacion': {e}")
-            await ctx.send(f"Error en las traducciones: {e}")
-        except Exception as e:
-            log.exception(f"Error inesperado en 'clasificacion': {e}")
-            await ctx.send("Ha ocurrido un error. Inténtalo más tarde.")
-
     @tasks.loop(minutes=1)
     async def jail_check(self):
         """Tarea en segundo plano que reduce el tiempo en la cárcel de los usuarios.
@@ -597,10 +520,8 @@ class CiudadVirtual(commands.Cog):
                                         filename=image_filename
                                     )
                                 )
-                                log.info(f"Mensaje de liberación enviado a {user}.")
                             except FileNotFoundError:
                                 await user.send(embed=embed)
-                                log.warning(f"Archivo de imagen '{image_filename}' no encontrado. Enviando embed sin imagen a {user}.")
                             except Exception as e:
                                 log.error(f"No se pudo enviar el mensaje de liberación a {user}: {e}")
                         await self.config.member_from_ids(guild_id, member_id).jail_time.set(jail_time)

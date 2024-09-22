@@ -7,29 +7,28 @@ translations = {
         "Welcome to **City Virtual**. Here you can choose to be mafia, "
         "civilian, or police and participate in various activities.\n\n"
         "**Available Commands:**\n"
-        "!game set_language <es/en> - Set your preferred language.\n"
-        "!game choose_role <role> - Choose your role in the game.\n"
-        "!game action - Perform an action according to your role.\n"
-        "!game work - Work to earn coins.\n"
-        "!game daily_mission - Get your daily mission.\n"
-        "!game achievements - Show your achievements.\n"
-        "!game leaderboard - Show the player leaderboard.\n"
-        "!game challenge @user - Challenge another player.\n"
-        "!game buy <item> - Buy an item from the shop.\n"
-        "!game inventory - Show your inventory.\n"
+        "`!game set_language <es/en>` - Set your preferred language.\n"
+        "`!game choose_role <role>` - Choose your role in the game.\n"
+        "`!game action` - Perform an action according to your role.\n"
+        "`!game work` - Work to earn coins.\n"
+        "`!game daily_mission` - Get your daily mission.\n"
+        "`!game achievements` - Show your achievements.\n"
+        "`!game leaderboard` - Show the player leaderboard.\n"
+        "`!game challenge @user` - Challenge another player.\n"
+        "`!game buy <item>` - Buy an item from the shop.\n"
+        "`!game inventory` - Show your inventory.\n"
         "\n**Administrative Commands:**\n"
-        "!game admin change_role @user <role> - Change a user's role.\n"
-        "!game admin add_achievement @user <achievement> - Add an achievement to a user.\n"
-        "!game admin remove_achievement @user <achievement> - Remove an achievement from a user.\n"
-        "!game admin reset_user @user - Reset a user's progress.\n"
-        "!game admin cooldown <command> <time> - Change a command's cooldown.\n"
-        "!game admin multiplier <action/work> <value> - Set the economic multiplier.\n"
-        "!game admin release @user - Release a user from jail."
+        "`!game admin change_role @user <role>` - Change a user's role.\n"
+        "`!game admin add_achievement @user <achievement>` - Add an achievement to a user.\n"
+        "`!game admin remove_achievement @user <achievement>` - Remove an achievement from a user.\n"
+        "`!game admin reset_user @user` - Reset a user's progress.\n"
+        "`!game admin cooldown <command> <time>` - Change a command's cooldown.\n"
+        "`!game admin multiplier <action/work> <value>` - Set the economic multiplier."
     ),
     "language_set": "Your language has been set to '{language}'.",
     "no_role": (
         "You haven't chosen a role. Please choose a role using "
-        "!game choose_role <role>."
+        "`!game choose_role <role>`."
     ),
     "role_invalid": (
         "The role entered is not valid. Available roles are mafia, civilian, and police."
@@ -56,9 +55,6 @@ translations = {
     "released_title": "You Have Been Released",
     "released_from_jail": (
         "You have served your time in jail and are now free."
-    ),
-    "released_admin": (
-        "You have been released from jail by an administrator."
     ),
     "in_jail_title": "You Are in Jail",
     "in_jail": (
@@ -105,14 +101,11 @@ translations = {
     # Administrative Help
     "admin_help": (
         "**Administrative Commands:**\n"
-        "!game admin change_role @user <role> - Change a user's role.\n"
-        "!game admin add_achievement @user <achievement> - Add an achievement to a user.\n"
-        "!game admin remove_achievement @user <achievement> - Remove an achievement from a user.\n"
-        "!game admin reset_user @user - Reset a user's progress.\n"
-        "!game admin cooldown <command> <time> - Change a command's cooldown.\n"
-        "!game admin multiplier <action/work> <value> - Set the economic multiplier.\n"
-        "!game admin release @user - Release a user from jail."
+        "`!game admin change_role @user <role>` - Change a user's role.\n"
+        "`!game admin add_achievement @user <achievement>` - Add an achievement to a user.\n"
+        "`!game admin remove_achievement @user <achievement>` - Remove an achievement from a user.\n"
+        "`!game admin reset_user @user` - Reset a user's progress.\n"
+        "`!game admin cooldown <command> <time>` - Change a command's cooldown.\n"
+        "`!game admin multiplier <action/work> <value>` - Set the economic multiplier."
     ),
-    # New Translation for Admin Release
-    "released_admin": "You have been released from jail by an administrator."
 }
