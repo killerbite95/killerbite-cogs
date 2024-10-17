@@ -6,7 +6,7 @@ import datetime
 import pytz
 
 class GameServerMonitor(commands.Cog):
-    """Monitoriza servidores de juegos y actualiza su estado en Discord."""
+    """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite"""
 
     def __init__(self, bot):
         self.bot = bot
