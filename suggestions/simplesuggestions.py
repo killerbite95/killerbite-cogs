@@ -2,7 +2,7 @@ import discord
 from redbot.core import commands, Config, checks
 
 class SimpleSuggestions(commands.Cog):
-    """Cog para gestionar sugerencias en un canal de Discord."""
+    """Cog para gestionar sugerencias en un canal de Discord. By Killerbite"""
 
     def __init__(self, bot):
         self.bot = bot

@@ -4,7 +4,7 @@ from redbot.core import commands, Config
 import discord
 
 class ColaCoins(commands.Cog):
-    """Gestiona las ColaCoins para los usuarios."""
+    """Gestiona las ColaCoins para los usuarios. By Killerbite"""
 
     def __init__(self, bot):
         self.bot = bot

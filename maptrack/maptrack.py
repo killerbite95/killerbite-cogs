@@ -4,7 +4,7 @@ from redbot.core import commands, Config, checks
 from opengsq.protocols import Source
 
 class MapTrack(commands.Cog):
-    """Cog para rastrear cambios de mapa en servidores de juegos."""
+    """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite"""
 
     def __init__(self, bot):
         self.bot = bot

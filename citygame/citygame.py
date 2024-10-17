@@ -26,7 +26,7 @@ log = logging.getLogger("red.citygame")
 
 
 class CiudadVirtual(commands.Cog):
-    """Un juego de roles donde los usuarios pueden ser mafia, civil o policía."""
+    """Un juego de roles donde los usuarios pueden ser mafia, civil o policía. By Killerbite"""
 
     def __init__(self, bot: Red):
         self.bot = bot
