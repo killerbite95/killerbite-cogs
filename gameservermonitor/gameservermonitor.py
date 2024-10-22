@@ -6,7 +6,7 @@ import datetime
 import pytz
 
 class GameServerMonitor(commands.Cog):
-    """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite"""
+    """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -164,7 +164,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
                 embed.add_field(name="Current Map", value=map_name, inline=True)
                 embed.add_field(name="Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
-                embed.set_footer(text=f"Game Server Monitor | Last update: {local_time}")
+                embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
@@ -195,7 +195,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
                 embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
                 embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
-                embed.set_footer(text="Game Server Monitor")
+                embed.set_footer(text="Game Server Monitor by Killerbite95")
 
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
@@ -226,7 +226,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
                 embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
                 embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
-                embed.set_footer(text="Game Server Monitor")
+                embed.set_footer(text="Game Server Monitor by Killerbite95")
 
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)

@@ -5,7 +5,7 @@ from redbot.core.bot import Red
 from redbot.core.bank import bank_prune
 
 class PruneBans(commands.Cog):
-    """Cog para manejar la eliminación de créditos de usuarios baneados automáticamente."""
+    """Cog para manejar la eliminación de créditos de usuarios baneados automáticamente by Killerbite95"""
 
     def __init__(self, bot: Red):
         self.bot = bot

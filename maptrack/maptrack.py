@@ -4,7 +4,7 @@ from redbot.core import commands, Config, checks
 from opengsq.protocols import Source
 
 class MapTrack(commands.Cog):
-    """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite"""
+    """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite95"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -117,7 +117,7 @@ class MapTrack(commands.Cog):
                     embed.add_field(name="Map", value=map_name, inline=False)
                     embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
                     embed.add_field(name="Connect to server", value=f"[Connect]({connect_url})", inline=False)
-                    embed.set_footer(text="MapTrack Monitor")
+                    embed.set_footer(text="MapTrack Monitor by Killerbite95")
                     
                     await channel.send(embed=embed)
                     
@@ -138,7 +138,7 @@ class MapTrack(commands.Cog):
                             color=discord.Color.red()
                         )
                         embed.add_field(name="Status", value=":red_circle: Offline", inline=False)
-                        embed.set_footer(text="MapTrack Monitor")
+                        embed.set_footer(text="MapTrack Monitor by Killerbite95")
 
                         await channel.send(embed=embed)
                     offline_status[server_ip] = True
