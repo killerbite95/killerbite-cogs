@@ -5,6 +5,9 @@ from redbot.core.bot import Red
 import asyncio
 import datetime
 
+# Importar la función bank_prune desde redbot.core.bank
+from redbot.core.bank import bank_prune
+
 class PruneBans(commands.Cog):
     """Cog para manejar la eliminación de créditos de usuarios baneados y hacer seguimiento de los baneos."""
 
@@ -84,11 +87,13 @@ class PruneBans(commands.Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
             if str(reaction.emoji) == "✅":
-                # Ejecutar el prune usando bank_prune
-                failed_prunes = await self.bank_prune(guild)
+                # Ejecutar el prune usando bank_prune importado
+                failed_prunes = await bank_prune(self.bot, guild=guild)
+
                 if not failed_prunes:
-                    await ctx.send("Función prune ejecutada correctamente. Los créditos de los usuarios baneados han sido eliminados.")
+                    await ctx.send("Función prune ejecutada correctamente. Las cuentas bancarias de los usuarios baneados han sido eliminadas.")
                 else:
+                    # Formatear los mensajes de error
                     error_messages = "\n".join([f"ID {uid}: {error}" for uid, error in failed_prunes])
                     await ctx.send(f"Función prune ejecutada con errores. Detalles:\n{error_messages}")
 
@@ -97,7 +102,7 @@ class PruneBans(commands.Cog):
                 if log_channel_id:
                     log_channel = guild.get_channel(log_channel_id)
                     if log_channel:
-                        await log_channel.send(f"Prune ejecutado por {ctx.author.mention}. Los créditos de los usuarios baneados han sido eliminados.")
+                        await log_channel.send(f"Prune ejecutado por {ctx.author.mention}. Las cuentas bancarias de los usuarios baneados han sido eliminadas.")
             else:
                 await ctx.send("Operación cancelada.")
         except asyncio.TimeoutError:
@@ -317,27 +322,4 @@ class PruneBans(commands.Cog):
     async def before_update_ban_countdown(self):
         await self.bot.wait_until_ready()
 
-    async def bank_prune(self, guild: discord.Guild):
-        """
-        Elimina las cuentas bancarias de todos los usuarios baneados en el guild.
-        Retorna una lista de tuples con (user_id, error_message) para fallos.
-        """
-        failed_prunes = []
-        banned_users = [ban async for ban in guild.bans()]
-        
-        for ban_entry in banned_users:
-            user = ban_entry.user
-            user_id = user.id
-            try:
-                # Intentar obtener el objeto User
-                user_obj = await self.bot.fetch_user(user_id)
-                if not user_obj:
-                    failed_prunes.append((user_id, "No se pudo obtener el usuario."))
-                    continue
-
-                # Establecer el balance a cero utilizando el Bank cog
-                await bank.set_balance(user_obj, 0, guild=guild)
-            except Exception as e:
-                failed_prunes.append((user_id, str(e)))
-        
-        return failed_prunes
+    # Nota: Ya no necesitas una función bank_prune dentro del cog
