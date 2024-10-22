@@ -50,10 +50,7 @@ class PruneBans(commands.Cog):
             await ctx.send("No hay usuarios baneados en este servidor.")
             return
 
-        # Calcular la fecha límite para prunear (7 días atrás)
-        seven_days_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-
-        # Filtrar usuarios que han estado baneados por 7 días o más
+        # Obtener información de cada usuario baneado para prunear
         async with self.config.guild(guild).ban_track() as ban_track:
             users_to_prune = []
             for ban_entry in banned_users:
@@ -61,15 +58,14 @@ class PruneBans(commands.Cog):
                 user_id_str = str(user.id)
                 ban_info = ban_track.get(user_id_str)
                 if ban_info:
-                    ban_date = datetime.datetime.fromisoformat(ban_info["ban_date"])
-                    if ban_date <= seven_days_ago:
-                        users_to_prune.append((user, ban_info.get("balance", "Desconocido")))
+                    users_to_prune.append((user, ban_info.get("balance", "Desconocido")))
                 else:
-                    # Si el usuario no está en ban_track, considerarlo como no apto para prune
+                    # Si el usuario no está en ban_track, considerar si se debe prunear
+                    # En este caso, decidimos no prunear si no hay registro en ban_track
                     pass
 
         if not users_to_prune:
-            await ctx.send("No hay usuarios baneados que hayan pasado los 7 días para prunear.")
+            await ctx.send("No hay usuarios baneados con registros en seguimiento para prunear.")
             return
 
         # Preparar el mensaje de confirmación
@@ -129,16 +125,13 @@ class PruneBans(commands.Cog):
         """Comando de prueba para mostrar los usuarios que serían afectados por prune."""
         guild = ctx.guild
 
-        # Calcular la fecha límite para prunear (7 días atrás)
-        seven_days_ago = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-
         # Obtener la lista de usuarios baneados
         banned_users = [ban async for ban in guild.bans()]
         if not banned_users:
             await ctx.send("No hay usuarios baneados en este servidor.")
             return
 
-        # Filtrar usuarios que han estado baneados por 7 días o más
+        # Obtener la información de ban_track
         async with self.config.guild(guild).ban_track() as ban_track:
             users_to_prune = []
             for ban_entry in banned_users:
@@ -146,15 +139,13 @@ class PruneBans(commands.Cog):
                 user_id_str = str(user.id)
                 ban_info = ban_track.get(user_id_str)
                 if ban_info:
-                    ban_date = datetime.datetime.fromisoformat(ban_info["ban_date"])
-                    if ban_date <= seven_days_ago:
-                        users_to_prune.append((user, ban_info.get("balance", "Desconocido")))
+                    users_to_prune.append((user, ban_info.get("balance", "Desconocido")))
                 else:
-                    # Si el usuario no está en ban_track, considerarlo como no apto para prune
-                    pass
+                    # Si el usuario no está en ban_track, decidir si se muestra o no
+                    pass  # En este caso, no se muestra
 
         if not users_to_prune:
-            await ctx.send("No hay usuarios baneados que hayan pasado los 7 días para prunear.")
+            await ctx.send("No hay usuarios baneados con registros en seguimiento para prunear.")
             return
 
         # Preparar la lista de usuarios afectados
@@ -167,7 +158,7 @@ class PruneBans(commands.Cog):
     @commands.command(name="listbans")
     @checks.admin_or_permissions(administrator=True)
     async def list_bans(self, ctx):
-        """Lista los usuarios baneados con su tiempo transcurrido desde el baneo y sus créditos."""
+        """Lista los usuarios baneados con sus créditos."""
         guild = ctx.guild
         async with self.config.guild(guild).ban_track() as ban_track:
             if not ban_track:
@@ -175,19 +166,11 @@ class PruneBans(commands.Cog):
                 return
 
             description = "**Baneos Actuales:**\n"
-            now = datetime.datetime.utcnow()
             for user_id_str, ban_info in ban_track.items():
                 user_id = int(user_id_str)
-                ban_date = datetime.datetime.fromisoformat(ban_info["ban_date"])
-                time_since_ban = now - ban_date
-                days = time_since_ban.days
-                hours, remainder = divmod(time_since_ban.seconds, 3600)
-                minutes, _ = divmod(remainder, 60)
                 balance = ban_info.get("balance", "Desconocido")
                 description += (
-                    f"- Usuario ID: `{user_id}`, "
-                    f"Tiempo desde el baneo: `{days}` días, `{hours}` horas, `{minutes}` minutos, "
-                    f"Créditos: `{balance}`\n"
+                    f"- Usuario ID: `{user_id}`, Créditos: `{balance}`\n"
                 )
             await ctx.send(description)
 
