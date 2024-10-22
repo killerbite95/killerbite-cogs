@@ -40,39 +40,31 @@ class PruneBans(commands.Cog):
     async def manual_prune(self, ctx):
         """Ejecuta prune manualmente después de una confirmación."""
         guild = ctx.guild
+
         # Obtener la lista de usuarios baneados
         banned_users = [ban async for ban in guild.bans()]
-        banned_user_ids = [ban_entry.user.id for ban_entry in banned_users]
-
-        if not banned_user_ids:
+        if not banned_users:
             await ctx.send("No hay usuarios baneados en este servidor.")
             return
 
-        # Obtener la información de ban_track
+        # Obtener información de cada usuario baneado
         async with self.config.guild(guild).ban_track() as ban_track:
             affected_accounts = []
-            for user_id in banned_user_ids:
+            for ban_entry in banned_users:
+                user = ban_entry.user
+                user_id = user.id
                 user_id_str = str(user_id)
                 if user_id_str in ban_track:
-                    balance = ban_track[user_id_str].get("balance", None)
-                    if balance is not None and isinstance(balance, int) and balance > 0:
-                        affected_accounts.append((user_id, balance))
+                    balance = ban_track[user_id_str].get("balance", "Desconocido")
                 else:
-                    # Si el usuario no está en ban_track, no se puede acceder a su balance
-                    # Agregar como "Desconocido"
-                    affected_accounts.append((user_id, "Desconocido"))
+                    # Si el usuario no está en ban_track, marcar créditos como "Desconocido"
+                    balance = "Desconocido"
+                affected_accounts.append((user_id, balance))
 
-        if not affected_accounts:
-            await ctx.send("No hay cuentas bancarias de usuarios baneados para eliminar.")
-            return
-
-        # Mostrar la lista de usuarios afectados
+        # Preparar el mensaje de confirmación
         description = "**Usuarios que serán afectados por el prune:**\n"
         for user_id, balance in affected_accounts:
-            if balance == "Desconocido":
-                description += f"- ID: `{user_id}`, Créditos: `Desconocido`\n"
-            else:
-                description += f"- ID: `{user_id}`, Créditos: `{balance}`\n"
+            description += f"- ID: `{user_id}`, Créditos: `{balance}`\n"
 
         description += "\n**¿Deseas continuar?** Reacciona con ✅ para confirmar o ❌ para cancelar. *Esta acción es irreversible.*"
 
@@ -92,21 +84,13 @@ class PruneBans(commands.Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
             if str(reaction.emoji) == "✅":
-                # Iterar sobre los usuarios afectados y eliminar sus créditos
-                for user_id, balance in affected_accounts:
-                    user = guild.get_member(user_id)
-                    if not user:
-                        # Si no se puede obtener el Member, usar discord.Object
-                        user_obj = discord.Object(id=user_id)
-                    else:
-                        user_obj = user
-                    try:
-                        if balance != "Desconocido":
-                            await bank.set_balance(user_obj, 0)
-                    except Exception as e:
-                        await ctx.send(f"Error al eliminar créditos de ID {user_id}: {e}")
-
-                await ctx.send("Función prune ejecutada correctamente. Los créditos de los usuarios baneados han sido eliminados.")
+                # Ejecutar el prune usando bank_prune
+                failed_prunes = await self.bank_prune(guild)
+                if not failed_prunes:
+                    await ctx.send("Función prune ejecutada correctamente. Los créditos de los usuarios baneados han sido eliminados.")
+                else:
+                    error_messages = "\n".join([f"ID {uid}: {error}" for uid, error in failed_prunes])
+                    await ctx.send(f"Función prune ejecutada con errores. Detalles:\n{error_messages}")
 
                 # Enviar log al canal configurado
                 log_channel_id = await self.config.guild(guild).log_channel()
@@ -332,3 +316,23 @@ class PruneBans(commands.Cog):
     @update_ban_countdown.before_loop
     async def before_update_ban_countdown(self):
         await self.bot.wait_until_ready()
+
+    async def bank_prune(self, guild: discord.Guild):
+        """
+        Elimina las cuentas bancarias de todos los usuarios baneados en el guild.
+        Retorna una lista de tuples con (user_id, error_message) para fallos.
+        """
+        failed_prunes = []
+        banned_users = [ban async for ban in guild.bans()]
+        
+        for ban_entry in banned_users:
+            user = ban_entry.user
+            user_id = user.id
+            try:
+                # Ejecutar la función bank_prune externa
+                # Asegúrate de que esta función existe y está correctamente importada o definida
+                await bank_prune(self.bot, guild=guild)
+            except Exception as e:
+                failed_prunes.append((user_id, str(e)))
+        
+        return failed_prunes
