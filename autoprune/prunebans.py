@@ -55,7 +55,7 @@ class PruneBans(commands.Cog):
                 user_id_str = str(user_id)
                 if user_id_str in ban_track:
                     balance = ban_track[user_id_str].get("balance", None)
-                    if balance is not None and balance > 0:
+                    if balance is not None and isinstance(balance, int) and balance > 0:
                         affected_accounts.append((user_id, balance))
                 else:
                     # Si el usuario no está en ban_track, no se puede acceder a su balance
@@ -139,7 +139,7 @@ class PruneBans(commands.Cog):
                 user_id_str = str(user_id)
                 if user_id_str in ban_track:
                     balance = ban_track[user_id_str].get("balance", None)
-                    if balance is not None and balance > 0:
+                    if balance is not None and isinstance(balance, int) and balance > 0:
                         affected_accounts.append((user_id, balance))
                 else:
                     # Si el usuario no está en ban_track, no se puede acceder a su balance
@@ -163,7 +163,7 @@ class PruneBans(commands.Cog):
     @commands.command(name="listbans")
     @checks.admin_or_permissions(administrator=True)
     async def list_bans(self, ctx):
-        """Lista los usuarios baneados con su cuenta atrás de 7 días."""
+        """Lista los usuarios baneados con su cuenta atrás de 7 días y sus créditos."""
         guild = ctx.guild
         async with self.config.guild(guild).ban_track() as ban_track:
             if not ban_track:
@@ -182,10 +182,12 @@ class PruneBans(commands.Cog):
                 remaining_days = max(0, remaining_days)
                 remaining_hours = max(0, remaining_hours)
                 remaining_minutes = max(0, remaining_minutes)
+                balance = ban_info.get("balance", "Desconocido")
                 description += (
                     f"- Usuario ID: `{user_id}`, "
                     f"Días restantes: `{remaining_days}` días, "
-                    f"`{remaining_hours}` horas, `{remaining_minutes}` minutos\n"
+                    f"`{remaining_hours}` horas, `{remaining_minutes}` minutos, "
+                    f"Créditos: `{balance}`\n"
                 )
             await ctx.send(description)
 
@@ -216,9 +218,11 @@ class PruneBans(commands.Cog):
                     user_display = f"{user} (ID: {user_id})"
                 else:
                     user_display = f"ID: {user_id}"
+                balance = ban_info.get("balance", "Desconocido")
                 description += (
                     f"- {user_display}: `{remaining_days}` días, "
-                    f"`{remaining_hours}` horas, `{remaining_minutes}` minutos restantes\n"
+                    f"`{remaining_hours}` horas, `{remaining_minutes}` minutos restantes, "
+                    f"Créditos: `{balance}`\n"
                 )
             await ctx.send(description)
 
@@ -252,7 +256,8 @@ class PruneBans(commands.Cog):
                 remaining_hours, remaining_minutes = divmod(remaining_seconds, 3600)
                 remaining_minutes, _ = divmod(remaining_minutes, 60)
 
-                countdown = f"in {remaining_days} días, {remaining_hours} horas y {remaining_minutes} minutos"
+                # Formatear la fecha de finalización
+                end_date_formatted = unban_date.strftime('%Y-%m-%d %H:%M:%S UTC')
 
                 embed = discord.Embed(
                     title="🔨 Usuario Baneado",
@@ -261,7 +266,8 @@ class PruneBans(commands.Cog):
                 )
                 embed.add_field(name="Usuario", value=f"{user.mention} (ID: {user.id})", inline=False)
                 embed.add_field(name="Fecha de Baneo", value=ban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
-                embed.add_field(name="Cuenta Atrás", value=countdown, inline=False)
+                embed.add_field(name="Cuenta Atrás", value=countdown := f"in {remaining_days} días, {remaining_hours} horas y {remaining_minutes} minutos", inline=False)
+                embed.add_field(name="Fecha de Finalización", value=end_date_formatted, inline=False)
                 embed.add_field(name="Créditos", value=f"{balance_info}", inline=False)
                 await ban_log_channel.send(embed=embed)
                 
@@ -306,6 +312,9 @@ class PruneBans(commands.Cog):
                     remaining_seconds = remaining_time.seconds
                     remaining_hours, remaining_minutes = divmod(remaining_seconds, 3600)
                     remaining_minutes, _ = divmod(remaining_minutes, 60)
+                    remaining_days = max(0, remaining_days)
+                    remaining_hours = max(0, remaining_hours)
+                    remaining_minutes = max(0, remaining_minutes)
 
                     # Si ya pasaron los 7 días, simplemente dejamos de hacer seguimiento
                     if remaining_time.total_seconds() <= 0:
