@@ -329,9 +329,14 @@ class PruneBans(commands.Cog):
             user = ban_entry.user
             user_id = user.id
             try:
-                # Ejecutar la función bank_prune externa
-                # Asegúrate de que esta función existe y está correctamente importada o definida
-                await bank_prune(self.bot, guild=guild)
+                # Intentar obtener el objeto User
+                user_obj = await self.bot.fetch_user(user_id)
+                if not user_obj:
+                    failed_prunes.append((user_id, "No se pudo obtener el usuario."))
+                    continue
+
+                # Establecer el balance a cero utilizando el Bank cog
+                await bank.set_balance(user_obj, 0, guild=guild)
             except Exception as e:
                 failed_prunes.append((user_id, str(e)))
         
