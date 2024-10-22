@@ -40,7 +40,7 @@ class PruneBans(commands.Cog):
     async def manual_prune(self, ctx):
         """Ejecuta prune manualmente después de una confirmación."""
         guild = ctx.guild
-        banned_users = await guild.bans()
+        banned_users = [ban async for ban in guild.bans()]
         banned_user_ids = [ban_entry.user.id for ban_entry in banned_users]
 
         if not banned_user_ids:
@@ -105,20 +105,19 @@ class PruneBans(commands.Cog):
     async def prune_test(self, ctx):
         """Comando de prueba para mostrar los usuarios que serían afectados por prune."""
         guild = ctx.guild
-        banned_users = await guild.bans()
+        banned_users = [ban async for ban in guild.bans()]
         banned_user_ids = [ban_entry.user.id for ban_entry in banned_users]
 
-        if not banned_users:
+        if not banned_user_ids:
             await ctx.send("No hay usuarios baneados en este servidor.")
             return
 
         affected_accounts = []
-        for ban_entry in banned_users:
-            user = ban_entry.user
+        for user_id in banned_user_ids:
             try:
-                balance = await bank.get_balance(user)
+                balance = await bank.get_balance(discord.Object(id=user_id))
                 if balance > 0:
-                    affected_accounts.append((user.id, balance))
+                    affected_accounts.append((user_id, balance))
             except Exception:
                 continue  # Si el usuario no tiene cuenta en el banco, lo ignoramos
 
