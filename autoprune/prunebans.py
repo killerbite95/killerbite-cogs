@@ -24,7 +24,7 @@ class PruneBans(commands.Cog):
     def cog_unload(self):
         self.update_ban_countdown.cancel()
 
-    @commands.command(name="setlogprune")
+    @commands.command(name="setprunelog")
     @checks.admin_or_permissions(administrator=True)
     async def set_log_prune(self, ctx, channel: discord.TextChannel):
         """Establece el canal donde se enviarán los logs de prune."""
@@ -176,41 +176,6 @@ class PruneBans(commands.Cog):
                     f"- Usuario ID: `{user_id}`, "
                     f"Días restantes: `{remaining_days}` días, "
                     f"`{remaining_hours}` horas, `{remaining_minutes}` minutos, "
-                    f"Créditos: `{balance}`\n"
-                )
-            await ctx.send(description)
-
-    @commands.command(name="countdown")
-    @checks.admin_or_permissions(administrator=True)
-    async def countdown_bans(self, ctx):
-        """Muestra una cuenta atrás personalizada de 7 días para cada baneo."""
-        guild = ctx.guild
-        async with self.config.guild(guild).ban_track() as ban_track:
-            if not ban_track:
-                await ctx.send("No hay baneos en seguimiento.")
-                return
-            description = "**Cuenta Atrás de Baneos:**\n"
-            now = datetime.datetime.utcnow()
-            for user_id_str, ban_info in ban_track.items():
-                user_id = int(user_id_str)
-                unban_date = datetime.datetime.fromisoformat(ban_info["unban_date"])
-                remaining_time = unban_date - now
-                remaining_days = remaining_time.days
-                remaining_seconds = remaining_time.seconds
-                remaining_hours, remaining_minutes = divmod(remaining_seconds, 3600)
-                remaining_minutes, _ = divmod(remaining_minutes, 60)
-                remaining_days = max(0, remaining_days)
-                remaining_hours = max(0, remaining_hours)
-                remaining_minutes = max(0, remaining_minutes)
-                user = guild.get_member(user_id)
-                if user:
-                    user_display = f"{user} (ID: {user_id})"
-                else:
-                    user_display = f"ID: {user_id}"
-                balance = ban_info.get("balance", "Desconocido")
-                description += (
-                    f"- {user_display}: `{remaining_days}` días, "
-                    f"`{remaining_hours}` horas, `{remaining_minutes}` minutos restantes, "
                     f"Créditos: `{balance}`\n"
                 )
             await ctx.send(description)
