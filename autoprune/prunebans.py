@@ -259,6 +259,7 @@ class PruneBans(commands.Cog):
                 # Formatear la fecha de finalización
                 end_date_formatted = unban_date.strftime('%Y-%m-%d %H:%M:%S UTC')
 
+                # Crear el embed
                 embed = discord.Embed(
                     title="🔨 Usuario Baneado",
                     color=discord.Color.red(),
@@ -266,7 +267,11 @@ class PruneBans(commands.Cog):
                 )
                 embed.add_field(name="Usuario", value=f"{user.mention} (ID: {user.id})", inline=False)
                 embed.add_field(name="Fecha de Baneo", value=ban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
-                embed.add_field(name="Cuenta Atrás", value=countdown := f"in {remaining_days} días, {remaining_hours} horas y {remaining_minutes} minutos", inline=False)
+                
+                # Asignar 'countdown' en una línea separada
+                countdown = f"in {remaining_days} días, {remaining_hours} horas y {remaining_minutes} minutos"
+                embed.add_field(name="Cuenta Atrás", value=countdown, inline=False)
+                
                 embed.add_field(name="Fecha de Finalización", value=end_date_formatted, inline=False)
                 embed.add_field(name="Créditos", value=f"{balance_info}", inline=False)
                 await ban_log_channel.send(embed=embed)
