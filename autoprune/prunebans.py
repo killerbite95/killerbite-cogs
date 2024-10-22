@@ -40,6 +40,7 @@ class PruneBans(commands.Cog):
     async def manual_prune(self, ctx):
         """Ejecuta prune manualmente después de una confirmación."""
         guild = ctx.guild
+        # Obtener la lista de usuarios baneados
         banned_users = [ban async for ban in guild.bans()]
         banned_user_ids = [ban_entry.user.id for ban_entry in banned_users]
 
@@ -47,14 +48,19 @@ class PruneBans(commands.Cog):
             await ctx.send("No hay usuarios baneados en este servidor.")
             return
 
-        affected_accounts = []
-        for user_id in banned_user_ids:
-            try:
-                balance = await bank.get_balance(discord.Object(id=user_id))
-                if balance > 0:
-                    affected_accounts.append((user_id, balance))
-            except Exception:
-                continue  # Si el usuario no tiene cuenta en el banco, lo ignoramos
+        # Obtener la información de ban_track
+        async with self.config.guild(guild).ban_track() as ban_track:
+            affected_accounts = []
+            for user_id in banned_user_ids:
+                user_id_str = str(user_id)
+                if user_id_str in ban_track:
+                    balance = ban_track[user_id_str].get("balance", None)
+                    if balance is not None and balance > 0:
+                        affected_accounts.append((user_id, balance))
+                else:
+                    # Si el usuario no está en ban_track, no se puede acceder a su balance
+                    # Agregar como "Desconocido"
+                    affected_accounts.append((user_id, "Desconocido"))
 
         if not affected_accounts:
             await ctx.send("No hay cuentas bancarias de usuarios baneados para eliminar.")
@@ -63,7 +69,10 @@ class PruneBans(commands.Cog):
         # Mostrar la lista de usuarios afectados
         description = "**Usuarios que serán afectados por el prune:**\n"
         for user_id, balance in affected_accounts:
-            description += f"- ID: `{user_id}`, Créditos: `{balance}`\n"
+            if balance == "Desconocido":
+                description += f"- ID: `{user_id}`, Créditos: `Desconocido`\n"
+            else:
+                description += f"- ID: `{user_id}`, Créditos: `{balance}`\n"
 
         description += "\n**¿Deseas continuar?** Reacciona con ✅ para confirmar o ❌ para cancelar. *Esta acción es irreversible.*"
 
@@ -83,18 +92,28 @@ class PruneBans(commands.Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
             if str(reaction.emoji) == "✅":
-                # Ejecutar prune
-                prune_result = await bank.prune_accounts(guild)
-                if prune_result:
-                    await ctx.send("Función prune ejecutada correctamente.")
-                    # Enviar log al canal configurado
-                    log_channel_id = await self.config.guild(guild).log_channel()
-                    if log_channel_id:
-                        log_channel = guild.get_channel(log_channel_id)
-                        if log_channel:
-                            await log_channel.send(f"Prune ejecutado por {ctx.author.mention}.")
-                else:
-                    await ctx.send("No se encontraron cuentas para prune.")
+                # Iterar sobre los usuarios afectados y eliminar sus créditos
+                for user_id, balance in affected_accounts:
+                    user = guild.get_member(user_id)
+                    if not user:
+                        # Si no se puede obtener el Member, usar discord.Object
+                        user_obj = discord.Object(id=user_id)
+                    else:
+                        user_obj = user
+                    try:
+                        if balance != "Desconocido":
+                            await bank.set_balance(user_obj, 0)
+                    except Exception as e:
+                        await ctx.send(f"Error al eliminar créditos de ID {user_id}: {e}")
+
+                await ctx.send("Función prune ejecutada correctamente. Los créditos de los usuarios baneados han sido eliminados.")
+
+                # Enviar log al canal configurado
+                log_channel_id = await self.config.guild(guild).log_channel()
+                if log_channel_id:
+                    log_channel = guild.get_channel(log_channel_id)
+                    if log_channel:
+                        await log_channel.send(f"Prune ejecutado por {ctx.author.mention}. Los créditos de los usuarios baneados han sido eliminados.")
             else:
                 await ctx.send("Operación cancelada.")
         except asyncio.TimeoutError:
@@ -105,6 +124,7 @@ class PruneBans(commands.Cog):
     async def prune_test(self, ctx):
         """Comando de prueba para mostrar los usuarios que serían afectados por prune."""
         guild = ctx.guild
+        # Obtener la lista de usuarios baneados
         banned_users = [ban async for ban in guild.bans()]
         banned_user_ids = [ban_entry.user.id for ban_entry in banned_users]
 
@@ -112,14 +132,19 @@ class PruneBans(commands.Cog):
             await ctx.send("No hay usuarios baneados en este servidor.")
             return
 
-        affected_accounts = []
-        for user_id in banned_user_ids:
-            try:
-                balance = await bank.get_balance(discord.Object(id=user_id))
-                if balance > 0:
-                    affected_accounts.append((user_id, balance))
-            except Exception:
-                continue  # Si el usuario no tiene cuenta en el banco, lo ignoramos
+        # Obtener la información de ban_track
+        async with self.config.guild(guild).ban_track() as ban_track:
+            affected_accounts = []
+            for user_id in banned_user_ids:
+                user_id_str = str(user_id)
+                if user_id_str in ban_track:
+                    balance = ban_track[user_id_str].get("balance", None)
+                    if balance is not None and balance > 0:
+                        affected_accounts.append((user_id, balance))
+                else:
+                    # Si el usuario no está en ban_track, no se puede acceder a su balance
+                    # Agregar como "Desconocido"
+                    affected_accounts.append((user_id, "Desconocido"))
 
         if not affected_accounts:
             await ctx.send("No hay cuentas bancarias de usuarios baneados para eliminar.")
@@ -128,7 +153,10 @@ class PruneBans(commands.Cog):
         # Mostrar la lista de usuarios afectados
         description = "**Usuarios que serían afectados por el prune:**\n"
         for user_id, balance in affected_accounts:
-            description += f"- ID: `{user_id}`, Créditos: `{balance}`\n"
+            if balance == "Desconocido":
+                description += f"- ID: `{user_id}`, Créditos: `Desconocido`\n"
+            else:
+                description += f"- ID: `{user_id}`, Créditos: `{balance}`\n"
 
         await ctx.send(description)
 
@@ -204,6 +232,19 @@ class PruneBans(commands.Cog):
                 ban_date = datetime.datetime.utcnow()
                 unban_date = ban_date + datetime.timedelta(days=7)
 
+                # Intentar obtener el balance del usuario
+                try:
+                    balance = await bank.get_balance(user)
+                    if not isinstance(balance, int):
+                        balance = "Desconocido"
+                except Exception:
+                    balance = "Desconocido"  # No se pudo obtener el balance
+
+                if isinstance(balance, int) and balance > 0:
+                    balance_info = balance
+                else:
+                    balance_info = "Desconocido"
+
                 # Calcular tiempo restante en formato "in X días, Y horas y Z minutos"
                 remaining_time = unban_date - ban_date  # Será siempre 7 días en este punto
                 remaining_days = remaining_time.days
@@ -221,6 +262,7 @@ class PruneBans(commands.Cog):
                 embed.add_field(name="Usuario", value=f"{user.mention} (ID: {user.id})", inline=False)
                 embed.add_field(name="Fecha de Baneo", value=ban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
                 embed.add_field(name="Cuenta Atrás", value=countdown, inline=False)
+                embed.add_field(name="Créditos", value=f"{balance_info}", inline=False)
                 await ban_log_channel.send(embed=embed)
                 
                 # Guardar información del baneo
@@ -228,6 +270,7 @@ class PruneBans(commands.Cog):
                     ban_track[str(user.id)] = {
                         "ban_date": ban_date.isoformat(),
                         "unban_date": unban_date.isoformat(),
+                        "balance": balance_info,
                         "message_id": None  # Podemos guardar el ID del mensaje si lo necesitamos en el futuro
                     }
 
@@ -263,17 +306,14 @@ class PruneBans(commands.Cog):
                     remaining_seconds = remaining_time.seconds
                     remaining_hours, remaining_minutes = divmod(remaining_seconds, 3600)
                     remaining_minutes, _ = divmod(remaining_minutes, 60)
-                    remaining_days = max(0, remaining_days)
-                    remaining_hours = max(0, remaining_hours)
-                    remaining_minutes = max(0, remaining_minutes)
 
                     # Si ya pasaron los 7 días, simplemente dejamos de hacer seguimiento
                     if remaining_time.total_seconds() <= 0:
                         del ban_track[user_id_str]
                         await ban_log_channel.send(f"⏰ **El tiempo de seguimiento ha expirado para el usuario ID {user_id_str}.**")
                     else:
-                        # Opcional: Podrías actualizar los mensajes de log si guardas los message_id
-                        pass  # Actualmente no se actualizan los mensajes existentes
+                        # Opcional: Actualizar mensajes embebidos de cuenta atrás
+                        pass  # No implementado en este ejemplo
 
     @update_ban_countdown.before_loop
     async def before_update_ban_countdown(self):
