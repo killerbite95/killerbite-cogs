@@ -1,3 +1,5 @@
+# cogs/kickalerts/kickalerts.py
+
 import discord
 from discord.ext import commands, tasks
 from redbot.core import Config, checks, commands
