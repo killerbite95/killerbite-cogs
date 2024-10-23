@@ -1,3 +1,5 @@
+# cogs/kickalerts/kickalerts.py
+
 import discord
 from discord.ext import commands, tasks
 from redbot.core import Config, checks, commands
@@ -18,7 +20,8 @@ class KickAlerts(commands.Cog):
         # Configuración predeterminada por guild
         default_guild = {
             "alert_channel": None,     # ID del canal donde se enviarán las alertas
-            "alerted_streams": []      # Lista de IDs de transmisiones ya alertadas
+            "alerted_streams": [],     # Lista de IDs de transmisiones ya alertadas
+            "api_token": None          # Token de acceso a la API de Kick.com (si es necesario)
         }
         self.config.register_guild(**default_guild)
         
@@ -43,17 +46,28 @@ class KickAlerts(commands.Cog):
         await self.config.guild(ctx.guild).alerted_streams.set([])
         await ctx.send("Lista de transmisiones alertadas reiniciada.")
 
-    async def fetch_live_streams(self):
+    @commands.command(name="setkickt_token")
+    @checks.admin_or_permissions(administrator=True)
+    async def set_kick_token(self, ctx, token: str):
+        """Establece el token de acceso a la API de Kick.com."""
+        await self.config.guild(ctx.guild).api_token.set(token)
+        await ctx.send("Token de acceso a la API de Kick.com establecido correctamente.")
+
+    async def fetch_live_streams(self, guild_id):
         """Obtiene las transmisiones en vivo desde la API de Kick.com."""
         url = "https://api.kick.com/private/v1/livestreams"
-        headers = {
-            # Si la API requiere autenticación, añade aquí los headers necesarios
-        }
+        
+        # Obtener el token de acceso desde la configuración (si es necesario)
+        api_token = await self.config.guild_from_id(guild_id).api_token()
+        headers = {}
+        if api_token:
+            headers["Authorization"] = f"Bearer {api_token}"
 
         try:
             async with self.session.get(url, headers=headers) as response:
                 if response.status == 200:
                     data = await response.json()
+                    log.debug(f"Respuesta de la API: {data}")  # Añadir esta línea para depuración
                     # Asegúrate de ajustar la clave según la estructura real de la respuesta
                     live_streams = data.get("livestreams", [])
                     log.debug(f"Transmisiones obtenidas: {live_streams}")
@@ -80,7 +94,7 @@ class KickAlerts(commands.Cog):
                 log.warning(f"El canal de alertas ID {alert_channel_id} no se encontró en {guild.name}.")
                 continue
 
-            live_streams = await self.fetch_live_streams()
+            live_streams = await self.fetch_live_streams(guild.id)
             if not live_streams:
                 log.debug("No hay transmisiones en vivo actualmente.")
                 continue  # No hay transmisiones en vivo actualmente
