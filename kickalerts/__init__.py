@@ -1,4 +1,4 @@
-from .simplesuggestions import SimpleSuggestions
+from .kickalerts import KickAlerts
 
-async def setup(bot):
-    await bot.add_cog(SimpleSuggestions(bot))
+def setup(bot):
+    bot.add_cog(KickAlerts(bot))
