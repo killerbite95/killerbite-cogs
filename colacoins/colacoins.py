@@ -156,21 +156,24 @@ class ColaCoins(commands.Cog):
 
     # --- Nuevos Comandos Añadidos ---
 
-    @commands.group(name="colacoins", invoke_without_command=True)
-    async def colacoins_group(self, ctx):
-        """Gestiona las ColaCoins. / Manages ColaCoins."""
-        # Si se invoca solo !colacoins o !miscolacoins, muestra las ColaCoins del usuario
-        await self.user_colacoins(ctx)
-
-    @colacoins_group.command(name="list", aliases=["lista"])
+    @commands.command(name="colacoinslist")
     @checks.admin_or_permissions(administrator=True)
-    async def list_colacoins(self, ctx):
+    async def colacoins_list_command(self, ctx):
         """Muestra una leaderboard de los usuarios con más ColaCoins. / Shows a leaderboard of users with the most ColaCoins."""
+        await self.send_leaderboard(ctx, language="en")
+
+    @commands.command(name="colacoinslista")
+    @checks.admin_or_permissions(administrator=True)
+    async def colacoins_lista_command(self, ctx):
+        """Muestra una leaderboard de los usuarios con más ColaCoins. / Shows a leaderboard of users with the most ColaCoins."""
+        await self.send_leaderboard(ctx, language="es")
+
+    async def send_leaderboard(self, ctx, language="en"):
         colacoins = await self.config.colacoins()
         if not colacoins:
             mensaje = (
                 "No hay usuarios con ColaCoins actualmente." 
-                if ctx.invoked_with == 'lista' 
+                if language == "es" 
                 else 
                 "There are no users with ColaCoins currently."
             )
@@ -183,11 +186,14 @@ class ColaCoins(commands.Cog):
         # Preparar los datos para la leaderboard
         leaderboard = []
         for idx, (user_id, amount) in enumerate(sorted_colacoins, start=1):
-            user = self.bot.get_user(int(user_id))
-            if user:
-                username = user.display_name
-            else:
-                username = f"Usuario ID {user_id}" if ctx.invoked_with == 'lista' else f"User ID {user_id}"
+            try:
+                user = self.bot.get_user(int(user_id))
+                if user:
+                    username = user.display_name
+                else:
+                    username = f"Usuario ID {user_id}" if language == "es" else f"User ID {user_id}"
+            except ValueError:
+                username = f"Usuario ID {user_id}" if language == "es" else f"User ID {user_id}"
             emoji = await self.config.emoji() or ""
             leaderboard.append(f"**{idx}. {username}** - {amount} {emoji} ColaCoins")
 
@@ -199,7 +205,7 @@ class ColaCoins(commands.Cog):
 
         # Crear el embed inicial
         embed = discord.Embed(
-            title="🏆 Leaderboard de ColaCoins" if ctx.invoked_with == 'lista' else "🏆 ColaCoins Leaderboard",
+            title="🏆 Leaderboard de ColaCoins" if language == "es" else "🏆 ColaCoins Leaderboard",
             description="\n".join(pages[current_page]),
             color=discord.Color.gold()
         )
