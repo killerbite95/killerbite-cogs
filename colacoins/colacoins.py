@@ -180,9 +180,23 @@ class ColaCoins(commands.Cog):
             await ctx.send(mensaje)
             return
 
-        # Crear una lista de tuplas (usuario_id, cantidad)
-        sorted_colacoins = sorted(colacoins.items(), key=lambda x: x[1], reverse=True)
-        
+        # Crear una lista de tuplas (usuario_id, cantidad) excluyendo ColaCoins < 0
+        sorted_colacoins = sorted(
+            ((user_id, amount) for user_id, amount in colacoins.items() if amount >= 0),
+            key=lambda x: x[1],
+            reverse=True
+        )
+
+        if not sorted_colacoins:
+            mensaje = (
+                "No hay usuarios con ColaCoins de 0 o más actualmente." 
+                if language == "es" 
+                else 
+                "There are no users with 0 or more ColaCoins currently."
+            )
+            await ctx.send(mensaje)
+            return
+
         # Preparar los datos para la leaderboard
         leaderboard = []
         for idx, (user_id, amount) in enumerate(sorted_colacoins, start=1):
@@ -190,12 +204,20 @@ class ColaCoins(commands.Cog):
                 user = self.bot.get_user(int(user_id))
                 if user:
                     username = user.display_name
+                    avatar = user.avatar.url if user.avatar else user.default_avatar.url
                 else:
                     username = f"Usuario ID {user_id}" if language == "es" else f"User ID {user_id}"
+                    avatar = "https://cdn.discordapp.com/embed/avatars/0.png"  # Avatar por defecto
             except ValueError:
                 username = f"Usuario ID {user_id}" if language == "es" else f"User ID {user_id}"
+                avatar = "https://cdn.discordapp.com/embed/avatars/0.png"  # Avatar por defecto
             emoji = await self.config.emoji() or ""
-            leaderboard.append(f"**{idx}. {username}** - {amount} {emoji} ColaCoins")
+            leaderboard.append({
+                "rank": idx,
+                "username": username,
+                "amount": amount,
+                "avatar": avatar
+            })
 
         # Implementar la paginación (10 usuarios por página)
         per_page = 10
@@ -206,10 +228,11 @@ class ColaCoins(commands.Cog):
         # Crear el embed inicial
         embed = discord.Embed(
             title="🏆 Leaderboard de ColaCoins" if language == "es" else "🏆 ColaCoins Leaderboard",
-            description="\n".join(pages[current_page]),
+            description=self.format_leaderboard_page(pages[current_page], language),
             color=discord.Color.gold()
         )
-        embed.set_footer(text=f"Página {current_page + 1} de {total_pages}")
+        embed.set_thumbnail(url=self.bot.user.avatar.url if self.bot.user.avatar else self.bot.user.default_avatar.url)
+        embed.set_footer(text=f"Página {current_page + 1} de {total_pages} • Total Usuarios: {len(sorted_colacoins)}")
 
         message = await ctx.send(embed=embed)
 
@@ -225,7 +248,7 @@ class ColaCoins(commands.Cog):
 
         while True:
             try:
-                reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+                reaction, user = await self.bot.wait_for("reaction_add", timeout=120.0, check=check)
             except asyncio.TimeoutError:
                 # Quitar las reacciones si no hay actividad
                 await message.clear_reactions()
@@ -234,14 +257,47 @@ class ColaCoins(commands.Cog):
                 if str(reaction.emoji) == "▶️":
                     if current_page + 1 < total_pages:
                         current_page += 1
-                        embed.description = "\n".join(pages[current_page])
-                        embed.set_footer(text=f"Página {current_page + 1} de {total_pages}")
+                        embed.description = self.format_leaderboard_page(pages[current_page], language)
+                        embed.set_footer(text=f"Página {current_page + 1} de {total_pages} • Total Usuarios: {len(sorted_colacoins)}")
                         await message.edit(embed=embed)
                 elif str(reaction.emoji) == "◀️":
                     if current_page > 0:
                         current_page -= 1
-                        embed.description = "\n".join(pages[current_page])
-                        embed.set_footer(text=f"Página {current_page + 1} de {total_pages}")
+                        embed.description = self.format_leaderboard_page(pages[current_page], language)
+                        embed.set_footer(text=f"Página {current_page + 1} de {total_pages} • Total Usuarios: {len(sorted_colacoins)}")
                         await message.edit(embed=embed)
                 # Remover la reacción del usuario para permitir múltiples reacciones
                 await message.remove_reaction(reaction, user)
+
+    def format_leaderboard_page(self, page, language):
+        """Formatea una página de la leaderboard para el embed."""
+        lines = []
+        for entry in page:
+            rank = entry["rank"]
+            username = entry["username"]
+            amount = entry["amount"]
+            # Usa emojis de medallas para los primeros puestos
+            if rank == 1:
+                medal = "🥇"
+            elif rank == 2:
+                medal = "🥈"
+            elif rank == 3:
+                medal = "🥉"
+            else:
+                medal = f"{rank}."
+
+            line = f"{medal} **{username}** - {amount} {entry['amount']} ColaCoins"
+            # Para un diseño más vistoso, puedes incluir los emojis de medallas
+            lines.append(f"{medal} **{username}** - {amount} {self.get_emoji(language)} ColaCoins")
+        return "\n".join(lines)
+
+    def get_emoji(self, language):
+        """Devuelve el emoji de ColaCoins."""
+        # Puedes personalizar esta función para devolver diferentes emojis según el idioma
+        # Actualmente, devuelve el emoji configurado o una cadena vacía
+        # Si necesitas emojis específicos por idioma, ajusta aquí
+        # Por ahora, devuelve una cadena vacía
+        # Ejemplo:
+        # return "💎" if language == "es" else "💰"
+        return ""
+
