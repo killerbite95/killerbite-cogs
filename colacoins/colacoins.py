@@ -1,6 +1,6 @@
 import json
 import os
-from redbot.core import commands, Config
+from redbot.core import commands, Config, checks
 import discord
 import asyncio
 import logging
@@ -21,12 +21,14 @@ class ColaCoins(commands.Cog):
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
         handler.setFormatter(formatter)
-        self.logger.addHandler(handler)
+        if not self.logger.handlers:
+            self.logger.addHandler(handler)
 
     async def save_data(self):
         data = await self.config.colacoins()
         with open("colacoins_data.json", "w") as f:
             json.dump(data, f)
+        self.logger.debug("Datos de ColaCoins guardados en colacoins_data.json.")
 
     async def load_data(self):
         if os.path.exists("colacoins_data.json"):
