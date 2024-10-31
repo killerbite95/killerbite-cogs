@@ -27,7 +27,7 @@ class ChannelOrThreadConverter(commands.Converter):
         return channel
 
 class MapTrack(commands.Cog):
-    """Cog to track map changes on game servers. By Killerbite95"""
+    """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite95"""
 
     def __init__(self, bot):
         self.bot = bot
@@ -52,7 +52,7 @@ class MapTrack(commands.Cog):
     async def add_map_track(self, ctx, server_ip: str, channel: ChannelOrThreadConverter = None):
         """Adds a server to track map changes.
 
-        Uso: !addmaptrack <server_ip> [channel_id]
+        Usage: !addmaptrack <server_ip> [channel_id]
         """
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
@@ -66,7 +66,7 @@ class MapTrack(commands.Cog):
     async def remove_map_track(self, ctx, channel: ChannelOrThreadConverter):
         """Removes all map tracks from a channel or thread.
 
-        Uso: !removemaptrack <channel_id>
+        Usage: !removemaptrack <channel_id>
         """
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             to_remove = [ip for ip, ch_id in map_track_channels.items() if ch_id == channel.id]
@@ -81,6 +81,10 @@ class MapTrack(commands.Cog):
         if not map_track_channels:
             await ctx.send("There are no active map tracks.")
             return
+
+        # Limpiar map tracks con canales eliminados antes de mostrar
+        map_track_channels = await self.cleanup_map_tracks(ctx.guild)
+
         message = "**Active Map Tracks:**\n"
         for server_ip, channel_id in map_track_channels.items():
             channel = self.bot.get_channel(channel_id)
@@ -88,11 +92,9 @@ class MapTrack(commands.Cog):
                 try:
                     channel = await self.bot.fetch_channel(channel_id)
                 except (discord.NotFound, discord.Forbidden):
-                    channel = None
+                    continue  # Ya ha sido limpiado
             if channel:
                 message += f"• **{server_ip}** - Channel/Thread: {channel.mention}\n"
-            else:
-                message += f"• **{server_ip}** - Channel/Thread: Not found (ID: {channel_id})\n"
         await ctx.send(message)
 
     @commands.command(name="forcemaptrack")
@@ -112,14 +114,36 @@ class MapTrack(commands.Cog):
 
     @tasks.loop(seconds=30)
     async def map_check(self):
-        """Periodically checks for map changes on tracked servers."""
+        """Verifica periódicamente si hay un cambio de mapa en los servidores rastreados."""
         for guild in self.bot.guilds:
+            # Limpiar map tracks con canales eliminados
+            await self.cleanup_map_tracks(guild)
             map_track_channels = await self.config.guild(guild).map_track_channels()
-            tasks = []
+            tasks_list = []
             for server_ip in list(map_track_channels.keys()):
-                tasks.append(self.send_map_update(guild, server_ip))
-            if tasks:
-                await asyncio.gather(*tasks)
+                tasks_list.append(self.send_map_update(guild, server_ip))
+            if tasks_list:
+                await asyncio.gather(*tasks_list)
+
+    async def cleanup_map_tracks(self, guild):
+        """Elimina map tracks asociados con canales o hilos eliminados."""
+        async with self.config.guild(guild).map_track_channels() as map_track_channels:
+            to_remove = []
+            for server_ip, channel_id in map_track_channels.items():
+                channel = self.bot.get_channel(channel_id)
+                if channel is None:
+                    try:
+                        channel = await self.bot.fetch_channel(channel_id)
+                    except (discord.NotFound, discord.Forbidden):
+                        to_remove.append(server_ip)
+                        self.logger.warning(f"Channel with ID {channel_id} not found. Map track for {server_ip} removed.")
+                elif not isinstance(channel, (discord.TextChannel, discord.Thread)):
+                    # Si el canal no es un canal de texto o hilo, eliminar el map track
+                    to_remove.append(server_ip)
+                    self.logger.warning(f"Channel with ID {channel_id} is not a text channel or thread. Map track for {server_ip} removed.")
+            for server_ip in to_remove:
+                del map_track_channels[server_ip]
+        return map_track_channels
 
     async def send_map_update(self, guild, server_ip, first_time=False, force=False):
         """Envía una actualización de mapa si hay un cambio."""
@@ -152,7 +176,11 @@ class MapTrack(commands.Cog):
                     try:
                         channel = await self.bot.fetch_channel(channel_id)
                     except (discord.NotFound, discord.Forbidden):
-                        channel = None
+                        # Eliminar el map track si el canal no existe
+                        async with self.config.guild(guild).map_track_channels() as map_track_channels:
+                            del map_track_channels[server_ip]
+                        self.logger.warning(f"Channel with ID {channel_id} not found. Map track for {server_ip} removed.")
+                        return
 
                 if channel:
                     # Verificar permisos antes de enviar el mensaje
@@ -182,7 +210,7 @@ class MapTrack(commands.Cog):
                     self.logger.info(f"Sent map update for {server_ip} in {channel}.")
                     
                 else:
-                    # Si el canal no se encuentra, eliminarlo de la configuración
+                    # Eliminar el map track si el canal no existe
                     async with self.config.guild(guild).map_track_channels() as map_track_channels:
                         del map_track_channels[server_ip]
                     self.logger.warning(f"Channel with ID {channel_id} not found. Map track for {server_ip} removed.")
@@ -203,7 +231,11 @@ class MapTrack(commands.Cog):
                         try:
                             channel = await self.bot.fetch_channel(channel_id)
                         except (discord.NotFound, discord.Forbidden):
-                            channel = None
+                            # Eliminar el map track si el canal no existe
+                            async with self.config.guild(guild).map_track_channels() as map_track_channels:
+                                del map_track_channels[server_ip]
+                            self.logger.warning(f"Channel with ID {channel_id} not found. Map track for {server_ip} removed.")
+                            return
                     if channel:
                         # Verificar permisos antes de enviar el mensaje
                         if not channel.permissions_for(guild.me).send_messages:
@@ -221,7 +253,7 @@ class MapTrack(commands.Cog):
                         await channel.send(embed=embed)
                         self.logger.info(f"Sent offline notification for {server_ip} in {channel}.")
                     else:
-                        # Si el canal no se encuentra, eliminarlo de la configuración
+                        # Eliminar el map track si el canal no existe
                         async with self.config.guild(guild).map_track_channels() as map_track_channels:
                             del map_track_channels[server_ip]
                         self.logger.warning(f"Channel with ID {channel_id} not found. Map track for {server_ip} removed.")
