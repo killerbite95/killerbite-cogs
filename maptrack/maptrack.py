@@ -2,6 +2,7 @@ import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from opengsq.protocols import Source
+from typing import Union  # Importar Union para anotaciones de tipo
 
 class MapTrack(commands.Cog):
     """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite95"""
@@ -19,7 +20,7 @@ class MapTrack(commands.Cog):
 
     @commands.command(name="añadirmaptrack")
     @checks.admin_or_permissions(administrator=True)
-    async def add_map_track(self, ctx, server_ip: str, channel: discord.TextChannel = None):
+    async def add_map_track(self, ctx, server_ip: str, channel: Union[discord.TextChannel, discord.Thread] = None):
         """Añade un servidor para rastrear cambios de mapa."""
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
@@ -30,13 +31,13 @@ class MapTrack(commands.Cog):
 
     @commands.command(name="borrarmaptrack")
     @checks.admin_or_permissions(administrator=True)
-    async def remove_map_track(self, ctx, channel: discord.TextChannel):
-        """Elimina todos los map track de un canal."""
+    async def remove_map_track(self, ctx, channel: Union[discord.TextChannel, discord.Thread]):
+        """Elimina todos los map track de un canal o hilo."""
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             to_remove = [ip for ip, ch_id in map_track_channels.items() if ch_id == channel.id]
             for ip in to_remove:
                 del map_track_channels[ip]
-        await ctx.send(f"Todos los map tracks eliminados del canal {channel.mention}")
+        await ctx.send(f"Todos los map tracks eliminados del canal/hilo {channel.mention}")
 
     @commands.command(name="maptracks")
     async def list_map_tracks(self, ctx):
@@ -49,12 +50,14 @@ class MapTrack(commands.Cog):
         for server_ip, channel_id in map_track_channels.items():
             channel = self.bot.get_channel(channel_id)
             if channel:
-                message += f"**{server_ip}** - Canal: {channel.mention}\n"
+                message += f"**{server_ip}** - Canal/Hilo: {channel.mention}\n"
+            else:
+                message += f"**{server_ip}** - Canal/Hilo: No encontrado (ID: {channel_id})\n"
         await ctx.send(message)
 
     @commands.command(name="forzarmaptrack")
     async def force_map_track(self, ctx):
-        """Fuerza un rastreo de mapa en el canal actual."""
+        """Fuerza un rastreo de mapa en el canal o hilo actual."""
         map_track_channels = await self.config.guild(ctx.guild).map_track_channels()
         server_ip = None
         for ip, channel_id in map_track_channels.items():
@@ -64,7 +67,7 @@ class MapTrack(commands.Cog):
         if server_ip:
             await self.send_map_update(ctx.guild, server_ip, force=True)
         else:
-            await ctx.send("No hay map track activo en este canal.")
+            await ctx.send("No hay map track activo en este canal o hilo.")
 
     @tasks.loop(seconds=30)
     async def map_check(self):
@@ -111,16 +114,22 @@ class MapTrack(commands.Cog):
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
                     embed = discord.Embed(
-                        title="Map Change Detected!" if not first_time else "Initial Map State",
+                        title="¡Cambio de mapa detectado!" if not first_time else "Estado inicial del mapa",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="Map", value=map_name, inline=False)
-                    embed.add_field(name="Players", value=f"{players}/{max_players}", inline=False)
-                    embed.add_field(name="Connect to server", value=f"[Connect]({connect_url})", inline=False)
+                    embed.add_field(name="Mapa", value=map_name, inline=False)
+                    embed.add_field(name="Jugadores", value=f"{players}/{max_players}", inline=False)
+                    embed.add_field(name="Conectar al servidor", value=f"[Conectar]({connect_url})", inline=False)
                     embed.set_footer(text="MapTrack Monitor by Killerbite95")
                     
                     await channel.send(embed=embed)
                     
+                else:
+                    # Si el canal no se encuentra, eliminarlo de la configuración
+                    async with self.config.guild(guild).map_track_channels() as map_track_channels:
+                        del map_track_channels[server_ip]
+                    self.bot.logger.warning(f"Canal con ID {channel_id} no encontrado. Map track para {server_ip} eliminado.")
+                
                 # Almacenar el nuevo mapa como el último mapa
                 async with self.config.guild(guild).last_maps() as last_maps:
                     last_maps[server_ip] = map_name
@@ -134,13 +143,18 @@ class MapTrack(commands.Cog):
                     channel = self.bot.get_channel(channel_id)
                     if channel:
                         embed = discord.Embed(
-                            title="Server Offline",
+                            title="Servidor Offline",
                             color=discord.Color.red()
                         )
-                        embed.add_field(name="Status", value=":red_circle: Offline", inline=False)
+                        embed.add_field(name="Estado", value=":red_circle: Offline", inline=False)
                         embed.set_footer(text="MapTrack Monitor by Killerbite95")
 
                         await channel.send(embed=embed)
+                    else:
+                        # Si el canal no se encuentra, eliminarlo de la configuración
+                        async with self.config.guild(guild).map_track_channels() as map_track_channels:
+                            del map_track_channels[server_ip]
+                        self.bot.logger.warning(f"Canal con ID {channel_id} no encontrado. Map track para {server_ip} eliminado.")
                     offline_status[server_ip] = True
 
     def cog_unload(self):
