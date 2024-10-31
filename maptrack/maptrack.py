@@ -2,7 +2,27 @@ import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from opengsq.protocols import Source
-from typing import Union  # Importar Union para anotaciones de tipo
+from typing import Union
+
+class ChannelOrThreadConverter(commands.Converter):
+    async def convert(self, ctx, argument):
+        # Intentar convertir el argumento a un entero (ID)
+        try:
+            channel_id = int(argument)
+        except ValueError:
+            raise commands.BadArgument(f"El canal o hilo '{argument}' no es un ID válido.")
+
+        # Intentar obtener el canal o hilo
+        channel = ctx.bot.get_channel(channel_id)
+        if channel is None:
+            try:
+                channel = await ctx.bot.fetch_channel(channel_id)
+            except (discord.NotFound, discord.Forbidden):
+                raise commands.BadArgument(f"No se pudo encontrar un canal o hilo con el ID {channel_id}.")
+        # Verificar que sea un canal de texto o un hilo
+        if not isinstance(channel, (discord.TextChannel, discord.Thread)):
+            raise commands.BadArgument("El ID proporcionado no corresponde a un canal de texto o hilo.")
+        return channel
 
 class MapTrack(commands.Cog):
     """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite95"""
@@ -20,8 +40,11 @@ class MapTrack(commands.Cog):
 
     @commands.command(name="añadirmaptrack")
     @checks.admin_or_permissions(administrator=True)
-    async def add_map_track(self, ctx, server_ip: str, channel: Union[discord.TextChannel, discord.Thread] = None):
-        """Añade un servidor para rastrear cambios de mapa."""
+    async def add_map_track(self, ctx, server_ip: str, channel: ChannelOrThreadConverter = None):
+        """Añade un servidor para rastrear cambios de mapa.
+        
+        Uso: !añadirmaptrack <server_ip> [channel_id]
+        """
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             map_track_channels[server_ip] = channel.id
@@ -31,8 +54,11 @@ class MapTrack(commands.Cog):
 
     @commands.command(name="borrarmaptrack")
     @checks.admin_or_permissions(administrator=True)
-    async def remove_map_track(self, ctx, channel: Union[discord.TextChannel, discord.Thread]):
-        """Elimina todos los map track de un canal o hilo."""
+    async def remove_map_track(self, ctx, channel: ChannelOrThreadConverter):
+        """Elimina todos los map tracks de un canal o hilo.
+        
+        Uso: !borrarmaptrack <channel_id>
+        """
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             to_remove = [ip for ip, ch_id in map_track_channels.items() if ch_id == channel.id]
             for ip in to_remove:
@@ -49,6 +75,11 @@ class MapTrack(commands.Cog):
         message = "MapTracks Activos:\n"
         for server_ip, channel_id in map_track_channels.items():
             channel = self.bot.get_channel(channel_id)
+            if channel is None:
+                try:
+                    channel = await self.bot.fetch_channel(channel_id)
+                except (discord.NotFound, discord.Forbidden):
+                    channel = None
             if channel:
                 message += f"**{server_ip}** - Canal/Hilo: {channel.mention}\n"
             else:
@@ -74,7 +105,7 @@ class MapTrack(commands.Cog):
         """Verifica cada 30 segundos si hay un cambio de mapa en los servidores rastreados."""
         for guild in self.bot.guilds:
             map_track_channels = await self.config.guild(guild).map_track_channels()
-            for server_ip in map_track_channels.keys():
+            for server_ip in list(map_track_channels.keys()):
                 await self.send_map_update(guild, server_ip)
 
     async def send_map_update(self, guild, server_ip, first_time=False, force=False):
@@ -103,7 +134,11 @@ class MapTrack(commands.Cog):
             if first_time or force or last_map != map_name:
                 channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
                 channel = self.bot.get_channel(channel_id)
-                
+                if channel is None:
+                    try:
+                        channel = await self.bot.fetch_channel(channel_id)
+                    except (discord.NotFound, discord.Forbidden):
+                        channel = None
                 if channel:
                     # Reemplazar la IP interna con la IP pública
                     internal_ip, port = server_ip.split(":")
@@ -141,6 +176,11 @@ class MapTrack(commands.Cog):
                     # El servidor no estaba marcado como offline, enviar un mensaje
                     channel_id = await self.config.guild(guild).map_track_channels.get_raw(server_ip)
                     channel = self.bot.get_channel(channel_id)
+                    if channel is None:
+                        try:
+                            channel = await self.bot.fetch_channel(channel_id)
+                        except (discord.NotFound, discord.Forbidden):
+                            channel = None
                     if channel:
                         embed = discord.Embed(
                             title="Servidor Offline",
@@ -160,5 +200,5 @@ class MapTrack(commands.Cog):
     def cog_unload(self):
         self.map_check.cancel()
 
-def setup(bot):
-    bot.add_cog(MapTrack(bot))
+    def setup(bot):
+        bot.add_cog(MapTrack(bot))
