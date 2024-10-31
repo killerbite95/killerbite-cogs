@@ -47,12 +47,12 @@ class MapTrack(commands.Cog):
         self.logger.setLevel(logging.INFO)
         self.map_check.start()
 
-    @commands.command(name="addmaptrack")
+    @commands.command(name="addmaptrack", aliases=["añadirmaptrack"])
     @checks.admin_or_permissions(administrator=True)
     async def add_map_track(self, ctx, server_ip: str, channel: ChannelOrThreadConverter = None):
         """Adds a server to track map changes.
 
-        Usage: !addmaptrack <server_ip> [channel_id]
+        Uso: !addmaptrack <server_ip> [channel_id]
         """
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
@@ -61,12 +61,12 @@ class MapTrack(commands.Cog):
         # Enviar un primer mensaje con el estado actual
         await self.send_map_update(ctx.guild, server_ip, first_time=True)
 
-    @commands.command(name="removemaptrack")
+    @commands.command(name="removemaptrack", aliases=["borrarmaptrack"])
     @checks.admin_or_permissions(administrator=True)
     async def remove_map_track(self, ctx, channel: ChannelOrThreadConverter):
         """Removes all map tracks from a channel or thread.
 
-        Usage: !removemaptrack <channel_id>
+        Uso: !removemaptrack <channel_id>
         """
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             to_remove = [ip for ip, ch_id in map_track_channels.items() if ch_id == channel.id]
@@ -74,7 +74,7 @@ class MapTrack(commands.Cog):
                 del map_track_channels[ip]
         await ctx.send(f"All map tracks removed from channel/thread {channel.mention}")
 
-    @commands.command(name="maptracks")
+    @commands.command(name="maptracks", aliases=["listarmaptracks"])
     async def list_map_tracks(self, ctx):
         """Lists all servers with active map tracking."""
         map_track_channels = await self.config.guild(ctx.guild).map_track_channels()
@@ -97,7 +97,7 @@ class MapTrack(commands.Cog):
                 message += f"• **{server_ip}** - Channel/Thread: {channel.mention}\n"
         await ctx.send(message)
 
-    @commands.command(name="forcemaptrack")
+    @commands.command(name="forcemaptrack", aliases=["forzarmaptrack"])
     async def force_map_track(self, ctx):
         """Forces a map tracking update in the current channel or thread."""
         map_track_channels = await self.config.guild(ctx.guild).map_track_channels()
