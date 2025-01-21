@@ -1,0 +1,9 @@
+{
+    "author": ["TuNombre"],
+    "install_msg": "Gracias por instalar TriniCog!",
+    "description": "Cog para gestionar frases de Trini",
+    "short": "Frases de Trini",
+    "requirements": [],
+    "tags": ["fun", "quotes"]
+  }
+  
