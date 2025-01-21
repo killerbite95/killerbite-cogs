@@ -140,11 +140,11 @@ class GameServerMonitor(commands.Cog):
                 map_name = info.map if hasattr(info, "map") else "N/A"
                 hostname = info.name if hasattr(info, "name") else "Unknown Server"
 
-                # Verificar si el servidor Source está protegido con contraseña
+                # Verificar si el servidor está protegido con contraseña (Source: visibility=1)
                 is_passworded = False
                 if game in ["cs2", "css", "gmod", "rust"]:
-                    if hasattr(info, "passworded"):
-                        is_passworded = info.passworded
+                    if hasattr(info, "visibility") and info.visibility == 1:
+                        is_passworded = True
 
                 # Reemplazar la IP interna con la pública, si aplica
                 internal_ip, port = server_ip.split(":")
@@ -162,7 +162,7 @@ class GameServerMonitor(commands.Cog):
 
                 # Creamos el embed según el estado
                 if is_passworded:
-                    # Servidor en línea pero con contraseña => Mantenimiento
+                    # Servidor en línea con contraseña => Mantenimiento
                     embed = discord.Embed(
                         title=f"{hostname} - Server Status",
                         color=discord.Color.orange()
@@ -176,7 +176,7 @@ class GameServerMonitor(commands.Cog):
                     )
                     embed.add_field(name="Status", value=":green_circle: Online", inline=True)
 
-                # Campos comunes al embed (tanto Online como Mantenimiento)
+                # Campos comunes (IP, jugadores, mapa, etc.)
                 embed.add_field(name="Game", value=game_name, inline=True)
                 embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
                 embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
@@ -184,7 +184,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
-                # Enviar o editar el mensaje según corresponda
+                # Enviar o editar el mensaje
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
                     servers[server_ip]["message_id"] = message.id
@@ -197,7 +197,7 @@ class GameServerMonitor(commands.Cog):
                         servers[server_ip]["message_id"] = message.id
 
             except Exception:
-                # Si no responde, lo marcamos como Offline
+                # Si no responde => Offline
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
