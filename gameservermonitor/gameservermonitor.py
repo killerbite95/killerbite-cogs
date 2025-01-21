@@ -180,7 +180,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name=":video_game: Game", value=game_name, inline=True)
                 embed.add_field(name="\n\u200b\n:link: Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
-                embed.add_field(name="🗺️ Current Map", value=map_name, inline=True)
+                embed.add_field(name=":map: Current Map", value=map_name, inline=True)
                 embed.add_field(name=":busts_in_silhouette: Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
