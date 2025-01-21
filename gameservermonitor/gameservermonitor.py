@@ -167,14 +167,14 @@ class GameServerMonitor(commands.Cog):
                         title=f"{hostname} - Server Status",
                         color=discord.Color.orange()
                     )
-                    embed.add_field(name="🔐Status", value="Maintenance", inline=True)
+                    embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
                     # Servidor en línea y sin contraseña => Online
                     embed = discord.Embed(
                         title=f"{hostname} - Server Status",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="✅Status", value="Online", inline=True)
+                    embed.add_field(name="✅ Status", value="Online", inline=True)
 
                 # Campos comunes (IP, jugadores, mapa, etc.)
                 embed.add_field(name=":video_game: Game", value=game_name, inline=True)
