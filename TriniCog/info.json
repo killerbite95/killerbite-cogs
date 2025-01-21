@@ -1,9 +1,8 @@
 {
-    "author": ["TuNombre"],
-    "install_msg": "Gracias por instalar TriniCog!",
-    "description": "Cog para gestionar frases de Trini",
-    "short": "Frases de Trini",
-    "requirements": [],
-    "tags": ["fun", "quotes"]
-  }
-  
+  "author": ["killerbite95"],
+  "install_msg": "¡Gracias por instalar TriniCog! Disfruta de tus frases personalizadas.",
+  "description": "Cog para la gestión de frases de Trini. Permite añadir, listar y eliminar frases, y mostrarlas de forma aleatoria.",
+  "short": "Frases personalizadas de Trini",
+  "requirements": [],
+  "tags": ["fun", "quotes", "messages"]
+}
