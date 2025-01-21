@@ -114,7 +114,14 @@ class GameServerMonitor(commands.Cog):
             if not channel:
                 return
 
-            # Determinamos el objeto "source"
+            # Inicializamos variables
+            map_name = "N/A"
+            hostname = "Unknown Server"
+            players = 0
+            max_players = 0
+            is_passworded = False  # Sólo aplica a Source
+
+            # Determinamos el tipo de protocolo/objeto
             if game in ["cs2", "css", "gmod", "rust"]:
                 source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
                 game_name = {
@@ -133,57 +140,57 @@ class GameServerMonitor(commands.Cog):
                 await channel.send(f"Juego {game} no soportado.")
                 return
 
-            # Comprobamos el estado
             try:
+                # Distinguimos Minecraft de los demás
                 if game == "minecraft":
-                    # Usamos get_status() en lugar de get_info()
+                    # Usamos get_status() (server list ping)
                     info = await source.get_status()
-                    # Estructura típica devuelta por get_status():
+
+                    # Ejemplo de info:
                     # {
                     #   "description": "A Minecraft Server",
-                    #   "players": {"max": 20, "online": 0},
+                    #   "players": {"max": 20, "online": 3},
                     #   "version": {"name": "Paper 1.19.3", "protocol": 761},
                     #   ...
                     # }
+
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
-                    # El 'hostname' podría venir de "description", "motd", etc.
                     hostname = info.get("description", "Minecraft Server")
-                    # No hay "map" en Minecraft (podrías mostrar otra info)
-                    map_name = "N/A"
 
-                    # No hay contraseña tipo "is_passworded" en Minecraft
-                    is_passworded = False
+                    # Añadimos la versión del servidor
+                    version_str = info.get("version", {}).get("name", "???")  
+                    # No hay "map" en Minecraft, lo usaremos para la versión
+                    map_name = version_str
 
+                    # Minecraft no tiene contraseña como Source => is_passworded = False
                 else:
-                    # Para Source, FiveM (y otros) usamos get_info()
+                    # Para Source, FiveM, etc. => get_info()
                     info = await source.get_info()
                     players = info.players
                     max_players = info.max_players
-                    map_name = info.map if hasattr(info, "map") else "N/A"
-                    hostname = info.name if hasattr(info, "name") else "Unknown Server"
+                    map_name = getattr(info, "map", "N/A")
+                    hostname = getattr(info, "name", "Unknown Server")
 
-                    # Verificar si el servidor está protegido con contraseña (SOLO Source)
-                    is_passworded = False
                     if game in ["cs2", "css", "gmod", "rust"]:
+                        # visibility=1 => password
                         if hasattr(info, "visibility") and info.visibility == 1:
                             is_passworded = True
 
-                # Reemplazar la IP interna si aplica
+                # Reemplazar IP interna si aplica
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = internal_ip
 
-                # Obtener la hora local
+                # Hora local
                 timezone = await self.config.guild(guild).timezone()
                 tz = pytz.timezone(timezone)
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Creamos el embed
-                # Si es Source, marcar Mantenimiento si is_passworded
+                # Decidimos color y texto de estado
                 if is_passworded:
                     embed = discord.Embed(
                         title=f"{hostname} - Server Status",
@@ -197,20 +204,34 @@ class GameServerMonitor(commands.Cog):
                     )
                     embed.add_field(name="✅ Status", value="Online", inline=True)
 
+                # Campo de Juego
                 embed.add_field(name=":video_game: Game", value=game_name, inline=True)
 
+                # Para Minecraft no tiene sentido un link de conexión
                 if game != "minecraft":
-                    # Para juegos que tengan un link de conexión (Source, FiveM).
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
                     embed.add_field(
                         name=":link: Connect",
-                        value=f"\n[Connect]({connect_url})\n",
+                        value=f"[Connect]({connect_url})",
                         inline=False
                     )
 
-                # IP y mapa
+                # IP
                 embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
-                embed.add_field(name=":map: Current Map", value=map_name, inline=True)
+
+                if game == "minecraft":
+                    # Como 'map_name' contiene la versión del server,
+                    # renombramos el campo a "Version"
+                    embed.add_field(name=":diamond_shape_with_a_dot_inside: Version", value=map_name, inline=True)
+
+                    # Puedes también mostrar la MOTD, si es un string
+                    # A veces "description" puede ser un dict si tiene colores JSON en MC
+                    # Hacemos un str() por si acaso:
+                    motd_str = str(hostname)
+                    embed.add_field(name=":scroll: MOTD", value=motd_str, inline=False)
+                else:
+                    # En juegos Source / FiveM se muestra el mapa
+                    embed.add_field(name=":map: Current Map", value=map_name, inline=True)
 
                 # Jugadores
                 if max_players > 0:
@@ -225,31 +246,30 @@ class GameServerMonitor(commands.Cog):
 
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
-                # Enviar o editar el mensaje
+                # Enviar o editar
                 if first_time or not message_id:
-                    message = await channel.send(embed=embed)
-                    servers[server_ip]["message_id"] = message.id
+                    msg = await channel.send(embed=embed)
+                    servers[server_ip]["message_id"] = msg.id
                 else:
                     try:
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(embed=embed)
+                        msg = await channel.fetch_message(message_id)
+                        await msg.edit(embed=embed)
                     except discord.NotFound:
-                        message = await channel.send(embed=embed)
-                        servers[server_ip]["message_id"] = message.id
+                        msg = await channel.send(embed=embed)
+                        servers[server_ip]["message_id"] = msg.id
 
             except Exception:
-                # Si falla, marcamos como Offline
+                # Si algo falla, Offline
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = internal_ip
 
-                # Para que no dé error si no se llegó a game_name
                 if game == "minecraft":
                     game_title = "Minecraft"
                 elif game in ["cs2", "css", "gmod", "rust", "fivem"]:
-                    game_title = game_name  # ya definido arriba
+                    game_title = game_name  # ya definido
                 else:
                     game_title = game
 
@@ -262,29 +282,28 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
 
-                # No mostramos "Connect" si es Minecraft
-                if game not in ["minecraft"]:
+                if game != "minecraft":
+                    # Solo mostrará "Connect" en juegos que no sean MC
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
                     embed.add_field(
                         name=":link: Connect",
-                        value=f"\n[Connect]({connect_url})\n",
+                        value=f"[Connect]({connect_url})",
                         inline=False
                     )
 
                 if first_time or not message_id:
-                    message = await channel.send(embed=embed)
-                    servers[server_ip]["message_id"] = message.id
+                    msg = await channel.send(embed=embed)
+                    servers[server_ip]["message_id"] = msg.id
                 else:
                     try:
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(embed=embed)
+                        msg = await channel.fetch_message(message_id)
+                        await msg.edit(embed=embed)
                     except discord.NotFound:
-                        message = await channel.send(embed=embed)
-                        servers[server_ip]["message_id"] = message.id
+                        msg = await channel.send(embed=embed)
+                        servers[server_ip]["message_id"] = msg.id
 
     def cog_unload(self):
         self.server_monitor.cancel()
-
 
 def setup(bot):
     bot.add_cog(GameServerMonitor(bot))
