@@ -114,7 +114,7 @@ class GameServerMonitor(commands.Cog):
             if not channel:
                 return
 
-            # Determinar protocolo según el juego
+            # Determinar el protocolo según el juego
             if game in ["cs2", "css", "gmod", "rust"]:
                 source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
                 game_name = {
@@ -140,7 +140,13 @@ class GameServerMonitor(commands.Cog):
                 map_name = info.map if hasattr(info, "map") else "N/A"
                 hostname = info.name if hasattr(info, "name") else "Unknown Server"
 
-                # Reemplazar la IP interna con la IP pública
+                # Verificar si el servidor Source está protegido con contraseña
+                is_passworded = False
+                if game in ["cs2", "css", "gmod", "rust"]:
+                    if hasattr(info, "passworded"):
+                        is_passworded = info.passworded
+
+                # Reemplazar la IP interna con la pública, si aplica
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
@@ -148,24 +154,37 @@ class GameServerMonitor(commands.Cog):
                     public_ip = internal_ip
                 connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
-                # Obtener la zona horaria y la hora local utilizando pytz
+                # Obtener la zona horaria y la hora local
                 timezone = await self.config.guild(guild).timezone()
                 tz = pytz.timezone(timezone)
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                embed = discord.Embed(
-                    title=f"{hostname} - Server Status" if not first_time else f"{hostname} - Initial Server Status",
-                    color=discord.Color.green()
-                )
+                # Creamos el embed según el estado
+                if is_passworded:
+                    # Servidor en línea pero con contraseña => Mantenimiento
+                    embed = discord.Embed(
+                        title=f"{hostname} - Server Status",
+                        color=discord.Color.orange()
+                    )
+                    embed.add_field(name="Status", value=":orange_circle: Mantenimiento", inline=True)
+                else:
+                    # Servidor en línea y sin contraseña => Online
+                    embed = discord.Embed(
+                        title=f"{hostname} - Server Status",
+                        color=discord.Color.green()
+                    )
+                    embed.add_field(name="Status", value=":green_circle: Online", inline=True)
+
+                # Campos comunes al embed (tanto Online como Mantenimiento)
                 embed.add_field(name="Game", value=game_name, inline=True)
                 embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
-                embed.add_field(name="Status", value=":green_circle: Online", inline=True)
                 embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
                 embed.add_field(name="Current Map", value=map_name, inline=True)
                 embed.add_field(name="Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
+                # Enviar o editar el mensaje según corresponda
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
                     servers[server_ip]["message_id"] = message.id
@@ -174,43 +193,11 @@ class GameServerMonitor(commands.Cog):
                         message = await channel.fetch_message(message_id)
                         await message.edit(embed=embed)
                     except discord.NotFound:
-                        # Si el mensaje no se encuentra, envía uno nuevo
                         message = await channel.send(embed=embed)
                         servers[server_ip]["message_id"] = message.id
 
             except Exception:
-                # Manejar el caso cuando el servidor no responde
-                internal_ip, port = server_ip.split(":")
-                if internal_ip.startswith("10.0.0."):
-                    public_ip = "178.33.160.187"
-                else:
-                    public_ip = internal_ip
-                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
-
-                embed = discord.Embed(
-                    title="Server Status - Offline",
-                    color=discord.Color.red()
-                )
-                embed.add_field(name="Game", value=game_name, inline=True)
-                embed.add_field(name="Connect", value=f"[Connect]({connect_url})", inline=False)
-                embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
-                embed.add_field(name="Address:Port", value=f"{public_ip}:{port}", inline=True)
-                embed.set_footer(text="Game Server Monitor by Killerbite95")
-
-                if first_time or not message_id:
-                    message = await channel.send(embed=embed)
-                    servers[server_ip]["message_id"] = message.id
-                else:
-                    try:
-                        message = await channel.fetch_message(message_id)
-                        await message.edit(embed=embed)
-                    except discord.NotFound:
-                        # Si el mensaje no se encuentra, envía uno nuevo
-                        message = await channel.send(embed=embed)
-                        servers[server_ip]["message_id"] = message.id
-
-            except Exception:
-                # Manejar el caso cuando el servidor no responde
+                # Si no responde, lo marcamos como Offline
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
@@ -241,6 +228,7 @@ class GameServerMonitor(commands.Cog):
 
     def cog_unload(self):
         self.server_monitor.cancel()
+
 
 def setup(bot):
     bot.add_cog(GameServerMonitor(bot))
