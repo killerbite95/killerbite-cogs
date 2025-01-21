@@ -167,14 +167,14 @@ class GameServerMonitor(commands.Cog):
                         title=f"{hostname} - Server Status",
                         color=discord.Color.orange()
                     )
-                    embed.add_field(name="Status", value=":orange_circle: Maintenance", inline=True)
+                    embed.add_field(name="Status", value=":orange_circle:🔐 Maintenance", inline=True)
                 else:
                     # Servidor en línea y sin contraseña => Online
                     embed = discord.Embed(
                         title=f"{hostname} - Server Status",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="Status", value=":green_circle: Online", inline=True)
+                    embed.add_field(name="Status", value=":green_circle:✅ Online", inline=True)
 
                 # Campos comunes (IP, jugadores, mapa, etc.)
                 embed.add_field(name="Game", value=game_name, inline=True)
@@ -206,7 +206,7 @@ class GameServerMonitor(commands.Cog):
                 connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
                 embed = discord.Embed(
-                    title="Server Status - Offline",
+                    title="Server Status - ❌ Offline",
                     color=discord.Color.red()
                 )
                 embed.add_field(name="Game", value=game_name, inline=True)
