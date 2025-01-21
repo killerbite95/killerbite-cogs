@@ -193,7 +193,7 @@ class GameServerMonitor(commands.Cog):
 
                 if game == "minecraft" and domain:
                     # Muestra dominio en vez de la IP real
-                    ip_to_show = f"{domain}:{port_part}"
+                    ip_to_show = f"{domain}"
                 else:
                     # Muestra la IP normal
                     ip_to_show = f"{public_ip}:{port_part}"
