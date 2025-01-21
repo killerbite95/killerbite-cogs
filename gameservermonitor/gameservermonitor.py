@@ -114,7 +114,7 @@ class GameServerMonitor(commands.Cog):
             if not channel:
                 return
 
-            # Determinar el protocolo según el juego
+            # Determinamos el objeto "source"
             if game in ["cs2", "css", "gmod", "rust"]:
                 source = Source(host=server_ip.split(":")[0], port=int(server_ip.split(":")[1]))
                 game_name = {
@@ -133,55 +133,96 @@ class GameServerMonitor(commands.Cog):
                 await channel.send(f"Juego {game} no soportado.")
                 return
 
+            # Comprobamos el estado
             try:
-                info = await source.get_info()
-                players = info.players
-                max_players = info.max_players
-                map_name = info.map if hasattr(info, "map") else "N/A"
-                hostname = info.name if hasattr(info, "name") else "Unknown Server"
+                if game == "minecraft":
+                    # Usamos get_status() en lugar de get_info()
+                    info = await source.get_status()
+                    # Estructura típica devuelta por get_status():
+                    # {
+                    #   "description": "A Minecraft Server",
+                    #   "players": {"max": 20, "online": 0},
+                    #   "version": {"name": "Paper 1.19.3", "protocol": 761},
+                    #   ...
+                    # }
+                    players = info["players"]["online"]
+                    max_players = info["players"]["max"]
+                    # El 'hostname' podría venir de "description", "motd", etc.
+                    hostname = info.get("description", "Minecraft Server")
+                    # No hay "map" en Minecraft (podrías mostrar otra info)
+                    map_name = "N/A"
 
-                # Verificar si el servidor está protegido con contraseña (Source: visibility=1)
-                is_passworded = False
-                if game in ["cs2", "css", "gmod", "rust"]:
-                    if hasattr(info, "visibility") and info.visibility == 1:
-                        is_passworded = True
+                    # No hay contraseña tipo "is_passworded" en Minecraft
+                    is_passworded = False
 
-                # Reemplazar la IP interna con la pública, si aplica
+                else:
+                    # Para Source, FiveM (y otros) usamos get_info()
+                    info = await source.get_info()
+                    players = info.players
+                    max_players = info.max_players
+                    map_name = info.map if hasattr(info, "map") else "N/A"
+                    hostname = info.name if hasattr(info, "name") else "Unknown Server"
+
+                    # Verificar si el servidor está protegido con contraseña (SOLO Source)
+                    is_passworded = False
+                    if game in ["cs2", "css", "gmod", "rust"]:
+                        if hasattr(info, "visibility") and info.visibility == 1:
+                            is_passworded = True
+
+                # Reemplazar la IP interna si aplica
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = internal_ip
-                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
 
-                # Obtener la zona horaria y la hora local
+                # Obtener la hora local
                 timezone = await self.config.guild(guild).timezone()
                 tz = pytz.timezone(timezone)
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Creamos el embed según el estado
+                # Creamos el embed
+                # Si es Source, marcar Mantenimiento si is_passworded
                 if is_passworded:
-                    # Servidor en línea con contraseña => Mantenimiento
                     embed = discord.Embed(
                         title=f"{hostname} - Server Status",
                         color=discord.Color.orange()
                     )
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
-                    # Servidor en línea y sin contraseña => Online
                     embed = discord.Embed(
                         title=f"{hostname} - Server Status",
                         color=discord.Color.green()
                     )
                     embed.add_field(name="✅ Status", value="Online", inline=True)
 
-                # Campos comunes (IP, jugadores, mapa, etc.)
                 embed.add_field(name=":video_game: Game", value=game_name, inline=True)
-                embed.add_field(name="\n\u200b\n:link: Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
+
+                if game != "minecraft":
+                    # Para juegos que tengan un link de conexión (Source, FiveM).
+                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+                    embed.add_field(
+                        name=":link: Connect",
+                        value=f"\n[Connect]({connect_url})\n",
+                        inline=False
+                    )
+
+                # IP y mapa
                 embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
                 embed.add_field(name=":map: Current Map", value=map_name, inline=True)
-                embed.add_field(name=":busts_in_silhouette: Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
+
+                # Jugadores
+                if max_players > 0:
+                    percent = int(players / max_players * 100)
+                else:
+                    percent = 0
+                embed.add_field(
+                    name=":busts_in_silhouette: Players",
+                    value=f"{players}/{max_players} ({percent}%)",
+                    inline=True
+                )
+
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
                 # Enviar o editar el mensaje
@@ -197,23 +238,38 @@ class GameServerMonitor(commands.Cog):
                         servers[server_ip]["message_id"] = message.id
 
             except Exception:
-                # Si no responde => Offline
+                # Si falla, marcamos como Offline
                 internal_ip, port = server_ip.split(":")
                 if internal_ip.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = internal_ip
-                connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+
+                # Para que no dé error si no se llegó a game_name
+                if game == "minecraft":
+                    game_title = "Minecraft"
+                elif game in ["cs2", "css", "gmod", "rust", "fivem"]:
+                    game_title = game_name  # ya definido arriba
+                else:
+                    game_title = game
 
                 embed = discord.Embed(
-                    title="Server Status - ❌ Offline",
+                    title=f"{game_title} Server - ❌ Offline",
                     color=discord.Color.red()
                 )
-                embed.add_field(name=":video_game: Game", value=game_name, inline=True)
-                embed.add_field(name="\n\u200b\n:link: Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
+                embed.add_field(name=":video_game: Game", value=game_title, inline=True)
                 embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
+
+                # No mostramos "Connect" si es Minecraft
+                if game not in ["minecraft"]:
+                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+                    embed.add_field(
+                        name=":link: Connect",
+                        value=f"\n[Connect]({connect_url})\n",
+                        inline=False
+                    )
 
                 if first_time or not message_id:
                     message = await channel.send(embed=embed)
