@@ -179,7 +179,7 @@ class GameServerMonitor(commands.Cog):
                 # Campos comunes (IP, jugadores, mapa, etc.)
                 embed.add_field(name=":video_game: Game", value=game_name, inline=True)
                 embed.add_field(name="\n\u200b\n:link: Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
-                embed.add_field(name=":round_pushpin: Address:Port", value=f"{public_ip}:{port}", inline=True)
+                embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
                 embed.add_field(name=":gear: Current Map", value=map_name, inline=True)
                 embed.add_field(name=":busts_in_silhouette: Players", value=f"{players}/{max_players} ({int(players/max_players*100)}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
@@ -212,7 +212,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name=":video_game: Game", value=game_name, inline=True)
                 embed.add_field(name="\n\u200b\n:link: Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.add_field(name="Status", value=":red_circle: Offline", inline=True)
-                embed.add_field(name=":round_pushpin: Address:Port", value=f"{public_ip}:{port}", inline=True)
+                embed.add_field(name=":round_pushpin: IP", value=f"{public_ip}:{port}", inline=True)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
 
                 if first_time or not message_id:
