@@ -36,8 +36,8 @@ class GameServerMonitor(commands.Cog):
           !addserver <ip:puerto> <juego> [channel] [domain]
 
         Ejemplos:
-          !addserver 78.46.109.228:25575 minecraft  #bot terracita.alienhost.ovh
-          !addserver 178.33.160.187:27015 cs2
+          !addserver 194.69.160.51:25575 minecraft #canal mc.dominio.com
+          !addserver 194.69.160.51:27015 cs2 #canal
         """
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).servers() as servers:
