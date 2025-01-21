@@ -234,8 +234,6 @@ class GameServerMonitor(commands.Cog):
                 if game == "minecraft":
                     # Usamos la 'map_name' como "Versión"
                     embed.add_field(name=":diamond_shape_with_a_dot_inside: Version", value=map_name, inline=True)
-                    # Mostramos la MOTD en un campo, si deseas
-                    embed.add_field(name=":scroll: MOTD", value=str(hostname), inline=False)
                 else:
                     # En Source / FiveM mostramos "map"
                     embed.add_field(name=":map: Current Map", value=map_name, inline=True)
