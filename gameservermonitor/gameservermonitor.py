@@ -167,7 +167,7 @@ class GameServerMonitor(commands.Cog):
                         title=f"{hostname} - Server Status",
                         color=discord.Color.orange()
                     )
-                    embed.add_field(name="Status", value=":orange_circle: Mantenimiento", inline=True)
+                    embed.add_field(name="Status", value=":orange_circle: Maintenance", inline=True)
                 else:
                     # Servidor en línea y sin contraseña => Online
                     embed = discord.Embed(
