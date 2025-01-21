@@ -288,7 +288,7 @@ class GameServerMonitor(commands.Cog):
 
                 # IP a mostrar (dominio si Minecraft + domain, si no, la IP)
                 if game == "minecraft" and domain:
-                    ip_to_show = f"{domain}:{port_part}"
+                    ip_to_show = f"{domain}"
                 else:
                     ip_to_show = f"{public_ip}:{port_part}"
 
