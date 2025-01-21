@@ -297,8 +297,8 @@ class GameServerMonitor(commands.Cog):
                 if game != "minecraft":
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port_part}"
                     embed.add_field(
-                        name="\n\u200b\n:link: Connect",
-                        value=f"[Connect]({connect_url})\n\u200b\n",
+                        name="\n\u200b:link: Connect",
+                        value=f"[Connect]({connect_url})\n\u200b",
                         inline=False
                     )
 
