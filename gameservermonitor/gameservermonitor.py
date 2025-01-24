@@ -1,7 +1,7 @@
 import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
-from opengsq.protocols import Source, Minecraft, FiveM
+from opengsq.protocols import Source, Minecraft
 import datetime
 import pytz
 
@@ -23,6 +23,11 @@ class GameServerMonitor(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def set_timezone(self, ctx, timezone: str):
         """Establece la zona horaria para las actualizaciones."""
+        try:
+            pytz.timezone(timezone)  # Validar zona horaria
+        except pytz.UnknownTimeZoneError:
+            await ctx.send(f"La zona horaria '{timezone}' no es válida.")
+            return
         await self.config.guild(ctx.guild).timezone.set(timezone)
         await ctx.send(f"Zona horaria establecida en {timezone}")
 
@@ -38,9 +43,38 @@ class GameServerMonitor(commands.Cog):
         Ejemplos:
           !addserver 194.69.160.51:25575 minecraft #canal mc.dominio.com
           !addserver 194.69.160.51:27015 cs2 #canal
+          !addserver 51.255.126.200:27015 gmod 1330136596573589551
         """
         channel = channel or ctx.channel
+        game = game.lower()
+
+        # Validar y asignar puerto predeterminado si no se proporciona
+        if ":" in server_ip:
+            ip_part, port_part_str = server_ip.split(":")
+            try:
+                port_part = int(port_part_str)
+            except ValueError:
+                await ctx.send(f"Puerto inválido proporcionado en '{server_ip}'.")
+                return
+        else:
+            default_ports = {
+                "cs2": "27015",
+                "css": "27015",
+                "gmod": "27015",    # Puerto predeterminado para gmod
+                "rust": "28015",
+                "minecraft": "25565"
+            }
+            port_part = default_ports.get(game)
+            if not port_part:
+                await ctx.send(f"No se proporcionó un puerto y no hay un puerto predeterminado para el juego '{game}'. Por favor, especifica el puerto.")
+                return
+            ip_part = server_ip
+            server_ip = f"{ip_part}:{port_part}"  # Formatear server_ip con el puerto
+
         async with self.config.guild(ctx.guild).servers() as servers:
+            if server_ip in servers:
+                await ctx.send(f"El servidor {server_ip} ya está siendo monitoreado.")
+                return
             servers[server_ip] = {
                 "game": game,
                 "channel_id": channel.id,
@@ -57,6 +91,11 @@ class GameServerMonitor(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def remove_server(self, ctx, server_ip: str):
         """Elimina el monitoreo de un servidor."""
+        # Asegurarse de que server_ip incluya el puerto
+        if ":" not in server_ip:
+            await ctx.send(f"Por favor, proporciona el servidor en formato 'ip:puerto'.")
+            return
+
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_ip in servers:
                 del servers[server_ip]
@@ -71,8 +110,7 @@ class GameServerMonitor(commands.Cog):
         for server_ip, data in servers.items():
             if data["channel_id"] == ctx.channel.id:
                 await self.update_server_status(ctx.guild, server_ip, first_time=True)
-                return
-        await ctx.send("No hay servidores monitoreados en este canal.")
+        await ctx.send("Actualización de estado forzada para los servidores en este canal.")
 
     @commands.command(name="listaserver")
     async def list_servers(self, ctx):
@@ -87,7 +125,7 @@ class GameServerMonitor(commands.Cog):
             channel = self.bot.get_channel(data["channel_id"])
             domain = data.get("domain")
             message += (
-                f"**{server_ip}** - Juego: {data['game']} - "
+                f"**{server_ip}** - Juego: {data['game'].upper()} - "
                 f"Canal: {channel.mention if channel else 'Desconocido'}"
             )
             if domain:
@@ -100,6 +138,9 @@ class GameServerMonitor(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def refresh_time(self, ctx, seconds: int):
         """Establece el tiempo de actualización en segundos."""
+        if seconds < 10:
+            await ctx.send("El tiempo de actualización debe ser al menos 10 segundos.")
+            return
         await self.config.guild(ctx.guild).refresh_time.set(seconds)
         self.server_monitor.change_interval(seconds=seconds)
         await ctx.send(f"Tiempo de actualización establecido en {seconds} segundos.")
@@ -135,11 +176,29 @@ class GameServerMonitor(commands.Cog):
             if not channel:
                 return
 
-            # 1) Obtenemos la IP para la consulta real
-            ip_part = server_ip.split(":")[0]
-            port_part = int(server_ip.split(":")[1])
+            # 1) Obtener IP y puerto, asignar puerto predeterminado si es necesario
+            if ":" in server_ip:
+                ip_part, port_part_str = server_ip.split(":")
+                try:
+                    port_part = int(port_part_str)
+                except ValueError:
+                    await channel.send(f"Puerto inválido para el servidor {server_ip}.")
+                    return
+            else:
+                default_ports = {
+                    "cs2": 27015,
+                    "css": 27015,
+                    "gmod": 27015,    # Puerto predeterminado para gmod
+                    "rust": 28015,
+                    "minecraft": 25565
+                }
+                port_part = default_ports.get(game)
+                if not port_part:
+                    await channel.send(f"No se proporcionó un puerto y no hay un puerto predeterminado para el juego '{game}'.")
+                    return
+                ip_part = server_ip
 
-            # 2) Creamos el objeto del protocolo
+            # 2) Crear el objeto del protocolo
             if game in ["cs2", "css", "gmod", "rust"]:
                 source = Source(host=ip_part, port=port_part)
                 game_name = {
@@ -151,15 +210,12 @@ class GameServerMonitor(commands.Cog):
             elif game == "minecraft":
                 source = Minecraft(host=ip_part, port=port_part)
                 game_name = "Minecraft"
-            elif game == "fivem":
-                source = FiveM(host=ip_part, port=port_part)
-                game_name = "FiveM"
             else:
                 await channel.send(f"Juego {game} no soportado.")
                 return
 
             try:
-                # 3) Lógica de obtener datos
+                # 3) Obtener datos del servidor
                 if game == "minecraft":
                     # Mejor con get_status() en vez de get_info()
                     info = await source.get_status()
@@ -171,7 +227,7 @@ class GameServerMonitor(commands.Cog):
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
                 else:
-                    # Source, FiveM
+                    # Source (cs2, css, gmod, rust)
                     info = await source.get_info()
                     players = info.players
                     max_players = info.max_players
@@ -200,7 +256,10 @@ class GameServerMonitor(commands.Cog):
 
                 # 5) Hora local
                 timezone = await self.config.guild(guild).timezone()
-                tz = pytz.timezone(timezone)
+                try:
+                    tz = pytz.timezone(timezone)
+                except pytz.UnknownTimeZoneError:
+                    tz = pytz.UTC
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -235,7 +294,7 @@ class GameServerMonitor(commands.Cog):
                     # Usamos la 'map_name' como "Versión"
                     embed.add_field(name=":diamond_shape_with_a_dot_inside: Version", value=map_name, inline=True)
                 else:
-                    # En Source / FiveM mostramos "map"
+                    # En Source mostramos "map"
                     embed.add_field(name=":map: Current Map", value=map_name, inline=True)
 
                 # Jugadores
@@ -263,8 +322,9 @@ class GameServerMonitor(commands.Cog):
                         msg = await channel.send(embed=embed)
                         servers[server_ip]["message_id"] = msg.id
 
-            except Exception:
-                # Offline
+            except Exception as e:
+                # Manejar excepciones específicas si es posible
+                # Offline o error al obtener información
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
@@ -272,7 +332,7 @@ class GameServerMonitor(commands.Cog):
 
                 if game == "minecraft":
                     game_title = "Minecraft"
-                elif game in ["cs2", "css", "gmod", "rust", "fivem"]:
+                elif game in ["cs2", "css", "gmod", "rust"]:
                     game_title = game_name
                 else:
                     game_title = game
