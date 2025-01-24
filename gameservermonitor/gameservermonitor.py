@@ -281,48 +281,48 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Crear embed
+                # Crear embed en inglés
                 if is_passworded:
                     embed = discord.Embed(
-                        title=f"{hostname} - Estado del Servidor",
+                        title=f"{hostname} - Server Status",
                         color=discord.Color.orange()
                     )
-                    embed.add_field(name="🔐 Estado", value="Mantenimiento", inline=True)
+                    embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
                     embed = discord.Embed(
-                        title=f"{hostname} - Estado del Servidor",
+                        title=f"{hostname} - Server Status",
                         color=discord.Color.green()
                     )
-                    embed.add_field(name="✅ Estado", value="En Línea", inline=True)
+                    embed.add_field(name="✅ Status", value="Online", inline=True)
 
-                embed.add_field(name="🎮 Juego", value=game_name, inline=True)
+                embed.add_field(name="🎮 Game", value=game_name, inline=True)
 
                 if game != "minecraft":
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port_part}"
                     embed.add_field(
-                        name="\n\u200b\n🔗 Conectar",
-                        value=f"[Conectar]({connect_url})\n\u200b\n",
+                        name="\n\u200b\n🔗 Connect",
+                        value=f"[Connect]({connect_url})\n\u200b\n",
                         inline=False
                     )
 
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
 
                 if game == "minecraft":
-                    embed.add_field(name="💎 Versión", value=map_name, inline=True)
+                    embed.add_field(name="💎 Version", value=map_name, inline=True)
                 else:
-                    embed.add_field(name="🗺️ Mapa Actual", value=map_name, inline=True)
+                    embed.add_field(name="🗺️ Current Map", value=map_name, inline=True)
 
                 if max_players > 0:
                     percent = int(players / max_players * 100)
                 else:
                     percent = 0
                 embed.add_field(
-                    name="👥 Jugadores",
+                    name="👥 Players",
                     value=f"{players}/{max_players} ({percent}%)",
                     inline=True
                 )
 
-                embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Última actualización: {local_time}")
+                embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
                 # Enviar o editar mensaje
                 if first_time or not message_id:
@@ -356,8 +356,8 @@ class GameServerMonitor(commands.Cog):
                     title=f"{game_title} Server - ❌ Offline",
                     color=discord.Color.red()
                 )
-                embed.add_field(name="Estado", value="🔴 Offline", inline=True)
-                embed.add_field(name="🎮 Juego", value=game_title, inline=True)
+                embed.add_field(name="Status", value="🔴 Offline", inline=True)
+                embed.add_field(name="🎮 Game", value=game_title, inline=True)
 
                 # IP a mostrar (dominio si Minecraft + domain, si no, la IP)
                 if game == "minecraft" and domain:
@@ -370,8 +370,8 @@ class GameServerMonitor(commands.Cog):
                 if game != "minecraft":
                     connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port_part}"
                     embed.add_field(
-                        name="\n\u200b\n🔗 Conectar",
-                        value=f"[Conectar]({connect_url})\n\u200b\n",
+                        name="\n\u200b\n🔗 Connect",
+                        value=f"[Connect]({connect_url})\n\u200b\n",
                         inline=False
                     )
 
@@ -394,8 +394,5 @@ class GameServerMonitor(commands.Cog):
                         except Exception as send_error:
                             logger.error(f"Error al enviar mensaje offline para {server_ip_formatted}: {send_error}")
 
-    def cog_unload(self):
-        self.server_monitor.cancel()
-
-def setup(bot):
-    bot.add_cog(GameServerMonitor(bot))
+    def setup(bot):
+        bot.add_cog(GameServerMonitor(bot))
