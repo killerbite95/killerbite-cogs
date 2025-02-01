@@ -2,7 +2,6 @@ import discord
 from discord.ext import commands, tasks
 from redbot.core import Config, checks
 import requests
-import math
 
 # Mapeo de colores de Trello a valores hex
 COLOR_MAP = {
@@ -33,9 +32,10 @@ class TrelloCog(commands.Cog):
             "api_key": None,
             "api_token": None,
             "board_id": None,
-            "channels": {},  # Canal por etiqueta (por ejemplo, "En Progreso" -> canal_id)
+            "channels": {},  # Asociar canal por etiqueta, ej: "en progreso" -> canal_id
         }
         self.config.register_global(**default_global)
+        self.track_trello_changes.start()
 
     # ========= Comandos de configuración =========
 
@@ -44,7 +44,7 @@ class TrelloCog(commands.Cog):
     async def set_trello_creds(self, ctx, api_key: str, api_token: str):
         """
         Guarda las credenciales de Trello (API key y token).
-        
+
         Ejemplo: !settrello MI_API_KEY MI_API_TOKEN
         """
         await self.config.api_key.set(api_key)
@@ -73,16 +73,16 @@ class TrelloCog(commands.Cog):
         Ejemplo: !setchannel "En Progreso" #progreso
         """
         async with self.config.channels() as channels:
-            channels[label] = channel.id
-        await ctx.send(f"Canal {channel.mention} configurado para la etiqueta {label}.")
+            # Se guarda la etiqueta en minúsculas para evitar problemas de mayúsculas/minúsculas
+            channels[label.lower()] = channel.id
+        await ctx.send(f"Canal {channel.mention} configurado para la etiqueta '{label}'.")
 
     # ========= Comandos informativos =========
 
     @commands.command(name="trellolists")
     async def trello_lists(self, ctx):
         """
-        Muestra las listas del tablero configurado (board_id),
-        con paginación.
+        Muestra las listas del tablero configurado (board_id).
         
         Uso: !trellolists
         """
@@ -95,7 +95,7 @@ class TrelloCog(commands.Cog):
         if not board_id:
             return await ctx.send("No se ha configurado el board_id. Usa !settrelloboard.")
 
-        # Llamada a la API de Trello
+        # Llamada a la API de Trello para obtener las listas del tablero
         url = f"https://api.trello.com/1/boards/{board_id}/lists"
         params = {
             "key": api_key,
@@ -125,7 +125,7 @@ class TrelloCog(commands.Cog):
     @commands.command(name="trellocards")
     async def trello_cards(self, ctx, list_id: str = None):
         """
-        Muestra las tarjetas de un tablero, con paginación y filtrado por etiquetas.
+        Muestra las tarjetas del tablero, con filtrado por listas.
         
         Uso: !trellocards <list_id>
         Si no se pasa list_id, muestra todas las tarjetas de todas las listas.
@@ -139,41 +139,67 @@ class TrelloCog(commands.Cog):
         if not board_id:
             return await ctx.send("No se ha configurado el board_id. Usa !settrelloboard.")
         
-        list_id = list_id or ""  # Si no hay lista, buscar todas
-        url = f"https://api.trello.com/1/boards/{board_id}/lists"
-        params = {
-            "key": api_key,
-            "token": api_token,
-            "fields": "id,name"
-        }
-        try:
-            resp = requests.get(url, params=params, timeout=10)
-            resp.raise_for_status()
-        except requests.RequestException as e:
-            return await ctx.send(f"Error consultando Trello: {e}")
-
-        lists_data = resp.json()
-
-        # Si no especificas lista, mostramos todas las tarjetas.
         cards_data = []
-        for lst in lists_data:
-            url = f"https://api.trello.com/1/lists/{lst['id']}/cards"
+
+        if list_id:
+            # Obtener las tarjetas de la lista especificada
+            url = f"https://api.trello.com/1/lists/{list_id}/cards"
             params = {
                 "key": api_key,
                 "token": api_token,
                 "fields": "id,name,labels"
             }
-            resp = requests.get(url, params=params)
-            cards_data += resp.json()
+            try:
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+                cards_data = resp.json()
+            except requests.RequestException as e:
+                return await ctx.send(f"Error consultando Trello: {e}")
+        else:
+            # Obtener todas las listas y luego todas sus tarjetas
+            url = f"https://api.trello.com/1/boards/{board_id}/lists"
+            params = {
+                "key": api_key,
+                "token": api_token,
+                "fields": "id,name"
+            }
+            try:
+                resp = requests.get(url, params=params, timeout=10)
+                resp.raise_for_status()
+            except requests.RequestException as e:
+                return await ctx.send(f"Error consultando Trello: {e}")
+
+            lists_data = resp.json()
+            for lst in lists_data:
+                lst_id = lst.get("id")
+                if not lst_id:
+                    continue
+                url_cards = f"https://api.trello.com/1/lists/{lst_id}/cards"
+                params_cards = {
+                    "key": api_key,
+                    "token": api_token,
+                    "fields": "id,name,labels"
+                }
+                try:
+                    resp_cards = requests.get(url_cards, params=params_cards, timeout=10)
+                    resp_cards.raise_for_status()
+                    cards_data += resp_cards.json()
+                except requests.RequestException:
+                    continue
+
+        if not cards_data:
+            return await ctx.send("No se encontraron tarjetas.")
 
         embed = discord.Embed(
             title="Tarjetas del tablero",
-            description="Mostrando todas las tarjetas",
+            description="Mostrando tarjetas" if list_id else "Mostrando todas las tarjetas",
             color=discord.Color.green()
         )
         for card in cards_data:
-            labels = ", ".join([lbl["name"] for lbl in card.get("labels", [])])
-            embed.add_field(name=card["name"], value=f"Etiquetas: {labels}", inline=False)
+            # Extraemos los nombres de las etiquetas (si existen)
+            etiquetas = card.get("labels", [])
+            labels_text = ", ".join([lbl.get("name", "Sin nombre") for lbl in etiquetas]) if etiquetas else "Sin etiquetas"
+            embed.add_field(name=card.get("name", "Sin nombre"), value=f"Etiquetas: {labels_text}", inline=False)
 
         await ctx.send(embed=embed)
 
@@ -199,7 +225,7 @@ class TrelloCog(commands.Cog):
         try:
             resp = requests.get(url, params=params, timeout=10)
             resp.raise_for_status()
-        except requests.RequestException as e:
+        except requests.RequestException:
             return
 
         lists_data = resp.json()
@@ -209,47 +235,50 @@ class TrelloCog(commands.Cog):
                 continue
 
             # Obtenemos las tarjetas de la lista
-            url = f"https://api.trello.com/1/lists/{list_id}/cards"
-            params = {
+            url_cards = f"https://api.trello.com/1/lists/{list_id}/cards"
+            params_cards = {
                 "key": api_key,
                 "token": api_token,
                 "fields": "id,name,labels"
             }
             try:
-                resp = requests.get(url, params=params, timeout=10)
-                resp.raise_for_status()
-            except requests.RequestException as e:
+                resp_cards = requests.get(url_cards, params=params_cards, timeout=10)
+                resp_cards.raise_for_status()
+            except requests.RequestException:
                 continue
 
-            cards_data = resp.json()
+            cards_data = resp_cards.json()
 
-            # Filtramos por las etiquetas que queremos trackear
+            # Recorremos las tarjetas y sus etiquetas para notificar cambios
             for card in cards_data:
-                labels = card.get("labels", [])
-                for label in labels:
+                etiquetas = card.get("labels", [])
+                for label in etiquetas:
                     label_name = label.get("name")
                     if not label_name:
                         continue
 
-                    # Buscamos el canal configurado para esa etiqueta
+                    # Se busca el canal configurado para la etiqueta (usamos lower-case)
                     async with self.config.channels() as channels:
                         channel_id = channels.get(label_name.lower())
-                        if not channel_id:
-                            continue
+                    if not channel_id:
+                        continue
 
-                        channel = self.bot.get_channel(channel_id)
-                        if channel:
-                            embed = discord.Embed(
-                                title=f"Tarea actualizada: {card['name']}",
-                                description=f"Etiquetas: {', '.join([lbl['name'] for lbl in labels])}",
-                                color=COLOR_MAP.get(label.get("color"), 0x95A5A6)
-                            )
-                            embed.add_field(name="Estado", value=f"**{label_name}**", inline=True)
+                    channel = self.bot.get_channel(channel_id)
+                    if channel:
+                        embed = discord.Embed(
+                            title=f"Tarea actualizada: {card.get('name', 'Sin nombre')}",
+                            description=f"Etiquetas: {', '.join([lbl.get('name', 'Sin nombre') for lbl in etiquetas])}",
+                            color=COLOR_MAP.get(label.get("color"), 0x95A5A6)
+                        )
+                        embed.add_field(name="Estado", value=f"**{label_name}**", inline=True)
+                        try:
                             await channel.send(embed=embed)
+                        except Exception:
+                            continue
 
     @track_trello_changes.before_loop
     async def before_track_trello_changes(self):
-        """Establece el loop para empezar cuando el bot esté listo."""
+        """Espera a que el bot esté listo antes de iniciar el loop."""
         await self.bot.wait_until_ready()
 
 
