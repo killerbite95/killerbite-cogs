@@ -1,4 +1,4 @@
 from .blackjack import Blackjack
 
-def setup(bot):
-    bot.add_cog(Blackjack(bot))
+async def setup(bot):
+    await bot.add_cog(Blackjack(bot))
