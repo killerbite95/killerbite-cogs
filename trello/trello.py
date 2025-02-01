@@ -1,6 +1,6 @@
 import discord
-from discord.ext import commands, tasks
-from redbot.core import Config, checks
+from discord.ext import tasks
+from redbot.core import commands, checks, Config
 import requests
 
 # Mapeo de colores de Trello a valores hex
