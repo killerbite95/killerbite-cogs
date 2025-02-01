@@ -298,7 +298,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="🎮 Game", value=game_name, inline=True)
 
                 if game != "minecraft":
-                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port_part}"
+                    connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
                     embed.add_field(
                         name="\n\u200b\n🔗 Connect",
                         value=f"[Connect]({connect_url})\n\u200b\n",
@@ -368,7 +368,7 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
 
                 if game != "minecraft":
-                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port_part}"
+                    connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
                     embed.add_field(
                         name="\n\u200b\n🔗 Connect",
                         value=f"[Connect]({connect_url})\n\u200b\n",
