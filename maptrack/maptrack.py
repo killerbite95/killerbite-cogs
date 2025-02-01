@@ -194,7 +194,7 @@ class MapTrack(commands.Cog):
                         public_ip = "178.33.160.187"
                     else:
                         public_ip = internal_ip
-                    connect_url = f"https://vauff.com/connect.php?ip={public_ip}:{port}"
+                    connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port}"
 
                     embed = discord.Embed(
                         title="📢 Map Change Detected!" if not first_time else "📋 Initial Map State",
