@@ -1,6 +1,5 @@
 import discord
-from discord.ext import commands
-from redbot.core import Config, bank, checks
+from redbot.core import commands, Config, bank, checks
 import random
 
 class AdvancedBlackjackView(discord.ui.View):
