@@ -1,4 +1,4 @@
-from .prunebans import PruneBans
+from .autonick import AutoNick
 
 async def setup(bot):
-    await bot.add_cog(PruneBans(bot))
+    await bot.add_cog(AutoNick(bot))
