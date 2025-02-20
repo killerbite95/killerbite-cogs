@@ -46,12 +46,14 @@ class AdvancedCaptcha(commands.Cog):
         self.font_data = os.path.join(self.data_path, "DroidSansMono.ttf")
 
     # -------------------------------------------------------------------------
-    # Función para generar la imagen del captcha con manejo de error en textbbox
+    # Función para generar la imagen del captcha con manejo de errores en la fuente
     # -------------------------------------------------------------------------
     def generate_captcha_image(self, captcha_code: str) -> discord.File:
         """Genera una imagen PNG con el código captcha usando la fuente ubicada en self.font_data."""
+        # Dimensiones y tamaño de fuente ajustados
         width, height = 600, 200
         font_size = 200
+
         image = Image.new("RGB", (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
 
@@ -61,21 +63,35 @@ class AdvancedCaptcha(commands.Cog):
             print(f"No se pudo cargar la fuente en {self.font_data}: {e}")
             font = ImageFont.load_default()
 
-        # Intentamos calcular el bounding box del texto
+        # Calculamos el bounding box del texto
         try:
             bbox = draw.textbbox((0, 0), captcha_code, font=font)
             text_width = bbox[2] - bbox[0]
             text_height = bbox[3] - bbox[1]
         except Exception as e:
             print(f"Error al calcular textbbox: {e}")
-            # Fallback: estimamos el ancho como font_size * longitud y alto como font_size
             text_width = font_size * len(captcha_code)
             text_height = font_size
 
         x = (width - text_width) / 2
         y = (height - text_height) / 2
 
-        draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
+        # Intentamos dibujar el texto; si ocurre un error (ej. invalid outline), se captura y se usa la fuente por defecto
+        try:
+            draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
+        except OSError as e:
+            print(f"Error al dibujar el texto con la fuente actual: {e}. Usando fuente por defecto.")
+            font = ImageFont.load_default()
+            # Recalcular con la fuente por defecto
+            try:
+                bbox = draw.textbbox((0, 0), captcha_code, font=font)
+                text_width = bbox[2] - bbox[0]
+                text_height = bbox[3] - bbox[1]
+            except Exception:
+                text_width, text_height = font.getsize(captcha_code)
+            x = (width - text_width) / 2
+            y = (height - text_height) / 2
+            draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
 
         buffer = io.BytesIO()
         image.save(buffer, "PNG")
@@ -216,14 +232,14 @@ class AdvancedCaptcha(commands.Cog):
             await self.safe_delete(msg)
 
     async def safe_delete(self, message: discord.Message):
-        """Intenta borrar un mensaje sin errores de permisos."""
+        """Intenta borrar un mensaje sin lanzar errores si faltan permisos."""
         try:
             await message.delete()
         except (discord.Forbidden, discord.HTTPException):
             pass
 
     # =========================================================================
-    #                   COMANDOS DE CONFIGURACIÓN
+    #                    COMANDOS DE CONFIGURACIÓN
     # =========================================================================
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
@@ -307,7 +323,6 @@ class AdvancedCaptcha(commands.Cog):
                     color_value = int(color, 16)
                 except ValueError:
                     pass
-
         if color_value is None:
             return await ctx.send("No se pudo interpretar el color. Usa formato #RRGGBB o un nombre válido.")
         await self.config.guild(ctx.guild).embed_color.set(color_value)
@@ -357,7 +372,7 @@ class AdvancedCaptcha(commands.Cog):
         await ctx.send(f"Captcha {'habilitado' if enabled else 'deshabilitado'}.")
 
     # =========================================================================
-    #             COMANDOS DE CONFIGURACIÓN Y RESET DE CONFIGURACIÓN
+    #         COMANDOS DE CONFIGURACIÓN Y RESET DE CONFIGURACIÓN
     # =========================================================================
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
@@ -365,18 +380,18 @@ class AdvancedCaptcha(commands.Cog):
     async def setupcaptcha(self, ctx):
         """
         Envía instrucciones para configurar el captcha.
-        Ejemplo de configuración:
-          1. Canal de captcha: `!setcaptchachannel #canal-de-captcha`
-          2. Tiempo de verificación: `!setcaptchatime 5`
-          3. Intentos máximos: `!setcaptchaattempts 5`
-          4. Invitación para reingreso: `!setcaptchainvite https://discord.gg/ejemplo`
+        Ejemplo:
+          1. Canal: `!setcaptchachannel #canal-de-captcha`
+          2. Tiempo: `!setcaptchatime 5`
+          3. Intentos: `!setcaptchaattempts 5`
+          4. Invitación: `!setcaptchainvite https://discord.gg/ejemplo`
           5. Embed:
              - Título: `!setcaptchatitle Verificación Captcha`
-             - Descripción: `!setcaptchadesc Para acceder al servidor, debes demostrar que eres humano completando el captcha.`
+             - Descripción: `!setcaptchadesc Para acceder, demuestra que eres humano completando el captcha.`
              - Color: `!setcaptchacolor #3498DB`
              - Thumbnail: `!setcaptchaimage https://imgur.com/C2c0SpZ`
-          6. Rol verificado: `!setcaptchaverifiedrole @Verificado`
-          7. Enviar embed informativo: `!setcaptchaembed`
+          6. Rol: `!setcaptchaverifiedrole @Verificado`
+          7. Enviar embed: `!setcaptchaembed`
           8. Ver configuración: `!showcaptchasettings`
         """
         instructions = (
@@ -390,11 +405,11 @@ class AdvancedCaptcha(commands.Cog):
             "**4. Establecer invitación para reingreso:**\n"
             "   `!setcaptchainvite https://discord.gg/ejemplo`\n\n"
             "**5. Configurar el Embed de captcha:**\n"
-            "   - Título (por defecto 'Verificación Captcha'):\n"
+            "   - Título:\n"
             "      `!setcaptchatitle Verificación Captcha`\n"
             "   - Descripción:\n"
-            "      `!setcaptchadesc Para acceder al servidor, debes demostrar que eres humano completando el captcha.`\n"
-            "   - Color (por defecto `#3498DB`):\n"
+            "      `!setcaptchadesc Para acceder, demuestra que eres humano completando el captcha.`\n"
+            "   - Color:\n"
             "      `!setcaptchacolor #3498DB`\n"
             "   - Thumbnail (opcional):\n"
             "      `!setcaptchaimage https://imgur.com/C2c0SpZ`\n\n"
