@@ -52,7 +52,7 @@ class AdvancedCaptcha(commands.Cog):
         image = Image.new("RGB", (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
         try:
-            font = ImageFont.truetype("advancedcaptcha/data/DroidSansMono.ttf", font_size)
+            font = ImageFont.truetype("data/DroidSansMono.ttf", font_size)
         except Exception:
             font = ImageFont.load_default()
 
