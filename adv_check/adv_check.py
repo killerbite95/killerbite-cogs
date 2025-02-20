@@ -156,10 +156,10 @@ class CheckView(discord.ui.View):
             discord.SelectOption(label="Actividad", value="activity")
         ]
     )
-    async def select_callback(self, interaction: discord.Interaction):
-        # 'self' aquí es el Select; accedemos a los valores y al view mediante self.view
-        value = self.values[0]
-        embed = self.view.embeds.get(value)
+    async def select_callback(self, interaction: discord.Interaction, select: discord.ui.Select):
+        """Actualiza el embed mostrado según la selección."""
+        value = select.values[0]
+        embed = self.embeds.get(value)
         if embed:
             await interaction.response.edit_message(embed=embed)
         else:
