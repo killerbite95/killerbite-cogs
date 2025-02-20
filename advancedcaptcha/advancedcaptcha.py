@@ -39,41 +39,39 @@ class AdvancedCaptcha(commands.Cog):
         self.config.register_guild(**default_guild)
         # Diccionario para almacenar los mensajes de cada proceso: {user_id: [message, ...]}
         self.process_messages = {}
-        # Indica la ruta donde el cog busca los datos “bundled”
-        self.data_path = bundled_data_path(self)
-        # Construye la ruta completa al archivo de la fuente
-        self.font_data = os.path.join(self.data_path, "DroidSansMono.ttf")
 
     # -------------------------------------------------------------------------
     # Función para generar la imagen del captcha
     # -------------------------------------------------------------------------
     def generate_captcha_image(self, captcha_code: str) -> discord.File:
-        """Genera una imagen PNG con el código captcha usando la fuente ubicada en font_data."""
-        width, height = 600, 200
+        """Genera una imagen PNG con el código captcha usando la fuente especificada."""
+        # Aumentamos las dimensiones y el tamaño de la fuente
+        width, height = 400, 160
         font_size = 380
+
         image = Image.new("RGB", (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
-
         try:
-            # Cargamos la fuente desde la ruta self.font_data
-            font = ImageFont.truetype(self.font_data, font_size)
-        except Exception as e:
-            print(f"No se pudo cargar la fuente en {self.font_data}: {e}")
+            font = ImageFont.truetype("data/DroidSansMono.ttf", font_size)
+        except Exception:
             font = ImageFont.load_default()
 
-        # Calculamos el tamaño del texto para centrarlo
+        # Calculamos el bounding box del texto para centrarlo
         bbox = draw.textbbox((0, 0), captcha_code, font=font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
+        text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = (width - text_width) / 2
         y = (height - text_height) / 2
 
+        # Dibujamos el texto en la imagen
         draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
 
+        # Guardamos en memoria temporal y lo enviamos como archivo de Discord
         buffer = io.BytesIO()
         image.save(buffer, "PNG")
         buffer.seek(0)
         return discord.File(fp=buffer, filename="captcha.png")
+
+
     # =========================================================================
     #                             EVENTOS
     # =========================================================================
