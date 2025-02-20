@@ -26,15 +26,18 @@ class CaptchaGenerator:
         self._width = width
         self._height = height
         self.font = ImageFont.truetype(font_path, font_size)
-        # Tabla de lookup para la máscara (aquí se deja la identidad)
+        # Tabla de lookup para la máscara (se deja como identidad)
         self.lookup_table = list(range(256))
 
     def _draw_character(self, char: str, color: ColorTuple) -> Image.Image:
         """Dibuja un carácter en una imagen RGBA con fondo transparente."""
-        size = self.font.getsize(char)
+        # Usamos getbbox en lugar de getsize
+        bbox = self.font.getbbox(char)
+        size = (bbox[2] - bbox[0], bbox[3] - bbox[1])
         img = Image.new("RGBA", size, (255, 255, 255, 0))
         draw = ImageDraw.Draw(img)
-        draw.text((0, 0), char, font=self.font, fill=color)
+        # Ajustamos el offset para que se dibuje correctamente
+        draw.text((-bbox[0], -bbox[1]), char, font=self.font, fill=color)
         return img
 
     def _create_captcha_image(self, chars: str, color: ColorTuple, background: ColorTuple) -> Image.Image:
@@ -44,7 +47,6 @@ class CaptchaGenerator:
 
         images: List[Image.Image] = []
         for char in chars:
-            # A veces se inserta un espacio extra para simular error
             if random.random() > 0.5:
                 images.append(self._draw_character(" ", color))
             images.append(self._draw_character(char, color))
@@ -123,18 +125,14 @@ class AdvancedCaptcha(commands.Cog):
         }
         self.config.register_guild(**default_guild)
         self.process_messages = {}
-        # Usamos bundled_data_path para obtener la ruta de la carpeta 'data'
         self.data_path = bundled_data_path(self)
         self.font_data = os.path.join(self.data_path, "DroidSansMono.ttf")
-        # Parámetros para el captcha
         self._width = 600
         self._height = 200
         self._font_size = 200
-        # Creamos la instancia de CaptchaGenerator
         self.captcha_generator = CaptchaGenerator(self._width, self._height, self.font_data, self._font_size)
 
     def generate_captcha_image(self, captcha_code: str) -> discord.File:
-        """Genera el captcha usando CaptchaGenerator y lo retorna como discord.File."""
         byte = self.captcha_generator.generate(captcha_code, format="png")
         return discord.File(fp=byte, filename="captcha.png")
 
@@ -143,7 +141,6 @@ class AdvancedCaptcha(commands.Cog):
     # -------------------------------------------------------------------------
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        """Inicia el proceso de captcha al unirse un miembro, si está habilitado y sin bypass."""
         guild = member.guild
         guild_config = await self.config.guild(guild).all()
         if not guild_config["captcha_enabled"]:
@@ -161,7 +158,6 @@ class AdvancedCaptcha(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        """Limpia los datos del proceso de captcha si un miembro abandona el servidor."""
         if member.id in self.process_messages:
             for msg in self.process_messages[member.id]:
                 try:
@@ -180,7 +176,7 @@ class AdvancedCaptcha(commands.Cog):
         max_attempts = guild_config["max_attempts"]
         invite_link = guild_config["invite_link"]
         proc_msgs = self.process_messages.get(member.id, [])
-        
+
         captcha_code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
         captcha_file = self.generate_captcha_image(captcha_code)
         try:
@@ -201,6 +197,7 @@ class AdvancedCaptcha(commands.Cog):
             if remaining_time <= 0:
                 await self.fail_captcha(member, invite_link, channel, proc_msgs)
                 break
+
             try:
                 msg = await self.bot.wait_for(
                     "message",
@@ -230,7 +227,6 @@ class AdvancedCaptcha(commands.Cog):
         self.process_messages.pop(member.id, None)
 
     async def assign_verified_role(self, member: discord.Member, role_id: Optional[int]):
-        """Asigna el rol de verificado al usuario si se configuró."""
         if role_id:
             role = member.guild.get_role(role_id)
             if role:
@@ -239,8 +235,8 @@ class AdvancedCaptcha(commands.Cog):
                 except discord.Forbidden:
                     pass
 
-    async def fail_captcha(self, member: discord.Member, invite_link: Optional[str], channel: discord.TextChannel, proc_msgs: List[discord.Message]):
-        """Envía DM con invitación, expulsa al miembro y elimina los mensajes del proceso."""
+    async def fail_captcha(self, member: discord.Member, invite_link: Optional[str],
+                             channel: discord.TextChannel, proc_msgs: List[discord.Message]):
         if invite_link:
             try:
                 await member.send(
@@ -271,7 +267,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchachannel(self, ctx, channel: discord.TextChannel):
-        """Establece el canal donde se enviarán los captchas."""
         await self.config.guild(ctx.guild).captcha_channel.set(channel.id)
         await ctx.send(f"Canal de captcha establecido en {channel.mention}")
 
@@ -279,7 +274,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchatime(self, ctx, minutes: int):
-        """Define el tiempo (en minutos) para completar el captcha."""
         if minutes < 1:
             return await ctx.send("El tiempo mínimo es de 1 minuto.")
         await self.config.guild(ctx.guild).verification_timeout.set(minutes)
@@ -289,7 +283,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchaattempts(self, ctx, attempts: int):
-        """Define el número máximo de intentos para resolver el captcha."""
         if attempts < 1:
             return await ctx.send("Debe haber al menos 1 intento.")
         await self.config.guild(ctx.guild).max_attempts.set(attempts)
@@ -299,7 +292,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchainvite(self, ctx, invite_link: str):
-        """Establece la invitación que se enviará por DM antes de expulsar al usuario."""
         await self.config.guild(ctx.guild).invite_link.set(invite_link)
         await ctx.send("Invitación configurada correctamente.")
 
@@ -307,7 +299,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchatitle(self, ctx, *, title: str):
-        """Establece el título del embed de captcha."""
         await self.config.guild(ctx.guild).embed_title.set(title)
         await ctx.send(f"Título del embed establecido a: {title}")
 
@@ -315,7 +306,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchadesc(self, ctx, *, description: str):
-        """Establece la descripción del embed de captcha."""
         await self.config.guild(ctx.guild).embed_description.set(description)
         await ctx.send("Descripción del embed actualizada.")
 
@@ -323,10 +313,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchacolor(self, ctx, color: str):
-        """
-        Establece el color del embed de captcha.
-        Puede ser en formato #RRGGBB o un nombre (blue, red, etc.).
-        """
         color_value = None
         if color.startswith("#"):
             try:
@@ -358,11 +344,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchaimage(self, ctx, *, image_url: str = None):
-        """
-        Establece el thumbnail del embed de captcha.
-        Ejemplo: !setcaptchaimage https://imgur.com/C2c0SpZ
-        Sin argumentos, lo elimina.
-        """
         if image_url and not (image_url.startswith("http://") or image_url.startswith("https://")):
             return await ctx.send("La URL de la imagen debe comenzar con http:// o https://")
         await self.config.guild(ctx.guild).embed_image.set(image_url)
@@ -375,10 +356,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchaverifiedrole(self, ctx, role: discord.Role):
-        """
-        Establece el rol que se asignará a los usuarios que verifiquen el captcha.
-        Ejemplo: !setcaptchaverifiedrole @Verificado
-        """
         await self.config.guild(ctx.guild).verified_role.set(role.id)
         await ctx.send(f"Rol de verificados establecido a: {role.mention}")
 
@@ -386,10 +363,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def togglecaptcha(self, ctx, state: str):
-        """
-        Habilita o deshabilita el sistema de captcha.
-        Uso: !togglecaptcha on / off
-        """
         state = state.lower()
         if state not in ("on", "off"):
             return await ctx.send("Uso: !togglecaptcha on / off")
@@ -401,22 +374,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setupcaptcha(self, ctx):
-        """
-        Envía instrucciones para configurar el captcha.
-        Ejemplo:
-          1. Canal: `!setcaptchachannel #canal-de-captcha`
-          2. Tiempo: `!setcaptchatime 5`
-          3. Intentos: `!setcaptchaattempts 5`
-          4. Invitación: `!setcaptchainvite https://discord.gg/ejemplo`
-          5. Embed:
-             - Título: `!setcaptchatitle Verificación Captcha`
-             - Descripción: `!setcaptchadesc Para acceder, demuestra que eres humano completando el captcha.`
-             - Color: `!setcaptchacolor #3498DB`
-             - Thumbnail: `!setcaptchaimage https://imgur.com/C2c0SpZ`
-          6. Rol verificado: `!setcaptchaverifiedrole @Verificado`
-          7. Enviar embed: `!setcaptchaembed`
-          8. Ver configuración: `!showcaptchasettings`
-        """
         instructions = (
             "**Pasos para configurar el Captcha**\n\n"
             "**1. Establecer canal de captcha:**\n"
@@ -449,7 +406,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def showcaptchasettings(self, ctx):
-        """Muestra la configuración actual del captcha."""
         guild_config = await self.config.guild(ctx.guild).all()
         embed = discord.Embed(title="Configuración Actual de Captcha", color=guild_config["embed_color"])
         embed.add_field(name="Captcha habilitado", value=str(guild_config["captcha_enabled"]), inline=False)
@@ -468,7 +424,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def setcaptchaembed(self, ctx):
-        """Envía el embed informativo de captcha al canal configurado (permanece fijo)."""
         guild_config = await self.config.guild(ctx.guild).all()
         channel_id = guild_config["captcha_channel"]
         if not channel_id:
@@ -490,11 +445,6 @@ class AdvancedCaptcha(commands.Cog):
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def resetcaptcha(self, ctx):
-        """
-        Reinicia la configuración del captcha a sus valores por defecto y limpia todos los datos internos.
-        
-        ¡ATENCIÓN! Esto borrará toda la configuración actual del cog en este servidor.
-        """
         default = {
             "captcha_enabled": True,
             "captcha_channel": None,
