@@ -283,14 +283,20 @@ class GameServerMonitor(commands.Cog):
 
                 # Crear embed en inglés
                 if is_passworded:
+                    title_online = f"{hostname} - Server Status"
+                    if len(title_online) > 256:
+                        title_online = title_online[:253] + "..."
                     embed = discord.Embed(
-                        title=f"{hostname} - Server Status",
+                        title=title_online,
                         color=discord.Color.orange()
                     )
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
+                    title_online = f"{hostname} - Server Status"
+                    if len(title_online) > 256:
+                        title_online = title_online[:253] + "..."
                     embed = discord.Embed(
-                        title=f"{hostname} - Server Status",
+                        title=title_online,
                         color=discord.Color.green()
                     )
                     embed.add_field(name="✅ Status", value="Online", inline=True)
@@ -352,8 +358,11 @@ class GameServerMonitor(commands.Cog):
                 else:
                     game_title = game
 
+                title_offline = f"{game_title} Server - ❌ Offline"
+                if len(title_offline) > 256:
+                    title_offline = title_offline[:253] + "..."
                 embed = discord.Embed(
-                    title=f"{game_title} Server - ❌ Offline",
+                    title=title_offline,
                     color=discord.Color.red()
                 )
                 embed.add_field(name="Status", value="🔴 Offline", inline=True)
