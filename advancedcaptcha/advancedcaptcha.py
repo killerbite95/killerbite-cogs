@@ -2,14 +2,16 @@ import discord
 import asyncio
 import random
 import string
+import io
 from redbot.core import commands, Config, checks
 from typing import Optional
+from PIL import Image, ImageDraw, ImageFont  # Asegúrate de tener Pillow instalado
 
 class AdvancedCaptcha(commands.Cog):
     """Cog avanzado de Captcha con verificación automática al unirse y borrado controlado de mensajes.
 
     - El embed informativo se envía mediante el comando !setcaptchaembed y permanece fijo.
-    - Al unirse, se envía un mensaje individual de desafío en el canal configurado.
+    - Al unirse, se envía un mensaje individual de desafío en el canal configurado, pero ahora con una imagen del captcha.
     - Se registran los mensajes relacionados a cada proceso de captcha para poder borrarlos
       sin afectar otros procesos o el embed informativo.
     """
@@ -34,6 +36,31 @@ class AdvancedCaptcha(commands.Cog):
         self.config.register_guild(**default_guild)
         # Almacena las listas de mensajes de cada proceso: {user_id: [message, ...]}
         self.process_messages = {}
+
+    # -------------------------------------------------------------------------
+    # Función para generar la imagen del captcha
+    # -------------------------------------------------------------------------
+    def generate_captcha_image(self, captcha_code: str) -> discord.File:
+        """Genera una imagen PNG con el código captcha usando la fuente especificada."""
+        # Dimensiones de la imagen (puedes ajustar según necesites)
+        width, height = 200, 80
+        image = Image.new("RGB", (width, height), color=(255, 255, 255))
+        draw = ImageDraw.Draw(image)
+        try:
+            # Ruta relativa a la carpeta del cog
+            font = ImageFont.truetype("data/DroidSansMono.ttf", 40)
+        except Exception:
+            font = ImageFont.load_default()
+
+        text_width, text_height = draw.textsize(captcha_code, font=font)
+        x = (width - text_width) / 2
+        y = (height - text_height) / 2
+        draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
+
+        buffer = io.BytesIO()
+        image.save(buffer, "PNG")
+        buffer.seek(0)
+        return discord.File(fp=buffer, filename="captcha.png")
 
     # =========================================================================
     #                              EVENTOS
@@ -70,11 +97,14 @@ class AdvancedCaptcha(commands.Cog):
 
         proc_msgs = self.process_messages.get(member.id, [])
 
-        # Envía mensaje individual de captcha (sin el embed informativo)
+        # Genera el captcha (6 caracteres alfanuméricos)
         captcha_code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
+        # Genera la imagen con el captcha
+        captcha_file = self.generate_captcha_image(captcha_code)
         try:
             challenge = await channel.send(
-                f"{member.mention}, escribe el siguiente captcha para continuar:\n**{captcha_code}**"
+                f"{member.mention}, escribe el texto que ves en la imagen para continuar:",
+                file=captcha_file
             )
             proc_msgs.append(challenge)
         except discord.Forbidden:
