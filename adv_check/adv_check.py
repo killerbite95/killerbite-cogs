@@ -11,9 +11,9 @@ _ = Translator("AdvCheck", __file__)
 class Check(commands.Cog):
     """Cog avanzado para realizar verificaciones completas en usuarios con UI interactiva y soporte para Slash Commands.
     
-    Este cog muestra información básica, roles, fecha de ingreso, avatar, permisos, actividad
-    y sanciones. En el apartado de sanciones se obtiene la información de baneos del cog de baneos
-    (PruneBans) y los warnings del propio Red (si el cog de moderación está cargado).
+    Muestra información básica, roles, fecha de ingreso, avatar, permisos, actividad
+    y sanciones. En el apartado de sanciones se obtiene la información real de baneos
+    (desde el cog de baneos PruneBans) y se invoca de forma "invisible" el comando de warnings.
     """
     __version__ = "2.3.0"
 
@@ -45,7 +45,6 @@ class Check(commands.Cog):
           • Actividad
           • Sanciones
         """
-        # Construir los embeds para cada sección (todos menos "sanciones" son síncronos)
         embeds = {
             "basic": self._build_basic_info(member),
             "roles": self._build_roles_embed(member),
@@ -54,8 +53,8 @@ class Check(commands.Cog):
             "permissions": self._build_permissions_embed(member),
             "activity": self._build_activity_embed(member)
         }
-        # El apartado de sanciones requiere consultas asíncronas:
-        embeds["sanctions"] = await self._build_sanctions_embed(member)
+        # Se obtiene el apartado de sanciones de forma asíncrona, pasando el ctx para poder invocar el comando de warnings.
+        embeds["sanctions"] = await self._build_sanctions_embed(ctx, member)
 
         view = CheckView(member, embeds)
         await ctx.send(embed=embeds["basic"], view=view, ephemeral=True)
@@ -142,10 +141,10 @@ class Check(commands.Cog):
         )
         return embed
 
-    async def _build_sanctions_embed(self, member: discord.Member) -> discord.Embed:
+    async def _build_sanctions_embed(self, ctx: commands.Context, member: discord.Member) -> discord.Embed:
         """Crea un embed con las sanciones registradas del usuario.
-
-        Se obtiene la información de baneos del cog PruneBans y los warnings del cog de moderación (Mod).
+        
+        Se obtiene la información de baneos del cog PruneBans y se invoca el comando de warnings de forma invisible.
         """
         # Obtener información de baneos desde el cog PruneBans
         ban_info_str = "No hay baneos registrados."
@@ -167,21 +166,30 @@ class Check(commands.Cog):
         else:
             ban_info_str = "No se encontró el cog de baneos."
         
-        # Obtener warnings del cog de moderación (Mod)
+        # Obtener warnings ejecutando el comando "warnings" de forma invisible
         warnings_info = "No hay warnings registrados."
-        mod_cog = self.bot.get_cog("Mod")
-        if mod_cog is not None:
+        warns_cmd = self.bot.get_command("warnings")
+        if warns_cmd is not None:
+            captured = []
+            # Guardar la función original para restaurarla después
+            original_send = ctx.send
+
+            async def fake_send(content=None, **kwargs):
+                if content:
+                    captured.append(content)
+
+            ctx.send = fake_send
             try:
-                # Se asume que la configuración del Mod cog guarda los warns en 'warns'
-                warns = await mod_cog.config.member(member).warns()
-                if warns:
-                    warnings_info = f"{len(warns)} warning(s) registrado(s)."
-                else:
-                    warnings_info = "No hay warnings registrados."
+                # Invoca el comando warnings, pasando el miembro
+                await ctx.invoke(warns_cmd, member=member)
             except Exception:
-                warnings_info = "No se pudo obtener la información de warnings."
+                warnings_info = "Error al obtener warnings."
+            finally:
+                ctx.send = original_send
+            if captured:
+                warnings_info = "\n".join(captured)
         else:
-            warnings_info = "El cog de moderación (Mod) no está cargado."
+            warnings_info = "El comando warnings no está disponible."
         
         description = f"{ban_info_str}\n\n**Warnings:** {warnings_info}"
         embed = discord.Embed(
