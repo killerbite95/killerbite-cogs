@@ -191,6 +191,23 @@ class GameServerMonitor(commands.Cog):
         server_ip_formatted = f"{ip_part}:{port_part}"
         return ip_part, port_part, server_ip_formatted
 
+    def parse_minecraft_description(self, description):
+        """
+        Convierte un "Chat Component" de Minecraft (dict o lista) a texto plano.
+        """
+        result = ""
+        if isinstance(description, dict):
+            result += description.get("text", "")
+            if "extra" in description:
+                for item in description["extra"]:
+                    result += self.parse_minecraft_description(item)
+        elif isinstance(description, list):
+            for item in description:
+                result += self.parse_minecraft_description(item)
+        else:
+            result += str(description)
+        return result
+
     async def update_server_status(self, guild, server_ip, first_time=False):
         """Actualiza el estado del servidor y edita el mensaje en Discord."""
         async with self.config.guild(guild).servers() as servers:
@@ -249,6 +266,9 @@ class GameServerMonitor(commands.Cog):
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
                     hostname = info.get("description", "Minecraft Server")
+                    # Si hostname es un dict o lista, lo convertimos a texto plano
+                    if isinstance(hostname, (dict, list)):
+                        hostname = self.parse_minecraft_description(hostname)
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
                 else:
@@ -282,19 +302,16 @@ class GameServerMonitor(commands.Cog):
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
                 # Crear embed en inglés
+                title_online = f"{hostname} - Server Status"
+                if len(title_online) > 256:
+                    title_online = title_online[:253] + "..."
                 if is_passworded:
-                    title_online = f"{hostname} - Server Status"
-                    if len(title_online) > 256:
-                        title_online = title_online[:253] + "..."
                     embed = discord.Embed(
                         title=title_online,
                         color=discord.Color.orange()
                     )
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
-                    title_online = f"{hostname} - Server Status"
-                    if len(title_online) > 256:
-                        title_online = title_online[:253] + "..."
                     embed = discord.Embed(
                         title=title_online,
                         color=discord.Color.green()
