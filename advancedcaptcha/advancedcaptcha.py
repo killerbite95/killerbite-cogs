@@ -292,7 +292,7 @@ class AdvancedCaptcha(commands.Cog):
     async def setcaptchaimage(self, ctx, *, image_url: str = None):
         """
         Establece el thumbnail del embed informativo.
-        Ejemplo: !setcaptchaimage https://imgur.com/C2c0SpZ
+        Ejemplo: !setcaptchaimage https://i.imgur.com/bBJelmT.png
         Sin argumentos, elimina el thumbnail.
         """
         if image_url and not (image_url.startswith("http://") or image_url.startswith("https://")):
@@ -360,7 +360,7 @@ class AdvancedCaptcha(commands.Cog):
              - Color (por defecto `#3498DB`):
                 `!setcaptchacolor #3498DB`
              - Thumbnail (opcional):
-                `!setcaptchaimage https://imgur.com/C2c0SpZ`
+                `!setcaptchaimage https://i.imgur.com/bBJelmT.png`
           6. Establecer el rol de verificados:
              `!setcaptchaverifiedrole @Verificado`
           7. Enviar el embed informativo al canal de captcha:
@@ -386,7 +386,7 @@ class AdvancedCaptcha(commands.Cog):
             "   - Color (por defecto `#3498DB`):\n"
             "      `!setcaptchacolor #3498DB`\n"
             "   - Thumbnail (opcional):\n"
-            "      `!setcaptchaimage https://imgur.com/C2c0SpZ`\n\n"
+            "      `!setcaptchaimage https://i.imgur.com/bBJelmT.png`\n\n"
             "**6. Establecer el rol de verificados:**\n"
             "   `!setcaptchaverifiedrole @Verificado`\n\n"
             "**7. Enviar el embed informativo al canal de captcha:**\n"
