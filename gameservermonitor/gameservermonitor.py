@@ -209,6 +209,37 @@ class GameServerMonitor(commands.Cog):
             result += str(description)
         return result
 
+    def get_plain_hostname(self, raw_hostname):
+        """
+        Procesa el hostname obtenido del servidor de Minecraft:
+         - Si es dict o lista, lo convierte a texto plano.
+         - Si es una cadena que parece dict (empieza con '{' y termina con '}'),
+           se intenta evaluar.
+         - Se trunca para que, al añadir " - Server Status", no exceda 256 caracteres.
+        """
+        if isinstance(raw_hostname, (dict, list)):
+            hostname = self.parse_minecraft_description(raw_hostname)
+        elif isinstance(raw_hostname, str) and raw_hostname.strip().startswith("{") and raw_hostname.strip().endswith("}"):
+            try:
+                parsed_desc = ast.literal_eval(raw_hostname)
+                if isinstance(parsed_desc, (dict, list)):
+                    hostname = self.parse_minecraft_description(parsed_desc)
+                else:
+                    hostname = raw_hostname
+            except Exception as e:
+                logger.error(f"Error al evaluar la descripción: {e}")
+                hostname = raw_hostname
+        else:
+            hostname = raw_hostname
+
+        hostname = hostname.strip()
+        # Calcula el máximo de caracteres para hostname
+        sufijo = " - Server Status"
+        max_hostname_length = 256 - len(sufijo)
+        if len(hostname) > max_hostname_length:
+            hostname = hostname[:max_hostname_length - 3] + "..."
+        return hostname
+
     async def update_server_status(self, guild, server_ip, first_time=False):
         """Actualiza el estado del servidor y edita el mensaje en Discord."""
         async with self.config.guild(guild).servers() as servers:
@@ -224,7 +255,7 @@ class GameServerMonitor(commands.Cog):
             channel = self.bot.get_channel(channel_id)
 
             if not channel:
-                logger.error(f"Canal con ID {channel_id} no encontrado en el servidor {guild.name}.")
+                logger.error(f"Canal con ID {channel_id} no encontrado en {guild.name}.")
                 return
 
             # Analizar server_ip
@@ -255,7 +286,7 @@ class GameServerMonitor(commands.Cog):
                     source = None
                 game_name = "Minecraft"
             else:
-                logger.warning(f"Juego '{game}' no soportado para el servidor {server_ip_formatted}.")
+                logger.warning(f"Juego '{game}' no soportado para {server_ip_formatted}.")
                 await channel.send(f"Juego {game} no soportado.")
                 return
 
@@ -266,18 +297,9 @@ class GameServerMonitor(commands.Cog):
                     is_passworded = False
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
-                    hostname = info.get("description", "Minecraft Server")
-                    # Si hostname es un dict o lista, lo convertimos a texto plano
-                    if isinstance(hostname, (dict, list)):
-                        hostname = self.parse_minecraft_description(hostname)
-                    # Si hostname es una cadena que luce como diccionario, intentamos evaluarla
-                    elif isinstance(hostname, str) and hostname.startswith("{") and hostname.endswith("}"):
-                        try:
-                            parsed_desc = ast.literal_eval(hostname)
-                            if isinstance(parsed_desc, (dict, list)):
-                                hostname = self.parse_minecraft_description(parsed_desc)
-                        except Exception as e:
-                            logger.error(f"Error al evaluar la descripción: {e}")
+                    raw_hostname = info.get("description", "Minecraft Server")
+                    # Procesamos la descripción para obtener un hostname en texto plano
+                    hostname = self.get_plain_hostname(raw_hostname)
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
                 else:
@@ -309,10 +331,8 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Construir título y truncarlo si es necesario
+                # Construir el título final (ya procesado y truncado)
                 title_online = f"{hostname} - Server Status"
-                if len(title_online) > 256:
-                    title_online = title_online[:253] + "..."
 
                 if is_passworded:
                     embed = discord.Embed(
