@@ -52,14 +52,19 @@ class AdvancedCaptcha(commands.Cog):
             font = ImageFont.truetype("advancedcaptcha/data/DroidSansMono.ttf", 40)
         except Exception:
             font = ImageFont.load_default()
-        text_width, text_height = draw.textsize(captcha_code, font=font)
+
+        # Nuevo método para calcular el tamaño del texto
+        bbox = draw.textbbox((0, 0), captcha_code, font=font)
+        text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = (width - text_width) / 2
         y = (height - text_height) / 2
         draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
+
         buffer = io.BytesIO()
         image.save(buffer, "PNG")
         buffer.seek(0)
         return discord.File(fp=buffer, filename="captcha.png")
+
 
     # =========================================================================
     #                             EVENTOS
