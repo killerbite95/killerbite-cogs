@@ -3,22 +3,108 @@ import io
 import random
 import string
 import discord
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from redbot.core import commands, Config, checks
 from redbot.core.data_manager import bundled_data_path
-from typing import Optional
-from PIL import Image, ImageDraw, ImageFont  # Requiere Pillow
+from typing import Optional, Tuple, List
+
+# Tipo para colores
+ColorTuple = Tuple[int, int, int]
+
+def random_color(low: int, high: int, extra: Optional[int] = None) -> ColorTuple:
+    if extra is None:
+        return (random.randint(low, high), random.randint(low, high), random.randint(low, high))
+    else:
+        return (random.randint(low, high), random.randint(low, high), extra)
+
+class CaptchaGenerator:
+    """
+    Genera una imagen de captcha inspirada en el cog original.
+    Se crean imágenes para cada carácter y se pegan con offsets aleatorios; además, se añade ruido.
+    """
+    def __init__(self, width: int, height: int, font_path: str, font_size: int):
+        self._width = width
+        self._height = height
+        self.font = ImageFont.truetype(font_path, font_size)
+        # Tabla de lookup para la máscara (aquí se deja la identidad)
+        self.lookup_table = list(range(256))
+
+    def _draw_character(self, char: str, color: ColorTuple) -> Image.Image:
+        """Dibuja un carácter en una imagen RGBA con fondo transparente."""
+        size = self.font.getsize(char)
+        img = Image.new("RGBA", size, (255, 255, 255, 0))
+        draw = ImageDraw.Draw(img)
+        draw.text((0, 0), char, font=self.font, fill=color)
+        return img
+
+    def _create_captcha_image(self, chars: str, color: ColorTuple, background: ColorTuple) -> Image.Image:
+        """Crea la imagen base pegando imágenes de cada carácter con offsets aleatorios."""
+        image: Image.Image = Image.new("RGB", (self._width, self._height), background)
+        draw: ImageDraw.Draw = ImageDraw.Draw(image)
+
+        images: List[Image.Image] = []
+        for char in chars:
+            # A veces se inserta un espacio extra para simular error
+            if random.random() > 0.5:
+                images.append(self._draw_character(" ", color))
+            images.append(self._draw_character(char, color))
+
+        text_width: int = sum(im.size[0] for im in images)
+        new_width: int = max(text_width, self._width)
+        image = image.resize((new_width, self._height))
+
+        average: int = int(text_width / len(chars))
+        rand: int = int(0.25 * average)
+        offset: int = int(average * 0.1)
+
+        for img in images:
+            w, h = img.size
+            mask: Image.Image = img.convert("L").point(self.lookup_table)
+            image.paste(img, (offset, int((self._height - h) / 2)), mask)
+            offset = offset + w + random.randint(-rand, 0)
+
+        if new_width > self._width:
+            image = image.resize((self._width, self._height))
+        return image
+
+    def _create_noise_dots(self, image: Image.Image, color: ColorTuple) -> None:
+        """Añade puntos de ruido a la imagen."""
+        draw = ImageDraw.Draw(image)
+        for _ in range(random.randint(100, 300)):
+            x = random.randint(0, image.size[0]-1)
+            y = random.randint(0, image.size[1]-1)
+            draw.point((x, y), fill=color)
+
+    def _create_noise_curve(self, image: Image.Image, color: ColorTuple) -> None:
+        """Añade una curva de ruido a la imagen."""
+        draw = ImageDraw.Draw(image)
+        x1 = random.randint(0, image.size[0] // 2)
+        y1 = random.randint(0, image.size[1])
+        x2 = random.randint(image.size[0] // 2, image.size[0])
+        y2 = random.randint(0, image.size[1])
+        draw.line((x1, y1, x2, y2), fill=color, width=2)
+
+    def _generate(self, chars: str) -> Image.Image:
+        background: ColorTuple = random_color(238, 255)
+        color: ColorTuple = random_color(10, 200, random.randint(220, 255))
+        image: Image.Image = self._create_captcha_image(chars, color, background)
+        self._create_noise_dots(image, color)
+        self._create_noise_curve(image, color)
+        image = image.filter(ImageFilter.SMOOTH)
+        return image
+
+    def generate(self, chars: str, format: str = "png") -> io.BytesIO:
+        image: Image.Image = self._generate(chars)
+        byte: io.BytesIO = io.BytesIO()
+        image.save(byte, format=format)
+        byte.seek(0)
+        return byte
 
 class AdvancedCaptcha(commands.Cog):
-    """Cog avanzado de Captcha con verificación automática, asignación de rol y reinicio de config.
-
-    - Usa bundled_data_path para cargar la fuente 'DroidSansMono.ttf' en /data del cog.
-    - El embed informativo se envía con !setcaptchaembed.
-    - Al unirse, se envía un desafío (imagen con captcha) al canal configurado, si el captcha está habilitado.
-    - Al verificar, se asigna un rol al usuario (si está configurado).
-    - Se registran los mensajes del proceso y se borran al finalizar.
-    - !resetcaptcha reinicia la configuración a valores por defecto y limpia los datos internos.
+    """Cog avanzado de Captcha que utiliza CaptchaGenerator para generar imágenes similares al cog original.
+    
+    Incluye comandos de configuración, asignación de rol, habilitar/deshabilitar y reset.
     """
-
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=0xDEADBEEF, force_registration=True)
@@ -31,102 +117,51 @@ class AdvancedCaptcha(commands.Cog):
             "bypass_list": [],
             "verified_role": None,
             "embed_title": "Verificación Captcha",
-            "embed_description": (
-                "Para acceder al servidor, debes demostrar que eres humano completando el captcha."
-            ),
+            "embed_description": "Para acceder al servidor, debes demostrar que eres humano completando el captcha.",
             "embed_color": 0x3498DB,
             "embed_image": None
         }
         self.config.register_guild(**default_guild)
-        # Diccionario para almacenar los mensajes de cada proceso: {user_id: [message, ...]}
         self.process_messages = {}
-        # Ruta a la carpeta /data del cog
+        # Usamos bundled_data_path para obtener la ruta de la carpeta 'data'
         self.data_path = bundled_data_path(self)
-        # Ruta completa a la fuente
         self.font_data = os.path.join(self.data_path, "DroidSansMono.ttf")
+        # Parámetros para el captcha
+        self._width = 600
+        self._height = 200
+        self._font_size = 200
+        # Creamos la instancia de CaptchaGenerator
+        self.captcha_generator = CaptchaGenerator(self._width, self._height, self.font_data, self._font_size)
 
-    # -------------------------------------------------------------------------
-    # Función para generar la imagen del captcha con manejo de errores en la fuente
-    # -------------------------------------------------------------------------
     def generate_captcha_image(self, captcha_code: str) -> discord.File:
-        """Genera una imagen PNG con el código captcha usando la fuente ubicada en self.font_data."""
-        # Dimensiones y tamaño de fuente ajustados
-        width, height = 600, 200
-        font_size = 200
+        """Genera el captcha usando CaptchaGenerator y lo retorna como discord.File."""
+        byte = self.captcha_generator.generate(captcha_code, format="png")
+        return discord.File(fp=byte, filename="captcha.png")
 
-        image = Image.new("RGB", (width, height), color=(255, 255, 255))
-        draw = ImageDraw.Draw(image)
-
-        try:
-            font = ImageFont.truetype(self.font_data, font_size)
-        except Exception as e:
-            print(f"No se pudo cargar la fuente en {self.font_data}: {e}")
-            font = ImageFont.load_default()
-
-        # Calculamos el bounding box del texto
-        try:
-            bbox = draw.textbbox((0, 0), captcha_code, font=font)
-            text_width = bbox[2] - bbox[0]
-            text_height = bbox[3] - bbox[1]
-        except Exception as e:
-            print(f"Error al calcular textbbox: {e}")
-            text_width = font_size * len(captcha_code)
-            text_height = font_size
-
-        x = (width - text_width) / 2
-        y = (height - text_height) / 2
-
-        # Intentamos dibujar el texto; si ocurre un error (ej. invalid outline), se captura y se usa la fuente por defecto
-        try:
-            draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
-        except OSError as e:
-            print(f"Error al dibujar el texto con la fuente actual: {e}. Usando fuente por defecto.")
-            font = ImageFont.load_default()
-            # Recalcular con la fuente por defecto
-            try:
-                bbox = draw.textbbox((0, 0), captcha_code, font=font)
-                text_width = bbox[2] - bbox[0]
-                text_height = bbox[3] - bbox[1]
-            except Exception:
-                text_width, text_height = font.getsize(captcha_code)
-            x = (width - text_width) / 2
-            y = (height - text_height) / 2
-            draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
-
-        buffer = io.BytesIO()
-        image.save(buffer, "PNG")
-        buffer.seek(0)
-        return discord.File(fp=buffer, filename="captcha.png")
-
-    # =========================================================================
-    #                             EVENTOS
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # EVENTOS
+    # -------------------------------------------------------------------------
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        """Al unirse un miembro, inicia el proceso de captcha si está habilitado y no tiene bypass."""
+        """Inicia el proceso de captcha al unirse un miembro, si está habilitado y sin bypass."""
         guild = member.guild
         guild_config = await self.config.guild(guild).all()
         if not guild_config["captcha_enabled"]:
             return
-
         channel_id = guild_config["captcha_channel"]
         if not channel_id:
             return
-
-        bypass_list = guild_config["bypass_list"]
-        if member.id in bypass_list:
+        if member.id in guild_config["bypass_list"]:
             return
-
         channel = guild.get_channel(channel_id)
         if not channel:
             return
-
         self.process_messages[member.id] = []
         self.bot.loop.create_task(self.start_captcha_process(member, channel))
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):
-        """Al salir un miembro, limpiamos su información de proceso si está almacenada."""
+        """Limpia los datos del proceso de captcha si un miembro abandona el servidor."""
         if member.id in self.process_messages:
             for msg in self.process_messages[member.id]:
                 try:
@@ -135,22 +170,19 @@ class AdvancedCaptcha(commands.Cog):
                     pass
             del self.process_messages[member.id]
 
-    # =========================================================================
-    #                            PROCESO CAPTCHA
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # PROCESO CAPTCHA
+    # -------------------------------------------------------------------------
     async def start_captcha_process(self, member: discord.Member, channel: discord.TextChannel):
-        """Gestiona el proceso de captcha para un miembro, registrando y limpiando los mensajes del proceso."""
         guild = member.guild
         guild_config = await self.config.guild(guild).all()
         verification_timeout = guild_config["verification_timeout"]
         max_attempts = guild_config["max_attempts"]
         invite_link = guild_config["invite_link"]
-
         proc_msgs = self.process_messages.get(member.id, [])
-
+        
         captcha_code = ''.join(random.choices(string.ascii_letters + string.digits, k=6))
         captcha_file = self.generate_captcha_image(captcha_code)
-
         try:
             challenge = await channel.send(
                 f"{member.mention}, escribe el texto que ves en la imagen para continuar:",
@@ -169,7 +201,6 @@ class AdvancedCaptcha(commands.Cog):
             if remaining_time <= 0:
                 await self.fail_captcha(member, invite_link, channel, proc_msgs)
                 break
-
             try:
                 msg = await self.bot.wait_for(
                     "message",
@@ -189,9 +220,7 @@ class AdvancedCaptcha(commands.Cog):
                 break
             else:
                 attempts_left -= 1
-                feedback = await channel.send(
-                    f"{member.mention}, captcha incorrecto. Te quedan {attempts_left} intento(s)."
-                )
+                feedback = await channel.send(f"{member.mention}, captcha incorrecto. Te quedan {attempts_left} intento(s).")
                 proc_msgs.append(feedback)
                 await self.safe_delete(msg)
                 if attempts_left <= 0:
@@ -201,7 +230,7 @@ class AdvancedCaptcha(commands.Cog):
         self.process_messages.pop(member.id, None)
 
     async def assign_verified_role(self, member: discord.Member, role_id: Optional[int]):
-        """Asigna el rol verificado al usuario, si está configurado."""
+        """Asigna el rol de verificado al usuario si se configuró."""
         if role_id:
             role = member.guild.get_role(role_id)
             if role:
@@ -210,13 +239,12 @@ class AdvancedCaptcha(commands.Cog):
                 except discord.Forbidden:
                     pass
 
-    async def fail_captcha(self, member: discord.Member, invite_link: Optional[str], channel: discord.TextChannel, proc_msgs: list):
-        """Envía DM con invitación (si existe), expulsa al miembro y borra los mensajes del proceso."""
+    async def fail_captcha(self, member: discord.Member, invite_link: Optional[str], channel: discord.TextChannel, proc_msgs: List[discord.Message]):
+        """Envía DM con invitación, expulsa al miembro y elimina los mensajes del proceso."""
         if invite_link:
             try:
                 await member.send(
-                    f"Lo sentimos, no has completado el captcha a tiempo. "
-                    f"Puedes volver a intentarlo usando este enlace:\n{invite_link}"
+                    f"Lo sentimos, no has completado el captcha a tiempo. Puedes volver a intentarlo usando este enlace:\n{invite_link}"
                 )
             except discord.Forbidden:
                 pass
@@ -226,21 +254,19 @@ class AdvancedCaptcha(commands.Cog):
             pass
         await self.delete_process_messages(proc_msgs)
 
-    async def delete_process_messages(self, messages: list):
-        """Elimina todos los mensajes registrados de este proceso."""
+    async def delete_process_messages(self, messages: List[discord.Message]):
         for msg in messages:
             await self.safe_delete(msg)
 
     async def safe_delete(self, message: discord.Message):
-        """Intenta borrar un mensaje sin lanzar errores si faltan permisos."""
         try:
             await message.delete()
         except (discord.Forbidden, discord.HTTPException):
             pass
 
-    # =========================================================================
-    #                    COMANDOS DE CONFIGURACIÓN
-    # =========================================================================
+    # -------------------------------------------------------------------------
+    # COMANDOS DE CONFIGURACIÓN
+    # -------------------------------------------------------------------------
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
@@ -335,7 +361,7 @@ class AdvancedCaptcha(commands.Cog):
         """
         Establece el thumbnail del embed de captcha.
         Ejemplo: !setcaptchaimage https://imgur.com/C2c0SpZ
-        Sin argumentos, elimina el thumbnail.
+        Sin argumentos, lo elimina.
         """
         if image_url and not (image_url.startswith("http://") or image_url.startswith("https://")):
             return await ctx.send("La URL de la imagen debe comenzar con http:// o https://")
@@ -371,9 +397,6 @@ class AdvancedCaptcha(commands.Cog):
         await self.config.guild(ctx.guild).captcha_enabled.set(enabled)
         await ctx.send(f"Captcha {'habilitado' if enabled else 'deshabilitado'}.")
 
-    # =========================================================================
-    #         COMANDOS DE CONFIGURACIÓN Y RESET DE CONFIGURACIÓN
-    # =========================================================================
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
     @commands.command()
@@ -390,7 +413,7 @@ class AdvancedCaptcha(commands.Cog):
              - Descripción: `!setcaptchadesc Para acceder, demuestra que eres humano completando el captcha.`
              - Color: `!setcaptchacolor #3498DB`
              - Thumbnail: `!setcaptchaimage https://imgur.com/C2c0SpZ`
-          6. Rol: `!setcaptchaverifiedrole @Verificado`
+          6. Rol verificado: `!setcaptchaverifiedrole @Verificado`
           7. Enviar embed: `!setcaptchaembed`
           8. Ver configuración: `!showcaptchasettings`
         """
@@ -481,9 +504,7 @@ class AdvancedCaptcha(commands.Cog):
             "bypass_list": [],
             "verified_role": None,
             "embed_title": "Verificación Captcha",
-            "embed_description": (
-                "Para acceder al servidor, debes demostrar que eres humano completando el captcha."
-            ),
+            "embed_description": "Para acceder al servidor, debes demostrar que eres humano completando el captcha.",
             "embed_color": 0x3498DB,
             "embed_image": None
         }
