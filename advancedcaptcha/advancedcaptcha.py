@@ -14,7 +14,7 @@ class AdvancedCaptcha(commands.Cog):
     - Al unirse, se envía un desafío (imagen con captcha) en el canal configurado, siempre que el captcha esté habilitado.
     - Al verificar, se asigna el rol configurado al usuario.
     - Se registra y, al finalizar cada proceso, se eliminan únicamente los mensajes relacionados.
-    - !resetcaptcha restablece la configuración y borra los datos internos.
+    - !resetcaptcha reinicia la configuración a los valores por defecto y limpia los datos internos.
     """
 
     def __init__(self, bot):
@@ -62,7 +62,7 @@ class AdvancedCaptcha(commands.Cog):
         return discord.File(fp=buffer, filename="captcha.png")
 
     # =========================================================================
-    #                              EVENTOS
+    #                             EVENTOS
     # =========================================================================
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
@@ -81,11 +81,23 @@ class AdvancedCaptcha(commands.Cog):
         if not channel:
             return
 
+        # Inicializa la lista de mensajes para este proceso y lanza el captcha.
         self.process_messages[member.id] = []
         self.bot.loop.create_task(self.start_captcha_process(member, channel))
 
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member):
+        """Al salir un miembro, se limpia su información de proceso para evitar datos residuales."""
+        if member.id in self.process_messages:
+            for msg in self.process_messages[member.id]:
+                try:
+                    await msg.delete()
+                except Exception:
+                    pass
+            del self.process_messages[member.id]
+
     # =========================================================================
-    #                              PROCESO CAPTCHA
+    #                           PROCESO CAPTCHA
     # =========================================================================
     async def start_captcha_process(self, member: discord.Member, channel: discord.TextChannel):
         """Gestiona el proceso de captcha para un miembro, registrando y controlando sus mensajes."""
@@ -187,7 +199,7 @@ class AdvancedCaptcha(commands.Cog):
             pass
 
     # =========================================================================
-    #                   COMANDOS DE CONFIGURACIÓN
+    #                    COMANDOS DE CONFIGURACIÓN
     # =========================================================================
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
@@ -330,7 +342,7 @@ class AdvancedCaptcha(commands.Cog):
         await ctx.send(f"Captcha {'habilitado' if enabled else 'deshabilitado'}.")
 
     # =========================================================================
-    #                 COMANDOS DE AYUDA Y RESET DE CONFIGURACIÓN
+    #              COMANDOS DE AYUDA Y RESET DE CONFIGURACIÓN
     # =========================================================================
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
@@ -443,7 +455,7 @@ class AdvancedCaptcha(commands.Cog):
         await ctx.send(f"Embed de captcha enviado en {channel.mention}")
 
     # =========================================================================
-    #                          COMANDO RESET DE CONFIGURACIÓN
+    #                  COMANDO RESET DE CONFIGURACIÓN
     # =========================================================================
     @commands.guild_only()
     @checks.admin_or_permissions(manage_guild=True)
@@ -471,7 +483,6 @@ class AdvancedCaptcha(commands.Cog):
         }
         await self.config.guild(ctx.guild).clear()
         await self.config.guild(ctx.guild).set(default)
-        # Limpia cualquier dato de procesos en curso
         self.process_messages.clear()
         await ctx.send("¡La configuración del captcha ha sido reiniciada a los valores por defecto!")
 
