@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 import discord
 from redbot.core import checks, commands
@@ -83,7 +83,9 @@ class Check(commands.Cog):
         """Crea un embed con la fecha de ingreso del usuario al servidor."""
         join_date = member.joined_at
         if join_date:
-            delta = datetime.utcnow() - join_date
+            # Se obtiene un datetime aware en UTC
+            now = datetime.now(tz=timezone.utc)
+            delta = now - join_date
             description = _("Se unió el {date} (hace {days} días)").format(
                 date=join_date.strftime("%d/%m/%Y %H:%M:%S"),
                 days=delta.days
