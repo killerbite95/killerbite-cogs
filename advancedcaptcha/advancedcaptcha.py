@@ -45,21 +45,27 @@ class AdvancedCaptcha(commands.Cog):
     # -------------------------------------------------------------------------
     def generate_captcha_image(self, captcha_code: str) -> discord.File:
         """Genera una imagen PNG con el código captcha usando la fuente especificada."""
-        width, height = 200, 80
+        # Aumentamos las dimensiones y el tamaño de la fuente
+        width, height = 400, 160
+        font_size = 100
+
         image = Image.new("RGB", (width, height), color=(255, 255, 255))
         draw = ImageDraw.Draw(image)
         try:
-            font = ImageFont.truetype("advancedcaptcha/data/DroidSansMono.ttf", 40)
+            font = ImageFont.truetype("advancedcaptcha/data/DroidSansMono.ttf", font_size)
         except Exception:
             font = ImageFont.load_default()
 
-        # Nuevo método para calcular el tamaño del texto
+        # Calculamos el bounding box del texto para centrarlo
         bbox = draw.textbbox((0, 0), captcha_code, font=font)
         text_width, text_height = bbox[2] - bbox[0], bbox[3] - bbox[1]
         x = (width - text_width) / 2
         y = (height - text_height) / 2
+
+        # Dibujamos el texto en la imagen
         draw.text((x, y), captcha_code, font=font, fill=(0, 0, 0))
 
+        # Guardamos en memoria temporal y lo enviamos como archivo de Discord
         buffer = io.BytesIO()
         image.save(buffer, "PNG")
         buffer.seek(0)
