@@ -28,7 +28,7 @@ class Check(commands.Cog):
         # Este cog no almacena datos de usuario.
         return
 
-    @commands.hybrid_command(name="advcheck", with_app_command=True)
+    @commands.hybrid_command(name="advcheck", aliases=["check"], with_app_command=True)
     @checks.mod()
     @commands.max_concurrency(1, commands.BucketType.guild)
     async def advcheck(self, ctx: commands.Context, member: discord.Member):
@@ -83,7 +83,6 @@ class Check(commands.Cog):
         """Crea un embed con la fecha de ingreso del usuario al servidor."""
         join_date = member.joined_at
         if join_date:
-            # Se obtiene un datetime aware en UTC
             now = datetime.now(tz=timezone.utc)
             delta = now - join_date
             description = _("Se unió el {date} (hace {days} días)").format(
@@ -157,10 +156,10 @@ class CheckView(discord.ui.View):
             discord.SelectOption(label="Actividad", value="activity")
         ]
     )
-    async def select_callback(self, select: discord.ui.Select, interaction: discord.Interaction):
-        """Actualiza el embed mostrado según la selección."""
-        value = select.values[0]
-        embed = self.embeds.get(value)
+    async def select_callback(self, interaction: discord.Interaction):
+        # 'self' aquí es el Select; accedemos a los valores y al view mediante self.view
+        value = self.values[0]
+        embed = self.view.embeds.get(value)
         if embed:
             await interaction.response.edit_message(embed=embed)
         else:
