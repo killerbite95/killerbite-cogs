@@ -53,7 +53,6 @@ class GameServerMonitor(commands.Cog):
         channel = channel or ctx.channel
         game = game.lower()
 
-        # Analizar y validar server_ip
         parsed = self.parse_server_ip(server_ip, game)
         if not parsed:
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto' o solo 'ip'.")
@@ -67,8 +66,8 @@ class GameServerMonitor(commands.Cog):
             servers[server_ip_formatted] = {
                 "game": game,
                 "channel_id": channel.id,
-                "message_id": None,  # Inicialmente sin mensaje
-                "domain": domain     # Almacena el dominio si se proporcionó
+                "message_id": None,
+                "domain": domain
             }
         await ctx.send(
             f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}."
@@ -80,7 +79,6 @@ class GameServerMonitor(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def remove_server(self, ctx, server_ip: str):
         """Elimina el monitoreo de un servidor."""
-        # Analizar server_ip
         parsed = self.parse_server_ip(server_ip)
         if not parsed:
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto'.")
@@ -164,11 +162,10 @@ class GameServerMonitor(commands.Cog):
         default_ports = {
             "cs2": 27015,
             "css": 27015,
-            "gmod": 27015,    # Puerto predeterminado para gmod
+            "gmod": 27015,
             "rust": 28015,
             "minecraft": 25565
         }
-
         if ":" in server_ip:
             parts = server_ip.split(":")
             if len(parts) != 2:
@@ -211,29 +208,32 @@ class GameServerMonitor(commands.Cog):
 
     def get_plain_hostname(self, raw_hostname):
         """
-        Procesa el hostname obtenido del servidor de Minecraft:
+        Procesa el hostname obtenido del servidor de Minecraft.
          - Si es dict o lista, lo convierte a texto plano.
-         - Si es una cadena que parece dict (empieza con '{' y termina con '}'),
-           se intenta evaluar.
-         - Se trunca para que, al añadir " - Server Status", no exceda 256 caracteres.
+         - Si es una cadena que luce como dict (comienza con '{' y termina con '}'),
+           se intenta evaluar y extraer el texto.
+         - Se trunca para que, al añadir " - Server Status", el total no supere 256 caracteres.
         """
         if isinstance(raw_hostname, (dict, list)):
             hostname = self.parse_minecraft_description(raw_hostname)
-        elif isinstance(raw_hostname, str) and raw_hostname.strip().startswith("{") and raw_hostname.strip().endswith("}"):
-            try:
-                parsed_desc = ast.literal_eval(raw_hostname)
-                if isinstance(parsed_desc, (dict, list)):
-                    hostname = self.parse_minecraft_description(parsed_desc)
-                else:
+        elif isinstance(raw_hostname, str):
+            # Intentar convertir la cadena a un objeto si luce como dict
+            stripped = raw_hostname.strip()
+            if stripped.startswith("{") and stripped.endswith("}"):
+                try:
+                    parsed_obj = ast.literal_eval(stripped)
+                    if isinstance(parsed_obj, (dict, list)):
+                        hostname = self.parse_minecraft_description(parsed_obj)
+                    else:
+                        hostname = raw_hostname
+                except Exception as e:
+                    logger.error(f"Error al evaluar la descripción: {e}")
                     hostname = raw_hostname
-            except Exception as e:
-                logger.error(f"Error al evaluar la descripción: {e}")
+            else:
                 hostname = raw_hostname
         else:
-            hostname = raw_hostname
-
+            hostname = str(raw_hostname)
         hostname = hostname.strip()
-        # Calcula el máximo de caracteres para hostname
         sufijo = " - Server Status"
         max_hostname_length = 256 - len(sufijo)
         if len(hostname) > max_hostname_length:
@@ -251,21 +251,18 @@ class GameServerMonitor(commands.Cog):
             game = server_info.get("game")
             channel_id = server_info.get("channel_id")
             message_id = server_info.get("message_id")
-            domain = server_info.get("domain")  # Se guarda en add_server
+            domain = server_info.get("domain")
             channel = self.bot.get_channel(channel_id)
-
             if not channel:
                 logger.error(f"Canal con ID {channel_id} no encontrado en {guild.name}.")
                 return
 
-            # Analizar server_ip
             parsed = self.parse_server_ip(server_ip, game)
             if not parsed:
                 logger.error(f"Formato inválido para server_ip '{server_ip}' en {guild.name}.")
                 return
             ip_part, port_part, server_ip_formatted = parsed
 
-            # Crear el objeto del protocolo
             if game in ["cs2", "css", "gmod", "rust"]:
                 try:
                     source = Source(host=ip_part, port=port_part)
@@ -291,14 +288,12 @@ class GameServerMonitor(commands.Cog):
                 return
 
             try:
-                # Obtener datos del servidor
                 if game == "minecraft":
                     info = await source.get_status()
                     is_passworded = False
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
                     raw_hostname = info.get("description", "Minecraft Server")
-                    # Procesamos la descripción para obtener un hostname en texto plano
                     hostname = self.get_plain_hostname(raw_hostname)
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
@@ -310,7 +305,6 @@ class GameServerMonitor(commands.Cog):
                     hostname = getattr(info, "name", "Unknown Server")
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
 
-                # Armamos la IP que mostramos en el embed
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
@@ -321,7 +315,6 @@ class GameServerMonitor(commands.Cog):
                 else:
                     ip_to_show = f"{public_ip}:{port_part}"
 
-                # Hora local
                 timezone = await self.config.guild(guild).timezone()
                 try:
                     tz = pytz.timezone(timezone)
@@ -331,7 +324,6 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Construir el título final (ya procesado y truncado)
                 title_online = f"{hostname} - Server Status"
 
                 if is_passworded:
@@ -376,7 +368,6 @@ class GameServerMonitor(commands.Cog):
 
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
-                # Enviar o editar mensaje
                 if first_time or not message_id:
                     msg = await channel.send(embed=embed)
                     servers[server_ip]["message_id"] = msg.id
@@ -390,8 +381,6 @@ class GameServerMonitor(commands.Cog):
 
             except Exception as e:
                 logger.error(f"Error al actualizar el servidor {server_ip_formatted}: {e}")
-
-                # En caso de error, se muestra el servidor como Offline
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
