@@ -29,7 +29,7 @@ class GameServerMonitor(commands.Cog):
     async def set_timezone(self, ctx, timezone: str):
         """Establece la zona horaria para las actualizaciones."""
         try:
-            pytz.timezone(timezone)  # Validar zona horaria
+            pytz.timezone(timezone)
         except pytz.UnknownTimeZoneError:
             await ctx.send(f"La zona horaria '{timezone}' no es válida.")
             return
@@ -44,15 +44,9 @@ class GameServerMonitor(commands.Cog):
         
         Uso:
           !addserver <ip:puerto> <juego> [channel] [domain]
-
-        Ejemplos:
-          !addserver 194.69.160.51:25575 minecraft #canal mc.dominio.com
-          !addserver 194.69.160.51:27015 cs2 #canal
-          !addserver 51.255.126.200:27015 gmod #canal 1330136596573589551
         """
         channel = channel or ctx.channel
         game = game.lower()
-
         parsed = self.parse_server_ip(server_ip, game)
         if not parsed:
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto' o solo 'ip'.")
@@ -69,10 +63,8 @@ class GameServerMonitor(commands.Cog):
                 "message_id": None,
                 "domain": domain
             }
-        await ctx.send(
-            f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}."
-            + (f"\nDominio asignado: {domain}" if domain else "")
-        )
+        await ctx.send(f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}."
+                       + (f"\nDominio asignado: {domain}" if domain else ""))
         await self.update_server_status(ctx.guild, server_ip_formatted, first_time=True)
 
     @commands.command(name="removeserver")
@@ -84,7 +76,6 @@ class GameServerMonitor(commands.Cog):
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto'.")
             return
         server_ip_formatted = f"{parsed[0]}:{parsed[1]}"
-
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_ip_formatted in servers:
                 del servers[server_ip_formatted]
@@ -118,10 +109,7 @@ class GameServerMonitor(commands.Cog):
         for server_ip, data in servers.items():
             channel = self.bot.get_channel(data["channel_id"])
             domain = data.get("domain")
-            message += (
-                f"**{server_ip}** - Juego: **{data['game'].upper()}** - "
-                f"Canal: {channel.mention if channel else 'Desconocido'}"
-            )
+            message += f"**{server_ip}** - Juego: **{data['game'].upper()}** - Canal: {channel.mention if channel else 'Desconocido'}"
             if domain:
                 message += f" - Dominio: {domain}"
             message += "\n"
@@ -208,16 +196,14 @@ class GameServerMonitor(commands.Cog):
 
     def get_plain_hostname(self, raw_hostname):
         """
-        Procesa el hostname obtenido del servidor de Minecraft.
+        Procesa el hostname obtenido del servidor de Minecraft:
          - Si es dict o lista, lo convierte a texto plano.
-         - Si es una cadena que luce como dict (comienza con '{' y termina con '}'),
-           se intenta evaluar y extraer el texto.
-         - Se trunca para que, al añadir " - Server Status", el total no supere 256 caracteres.
+         - Si es una cadena que luce como dict (empieza y termina con llaves), se evalúa.
+         - Se limpia y trunca para que, al agregar " - Server Status", no supere los 256 caracteres.
         """
         if isinstance(raw_hostname, (dict, list)):
             hostname = self.parse_minecraft_description(raw_hostname)
         elif isinstance(raw_hostname, str):
-            # Intentar convertir la cadena a un objeto si luce como dict
             stripped = raw_hostname.strip()
             if stripped.startswith("{") and stripped.endswith("}"):
                 try:
@@ -310,10 +296,7 @@ class GameServerMonitor(commands.Cog):
                 else:
                     public_ip = ip_part
 
-                if game == "minecraft" and domain:
-                    ip_to_show = f"{domain}"
-                else:
-                    ip_to_show = f"{public_ip}:{port_part}"
+                ip_to_show = f"{domain}" if (game == "minecraft" and domain) else f"{public_ip}:{port_part}"
 
                 timezone = await self.config.guild(guild).timezone()
                 try:
@@ -324,48 +307,27 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
+                # Construir el título ya procesado
                 title_online = f"{hostname} - Server Status"
 
                 if is_passworded:
-                    embed = discord.Embed(
-                        title=title_online,
-                        color=discord.Color.orange()
-                    )
+                    embed = discord.Embed(title=title_online, color=discord.Color.orange())
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
-                    embed = discord.Embed(
-                        title=title_online,
-                        color=discord.Color.green()
-                    )
+                    embed = discord.Embed(title=title_online, color=discord.Color.green())
                     embed.add_field(name="✅ Status", value="Online", inline=True)
 
                 embed.add_field(name="🎮 Game", value=game_name, inline=True)
-
                 if game != "minecraft":
                     connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
-                    embed.add_field(
-                        name="\n\u200b\n🔗 Connect",
-                        value=f"[Connect]({connect_url})\n\u200b\n",
-                        inline=False
-                    )
-
+                    embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-
                 if game == "minecraft":
                     embed.add_field(name="💎 Version", value=map_name, inline=True)
                 else:
                     embed.add_field(name="🗺️ Current Map", value=map_name, inline=True)
-
-                if max_players > 0:
-                    percent = int(players / max_players * 100)
-                else:
-                    percent = 0
-                embed.add_field(
-                    name="👥 Players",
-                    value=f"{players}/{max_players} ({percent}%)",
-                    inline=True
-                )
-
+                percent = int(players / max_players * 100) if max_players > 0 else 0
+                embed.add_field(name="👥 Players", value=f"{players}/{max_players} ({percent}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
                 if first_time or not message_id:
@@ -385,39 +347,18 @@ class GameServerMonitor(commands.Cog):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = ip_part
-
-                if game == "minecraft":
-                    game_title = "Minecraft"
-                elif game in ["cs2", "css", "gmod", "rust"]:
-                    game_title = game_name
-                else:
-                    game_title = game
-
+                game_title = "Minecraft" if game == "minecraft" else game
                 title_offline = f"{game_title} Server - ❌ Offline"
                 if len(title_offline) > 256:
                     title_offline = title_offline[:253] + "..."
-                embed = discord.Embed(
-                    title=title_offline,
-                    color=discord.Color.red()
-                )
+                embed = discord.Embed(title=title_offline, color=discord.Color.red())
                 embed.add_field(name="Status", value="🔴 Offline", inline=True)
                 embed.add_field(name="🎮 Game", value=game_title, inline=True)
-
-                if game == "minecraft" and domain:
-                    ip_to_show = f"{domain}"
-                else:
-                    ip_to_show = f"{public_ip}:{port_part}"
-
+                ip_to_show = f"{domain}" if (game == "minecraft" and domain) else f"{public_ip}:{port_part}"
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-
                 if game != "minecraft":
                     connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
-                    embed.add_field(
-                        name="\n\u200b\n🔗 Connect",
-                        value=f"[Connect]({connect_url})\n\u200b\n",
-                        inline=False
-                    )
-
+                    embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
 
                 if first_time or not message_id:
