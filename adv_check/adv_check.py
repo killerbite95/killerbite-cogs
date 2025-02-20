@@ -5,11 +5,11 @@ import discord
 from redbot.core import checks, commands
 from redbot.core.i18n import Translator, cog_i18n
 
-_ = Translator("Check", __file__)
+_ = Translator("AdvCheck", __file__)
 
 @cog_i18n(_)
 class Check(commands.Cog):
-    """Cog para realizar verificaciones completas en usuarios con UI interactiva y soporte para Slash Commands.
+    """Cog avanzado para realizar verificaciones completas en usuarios con UI interactiva y soporte para Slash Commands.
     
     Este cog permite obtener información básica, roles, fecha de ingreso, avatar, permisos y actividad,
     todo integrado en una UI interactiva que utiliza componentes de Discord.
@@ -18,7 +18,7 @@ class Check(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.log = logging.getLogger("red.cog.dav-cogs.check")
+        self.log = logging.getLogger("red.cog.adv_check")
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre_processed = super().format_help_for_context(ctx)
@@ -28,10 +28,10 @@ class Check(commands.Cog):
         # Este cog no almacena datos de usuario.
         return
 
-    @commands.hybrid_command(name="check", with_app_command=True)
+    @commands.hybrid_command(name="advcheck", with_app_command=True)
     @checks.mod()
     @commands.max_concurrency(1, commands.BucketType.guild)
-    async def check(self, ctx: commands.Context, member: discord.Member):
+    async def advcheck(self, ctx: commands.Context, member: discord.Member):
         """
         Realiza una verificación completa del usuario especificado.
 
@@ -53,7 +53,6 @@ class Check(commands.Cog):
             "activity": self._build_activity_embed(member)
         }
         view = CheckView(member, embeds)
-        # Envía el mensaje inicial con la información básica y la UI interactiva
         await ctx.send(embed=embeds["basic"], view=view)
 
     def _build_basic_info(self, member: discord.Member) -> discord.Embed:
@@ -157,7 +156,7 @@ class CheckView(discord.ui.View):
         ]
     )
     async def select_callback(self, select: discord.ui.Select, interaction: discord.Interaction):
-        """Callback que actualiza el embed mostrado según la selección."""
+        """Actualiza el embed mostrado según la selección."""
         value = select.values[0]
         embed = self.embeds.get(value)
         if embed:
@@ -167,6 +166,6 @@ class CheckView(discord.ui.View):
 
     @discord.ui.button(label="Cerrar", style=discord.ButtonStyle.red)
     async def close_button(self, button: discord.ui.Button, interaction: discord.Interaction):
-        """Botón para cerrar la interfaz interactiva."""
+        """Cierra la interfaz interactiva."""
         await interaction.message.delete()
         self.stop()
