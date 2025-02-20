@@ -29,7 +29,7 @@ class AdvancedCaptcha(commands.Cog):
                 "Para acceder al servidor, debes demostrar que eres humano completando el captcha."
             ),
             "embed_color": 0x3498DB,          # Color por defecto (azul)
-            "embed_image": None               # Imagen grande en el embed (opcional)
+            "embed_image": None               # Thumbnail del embed (opcional)
         }
         self.config.register_guild(**default_guild)
         # Almacena las listas de mensajes de cada proceso: {user_id: [message, ...]}
@@ -253,17 +253,17 @@ class AdvancedCaptcha(commands.Cog):
     @commands.command()
     async def setcaptchaimage(self, ctx, *, image_url: str = None):
         """
-        Establece la imagen (grande) del embed de captcha.
+        Establece el thumbnail del embed de captcha.
         Ejemplo: !setcaptchaimage https://imgur.com/C2c0SpZ
-        Sin argumentos, elimina la imagen.
+        Sin argumentos, elimina el thumbnail.
         """
         if image_url and not (image_url.startswith("http://") or image_url.startswith("https://")):
             return await ctx.send("La URL de la imagen debe comenzar con http:// o https://")
         await self.config.guild(ctx.guild).embed_image.set(image_url)
         if image_url:
-            await ctx.send(f"Imagen del embed establecida a {image_url}")
+            await ctx.send(f"Thumbnail del embed establecido a {image_url}")
         else:
-            await ctx.send("Imagen del embed eliminada.")
+            await ctx.send("Thumbnail del embed eliminado.")
 
     # =========================================================================
     #                              BYPASS
@@ -342,7 +342,7 @@ class AdvancedCaptcha(commands.Cog):
                 `!setcaptchadesc Para acceder al servidor, debes demostrar que eres humano completando el captcha.`
              - Color (por defecto `#3498DB`):
                 `!setcaptchacolor #3498DB`
-             - Imagen (opcional):
+             - Thumbnail (opcional):
                 `!setcaptchaimage https://imgur.com/C2c0SpZ`
           6. Enviar el embed informativo al canal de captcha:
              `!setcaptchaembed`
@@ -366,7 +366,7 @@ class AdvancedCaptcha(commands.Cog):
             "      `!setcaptchadesc Para acceder al servidor, debes demostrar que eres humano completando el captcha.`\n"
             "   - Color (por defecto `#3498DB`):\n"
             "      `!setcaptchacolor #3498DB`\n"
-            "   - Imagen (opcional):\n"
+            "   - Thumbnail (opcional):\n"
             "      `!setcaptchaimage https://imgur.com/C2c0SpZ`\n\n"
             "**6. Enviar el embed informativo al canal de captcha:**\n"
             "   `!setcaptchaembed`\n\n"
@@ -391,7 +391,7 @@ class AdvancedCaptcha(commands.Cog):
         embed.add_field(name="Título del embed", value=guild_config["embed_title"], inline=False)
         embed.add_field(name="Descripción del embed", value=guild_config["embed_description"], inline=False)
         embed.add_field(name="Color del embed", value=f"#{guild_config['embed_color']:06X}", inline=False)
-        embed.add_field(name="Imagen del embed", value=guild_config["embed_image"] if guild_config["embed_image"] else "No configurada", inline=False)
+        embed.add_field(name="Thumbnail del embed", value=guild_config["embed_image"] if guild_config["embed_image"] else "No configurado", inline=False)
         await ctx.send(embed=embed)
 
     # =========================================================================
@@ -418,7 +418,7 @@ class AdvancedCaptcha(commands.Cog):
             color=guild_config["embed_color"]
         )
         if guild_config["embed_image"]:
-            embed.set_image(url=guild_config["embed_image"])
+            embed.set_thumbnail(url=guild_config["embed_image"])
         await channel.send(embed=embed)
         await ctx.send(f"Embed de captcha enviado en {channel.mention}")
 
