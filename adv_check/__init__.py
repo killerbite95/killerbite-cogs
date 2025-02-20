@@ -1,4 +1,4 @@
-from .check import Check
+from .adv_check import Check
 from pathlib import Path
 import json
 
