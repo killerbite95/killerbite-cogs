@@ -5,6 +5,7 @@ from opengsq.protocols import Source, Minecraft
 import datetime
 import pytz
 import logging
+import ast
 
 # Configuración de logging
 logger = logging.getLogger("red.trini.gameservermonitor")
@@ -269,6 +270,14 @@ class GameServerMonitor(commands.Cog):
                     # Si hostname es un dict o lista, lo convertimos a texto plano
                     if isinstance(hostname, (dict, list)):
                         hostname = self.parse_minecraft_description(hostname)
+                    # Si hostname es una cadena que luce como diccionario, intentamos evaluarla
+                    elif isinstance(hostname, str) and hostname.startswith("{") and hostname.endswith("}"):
+                        try:
+                            parsed_desc = ast.literal_eval(hostname)
+                            if isinstance(parsed_desc, (dict, list)):
+                                hostname = self.parse_minecraft_description(parsed_desc)
+                        except Exception as e:
+                            logger.error(f"Error al evaluar la descripción: {e}")
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
                 else:
@@ -277,7 +286,6 @@ class GameServerMonitor(commands.Cog):
                     max_players = info.max_players
                     map_name = getattr(info, "map", "N/A")
                     hostname = getattr(info, "name", "Unknown Server")
-                    # Para Source: visibility=1 => con contraseña
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
 
                 # Armamos la IP que mostramos en el embed
@@ -296,15 +304,16 @@ class GameServerMonitor(commands.Cog):
                 try:
                     tz = pytz.timezone(timezone)
                 except pytz.UnknownTimeZoneError:
-                    logger.error(f"Zona horaria '{timezone}' inválida para el servidor {guild.name}. Usando UTC.")
+                    logger.error(f"Zona horaria '{timezone}' inválida para {guild.name}. Usando UTC.")
                     tz = pytz.UTC
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Crear embed en inglés
+                # Construir título y truncarlo si es necesario
                 title_online = f"{hostname} - Server Status"
                 if len(title_online) > 256:
                     title_online = title_online[:253] + "..."
+
                 if is_passworded:
                     embed = discord.Embed(
                         title=title_online,
@@ -362,7 +371,7 @@ class GameServerMonitor(commands.Cog):
             except Exception as e:
                 logger.error(f"Error al actualizar el servidor {server_ip_formatted}: {e}")
 
-                # Offline o error al obtener información
+                # En caso de error, se muestra el servidor como Offline
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
@@ -385,7 +394,6 @@ class GameServerMonitor(commands.Cog):
                 embed.add_field(name="Status", value="🔴 Offline", inline=True)
                 embed.add_field(name="🎮 Game", value=game_title, inline=True)
 
-                # IP a mostrar (dominio si Minecraft + domain, si no, la IP)
                 if game == "minecraft" and domain:
                     ip_to_show = f"{domain}"
                 else:
