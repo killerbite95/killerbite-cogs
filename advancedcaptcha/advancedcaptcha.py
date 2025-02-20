@@ -263,7 +263,7 @@ class AdvancedCaptcha(commands.Cog):
     async def setcaptchaimage(self, ctx, *, image_url: str = None):
         """
         Establece la imagen (grande) del embed de captcha.
-        Ejemplo: !setcaptchaimage https://imgur.com/C2c0SpZ
+        Ejemplo: !setcaptchaimage https://i.imgur.com/bBJelmT.png
         Sin argumentos, elimina la imagen.
         """
         if image_url and not (image_url.startswith("http://") or image_url.startswith("https://")):
@@ -352,7 +352,7 @@ class AdvancedCaptcha(commands.Cog):
              - Color (por defecto `#3498DB`):
                 `!setcaptchacolor #3498DB`
              - Imagen (opcional):
-                `!setcaptchaimage https://imgur.com/C2c0SpZ`
+                `!setcaptchaimage https://i.imgur.com/bBJelmT.png`
           6. Para ver la configuración actual:
              `!showcaptchasettings`
         """
@@ -374,7 +374,7 @@ class AdvancedCaptcha(commands.Cog):
             "   - Color (por defecto `#3498DB`):\n"
             "      `!setcaptchacolor #3498DB`\n"
             "   - Imagen (opcional):\n"
-            "      `!setcaptchaimage https://imgur.com/C2c0SpZ`\n\n"
+            "      `!setcaptchaimage https://i.imgur.com/bBJelmT.png`\n\n"
             "**6. Ver la configuración actual:**\n"
             "   `!showcaptchasettings`\n"
         )
