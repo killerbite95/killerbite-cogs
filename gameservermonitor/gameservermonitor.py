@@ -79,7 +79,6 @@ class GameServerMonitor(commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def remove_server(self, ctx, server_ip: str):
         """Elimina el monitoreo de un servidor."""
-        # Analizar server_ip
         parsed = self.parse_server_ip(server_ip)
         if not parsed:
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto'.")
@@ -192,21 +191,38 @@ class GameServerMonitor(commands.Cog):
         return ip_part, port_part, server_ip_formatted
 
     def convert_motd(self, motd):
-        """Convierte el MOTD (mensaje del día) en formato JSON a un string plano."""
+        """
+        Convierte el MOTD (mensaje del día) en formato JSON a un string plano.
+        Se ignoran atributos de formato (como color, bold, italic) ya que se necesita texto limpio.
+        """
         if isinstance(motd, str):
-            return motd
+            return motd.strip()
         elif isinstance(motd, dict):
             text = motd.get("text", "")
             if "extra" in motd and isinstance(motd["extra"], list):
                 for extra in motd["extra"]:
                     text += self.convert_motd(extra)
-            return text
+            return text.strip()
         elif isinstance(motd, list):
             text = ""
             for item in motd:
                 text += self.convert_motd(item)
-            return text
+            return text.strip()
         return ""
+
+    def truncate_title(self, title: str, suffix: str) -> str:
+        """
+        Trunca el título para que la longitud total (título + sufijo)
+        no supere 256 caracteres.
+        """
+        max_total = 256
+        allowed_length = max_total - len(suffix)
+        if len(title) > allowed_length:
+            # Reservamos 3 caracteres para "..."
+            truncated = title[: max(allowed_length - 3, 0)] + "..."
+        else:
+            truncated = title
+        return truncated + suffix
 
     async def update_server_status(self, guild, server_ip, first_time=False):
         """Actualiza el estado del servidor y edita el mensaje en Discord."""
@@ -265,7 +281,7 @@ class GameServerMonitor(commands.Cog):
                     is_passworded = False
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
-                    # El hostname viene en formato JSON (MOTD)
+                    # Convertir el MOTD que viene en formato JSON a texto limpio
                     motd_raw = info.get("description", "Minecraft Server")
                     hostname = self.convert_motd(motd_raw)
                     version_str = info.get("version", {}).get("name", "???")
@@ -277,6 +293,10 @@ class GameServerMonitor(commands.Cog):
                     map_name = getattr(info, "map", "N/A")
                     hostname = getattr(info, "name", "Unknown Server")
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
+
+                # Si el hostname está vacío, usamos un fallback
+                if not hostname:
+                    hostname = "Minecraft Server"
 
                 # Armamos la IP que mostramos en el embed
                 if ip_part.startswith("10.0.0."):
@@ -299,20 +319,19 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Construir el embed
-                # Aseguramos que el título no supere 256 caracteres
-                base_title = f"{hostname} - Server Status"
-                if len(base_title) > 256:
-                    base_title = base_title[:250] + "..."
+                # Construir el embed utilizando la función de truncamiento
+                suffix = " - Server Status"
+                title = self.truncate_title(hostname, suffix)
+
                 if is_passworded:
                     embed = discord.Embed(
-                        title=base_title,
+                        title=title,
                         color=discord.Color.orange()
                     )
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
                     embed = discord.Embed(
-                        title=base_title,
+                        title=title,
                         color=discord.Color.green()
                     )
                     embed.add_field(name="✅ Status", value="Online", inline=True)
@@ -374,8 +393,12 @@ class GameServerMonitor(commands.Cog):
                 else:
                     game_title = game
 
+                # Para el embed offline, también aseguramos el límite
+                suffix_offline = " - ❌ Offline"
+                title_offline = self.truncate_title(game_title + " Server", suffix_offline)
+
                 embed = discord.Embed(
-                    title=f"{game_title} Server - ❌ Offline",
+                    title=title_offline,
                     color=discord.Color.red()
                 )
                 embed.add_field(name="Status", value="🔴 Offline", inline=True)
