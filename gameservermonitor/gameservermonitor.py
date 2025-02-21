@@ -415,5 +415,5 @@ class GameServerMonitor(commands.Cog):
                         except Exception as send_error:
                             logger.error(f"Error al enviar mensaje offline para {server_ip_formatted}: {send_error}")
 
-def setup(bot):
-    bot.add_cog(GameServerMonitor(bot))
+async def setup(bot):
+    await bot.add_cog(GameServerMonitor(bot))
