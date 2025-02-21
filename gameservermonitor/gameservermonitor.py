@@ -14,6 +14,7 @@ class GameServerMonitor(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot
+        self.debug = False  # Modo debug desactivado por defecto
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_guild = {
             "servers": {},
@@ -23,12 +24,23 @@ class GameServerMonitor(commands.Cog):
         self.config.register_guild(**default_guild)
         self.server_monitor.start()
 
+    @commands.command(name="debug")
+    @checks.admin_or_permissions(administrator=True)
+    async def toggle_debug(self, ctx, enabled: bool):
+        """
+        Activa o desactiva el modo debug.
+        Uso:
+          !gameservermonitor debug true/false
+        """
+        self.debug = enabled
+        await ctx.send(f"Modo debug {'activado' if enabled else 'desactivado'}.")
+
     @commands.command(name="settimezone")
     @checks.admin_or_permissions(administrator=True)
     async def set_timezone(self, ctx, timezone: str):
         """Establece la zona horaria para las actualizaciones."""
         try:
-            pytz.timezone(timezone)  # Validar zona horaria
+            pytz.timezone(timezone)
         except pytz.UnknownTimeZoneError:
             await ctx.send(f"La zona horaria '{timezone}' no es válida.")
             return
@@ -52,7 +64,6 @@ class GameServerMonitor(commands.Cog):
         channel = channel or ctx.channel
         game = game.lower()
 
-        # Analizar y validar server_ip
         parsed = self.parse_server_ip(server_ip, game)
         if not parsed:
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto' o solo 'ip'.")
@@ -66,12 +77,12 @@ class GameServerMonitor(commands.Cog):
             servers[server_ip_formatted] = {
                 "game": game,
                 "channel_id": channel.id,
-                "message_id": None,  # Inicialmente sin mensaje
-                "domain": domain     # Almacena el dominio si se proporcionó
+                "message_id": None,
+                "domain": domain
             }
         await ctx.send(
-            f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}."
-            + (f"\nDominio asignado: {domain}" if domain else "")
+            f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}." +
+            (f"\nDominio asignado: {domain}" if domain else "")
         )
         await self.update_server_status(ctx.guild, server_ip_formatted, first_time=True)
 
@@ -125,7 +136,6 @@ class GameServerMonitor(commands.Cog):
             if domain:
                 message += f" - Dominio: {domain}"
             message += "\n"
-
         await ctx.send(message)
 
     @commands.command(name="refreshtime")
@@ -162,11 +172,10 @@ class GameServerMonitor(commands.Cog):
         default_ports = {
             "cs2": 27015,
             "css": 27015,
-            "gmod": 27015,    # Puerto predeterminado para gmod
+            "gmod": 27015,
             "rust": 28015,
             "minecraft": 25565
         }
-
         if ":" in server_ip:
             parts = server_ip.split(":")
             if len(parts) != 2:
@@ -193,7 +202,7 @@ class GameServerMonitor(commands.Cog):
     def convert_motd(self, motd):
         """
         Convierte el MOTD (mensaje del día) en formato JSON a un string plano.
-        Se ignoran atributos de formato (como color, bold, italic) ya que se necesita texto limpio.
+        Se ignoran atributos de formato (color, bold, etc.) para obtener solo texto limpio.
         """
         if isinstance(motd, str):
             return motd.strip()
@@ -212,13 +221,11 @@ class GameServerMonitor(commands.Cog):
 
     def truncate_title(self, title: str, suffix: str) -> str:
         """
-        Trunca el título para que la longitud total (título + sufijo)
-        no supere 256 caracteres.
+        Trunca el título para que la longitud total (título + sufijo) no supere 256 caracteres.
         """
         max_total = 256
         allowed_length = max_total - len(suffix)
         if len(title) > allowed_length:
-            # Reservamos 3 caracteres para "..."
             truncated = title[: max(allowed_length - 3, 0)] + "..."
         else:
             truncated = title
@@ -235,14 +242,13 @@ class GameServerMonitor(commands.Cog):
             game = server_info.get("game")
             channel_id = server_info.get("channel_id")
             message_id = server_info.get("message_id")
-            domain = server_info.get("domain")  # Se guarda en add_server
+            domain = server_info.get("domain")
             channel = self.bot.get_channel(channel_id)
 
             if not channel:
                 logger.error(f"Canal con ID {channel_id} no encontrado en el servidor {guild.name}.")
                 return
 
-            # Analizar server_ip
             parsed = self.parse_server_ip(server_ip, game)
             if not parsed:
                 logger.error(f"Formato inválido para server_ip '{server_ip}' en {guild.name}.")
@@ -275,15 +281,17 @@ class GameServerMonitor(commands.Cog):
                 return
 
             try:
-                # Obtener datos del servidor
                 if game == "minecraft":
                     info = await source.get_status()
                     is_passworded = False
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
-                    # Convertir el MOTD que viene en formato JSON a texto limpio
                     motd_raw = info.get("description", "Minecraft Server")
+                    if self.debug:
+                        logger.debug(f"Raw MOTD recibido: {motd_raw}")
                     hostname = self.convert_motd(motd_raw)
+                    if self.debug:
+                        logger.debug(f"MOTD convertido: {hostname}")
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
                 else:
@@ -294,138 +302,97 @@ class GameServerMonitor(commands.Cog):
                     hostname = getattr(info, "name", "Unknown Server")
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
 
-                # Si el hostname está vacío, usamos un fallback
                 if not hostname:
                     hostname = "Minecraft Server"
 
-                # Armamos la IP que mostramos en el embed
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = ip_part
 
-                if game == "minecraft" and domain:
-                    ip_to_show = f"{domain}"
-                else:
-                    ip_to_show = f"{public_ip}:{port_part}"
+                ip_to_show = f"{domain}" if (game == "minecraft" and domain) else f"{public_ip}:{port_part}"
 
-                # Hora local
                 timezone = await self.config.guild(guild).timezone()
                 try:
                     tz = pytz.timezone(timezone)
                 except pytz.UnknownTimeZoneError:
-                    logger.error(f"Zona horaria '{timezone}' inválida para el servidor {guild.name}. Usando UTC.")
+                    logger.error(f"Zona horaria '{timezone}' inválida para {guild.name}. Usando UTC.")
                     tz = pytz.UTC
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Construir el embed utilizando la función de truncamiento
+                # Construir el título del embed con truncamiento
                 suffix = " - Server Status"
                 title = self.truncate_title(hostname, suffix)
+                if self.debug:
+                    logger.debug(f"Título final del embed: {title} (Longitud: {len(title)})")
 
                 if is_passworded:
-                    embed = discord.Embed(
-                        title=title,
-                        color=discord.Color.orange()
-                    )
+                    embed = discord.Embed(title=title, color=discord.Color.orange())
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
-                    embed = discord.Embed(
-                        title=title,
-                        color=discord.Color.green()
-                    )
+                    embed = discord.Embed(title=title, color=discord.Color.green())
                     embed.add_field(name="✅ Status", value="Online", inline=True)
 
                 embed.add_field(name="🎮 Game", value=game_name, inline=True)
-
                 if game != "minecraft":
                     connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
-                    embed.add_field(
-                        name="\n\u200b\n🔗 Connect",
-                        value=f"[Connect]({connect_url})\n\u200b\n",
-                        inline=False
-                    )
-
+                    embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-
                 if game == "minecraft":
                     embed.add_field(name="💎 Version", value=map_name, inline=True)
                 else:
                     embed.add_field(name="🗺️ Current Map", value=map_name, inline=True)
-
-                if max_players > 0:
-                    percent = int(players / max_players * 100)
-                else:
-                    percent = 0
-                embed.add_field(
-                    name="👥 Players",
-                    value=f"{players}/{max_players} ({percent}%)",
-                    inline=True
-                )
-
+                percent = int(players / max_players * 100) if max_players > 0 else 0
+                embed.add_field(name="👥 Players", value=f"{players}/{max_players} ({percent}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
-                # Enviar o editar mensaje
                 if first_time or not message_id:
                     msg = await channel.send(embed=embed)
                     servers[server_ip]["message_id"] = msg.id
+                    if self.debug:
+                        logger.debug(f"Mensaje enviado (ID: {msg.id}).")
                 else:
                     try:
                         msg = await channel.fetch_message(message_id)
                         await msg.edit(embed=embed)
+                        if self.debug:
+                            logger.debug(f"Mensaje editado (ID: {msg.id}).")
                     except discord.NotFound:
                         msg = await channel.send(embed=embed)
                         servers[server_ip]["message_id"] = msg.id
+                        if self.debug:
+                            logger.debug(f"Mensaje no encontrado; se envió uno nuevo (ID: {msg.id}).")
 
             except Exception as e:
                 logger.error(f"Error al actualizar el servidor {server_ip_formatted}: {e}")
+                if self.debug:
+                    logger.exception("Detalles del error en update_server_status:")
 
-                # Offline o error al obtener información
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = ip_part
 
-                if game == "minecraft":
-                    game_title = "Minecraft"
-                elif game in ["cs2", "css", "gmod", "rust"]:
-                    game_title = game_name
-                else:
-                    game_title = game
-
-                # Para el embed offline, también aseguramos el límite
+                game_title = "Minecraft" if game == "minecraft" else (game_name if game in ["cs2", "css", "gmod", "rust"] else game)
                 suffix_offline = " - ❌ Offline"
                 title_offline = self.truncate_title(game_title + " Server", suffix_offline)
-
-                embed = discord.Embed(
-                    title=title_offline,
-                    color=discord.Color.red()
-                )
+                embed = discord.Embed(title=title_offline, color=discord.Color.red())
                 embed.add_field(name="Status", value="🔴 Offline", inline=True)
                 embed.add_field(name="🎮 Game", value=game_title, inline=True)
-
-                # IP a mostrar (dominio si Minecraft + domain, si no, la IP)
-                if game == "minecraft" and domain:
-                    ip_to_show = f"{domain}"
-                else:
-                    ip_to_show = f"{public_ip}:{port_part}"
-
+                ip_to_show = f"{domain}" if (game == "minecraft" and domain) else f"{public_ip}:{port_part}"
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-
                 if game != "minecraft":
                     connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
-                    embed.add_field(
-                        name="\n\u200b\n🔗 Connect",
-                        value=f"[Connect]({connect_url})\n\u200b\n",
-                        inline=False
-                    )
-
+                    embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
 
                 if first_time or not message_id:
                     try:
                         msg = await channel.send(embed=embed)
                         servers[server_ip]["message_id"] = msg.id
+                        if self.debug:
+                            logger.debug(f"Mensaje offline enviado (ID: {msg.id}).")
                     except Exception as send_error:
                         logger.error(f"Error al enviar mensaje offline para {server_ip_formatted}: {send_error}")
                 else:
