@@ -191,6 +191,23 @@ class GameServerMonitor(commands.Cog):
         server_ip_formatted = f"{ip_part}:{port_part}"
         return ip_part, port_part, server_ip_formatted
 
+    def convert_motd(self, motd):
+        """Convierte el MOTD (mensaje del día) en formato JSON a un string plano."""
+        if isinstance(motd, str):
+            return motd
+        elif isinstance(motd, dict):
+            text = motd.get("text", "")
+            if "extra" in motd and isinstance(motd["extra"], list):
+                for extra in motd["extra"]:
+                    text += self.convert_motd(extra)
+            return text
+        elif isinstance(motd, list):
+            text = ""
+            for item in motd:
+                text += self.convert_motd(item)
+            return text
+        return ""
+
     async def update_server_status(self, guild, server_ip, first_time=False):
         """Actualiza el estado del servidor y edita el mensaje en Discord."""
         async with self.config.guild(guild).servers() as servers:
@@ -248,7 +265,9 @@ class GameServerMonitor(commands.Cog):
                     is_passworded = False
                     players = info["players"]["online"]
                     max_players = info["players"]["max"]
-                    hostname = info.get("description", "Minecraft Server")
+                    # El hostname viene en formato JSON (MOTD)
+                    motd_raw = info.get("description", "Minecraft Server")
+                    hostname = self.convert_motd(motd_raw)
                     version_str = info.get("version", {}).get("name", "???")
                     map_name = version_str
                 else:
@@ -257,7 +276,6 @@ class GameServerMonitor(commands.Cog):
                     max_players = info.max_players
                     map_name = getattr(info, "map", "N/A")
                     hostname = getattr(info, "name", "Unknown Server")
-                    # Para Source: visibility=1 => con contraseña
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
 
                 # Armamos la IP que mostramos en el embed
@@ -281,16 +299,20 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Crear embed en inglés
+                # Construir el embed
+                # Aseguramos que el título no supere 256 caracteres
+                base_title = f"{hostname} - Server Status"
+                if len(base_title) > 256:
+                    base_title = base_title[:250] + "..."
                 if is_passworded:
                     embed = discord.Embed(
-                        title=f"{hostname} - Server Status",
+                        title=base_title,
                         color=discord.Color.orange()
                     )
                     embed.add_field(name="🔐 Status", value="Maintenance", inline=True)
                 else:
                     embed = discord.Embed(
-                        title=f"{hostname} - Server Status",
+                        title=base_title,
                         color=discord.Color.green()
                     )
                     embed.add_field(name="✅ Status", value="Online", inline=True)
@@ -394,5 +416,5 @@ class GameServerMonitor(commands.Cog):
                         except Exception as send_error:
                             logger.error(f"Error al enviar mensaje offline para {server_ip_formatted}: {send_error}")
 
-    def setup(bot):
-        bot.add_cog(GameServerMonitor(bot))
+def setup(bot):
+    bot.add_cog(GameServerMonitor(bot))
