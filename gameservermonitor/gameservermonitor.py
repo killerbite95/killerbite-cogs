@@ -1,12 +1,11 @@
 import discord
-from discord.ext import tasks
-from redbot.core import commands, Config, checks
+from discord.ext import tasks, commands
+from redbot.core import Config, checks
 from opengsq.protocols import Source, Minecraft
 import datetime
 import pytz
 import logging
 
-# Configuración de logging
 logger = logging.getLogger("red.trini.gameservermonitor")
 
 class GameServerMonitor(commands.Cog):
@@ -24,18 +23,29 @@ class GameServerMonitor(commands.Cog):
         self.config.register_guild(**default_guild)
         self.server_monitor.start()
 
-    @commands.command(name="debug")
+    @commands.group(name="gameservermonitor", invoke_without_command=True)
+    async def gameservermonitor(self, ctx):
+        """Comandos del monitor de servidores de juegos.
+        
+        Usa:
+          !gameservermonitor <subcomando>
+          
+        Subcomandos disponibles: debug, settimezone, addserver, removeserver, forzarstatus, listaserver, refreshtime.
+        """
+        await ctx.send_help(ctx.command)
+
+    @gameservermonitor.command(name="debug")
     @checks.admin_or_permissions(administrator=True)
-    async def toggle_debug(self, ctx, enabled: bool):
+    async def debug_command(self, ctx, enabled: bool):
         """
         Activa o desactiva el modo debug.
-        Uso:
-          !gameservermonitor debug true/false
+        Ejemplo:
+          !gameservermonitor debug true
         """
         self.debug = enabled
         await ctx.send(f"Modo debug {'activado' if enabled else 'desactivado'}.")
 
-    @commands.command(name="settimezone")
+    @gameservermonitor.command(name="settimezone")
     @checks.admin_or_permissions(administrator=True)
     async def set_timezone(self, ctx, timezone: str):
         """Establece la zona horaria para las actualizaciones."""
@@ -47,19 +57,19 @@ class GameServerMonitor(commands.Cog):
         await self.config.guild(ctx.guild).timezone.set(timezone)
         await ctx.send(f"Zona horaria establecida en {timezone}")
 
-    @commands.command(name="addserver")
+    @gameservermonitor.command(name="addserver")
     @checks.admin_or_permissions(administrator=True)
     async def add_server(self, ctx, server_ip: str, game: str, channel: discord.TextChannel = None, domain: str = None):
         """
         Añade un servidor para monitorear su estado.
         
         Uso:
-          !addserver <ip:puerto> <juego> [channel] [domain]
+          !gameservermonitor addserver <ip:puerto> <juego> [channel] [domain]
 
         Ejemplos:
-          !addserver 194.69.160.51:25575 minecraft #canal mc.dominio.com
-          !addserver 194.69.160.51:27015 cs2 #canal
-          !addserver 51.255.126.200:27015 gmod #canal 1330136596573589551
+          !gameservermonitor addserver 194.69.160.51:25575 minecraft #canal mc.dominio.com
+          !gameservermonitor addserver 194.69.160.51:27015 cs2 #canal
+          !gameservermonitor addserver 51.255.126.200:27015 gmod #canal 1330136596573589551
         """
         channel = channel or ctx.channel
         game = game.lower()
@@ -86,7 +96,7 @@ class GameServerMonitor(commands.Cog):
         )
         await self.update_server_status(ctx.guild, server_ip_formatted, first_time=True)
 
-    @commands.command(name="removeserver")
+    @gameservermonitor.command(name="removeserver")
     @checks.admin_or_permissions(administrator=True)
     async def remove_server(self, ctx, server_ip: str):
         """Elimina el monitoreo de un servidor."""
@@ -95,7 +105,6 @@ class GameServerMonitor(commands.Cog):
             await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto'.")
             return
         server_ip_formatted = f"{parsed[0]}:{parsed[1]}"
-
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_ip_formatted in servers:
                 del servers[server_ip_formatted]
@@ -103,7 +112,7 @@ class GameServerMonitor(commands.Cog):
             else:
                 await ctx.send(f"No se encontró un servidor con IP {server_ip_formatted} en la lista.")
 
-    @commands.command(name="forzarstatus")
+    @gameservermonitor.command(name="forzarstatus")
     async def force_status(self, ctx):
         """Fuerza una actualización de estado en el canal actual."""
         servers = await self.config.guild(ctx.guild).servers()
@@ -117,7 +126,7 @@ class GameServerMonitor(commands.Cog):
         else:
             await ctx.send("No hay servidores monitoreados en este canal.")
 
-    @commands.command(name="listaserver")
+    @gameservermonitor.command(name="listaserver")
     async def list_servers(self, ctx):
         """Lista todos los servidores monitoreados."""
         servers = await self.config.guild(ctx.guild).servers()
@@ -130,7 +139,7 @@ class GameServerMonitor(commands.Cog):
             channel = self.bot.get_channel(data["channel_id"])
             domain = data.get("domain")
             message += (
-                f"**{server_ip}** - Juego: **{data['game'].upper()}** - "
+                f"**{server_ip}** - Juego: **{data['game'].upper()}** - " +
                 f"Canal: {channel.mention if channel else 'Desconocido'}"
             )
             if domain:
@@ -138,7 +147,7 @@ class GameServerMonitor(commands.Cog):
             message += "\n"
         await ctx.send(message)
 
-    @commands.command(name="refreshtime")
+    @gameservermonitor.command(name="refreshtime")
     @checks.admin_or_permissions(administrator=True)
     async def refresh_time(self, ctx, seconds: int):
         """Establece el tiempo de actualización en segundos."""
@@ -167,7 +176,7 @@ class GameServerMonitor(commands.Cog):
     def parse_server_ip(self, server_ip: str, game: str = None):
         """
         Analiza y valida server_ip.
-        Retorna (ip, port, server_ip_formatted) o None si inválido.
+        Retorna (ip, port, server_ip_formatted) o None si es inválido.
         """
         default_ports = {
             "cs2": 27015,
@@ -202,26 +211,29 @@ class GameServerMonitor(commands.Cog):
     def convert_motd(self, motd):
         """
         Convierte el MOTD (mensaje del día) en formato JSON a un string plano.
-        Se ignoran atributos de formato (color, bold, etc.) para obtener solo texto limpio.
+        Se ignoran atributos de formato (color, bold, etc.) y se colapsa el espacio múltiple.
         """
         if isinstance(motd, str):
-            return motd.strip()
+            result = motd
         elif isinstance(motd, dict):
-            text = motd.get("text", "")
+            result = motd.get("text", "")
             if "extra" in motd and isinstance(motd["extra"], list):
                 for extra in motd["extra"]:
-                    text += self.convert_motd(extra)
-            return text.strip()
+                    result += self.convert_motd(extra)
         elif isinstance(motd, list):
-            text = ""
+            result = ""
             for item in motd:
-                text += self.convert_motd(item)
-            return text.strip()
-        return ""
+                result += self.convert_motd(item)
+        else:
+            result = ""
+        result = result.strip()
+        result = " ".join(result.split())
+        return result
 
     def truncate_title(self, title: str, suffix: str) -> str:
         """
         Trunca el título para que la longitud total (título + sufijo) no supere 256 caracteres.
+        Si aún excede el límite, se retorna un título por defecto.
         """
         max_total = 256
         allowed_length = max_total - len(suffix)
@@ -229,7 +241,10 @@ class GameServerMonitor(commands.Cog):
             truncated = title[: max(allowed_length - 3, 0)] + "..."
         else:
             truncated = title
-        return truncated + suffix
+        final_title = truncated + suffix
+        if len(final_title) > max_total:
+            final_title = "Server Status"
+        return final_title
 
     async def update_server_status(self, guild, server_ip, first_time=False):
         """Actualiza el estado del servidor y edita el mensaje en Discord."""
@@ -246,7 +261,7 @@ class GameServerMonitor(commands.Cog):
             channel = self.bot.get_channel(channel_id)
 
             if not channel:
-                logger.error(f"Canal con ID {channel_id} no encontrado en el servidor {guild.name}.")
+                logger.error(f"Canal con ID {channel_id} no encontrado en {guild.name}.")
                 return
 
             parsed = self.parse_server_ip(server_ip, game)
@@ -255,7 +270,6 @@ class GameServerMonitor(commands.Cog):
                 return
             ip_part, port_part, server_ip_formatted = parsed
 
-            # Crear el objeto del protocolo
             if game in ["cs2", "css", "gmod", "rust"]:
                 try:
                     source = Source(host=ip_part, port=port_part)
@@ -276,7 +290,7 @@ class GameServerMonitor(commands.Cog):
                     source = None
                 game_name = "Minecraft"
             else:
-                logger.warning(f"Juego '{game}' no soportado para el servidor {server_ip_formatted}.")
+                logger.warning(f"Juego '{game}' no soportado para {server_ip_formatted}.")
                 await channel.send(f"Juego {game} no soportado.")
                 return
 
@@ -321,7 +335,6 @@ class GameServerMonitor(commands.Cog):
                 now = datetime.datetime.now(tz)
                 local_time = now.strftime("%Y-%m-%d %H:%M:%S")
 
-                # Construir el título del embed con truncamiento
                 suffix = " - Server Status"
                 title = self.truncate_title(hostname, suffix)
                 if self.debug:
@@ -363,17 +376,14 @@ class GameServerMonitor(commands.Cog):
                         servers[server_ip]["message_id"] = msg.id
                         if self.debug:
                             logger.debug(f"Mensaje no encontrado; se envió uno nuevo (ID: {msg.id}).")
-
             except Exception as e:
                 logger.error(f"Error al actualizar el servidor {server_ip_formatted}: {e}")
                 if self.debug:
                     logger.exception("Detalles del error en update_server_status:")
-
                 if ip_part.startswith("10.0.0."):
                     public_ip = "178.33.160.187"
                 else:
                     public_ip = ip_part
-
                 game_title = "Minecraft" if game == "minecraft" else (game_name if game in ["cs2", "css", "gmod", "rust"] else game)
                 suffix_offline = " - ❌ Offline"
                 title_offline = self.truncate_title(game_title + " Server", suffix_offline)
@@ -386,7 +396,6 @@ class GameServerMonitor(commands.Cog):
                     connect_url = f"https://alienhost.ovh/connect.php?ip={public_ip}:{port_part}"
                     embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
-
                 if first_time or not message_id:
                     try:
                         msg = await channel.send(embed=embed)
