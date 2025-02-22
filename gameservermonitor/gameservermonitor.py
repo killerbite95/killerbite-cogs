@@ -194,7 +194,6 @@ class GameServerMonitor(commands.Cog):
             text = " ".join([self.convert_motd(item) for item in motd]).strip()
         else:
             text = ""
-        # Colapsa espacios en blanco
         return " ".join(text.split())
 
     def truncate_title(self, title: str, suffix: str) -> str:
@@ -228,6 +227,9 @@ class GameServerMonitor(commands.Cog):
                 logger.error(f"Formato inválido para server_ip '{server_ip}' en {guild.name}.")
                 return
             ip_part, port_part, server_ip_formatted = parsed
+
+            # Definir public_ip de forma anticipada para usarla en cualquier bloque
+            public_ip = "178.33.160.187" if ip_part.startswith("10.0.0.") else ip_part
 
             # Crear el objeto del protocolo
             if game in ["cs2", "css", "gmod", "rust"]:
@@ -281,7 +283,6 @@ class GameServerMonitor(commands.Cog):
                 if not hostname:
                     hostname = "Minecraft Server"
 
-                public_ip = "178.33.160.187" if ip_part.startswith("10.0.0.") else ip_part
                 ip_to_show = domain if (game == "minecraft" and domain) else f"{public_ip}:{port_part}"
 
                 timezone = await self.config.guild(guild).timezone()
@@ -292,7 +293,6 @@ class GameServerMonitor(commands.Cog):
                     tz = pytz.UTC
                 local_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
 
-                # Construir título y embed de forma robusta
                 suffix = " - Server Status"
                 title = self.truncate_title(hostname, suffix)
                 if self.debug:
