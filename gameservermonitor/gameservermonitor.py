@@ -8,7 +8,7 @@ import logging
 
 logger = logging.getLogger("red.trini.gameservermonitor")
 
-class GameServerMonitor(commands.Cog):
+class GameServerMonitor(commands.Cog, name="GameServerMonitor"):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
 
     def __init__(self, bot):
@@ -26,10 +26,10 @@ class GameServerMonitor(commands.Cog):
     @commands.group(name="gameservermonitor", invoke_without_command=True)
     async def gameservermonitor(self, ctx):
         """Comandos del monitor de servidores de juegos.
-        
+
         Usa:
           !gameservermonitor <subcomando>
-          
+
         Subcomandos disponibles: debug, settimezone, addserver, removeserver, forzarstatus, listaserver, refreshtime.
         """
         await ctx.send_help(ctx.command)
@@ -62,7 +62,7 @@ class GameServerMonitor(commands.Cog):
     async def add_server(self, ctx, server_ip: str, game: str, channel: discord.TextChannel = None, domain: str = None):
         """
         Añade un servidor para monitorear su estado.
-        
+
         Uso:
           !gameservermonitor addserver <ip:puerto> <juego> [channel] [domain]
 
