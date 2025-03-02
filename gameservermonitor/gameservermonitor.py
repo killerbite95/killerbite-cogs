@@ -5,9 +5,21 @@ from opengsq.protocols import Source, Minecraft
 import datetime
 import pytz
 import logging
+import re  # Para la extracción de la versión numérica
 
 # Configuración de logging
 logger = logging.getLogger("red.trini.gameservermonitor")
+
+def extract_numeric_version(version_str: str) -> str:
+    """
+    Extrae la parte numérica (con puntos) de una cadena de versión.
+    Por ejemplo, de "Paper 1.21.1-R0.1-SNAPSHOT" extrae "1.21.1".
+    Si no se encuentra, devuelve la cadena original.
+    """
+    m = re.search(r"(\d+(?:\.\d+)+)", version_str)
+    if m:
+        return m.group(1)
+    return version_str
 
 class GameServerMonitor(commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
@@ -228,7 +240,7 @@ class GameServerMonitor(commands.Cog):
                 return
             ip_part, port_part, server_ip_formatted = parsed
 
-            # Definir public_ip de forma anticipada para usarla en cualquier bloque
+            # Definir public_ip de forma anticipada
             public_ip = "178.33.160.187" if ip_part.startswith("10.0.0.") else ip_part
 
             # Crear el objeto del protocolo
@@ -268,7 +280,9 @@ class GameServerMonitor(commands.Cog):
                     hostname = self.convert_motd(raw_motd)
                     if self.debug:
                         logger.debug(f"Hostname convertido: {hostname} (longitud {len(hostname)})")
+                    # Extraer la versión numérica de la cadena de versión
                     version_str = info.get("version", {}).get("name", "???")
+                    version_str = extract_numeric_version(version_str)
                     map_name = version_str
                 else:
                     info = await source.get_info()
