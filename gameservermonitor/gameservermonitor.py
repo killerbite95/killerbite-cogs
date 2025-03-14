@@ -445,12 +445,77 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 crossorigin="anonymous"></script>
         """
 
-        return {
-            "status": 0,
-            "web_content": {
-                "source": html_content
-            }
-        }
+        return {"status": 0, "web_content": {"source": html_content}}
+
+    @dashboard_page(name="add_server", description="Añade un servidor al monitor", methods=("GET", "POST"))
+    async def rpc_add_server(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
+        """
+        Página del dashboard para añadir un servidor.
+        Se espera que se pase 'guild_id' (int) en los kwargs.
+        """
+        guild = self.bot.get_guild(guild_id)
+        if guild is None:
+            return {"status": 1, "error": "Guild no encontrada."}
+        import wtforms
+        class AddServerForm(kwargs["Form"]):
+            server_ip = wtforms.StringField("Server IP (ip:puerto o ip)", validators=[wtforms.validators.InputRequired()])
+            game = wtforms.StringField("Juego", validators=[wtforms.validators.InputRequired()])
+            channel_id = wtforms.IntegerField("Channel ID", validators=[wtforms.validators.InputRequired()])
+            domain = wtforms.StringField("Dominio (opcional)")
+            submit = wtforms.SubmitField("Añadir Servidor")
+        form = AddServerForm()
+        if form.validate_on_submit():
+            server_ip = form.server_ip.data.strip()
+            game = form.game.data.strip().lower()
+            channel_id = form.channel_id.data
+            domain = form.domain.data.strip() if form.domain.data else None
+
+            parsed = self.parse_server_ip(server_ip, game)
+            if not parsed:
+                return {"status": 1, "error": "Formato de server_ip inválido."}
+            ip_part, port_part, server_ip_formatted = parsed
+
+            async with self.config.guild(guild).servers() as servers:
+                if server_ip_formatted in servers:
+                    return {"status": 0, "notifications": [{"message": "El servidor ya está siendo monitoreado.", "category": "warning"}]}
+                servers[server_ip_formatted] = {
+                    "game": game,
+                    "channel_id": channel_id,
+                    "message_id": None,
+                    "domain": domain
+                }
+            await self.update_server_status(guild, server_ip_formatted, first_time=True)
+            return {"status": 0, "notifications": [{"message": f"Servidor {server_ip_formatted} añadido correctamente.", "category": "success"}], "redirect_url": kwargs["request_url"]}
+        source = "{{ form|safe }}"
+        return {"status": 0, "web_content": {"source": source, "form": form}}
+
+    @dashboard_page(name="remove_server", description="Elimina un servidor del monitor", methods=("GET", "POST"))
+    async def rpc_remove_server(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
+        """
+        Página del dashboard para eliminar un servidor.
+        Se espera que se pase 'guild_id' (int) en los kwargs.
+        """
+        guild = self.bot.get_guild(guild_id)
+        if guild is None:
+            return {"status": 1, "error": "Guild no encontrada."}
+        import wtforms
+        class RemoveServerForm(kwargs["Form"]):
+            server_ip = wtforms.StringField("Server IP (ip:puerto o ip)", validators=[wtforms.validators.InputRequired()])
+            submit = wtforms.SubmitField("Eliminar Servidor")
+        form = RemoveServerForm()
+        if form.validate_on_submit():
+            server_ip = form.server_ip.data.strip()
+            parsed = self.parse_server_ip(server_ip)
+            if not parsed:
+                return {"status": 1, "error": "Formato de server_ip inválido."}
+            ip_part, port_part, server_ip_formatted = parsed
+            async with self.config.guild(guild).servers() as servers:
+                if server_ip_formatted not in servers:
+                    return {"status": 0, "notifications": [{"message": "El servidor no está siendo monitoreado.", "category": "warning"}]}
+                del servers[server_ip_formatted]
+            return {"status": 0, "notifications": [{"message": f"Servidor {server_ip_formatted} eliminado correctamente.", "category": "success"}], "redirect_url": kwargs["request_url"]}
+        source = "{{ form|safe }}"
+        return {"status": 0, "web_content": {"source": source, "form": form}}
 
 def setup(bot):
     cog = GameServerMonitor(bot)
