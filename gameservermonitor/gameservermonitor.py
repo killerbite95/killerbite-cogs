@@ -6,6 +6,10 @@ import datetime
 import pytz
 import logging
 import re  # Para la extracción de la versión numérica
+import typing
+
+# Importamos la integración del dashboard
+from .dashboard_integration import DashboardIntegration, dashboard_page
 
 # Configuración de logging
 logger = logging.getLogger("red.trini.gameservermonitor")
@@ -21,7 +25,7 @@ def extract_numeric_version(version_str: str) -> str:
         return m.group(1)
     return version_str
 
-class GameServerMonitor(commands.Cog):
+class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
 
     def __init__(self, bot):
@@ -35,6 +39,8 @@ class GameServerMonitor(commands.Cog):
         self.config.register_guild(**default_guild)
         self.debug = False  # Modo debug desactivado por defecto
         self.server_monitor.start()
+
+    # -------------------- Comandos del Cog --------------------
 
     @commands.command(name="settimezone")
     @checks.admin_or_permissions(administrator=True)
@@ -76,8 +82,10 @@ class GameServerMonitor(commands.Cog):
                 "message_id": None,
                 "domain": domain
             }
-        await ctx.send(f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}." +
-                       (f"\nDominio asignado: {domain}" if domain else ""))
+        await ctx.send(
+            f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}." +
+            (f"\nDominio asignado: {domain}" if domain else "")
+        )
         await self.update_server_status(ctx.guild, server_ip_formatted, first_time=True)
 
     @commands.command(name="removeserver")
@@ -144,6 +152,8 @@ class GameServerMonitor(commands.Cog):
         """Activa o desactiva el modo debug."""
         self.debug = state
         await ctx.send(f"Modo debug {'activado' if state else 'desactivado'}.")
+
+    # -------------------- Tareas y utilidades --------------------
 
     @tasks.loop(seconds=60)
     async def server_monitor(self):
@@ -375,6 +385,32 @@ class GameServerMonitor(commands.Cog):
                         await msg.edit(embed=embed)
                 except Exception as offline_error:
                     logger.error(f"Error enviando embed offline para {server_ip_formatted}: {offline_error}")
+
+    # -------------------- Dashboard Integration --------------------
+    @dashboard_page(name="servers", description="Muestra los servidores monitorizados")
+    async def rpc_callback_servers(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
+        """
+        Página del dashboard para mostrar los servidores monitorizados en la guild.
+        Se espera que se pase 'guild_id' (int) en los kwargs.
+        """
+        guild = self.bot.get_guild(guild_id)
+        if guild is None:
+            return {"status": 1, "error": "Guild no encontrada."}
+        servers = await self.config.guild(guild).servers()
+        html_content = "<h1>Servidores Monitorizados</h1>"
+        html_content += (
+            "<table border='1' style='border-collapse: collapse;'>"
+            "<tr><th>IP</th><th>Juego</th><th>Canal ID</th><th>Dominio</th></tr>"
+        )
+        for server_ip, data in servers.items():
+            game = data.get("game", "N/A")
+            channel_id = data.get("channel_id", "N/A")
+            domain = data.get("domain", "N/A")
+            html_content += (
+                f"<tr><td>{server_ip}</td><td>{game.upper()}</td><td>{channel_id}</td><td>{domain if domain else 'N/A'}</td></tr>"
+            )
+        html_content += "</table>"
+        return {"status": 0, "web_content": {"source": html_content}}
 
 def setup(bot):
     cog = GameServerMonitor(bot)
