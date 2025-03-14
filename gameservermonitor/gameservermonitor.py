@@ -396,21 +396,61 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             return {"status": 1, "error": "Guild no encontrada."}
+
         servers = await self.config.guild(guild).servers()
-        html_content = "<h1>Servidores Monitorizados</h1>"
-        html_content += (
-            "<table border='1' style='border-collapse: collapse;'>"
-            "<tr><th>IP</th><th>Juego</th><th>Canal ID</th><th>Dominio</th></tr>"
-        )
+
+        # Construimos el HTML usando Bootstrap (vía CDN) para un mejor estilo
+        html_content = """
+        <!-- Cargamos el CSS de Bootstrap desde un CDN -->
+        <link rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+              integrity="sha384-ENjdO4Dr2bkBIFxQG+8exIg2knQW4PuAtf3y5PxC5bl80k4CL8nAeZp3rNZZ8VC3"
+              crossorigin="anonymous">
+
+        <div class="container mt-4">
+          <h1 class="mb-4">Servidores Monitorizados</h1>
+          <table class="table table-bordered table-striped">
+            <thead class="table-dark">
+              <tr>
+                <th scope="col">IP</th>
+                <th scope="col">Juego</th>
+                <th scope="col">Canal ID</th>
+                <th scope="col">Dominio</th>
+              </tr>
+            </thead>
+            <tbody>
+        """
+
         for server_ip, data in servers.items():
-            game = data.get("game", "N/A")
+            game = data.get("game", "N/A").upper()
             channel_id = data.get("channel_id", "N/A")
-            domain = data.get("domain", "N/A")
-            html_content += (
-                f"<tr><td>{server_ip}</td><td>{game.upper()}</td><td>{channel_id}</td><td>{domain if domain else 'N/A'}</td></tr>"
-            )
-        html_content += "</table>"
-        return {"status": 0, "web_content": {"source": html_content}}
+            domain = data.get("domain", "N/A") or "N/A"
+            html_content += f"""
+              <tr>
+                <td>{server_ip}</td>
+                <td>{game}</td>
+                <td>{channel_id}</td>
+                <td>{domain}</td>
+              </tr>
+            """
+
+        html_content += """
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Opcional: JavaScript de Bootstrap, si lo necesitas -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+                integrity="sha384-pp6GQyJP0XKHTS0rphZo5hBjbgJf9HrYi7wkN8k82RBnANn7LkZ6A9E8M8AP52Ze"
+                crossorigin="anonymous"></script>
+        """
+
+        return {
+            "status": 0,
+            "web_content": {
+                "source": html_content
+            }
+        }
 
 def setup(bot):
     cog = GameServerMonitor(bot)
