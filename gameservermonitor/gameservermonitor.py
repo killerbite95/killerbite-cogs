@@ -376,12 +376,12 @@ class GameServerMonitor(commands.Cog):
                 except Exception as offline_error:
                     logger.error(f"Error enviando embed offline para {server_ip_formatted}: {offline_error}")
 
-def setup(bot):
+async def setup(bot):
     cog = GameServerMonitor(bot)
-    bot.add_cog(cog)
+    await bot.add_cog(cog)
     try:
         from .dashboard_integration import DashboardIntegration
     except ImportError:
-        import dashboard_integration
-        DashboardIntegration = dashboard_integration.DashboardIntegration
-    DashboardIntegration(bot, cog.config)
+        from dashboard_integration import DashboardIntegration
+    await bot.add_cog(DashboardIntegration(bot, cog.config))
+
