@@ -1,3 +1,7 @@
 {
-    "end_user_data_statement": "Este cog almacena la ID de usuario."
+    "author": [
+    "Killerbite95"
+  ],
+    "end_user_data_statement": "Este cog almacena la ID de usuario.",
+    "description": "Sistema de registro y limpieza de creditos a usuarios baneados."
 }

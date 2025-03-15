@@ -1,3 +1,7 @@
 {
-    "end_user_data_statement": "Este cog no almacena datos de usuario."
+    "author": [
+    "Killerbite95"
+  ],
+    "end_user_data_statement": "Este cog almacena la ID de usuario.",
+    "description": "Añade server status de tus servidores como CSS, CS2, GMOD, Minecraft!"
 }
