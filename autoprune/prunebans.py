@@ -10,6 +10,7 @@ from redbot.core.bank import bank_prune
 
 class PruneBans(commands.Cog):
     """Cog para manejar la eliminación de créditos de usuarios baneados y hacer seguimiento de los baneos."""
+    __author__ = "Killerbite95"  # Aquí se declara el autor
 
     def __init__(self, bot: Red):
         self.bot = bot
