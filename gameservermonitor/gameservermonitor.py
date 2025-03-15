@@ -27,6 +27,7 @@ def extract_numeric_version(version_str: str) -> str:
 
 class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
+    __author__ = "Killerbite95"  # Aquí se declara el autor
 
     def __init__(self, bot):
         self.bot = bot

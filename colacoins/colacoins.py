@@ -7,6 +7,7 @@ import logging
 
 class ColaCoins(commands.Cog):
     """Gestiona las ColaCoins para los usuarios. By Killerbite95"""
+    __author__ = "Killerbite95"  # Aquí se declara el autor
 
     def __init__(self, bot):
         self.bot = bot

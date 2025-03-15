@@ -7,6 +7,7 @@ class AdvancedBlackjackView(discord.ui.View):
     Vista con los botones de Hit, Stand, Double Down, Split y Help.
     Se encarga de interactuar con la partida en curso.
     """
+    __author__ = "Killerbite95"  # Aquí se declara el autor
     def __init__(self, cog, ctx, timeout=120):
         super().__init__(timeout=timeout)
         self.cog = cog

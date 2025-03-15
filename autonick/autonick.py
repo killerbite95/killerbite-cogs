@@ -27,6 +27,7 @@ class AutoNick(commands.Cog):
       • /autonick admin removeforbidden
       • /autonick admin listforbidden
     """
+    __author__ = "Killerbite95"  # Aquí se declara el autor
 
     def __init__(self, bot):
         self.bot = bot

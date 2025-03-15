@@ -4,6 +4,7 @@ import logging
 
 class ListRoles(commands.Cog):
     """Cog para listar los roles del servidor con su nombre e ID."""
+    __author__ = "Killerbite95"  # Aquí se declara el autor
     __version__ = "1.0.0"
 
     def __init__(self, bot: commands.Bot):

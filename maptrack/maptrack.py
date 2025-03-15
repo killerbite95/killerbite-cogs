@@ -28,6 +28,7 @@ class ChannelOrThreadConverter(commands.Converter):
 
 class MapTrack(commands.Cog):
     """Cog para rastrear cambios de mapa en servidores de juegos. By Killerbite95"""
+    __author__ = "Killerbite95"  # Aquí se declara el autor
 
     def __init__(self, bot):
         self.bot = bot

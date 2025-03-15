@@ -3,6 +3,7 @@ from redbot.core import commands, Config
 from datetime import datetime, timedelta, timezone
 
 class DayCounter(commands.Cog):
+    __author__ = "Killerbite95"  # Aquí se declara el autor
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890)
