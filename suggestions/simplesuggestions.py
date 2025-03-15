@@ -10,7 +10,8 @@ logger = logging.getLogger("red.trini.simplesuggestions")
 
 class SimpleSuggestions(DashboardIntegration, commands.Cog):
     """Cog para gestionar sugerencias en un canal de Discord. By Killerbite95"""
-
+    __author__ = "Killerbite95"  # Aquí se declara el autor
+    
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
