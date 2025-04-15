@@ -293,7 +293,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                         logger.debug(f"Hostname convertido: {hostname} (longitud {len(hostname)})")
                     # Extraer la versión numérica de la cadena de versión
                     version_str = info.get("version", {}).get("name", "???")
-                    version_str = extract_numeric_version(version_str)
+                    version_str = extract_highest_version(version_str)
                     map_name = version_str
                 else:
                     info = await source.get_info()
