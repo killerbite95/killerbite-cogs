@@ -294,8 +294,6 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     # Extraer la versión numérica de la cadena de versión
                     version_str = info.get("version", {}).get("name", "???")
                     version_str = extract_numeric_version(version_str)
-                    if version_str == "1.7.2":
-                        version_str = "1.21.1"  # Corrección automática para Velocity
                     map_name = version_str
                 else:
                     info = await source.get_info()
