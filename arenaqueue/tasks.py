@@ -3,9 +3,7 @@
 
 import discord
 from redbot.core import commands, Config
-from redbot.core.utils import schedules
-from redbot.core.utils.chat_formatting import box
-from redbot.core.utils.schedules import crontab
+from redbot.core.utils.schedules import loop, crontab
 from redbot.core.bot import Red
 from datetime import datetime, timedelta
 
@@ -16,13 +14,13 @@ class SeasonTasks(commands.Cog):
         self.bot = bot
         # Usamos el mismo identifier que en seasons.py para compartir configuración
         self.config = Config.get_conf(self, identifier=3456789012)
-        # No volvemos a register_guild aquí: ya lo hace SeasonsCog
+        # Arrancamos el loop de comprobación
         self.check_seasons.start()
 
     def cog_unload(self):
         self.check_seasons.cancel()
 
-    @schedules.loop(schedule=crontab(hour=0, minute=0))
+    @loop(schedule=crontab(hour=0, minute=0))
     async def check_seasons(self):
         """Revisa cada día a medianoche UTC el estado de las temporadas activas."""
         now = datetime.utcnow()
