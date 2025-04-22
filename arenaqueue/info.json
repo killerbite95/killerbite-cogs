@@ -1,9 +1,8 @@
-// arenaqueue/info.json
 {
   "name": "ArenaQueue",
   "version": "1.0.0",
   "description": "Cog para Red Discord Bot que proporciona gestión de colas in-house: temporadas, challenges, captain queue, MMR decay, suspensiones, webhooks y más.",
-  "author": ["Killerbite"],
+  "author": ["killerbite"],
   "contributors": [],
   "requirements": [],
   "tags": ["queue", "season", "challenges", "captain", "decay", "suspend", "webhook"]

@@ -1,11 +1,11 @@
 # arenaqueue/tasks.py
 # coding: utf-8
 
+import datetime
 import discord
-from redbot.core import commands, Config
-from redbot.core.utils.schedules import loop, crontab
+from discord.ext import tasks, commands
+from redbot.core import Config
 from redbot.core.bot import Red
-from datetime import datetime, timedelta
 
 class SeasonTasks(commands.Cog):
     """Tareas programadas para gestionar recordatorios y cierre automático de temporadas."""
@@ -18,24 +18,25 @@ class SeasonTasks(commands.Cog):
         self.check_seasons.start()
 
     def cog_unload(self):
+        # Al descargar el cog, detenemos el loop
         self.check_seasons.cancel()
 
-    @loop(schedule=crontab(hour=0, minute=0))
+    @tasks.loop(time=datetime.time(hour=0, minute=0))
     async def check_seasons(self):
         """Revisa cada día a medianoche UTC el estado de las temporadas activas."""
-        now = datetime.utcnow()
+        now = datetime.datetime.utcnow()
         for guild in self.bot.guilds:
             season = await self.config.guild(guild).season()
             if not season:
                 continue
 
-            start = datetime.utcfromtimestamp(season["start_ts"])
-            end = datetime.utcfromtimestamp(season["end_ts"])
+            start = datetime.datetime.utcfromtimestamp(season["start_ts"])
+            end = datetime.datetime.utcfromtimestamp(season["end_ts"])
             channel = guild.get_channel(season["channel_id"])
             role = guild.get_role(season["role_id"]) if season.get("role_id") else None
 
             # Recordatorio 1 día antes
-            if timedelta(days=1) >= (end - now) > timedelta(hours=23):
+            if datetime.timedelta(days=1) >= (end - now) > datetime.timedelta(hours=23):
                 mention = role.mention if role else ""
                 await channel.send(
                     f"⏰ **Recordatorio:** la temporada **{season['name']}** finaliza mañana ({end.date()}). {mention}"
@@ -49,4 +50,5 @@ class SeasonTasks(commands.Cog):
 
     @check_seasons.before_loop
     async def before_check(self):
+        # Esperamos a que el bot esté listo antes de arrancar el loop
         await self.bot.wait_until_ready()
