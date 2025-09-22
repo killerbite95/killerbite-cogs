@@ -78,7 +78,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
 
         # --- DayZ: requiere game_port + query_port ---
         if game == "dayz":
-            host = server_ip.split(":")[0]
+            host = server_ip.split(":")[0]  # tolera ip:algo, usa solo host
             if game_port is None or query_port is None:
                 return await ctx.send(
                     "Para **DayZ** indica `game_port` (entrada, ej. 2302) y `query_port` (consulta, ej. 27016).\n"
@@ -308,68 +308,42 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 logger.error(f"Canal no encontrado en {guild.name} (ID {server_info.get('channel_id')}).")
                 return
 
-            # Resolver host y protocolo
+            # Resolver host y datos base
             if game == "dayz":
                 host = server_key.split(":")[0]
-                # Migración retrocompatible: si faltan puertos, infiere
                 game_port = int(server_info.get("game_port") or server_key.split(":")[1])
                 query_port = server_info.get("query_port")
                 public_ip = "178.33.160.187" if host.startswith("10.0.0.") else host
                 game_name = "DayZ Standalone"
-
-                # Si no tenemos query_port, probamos candidatos comunes (27016, game_port+1, +2)
-                info = None
-                if query_port is None:
-                    candidates = [27016, game_port + 1, game_port + 2]
-                    qp_ok, info = await self._try_dayz_query(host, candidates)
-                    if qp_ok is not None:
-                        query_port = int(qp_ok)
-                        servers[server_key]["query_port"] = query_port  # persiste migración
-                        servers[server_key]["game_port"] = int(game_port)
-                        logger.info(f"DayZ {host}: inferido query_port={query_port}")
-                if query_port is not None and info is None:
-                    try:
-                        s = Source(host=host, port=int(query_port))
-                        info = await s.get_info()
-                    except Exception as e:
-                        logger.debug(f"DayZ query falló en {host}:{query_port} → {e!r}")
-                        raise
-
                 ip_to_show = f"{public_ip}:{game_port}"
-
+                # No hagas query aquí: se hará dentro del try/except de abajo
+                resolver = ("dayz", host, game_port, query_port)
             else:
-                # server_key siempre es ip:port
                 parsed_ip, parsed_port = server_key.split(":")
                 public_ip = "178.33.160.187" if parsed_ip.startswith("10.0.0.") else parsed_ip
+                ip_to_show = f"{public_ip}:{parsed_port}"
 
                 if game in {"cs2", "css", "gmod", "rust"}:
-                    try:
-                        s = Source(host=parsed_ip, port=int(parsed_port))
-                    except Exception as e:
-                        logger.error(f"Error creando Source para {server_key}: {e}")
-                        s = None
                     game_name = {
                         "cs2": "Counter-Strike 2",
                         "css": "Counter-Strike: Source",
                         "gmod": "Garry's Mod",
                         "rust": "Rust",
                     }.get(game, "Unknown Game")
-                    ip_to_show = f"{public_ip}:{parsed_port}"
+                    resolver = ("source", parsed_ip, int(parsed_port))
                 elif game == "minecraft":
-                    try:
-                        s = Minecraft(host=parsed_ip, port=int(parsed_port))
-                    except Exception as e:
-                        logger.error(f"Error creando Minecraft para {server_key}: {e}")
-                        s = None
                     game_name = "Minecraft"
-                    ip_to_show = f"{public_ip}:{parsed_port}"
+                    resolver = ("minecraft", parsed_ip, int(parsed_port))
                 else:
                     logger.warning(f"Juego '{game}' no soportado para el servidor {server_key}.")
                     return
 
             try:
-                if game == "minecraft":
-                    info = await s.get_status()
+                # --------- Query (todo dentro del try) ---------
+                if resolver[0] == "minecraft":
+                    _ip, _port = resolver[1], resolver[2]
+                    s_mc = Minecraft(host=_ip, port=_port)
+                    info = await s_mc.get_status()
                     if self.debug:
                         logger.debug(f"Raw get_status para {server_key}: {info}")
                     is_passworded = False
@@ -378,11 +352,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     raw_motd = info.get("description", "Minecraft Server")
                     hostname = self.convert_motd(raw_motd)
                     version_str = info.get("version", {}).get("name", "???")
-                    version_str = extract_numeric_version(version_str)
-                    map_name = version_str
-                else:
-                    if game != "dayz":
-                        info = await s.get_info()
+                    map_name = extract_numeric_version(version_str)
+                elif resolver[0] == "source":
+                    _ip, _port = resolver[1], resolver[2]
+                    s_src = Source(host=_ip, port=_port)
+                    info = await s_src.get_info()
                     if self.debug:
                         logger.debug(f"Raw get_info para {server_key}: {info}")
                     players = getattr(info, "players", 0)
@@ -390,11 +364,35 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     map_name = getattr(info, "map", "N/A")
                     hostname = getattr(info, "name", "Unknown Server")
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
+                else:  # dayz
+                    host, game_port, query_port = resolver[1], resolver[2], resolver[3]
+                    info = None
+                    # Intento de inferencia si no hay query_port guardado
+                    if query_port is None:
+                        candidates = [27016, game_port + 1, game_port + 2]
+                        qp_ok, info = await self._try_dayz_query(host, candidates)
+                        if qp_ok is not None:
+                            query_port = int(qp_ok)
+                            servers[server_key]["query_port"] = query_port
+                            servers[server_key]["game_port"] = int(game_port)
+                            logger.info(f"DayZ {host}: inferido query_port={query_port}")
+                    # Si ya tenemos puerto, o la inferencia no devolvió info, consulta directa
+                    if info is None and query_port is not None:
+                        s_src = Source(host=host, port=int(query_port))
+                        info = await s_src.get_info()
+
+                    if self.debug:
+                        logger.debug(f"Raw get_info (DayZ) para {server_key}: {info}")
+                    players = getattr(info, "players", 0)
+                    max_players = getattr(info, "max_players", 0)
+                    map_name = getattr(info, "map", "N/A")
+                    hostname = getattr(info, "name", "Unknown Server")
+                    is_passworded = hasattr(info, "visibility") and info.visibility == 1
 
                 if not hostname:
-                    hostname = "Minecraft Server" if game == "minecraft" else "Game Server"
+                    hostname = "Minecraft Server" if resolver[0] == "minecraft" else "Game Server"
 
-                # Hora local
+                # --------- Embed OK ---------
                 timezone = await self.config.guild(guild).timezone()
                 try:
                     tz = pytz.timezone(timezone)
@@ -416,12 +414,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 )
                 embed.add_field(name="🎮 Game", value=game_name, inline=True)
 
-                if game != "minecraft":
+                if resolver[0] != "minecraft":
                     connect_url = f"https://alienhost.ovh/connect.php?ip={ip_to_show}"
                     embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
 
                 embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-                if game == "minecraft":
+                if resolver[0] == "minecraft":
                     embed.add_field(name="💎 Version", value=map_name, inline=True)
                 else:
                     embed.add_field(name="🗺️ Current Map", value=map_name, inline=True)
@@ -430,30 +428,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 embed.add_field(name="👥 Players", value=f"{players}/{max_players} ({percent}%)", inline=True)
                 embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
 
-                try:
-                    if first_time or not message_id:
-                        msg = await channel.send(embed=embed)
-                        servers[server_key]["message_id"] = msg.id
-                    else:
-                        msg = await channel.fetch_message(message_id)
-                        await msg.edit(embed=embed)
-                except Exception as send_error:
-                    if "embeds.0.title" in str(send_error):
-                        logger.error(f"Error título largo en {server_key}: {send_error}. Usando fallback.")
-                        embed.title = "Server Status"
-                        try:
-                            if first_time or not message_id:
-                                msg = await channel.send(embed=embed)
-                                servers[server_key]["message_id"] = msg.id
-                            else:
-                                msg = await channel.fetch_message(message_id)
-                                await msg.edit(embed=embed)
-                        except Exception as fallback_error:
-                            logger.error(f"Error fallback en {server_key}: {fallback_error}")
-                    else:
-                        logger.error(f"Error enviando mensaje en {server_key}: {send_error}")
+                if first_time or not message_id:
+                    msg = await channel.send(embed=embed)
+                    servers[server_key]["message_id"] = msg.id
+                else:
+                    msg = await channel.fetch_message(message_id)
+                    await msg.edit(embed=embed)
 
             except Exception as e:
+                # --------- Fallback OFFLINE ---------
                 logger.error(f"Error actualizando {server_key}: {e!r}")
                 fallback_title = self.truncate_title((game_name if 'game_name' in locals() else 'Game') + " Server", " - ❌ Offline")
                 embed = discord.Embed(title=fallback_title, color=discord.Color.red())
@@ -474,15 +457,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
                 embed.set_footer(text="Game Server Monitor by Killerbite95")
 
-                try:
-                    if first_time or not message_id:
-                        msg = await channel.send(embed=embed)
-                        servers[server_key]["message_id"] = msg.id
-                    else:
-                        msg = await channel.fetch_message(message_id)
-                        await msg.edit(embed=embed)
-                except Exception as offline_error:
-                    logger.error(f"Error enviando embed offline para {server_key}: {offline_error}")
+                if first_time or not message_id:
+                    msg = await channel.send(embed=embed)
+                    servers[server_key]["message_id"] = msg.id
+                else:
+                    msg = await channel.fetch_message(message_id)
+                    await msg.edit(embed=embed)
 
     # -------------------- Dashboard --------------------
 
