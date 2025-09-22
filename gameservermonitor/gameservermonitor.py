@@ -78,7 +78,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
 
         # --- DayZ: requiere game_port + query_port ---
         if game == "dayz":
-            host = server_ip.split(":")[0]  # tolera ip:algo, usa solo host
+            host = server_ip.split(":")[0]
             if game_port is None or query_port is None:
                 return await ctx.send(
                     "Para **DayZ** indica `game_port` (entrada, ej. 2302) y `query_port` (consulta, ej. 27016).\n"
@@ -196,7 +196,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     async def gameservermonitordebug(self, ctx, state: bool):
         """Activa o desactiva el modo debug."""
         self.debug = state
-        await ctx.send(f"Modo debug {'activado' si state else 'desactivado'}.")
+        await ctx.send(f"Modo debug {'activado' if state else 'desactivado'}.")
 
     # -------------------- Tareas --------------------
 
@@ -317,7 +317,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 public_ip = "178.33.160.187" if host.startswith("10.0.0.") else host
                 game_name = "DayZ Standalone"
 
-                # Si no tenemos query_port, probamos candidatos comunes (27016, game_port+1)
+                # Si no tenemos query_port, probamos candidatos comunes (27016, game_port+1, +2)
                 info = None
                 if query_port is None:
                     candidates = [27016, game_port + 1, game_port + 2]
@@ -368,7 +368,6 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     return
 
             try:
-                # Query
                 if game == "minecraft":
                     info = await s.get_status()
                     if self.debug:
@@ -382,7 +381,6 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     version_str = extract_numeric_version(version_str)
                     map_name = version_str
                 else:
-                    # DayZ ya tiene 'info' calculado; resto usa s.get_info()
                     if game != "dayz":
                         info = await s.get_info()
                     if self.debug:
