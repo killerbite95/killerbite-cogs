@@ -20,6 +20,8 @@ def extract_numeric_version(version_str: str) -> str:
         return m.group(1)
     return version_str
 
+SUPPORTED_SOURCE_GAMES = {"cs2", "css", "gmod", "rust", "dayz"}
+
 class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
     __author__ = "Killerbite95"
@@ -72,7 +74,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
           !addserver <ip> dayz <game_port> <query_port> [#canal] [dominio]
         """
         channel = channel or ctx.channel
-        game = game.lower().strip()
+        game = (game or "").lower().strip()
 
         # --- DayZ: requiere game_port + query_port ---
         if game == "dayz":
@@ -85,7 +87,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             if not self._valid_port(game_port) or not self._valid_port(query_port):
                 return await ctx.send("`game_port` y `query_port` deben estar entre 1 y 65535.")
 
-            key = f"{host}:{game_port}"  # la clave visible siempre usa el puerto de juego
+            key = f"{host}:{int(game_port)}"  # la clave visible siempre usa el puerto de juego
             async with self.config.guild(ctx.guild).servers() as servers:
                 if key in servers:
                     return await ctx.send(f"El servidor {key} ya está siendo monitoreado.")
@@ -170,7 +172,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             domain = data.get("domain")
             game = (data.get("game") or "N/A").upper()
             extra = ""
-            if data.get("game", "").lower() == "dayz":
+            if (data.get("game") or "").lower().strip() == "dayz":
                 extra = f" (game:{data.get('game_port')} | query:{data.get('query_port')})"
             line = f"**{server_key}** - Juego: **{game}**{extra} - Canal: {channel.mention if channel else 'Desconocido'}"
             if domain:
@@ -194,7 +196,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     async def gameservermonitordebug(self, ctx, state: bool):
         """Activa o desactiva el modo debug."""
         self.debug = state
-        await ctx.send(f"Modo debug {'activado' if state else 'desactivado'}.")
+        await ctx.send(f"Modo debug {'activado' si state else 'desactivado'}.")
 
     # -------------------- Tareas --------------------
 
@@ -245,7 +247,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             if not game:
                 logger.error(f"server_ip '{server_ip}' no incluye puerto y no se proporcionó el juego.")
                 return None
-            port_part = default_ports.get(game.lower().strip())
+            port_part = default_ports.get((game or "").lower().strip())
             if not port_part:
                 logger.error(f"No hay puerto predeterminado para el juego '{game}'.")
                 return None
@@ -274,6 +276,22 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             title = title[: max(allowed - 3, 0)] + "..."
         return title + suffix
 
+    # -------------------- Core --------------------
+
+    async def _try_dayz_query(self, host: str, candidates: typing.List[int]) -> typing.Tuple[typing.Optional[int], typing.Optional[typing.Any]]:
+        """
+        Intenta consultar DayZ con una lista de puertos de query.
+        Devuelve (puerto_exitoso, info) o (None, None) si todos fallan.
+        """
+        for qp in candidates:
+            try:
+                s = Source(host=host, port=int(qp))
+                info = await s.get_info()
+                return qp, info
+            except Exception as e:
+                logger.debug(f"DayZ query falló en {host}:{qp} → {e!r}")
+        return None, None
+
     async def update_server_status(self, guild, server_key, first_time=False):
         async with self.config.guild(guild).servers() as servers:
             server_info = servers.get(server_key)
@@ -293,45 +311,66 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             # Resolver host y protocolo
             if game == "dayz":
                 host = server_key.split(":")[0]
-                game_port = int(server_info.get("game_port", 2302))
-                query_port = int(server_info.get("query_port", 27016))
+                # Migración retrocompatible: si faltan puertos, infiere
+                game_port = int(server_info.get("game_port") or server_key.split(":")[1])
+                query_port = server_info.get("query_port")
                 public_ip = "178.33.160.187" if host.startswith("10.0.0.") else host
                 game_name = "DayZ Standalone"
-                try:
-                    source = Source(host=host, port=query_port)
-                except Exception as e:
-                    logger.error(f"Error creando Source para DayZ {host}:{query_port}: {e}")
-                    source = None
+
+                # Si no tenemos query_port, probamos candidatos comunes (27016, game_port+1)
+                info = None
+                if query_port is None:
+                    candidates = [27016, game_port + 1, game_port + 2]
+                    qp_ok, info = await self._try_dayz_query(host, candidates)
+                    if qp_ok is not None:
+                        query_port = int(qp_ok)
+                        servers[server_key]["query_port"] = query_port  # persiste migración
+                        servers[server_key]["game_port"] = int(game_port)
+                        logger.info(f"DayZ {host}: inferido query_port={query_port}")
+                if query_port is not None and info is None:
+                    try:
+                        s = Source(host=host, port=int(query_port))
+                        info = await s.get_info()
+                    except Exception as e:
+                        logger.debug(f"DayZ query falló en {host}:{query_port} → {e!r}")
+                        raise
+
+                ip_to_show = f"{public_ip}:{game_port}"
+
             else:
+                # server_key siempre es ip:port
                 parsed_ip, parsed_port = server_key.split(":")
                 public_ip = "178.33.160.187" if parsed_ip.startswith("10.0.0.") else parsed_ip
 
-                if game in ["cs2", "css", "gmod", "rust"]:
+                if game in {"cs2", "css", "gmod", "rust"}:
                     try:
-                        source = Source(host=parsed_ip, port=int(parsed_port))
+                        s = Source(host=parsed_ip, port=int(parsed_port))
                     except Exception as e:
                         logger.error(f"Error creando Source para {server_key}: {e}")
-                        source = None
+                        s = None
                     game_name = {
                         "cs2": "Counter-Strike 2",
                         "css": "Counter-Strike: Source",
                         "gmod": "Garry's Mod",
                         "rust": "Rust",
                     }.get(game, "Unknown Game")
+                    ip_to_show = f"{public_ip}:{parsed_port}"
                 elif game == "minecraft":
                     try:
-                        source = Minecraft(host=parsed_ip, port=int(parsed_port))
+                        s = Minecraft(host=parsed_ip, port=int(parsed_port))
                     except Exception as e:
                         logger.error(f"Error creando Minecraft para {server_key}: {e}")
-                        source = None
+                        s = None
                     game_name = "Minecraft"
+                    ip_to_show = f"{public_ip}:{parsed_port}"
                 else:
-                    logger.warning(f"Juego '{game}' no soportado en {server_key}.")
-                    return  # no envíes mensaje para evitar spam
+                    logger.warning(f"Juego '{game}' no soportado para el servidor {server_key}.")
+                    return
 
             try:
+                # Query
                 if game == "minecraft":
-                    info = await source.get_status()
+                    info = await s.get_status()
                     if self.debug:
                         logger.debug(f"Raw get_status para {server_key}: {info}")
                     is_passworded = False
@@ -342,22 +381,17 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     version_str = info.get("version", {}).get("name", "???")
                     version_str = extract_numeric_version(version_str)
                     map_name = version_str
-                    ip_to_show = domain if domain else f"{public_ip}:{int(server_key.split(':')[1])}"
                 else:
-                    info = await source.get_info()
+                    # DayZ ya tiene 'info' calculado; resto usa s.get_info()
+                    if game != "dayz":
+                        info = await s.get_info()
                     if self.debug:
                         logger.debug(f"Raw get_info para {server_key}: {info}")
-                    players = info.players
-                    max_players = info.max_players
+                    players = getattr(info, "players", 0)
+                    max_players = getattr(info, "max_players", 0)
                     map_name = getattr(info, "map", "N/A")
                     hostname = getattr(info, "name", "Unknown Server")
                     is_passworded = hasattr(info, "visibility") and info.visibility == 1
-
-                    # IP a mostrar:
-                    if game == "dayz":
-                        ip_to_show = f"{public_ip}:{game_port}"  # puerto de juego/entrada
-                    else:
-                        ip_to_show = f"{public_ip}:{int(server_key.split(':')[1])}"
 
                 if not hostname:
                     hostname = "Minecraft Server" if game == "minecraft" else "Game Server"
@@ -422,7 +456,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                         logger.error(f"Error enviando mensaje en {server_key}: {send_error}")
 
             except Exception as e:
-                logger.error(f"Error actualizando {server_key}: {e}")
+                logger.error(f"Error actualizando {server_key}: {e!r}")
                 fallback_title = self.truncate_title((game_name if 'game_name' in locals() else 'Game') + " Server", " - ❌ Offline")
                 embed = discord.Embed(title=fallback_title, color=discord.Color.red())
                 embed.add_field(name="Status", value="🔴 Offline", inline=True)
@@ -431,8 +465,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 # IP a mostrar en fallo
                 if game == "dayz":
                     host = server_key.split(":")[0]
-                    game_port = server_info.get("game_port", 2302)
-                    ip_to_show = f"{('178.33.160.187' if host.startswith('10.0.0.') else host)}:{game_port}"
+                    gp = int(server_info.get("game_port") or server_key.split(":")[1])
+                    ip_to_show = f"{('178.33.160.187' if host.startswith('10.0.0.') else host)}:{gp}"
                 else:
                     ip_to_show = f"{('178.33.160.187' if server_key.split(':')[0].startswith('10.0.0.') else server_key.split(':')[0])}:{server_key.split(':')[1]}"
 
