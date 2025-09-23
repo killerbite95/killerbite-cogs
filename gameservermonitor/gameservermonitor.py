@@ -20,8 +20,6 @@ def extract_numeric_version(version_str: str) -> str:
         return m.group(1)
     return version_str
 
-SUPPORTED_SOURCE_GAMES = {"cs2", "css", "gmod", "rust", "dayz"}
-
 class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
     __author__ = "Killerbite95"
@@ -70,22 +68,23 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         Uso general (no DayZ):
           !addserver <ip[:puerto]> <juego> [#canal] [dominio]
 
-        Uso DayZ (requiere puertos explícitos):
+        Uso DayZ (puedes pasar ambos puertos):
           !addserver <ip> dayz <game_port> <query_port> [#canal] [dominio]
         """
         channel = channel or ctx.channel
         game = (game or "").lower().strip()
 
-        # --- DayZ: requiere game_port + query_port ---
+        # --- DayZ: admite game_port y query_port; el query lo haremos al game_port (p.ej. 2302) ---
         if game == "dayz":
             host = server_ip.split(":")[0]  # tolera ip:algo, usa solo host
-            if game_port is None or query_port is None:
+            if game_port is None:
                 return await ctx.send(
-                    "Para **DayZ** indica `game_port` (entrada, ej. 2302) y `query_port` (consulta, ej. 27016).\n"
+                    "Para **DayZ** indica al menos `game_port` (entrada, ej. 2302). "
+                    "Opcionalmente puedes añadir `query_port` (ej. 27016).\n"
                     "Ejemplo: `!addserver 1.2.3.4 dayz 2302 27016 #canal`"
                 )
-            if not self._valid_port(game_port) or not self._valid_port(query_port):
-                return await ctx.send("`game_port` y `query_port` deben estar entre 1 y 65535.")
+            if not self._valid_port(game_port) or (query_port is not None and not self._valid_port(query_port)):
+                return await ctx.send("Los puertos deben estar entre 1 y 65535.")
 
             key = f"{host}:{int(game_port)}"  # la clave visible siempre usa el puerto de juego
             async with self.config.guild(ctx.guild).servers() as servers:
@@ -97,12 +96,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     "message_id": None,
                     "domain": (domain or None),
                     "game_port": int(game_port),
-                    "query_port": int(query_port),
+                    "query_port": int(query_port) if query_port is not None else None,
                 }
 
             await ctx.send(
                 f"Servidor **{key}** (DayZ) añadido en {channel.mention}."
-                f"\nPuertos → juego: **{game_port}**, query: **{query_port}**"
+                f"\nPuertos → juego: **{game_port}**"
+                + (f", query: **{query_port}**" if query_port is not None else "")
                 + (f"\nDominio asignado: {domain}" if domain else "")
             )
             return await self.update_server_status(ctx.guild, key, first_time=True)
@@ -316,7 +316,6 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 public_ip = "178.33.160.187" if host.startswith("10.0.0.") else host
                 game_name = "DayZ Standalone"
                 ip_to_show = f"{public_ip}:{game_port}"
-                # No hagas query aquí: se hará dentro del try/except de abajo
                 resolver = ("dayz", host, game_port, query_port)
             else:
                 parsed_ip, parsed_port = server_key.split(":")
@@ -367,22 +366,38 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 else:  # dayz
                     host, game_port, query_port = resolver[1], resolver[2], resolver[3]
                     info = None
-                    # Intento de inferencia si no hay query_port guardado
-                    if query_port is None:
-                        candidates = [27016, game_port + 1, game_port + 2]
-                        qp_ok, info = await self._try_dayz_query(host, candidates)
-                        if qp_ok is not None:
-                            query_port = int(qp_ok)
-                            servers[server_key]["query_port"] = query_port
-                            servers[server_key]["game_port"] = int(game_port)
-                            logger.info(f"DayZ {host}: inferido query_port={query_port}")
-                    # Si ya tenemos puerto, o la inferencia no devolvió info, consulta directa
-                    if info is None and query_port is not None:
-                        s_src = Source(host=host, port=int(query_port))
-                        info = await s_src.get_info()
+                    used_port = None
+                    # 1) Intentar SIEMPRE el game_port (p.ej. 2302), tal como pides
+                    try:
+                        s_src_gp = Source(host=host, port=int(game_port))
+                        info = await s_src_gp.get_info()
+                        used_port = game_port
+                        logger.info(f"DayZ {host}: respondio en game_port={game_port}")
+                    except Exception as e_gp:
+                        logger.debug(f"DayZ no respondió en game_port {host}:{game_port} → {e_gp!r}")
+                        # 2) Intentar query_port si está configurado y es distinto
+                        if query_port is not None and int(query_port) != int(game_port):
+                            try:
+                                s_src_qp = Source(host=host, port=int(query_port))
+                                info = await s_src_qp.get_info()
+                                used_port = query_port
+                                logger.info(f"DayZ {host}: respondio en query_port={query_port}")
+                            except Exception as e_qp:
+                                logger.debug(f"DayZ tampoco respondió en query_port {host}:{query_port} → {e_qp!r}")
+                        # 3) Intentar candidatos comunes
+                        if info is None:
+                            candidates = [27016, game_port + 1, game_port + 2]
+                            qp_ok, info = await self._try_dayz_query(host, candidates)
+                            if qp_ok is not None:
+                                used_port = qp_ok
+                                logger.info(f"DayZ {host}: respondio en candidato={qp_ok}")
+
+                    if info is None:
+                        # Esto saltará al fallback OFFLINE
+                        raise RuntimeError(f"DayZ no respondió en {host} (gp {game_port}, qp {query_port})")
 
                     if self.debug:
-                        logger.debug(f"Raw get_info (DayZ) para {server_key}: {info}")
+                        logger.debug(f"Raw get_info (DayZ) para {server_key} (puerto usado {used_port}): {info}")
                     players = getattr(info, "players", 0)
                     max_players = getattr(info, "max_players", 0)
                     map_name = getattr(info, "map", "N/A")
@@ -516,7 +531,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
 
     @dashboard_page(name="add_server", description="Añade un servidor al monitor", methods=("GET", "POST"))
     async def rpc_add_server(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
-        """Página del dashboard para añadir un servidor. Para DayZ, indica game_port y query_port."""
+        """Página del dashboard para añadir un servidor. Para DayZ, indica game_port y opcional query_port."""
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             return {"status": 1, "error": "Guild no encontrada."}
@@ -526,7 +541,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             server_ip = wtforms.StringField("Server Host (IP o dominio, opcional ':puerto' salvo DayZ)", validators=[wtforms.validators.InputRequired()])
             game = wtforms.StringField("Juego (cs2, css, gmod, rust, minecraft, dayz)", validators=[wtforms.validators.InputRequired()])
             game_port = wtforms.IntegerField("DayZ Game Port (ej. 2302)", default=None)
-            query_port = wtforms.IntegerField("DayZ Query Port (ej. 27016)", default=None)
+            query_port = wtforms.IntegerField("DayZ Query Port (ej. 27016) (opcional)", default=None)
             channel_id = wtforms.IntegerField("Channel ID", validators=[wtforms.validators.InputRequired()])
             domain = wtforms.StringField("Dominio (opcional)")
             submit = wtforms.SubmitField("Añadir Servidor")
@@ -541,9 +556,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             if game == "dayz":
                 gp = form.game_port.data
                 qp = form.query_port.data
-                if gp in (None, "") or qp in (None, ""):
-                    return {"status": 1, "error": "Para DayZ debes indicar game_port y query_port."}
-                if not self._valid_port(int(gp)) or not self._valid_port(int(qp)):
+                if gp in (None, ""):
+                    return {"status": 1, "error": "Para DayZ debes indicar al menos game_port."}
+                if not self._valid_port(int(gp)) or (qp not in (None, "") and not self._valid_port(int(qp))):
                     return {"status": 1, "error": "Puertos inválidos (1-65535)."}
                 host = server_ip.split(":")[0]
                 key = f"{host}:{int(gp)}"
@@ -556,7 +571,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                         "message_id": None,
                         "domain": domain,
                         "game_port": int(gp),
-                        "query_port": int(qp),
+                        "query_port": int(qp) if qp not in (None, "") else None,
                     }
                 await self.update_server_status(guild, key, first_time=True)
                 return {
