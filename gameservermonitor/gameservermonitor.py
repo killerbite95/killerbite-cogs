@@ -73,6 +73,10 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # Servicio de queries con caché
         self.query_service: QueryService = QueryService(cache_max_age=5.0)
         
+        # Set de servidores recién actualizados (evita duplicados)
+        # Formato: {"guild_id:server_key": timestamp}
+        self._recently_updated: Dict[str, datetime.datetime] = {}
+        
         # Iniciar tarea de monitoreo
         self.server_monitor.start()
     
@@ -80,6 +84,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """Limpieza al descargar el cog."""
         self.server_monitor.cancel()
         self.query_service.clear_cache()
+        self._recently_updated.clear()
     
     async def red_delete_data_for_user(self, **kwargs) -> None:
         """Requerido por Red para GDPR compliance."""
@@ -510,9 +515,24 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # Limpiar caché expirada
         self.query_service.cleanup_cache()
         
+        # Limpiar servidores recién actualizados (más de 30 segundos)
+        now = datetime.datetime.utcnow()
+        expired_keys = [
+            key for key, timestamp in self._recently_updated.items()
+            if (now - timestamp).total_seconds() > 30
+        ]
+        for key in expired_keys:
+            del self._recently_updated[key]
+        
         for guild in self.bot.guilds:
             servers = await self.config.guild(guild).servers()
             for server_key in servers.keys():
+                # Saltar si fue actualizado recientemente (evita duplicados)
+                update_key = f"{guild.id}:{server_key}"
+                if update_key in self._recently_updated:
+                    logger.debug(f"Saltando {server_key} - actualizado recientemente")
+                    continue
+                
                 try:
                     await self.update_server_status(guild, server_key)
                 except Exception as e:
@@ -705,6 +725,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 msg += _("\nDominio: {}").format(domain)
             
             await ctx.send(msg)
+            
+            # Marcar como recién actualizado para evitar duplicados del loop
+            update_key = f"{ctx.guild.id}:{key}"
+            self._recently_updated[update_key] = datetime.datetime.utcnow()
+            
             await self.update_server_status(ctx.guild, key, first_time=True)
             return
         
@@ -744,6 +769,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             msg += _("\nDominio: {}").format(domain)
         
         await ctx.send(msg)
+        
+        # Marcar como recién actualizado para evitar duplicados del loop
+        update_key = f"{ctx.guild.id}:{server_key}"
+        self._recently_updated[update_key] = datetime.datetime.utcnow()
+        
         await self.update_server_status(ctx.guild, server_key, first_time=True)
     
     @commands.command(name="removeserver")
@@ -788,6 +818,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await ctx.send(_("✅ Actualización forzada completada."))
         else:
             await ctx.send(_("❌ No hay servidores monitoreados en este canal."))
+    
+    @commands.command(name="gsmversion")
+    async def gsm_version(self, ctx: commands.Context) -> None:
+        """Muestra la versión actual del cog GameServerMonitor."""
+        await ctx.send(f"🎮 **GameServerMonitor** v{self.__version__} by {self.__author__}")
     
     @commands.command(name="listaserver")
     async def list_servers(self, ctx: commands.Context) -> None:
