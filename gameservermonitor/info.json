@@ -1,7 +1,27 @@
 {
-    "author": [
-    "Killerbite95"
-  ],
-    "end_user_data_statement": "Este cog almacena la ID de usuario.",
-    "description": "Añade server status de tus servidores como CSS, CS2, GMOD, Minecraft!"
+    "author": ["Killerbite95"],
+    "install_msg": "¡Gracias por instalar GameServerMonitor! Usa `[p]help GameServerMonitor` para ver los comandos disponibles.",
+    "name": "GameServerMonitor",
+    "short": "Monitoriza servidores de juegos (CS2, CSS, GMOD, Rust, Minecraft, DayZ)",
+    "description": "Cog avanzado para monitorizar el estado de servidores de juegos en Discord. Soporta múltiples protocolos de query, estadísticas de uptime, thumbnails de juegos, sistema de eventos y panel de configuración web.",
+    "end_user_data_statement": "Este cog almacena IDs de canales y mensajes de Discord para actualizar el estado de los servidores. No almacena datos personales de usuarios.",
+    "hidden": false,
+    "disabled": false,
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 9, 0],
+    "requirements": ["opengsq", "pytz"],
+    "tags": [
+        "game",
+        "server",
+        "monitor",
+        "status",
+        "cs2",
+        "minecraft",
+        "dayz",
+        "rust",
+        "gmod",
+        "query"
+    ],
+    "type": "COG",
+    "permissions": ["send_messages", "embed_links", "read_message_history"]
 }

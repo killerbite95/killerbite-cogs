@@ -1,237 +1,111 @@
+"""
+GameServerMonitor - Cog para Red Discord Bot
+Monitoriza servidores de juegos y actualiza su estado en Discord.
+By Killerbite95
+
+Versión: 2.0.0
+Compatible con: Red-DiscordBot 3.5.22+
+"""
+
 import discord
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
-from opengsq.protocols import Source, Minecraft
+from redbot.core.bot import Red
+from redbot.core.i18n import Translator, cog_i18n
 import datetime
 import pytz
 import logging
-import re
 import typing
+from typing import Optional, Dict, Any, List, Tuple
 
-# Importamos la integración del dashboard
+# Importaciones locales
 from .dashboard_integration import DashboardIntegration, dashboard_page
+from .models import (
+    ServerStatus, GameType, QueryResult, ServerData, 
+    EmbedConfig, ServerStats
+)
+from .query_handlers import QueryService
+from .exceptions import (
+    GameServerMonitorError, ServerNotFoundError, ServerAlreadyExistsError,
+    InvalidPortError, UnsupportedGameError, ChannelNotFoundError,
+    InsufficientPermissionsError, InvalidTimezoneError
+)
 
 # Configuración de logging
-logger = logging.getLogger("red.trini.gameservermonitor")
+logger = logging.getLogger("red.killerbite95.gameservermonitor")
 
-def extract_numeric_version(version_str: str) -> str:
-    m = re.search(r"(\d+(?:\.\d+)+)", version_str)
-    if m:
-        return m.group(1)
-    return version_str
+# Internacionalización
+_ = Translator("GameServerMonitor", __file__)
 
+
+@cog_i18n(_)
 class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
+    
     __author__ = "Killerbite95"
-
-    def __init__(self, bot):
-        self.bot = bot
-        self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
-        default_guild = {
+    __version__ = "2.0.0"
+    
+    def __init__(self, bot: Red) -> None:
+        self.bot: Red = bot
+        self.config: Config = Config.get_conf(
+            self, 
+            identifier=1234567890, 
+            force_registration=True
+        )
+        
+        # Configuración por defecto del guild
+        default_guild: Dict[str, Any] = {
             "servers": {},
             "timezone": "UTC",
-            "refresh_time": 60
+            "refresh_time": 60,
+            "public_ip": None,  # IP pública para reemplazar IPs privadas
+            "connect_url_template": "https://alienhost.ovh/connect.php?ip={ip}",  # URL configurable
+            "embed_config": {
+                "show_thumbnail": True,
+                "show_connect_button": True,
+                "color_online": None,
+                "color_offline": None,
+                "color_maintenance": None
+            }
         }
         self.config.register_guild(**default_guild)
-        self.debug = False
+        
+        # Servicio de queries con caché
+        self.query_service: QueryService = QueryService(cache_max_age=5.0)
+        
+        # Iniciar tarea de monitoreo
         self.server_monitor.start()
-
-    # -------------------- Comandos --------------------
-
-    @commands.command(name="settimezone")
-    @checks.admin_or_permissions(administrator=True)
-    async def set_timezone(self, ctx, timezone: str):
-        """Establece la zona horaria para las actualizaciones."""
-        try:
-            pytz.timezone(timezone)
-        except pytz.UnknownTimeZoneError:
-            await ctx.send(f"La zona horaria '{timezone}' no es válida.")
-            return
-        await self.config.guild(ctx.guild).timezone.set(timezone)
-        await ctx.send(f"Zona horaria establecida en {timezone}")
-
-    @commands.command(name="addserver")
-    @checks.admin_or_permissions(administrator=True)
-    async def add_server(
-        self,
-        ctx,
-        server_ip: str,
-        game: str,
-        game_port: typing.Optional[int] = None,
-        query_port: typing.Optional[int] = None,
-        channel: typing.Optional[discord.TextChannel] = None,
-        domain: typing.Optional[str] = None,
-    ):
-        """
-        Añade un servidor para monitorear su estado.
-
-        Uso general (no DayZ):
-          !addserver <ip[:puerto]> <juego> [#canal] [dominio]
-
-        Uso DayZ (puedes pasar ambos puertos):
-          !addserver <ip> dayz <game_port> <query_port> [#canal] [dominio]
-        """
-        channel = channel or ctx.channel
-        game = (game or "").lower().strip()
-
-        # --- DayZ: admite game_port y query_port; el query lo haremos al game_port (p.ej. 2302) ---
-        if game == "dayz":
-            host = server_ip.split(":")[0]  # tolera ip:algo, usa solo host
-            if game_port is None:
-                return await ctx.send(
-                    "Para **DayZ** indica al menos `game_port` (entrada, ej. 2302). "
-                    "Opcionalmente puedes añadir `query_port` (ej. 27016).\n"
-                    "Ejemplo: `!addserver 1.2.3.4 dayz 2302 27016 #canal`"
-                )
-            if not self._valid_port(game_port) or (query_port is not None and not self._valid_port(query_port)):
-                return await ctx.send("Los puertos deben estar entre 1 y 65535.")
-
-            key = f"{host}:{int(game_port)}"  # la clave visible siempre usa el puerto de juego
-            async with self.config.guild(ctx.guild).servers() as servers:
-                if key in servers:
-                    return await ctx.send(f"El servidor {key} ya está siendo monitoreado.")
-                servers[key] = {
-                    "game": "dayz",
-                    "channel_id": channel.id,
-                    "message_id": None,
-                    "domain": (domain or None),
-                    "game_port": int(game_port),
-                    "query_port": int(query_port) if query_port is not None else None,
-                }
-
-            await ctx.send(
-                f"Servidor **{key}** (DayZ) añadido en {channel.mention}."
-                f"\nPuertos → juego: **{game_port}**"
-                + (f", query: **{query_port}**" if query_port is not None else "")
-                + (f"\nDominio asignado: {domain}" if domain else "")
-            )
-            return await self.update_server_status(ctx.guild, key, first_time=True)
-
-        # --- Resto de juegos ---
-        parsed = self.parse_server_ip(server_ip, game)
-        if not parsed:
-            await ctx.send(f"Formato inválido para server_ip '{server_ip}'. Debe ser 'ip:puerto' o solo 'ip'.")
-            return
-        ip_part, port_part, server_ip_formatted = parsed
-
-        async with self.config.guild(ctx.guild).servers() as servers:
-            if server_ip_formatted in servers:
-                await ctx.send(f"El servidor {server_ip_formatted} ya está siendo monitoreado.")
-                return
-            servers[server_ip_formatted] = {
-                "game": game,
-                "channel_id": channel.id,
-                "message_id": None,
-                "domain": domain
-            }
-        await ctx.send(
-            f"Servidor {server_ip_formatted} añadido para el juego **{game.upper()}** en {channel.mention}."
-            + (f"\nDominio asignado: {domain}" if domain else "")
-        )
-        await self.update_server_status(ctx.guild, server_ip_formatted, first_time=True)
-
-    @commands.command(name="removeserver")
-    @checks.admin_or_permissions(administrator=True)
-    async def remove_server(self, ctx, server_key: str):
-        """Elimina el monitoreo de un servidor. Pasa exactamente la clave listada (ej. `ip:puerto_de_juego`)."""
-        if ":" not in server_key:
-            await ctx.send("Debes indicar `ip:puerto` tal como aparece en la lista.")
-            return
-
-        async with self.config.guild(ctx.guild).servers() as servers:
-            if server_key in servers:
-                del servers[server_key]
-                await ctx.send(f"Monitoreo del servidor {server_key} eliminado.")
-            else:
-                await ctx.send(f"No se encontró un servidor con clave {server_key}.")
-
-    @commands.command(name="forzarstatus")
-    async def force_status(self, ctx):
-        """Fuerza una actualización de estado en el canal actual."""
-        servers = await self.config.guild(ctx.guild).servers()
-        actualizados = False
-        for server_key, data in servers.items():
-            if data.get("channel_id") == ctx.channel.id:
-                await self.update_server_status(ctx.guild, server_key, first_time=True)
-                actualizados = True
-        if actualizados:
-            await ctx.send("Actualización de estado forzada para los servidores en este canal.")
-        else:
-            await ctx.send("No hay servidores monitoreados en este canal.")
-
-    @commands.command(name="listaserver")
-    async def list_servers(self, ctx):
-        """Lista todos los servidores monitoreados."""
-        servers = await self.config.guild(ctx.guild).servers()
-        if not servers:
-            await ctx.send("No hay servidores siendo monitoreados.")
-            return
-        lines = ["Servidores monitoreados:"]
-        for server_key, data in servers.items():
-            channel = self.bot.get_channel(data.get("channel_id"))
-            domain = data.get("domain")
-            game = (data.get("game") or "N/A").upper()
-            extra = ""
-            if (data.get("game") or "").lower().strip() == "dayz":
-                extra = f" (game:{data.get('game_port')} | query:{data.get('query_port')})"
-            line = f"**{server_key}** - Juego: **{game}**{extra} - Canal: {channel.mention if channel else 'Desconocido'}"
-            if domain:
-                line += f" - Dominio: {domain}"
-            lines.append(line)
-        await ctx.send("\n".join(lines))
-
-    @commands.command(name="refreshtime")
-    @checks.admin_or_permissions(administrator=True)
-    async def refresh_time(self, ctx, seconds: int):
-        """Establece el tiempo de actualización en segundos."""
-        if seconds < 10:
-            await ctx.send("El tiempo de actualización debe ser al menos 10 segundos.")
-            return
-        await self.config.guild(ctx.guild).refresh_time.set(seconds)
-        self.server_monitor.change_interval(seconds=seconds)
-        await ctx.send(f"Tiempo de actualización establecido en {seconds} segundos.")
-
-    @commands.command(name="gameservermonitordebug")
-    @checks.admin_or_permissions(administrator=True)
-    async def gameservermonitordebug(self, ctx, state: bool):
-        """Activa o desactiva el modo debug."""
-        self.debug = state
-        await ctx.send(f"Modo debug {'activado' if state else 'desactivado'}.")
-
-    # -------------------- Tareas --------------------
-
-    @tasks.loop(seconds=60)
-    async def server_monitor(self):
-        for guild in self.bot.guilds:
-            servers = await self.config.guild(guild).servers()
-            for server_key in servers.keys():
-                await self.update_server_status(guild, server_key)
-
-    @server_monitor.before_loop
-    async def before_server_monitor(self):
-        await self.bot.wait_until_ready()
-        for guild in self.bot.guilds:
-            refresh_time = await self.config.guild(guild).refresh_time()
-            self.server_monitor.change_interval(seconds=refresh_time)
-
-    # -------------------- Utilidades --------------------
-
+    
+    def cog_unload(self) -> None:
+        """Limpieza al descargar el cog."""
+        self.server_monitor.cancel()
+        self.query_service.clear_cache()
+    
+    async def red_delete_data_for_user(self, **kwargs) -> None:
+        """Requerido por Red para GDPR compliance."""
+        pass
+    
+    # ==================== Utilidades ====================
+    
     def _valid_port(self, port: int) -> bool:
+        """Valida que un puerto esté en el rango válido."""
         return isinstance(port, int) and 1 <= port <= 65535
-
-    def parse_server_ip(self, server_ip: str, game: str = None):
+    
+    def _parse_server_ip(
+        self, 
+        server_ip: str, 
+        game: Optional[GameType] = None
+    ) -> Optional[Tuple[str, int, str]]:
         """
-        Para juegos NO DayZ:
-        - Acepta 'ip:puerto' o solo 'ip' y usa puerto por defecto según el juego.
-        Para DayZ, este método NO se usa; los puertos se pasan explícitamente.
+        Parsea una IP de servidor.
+        
+        Args:
+            server_ip: IP en formato 'ip:puerto' o solo 'ip'
+            game: Tipo de juego para puerto por defecto
+            
+        Returns:
+            Tupla (ip, puerto, formatted_key) o None si es inválido
         """
-        default_ports = {
-            "cs2": 27015,
-            "css": 27015,
-            "gmod": 27015,
-            "rust": 28015,
-            "minecraft": 25565,
-        }
         if ":" in server_ip:
             parts = server_ip.split(":")
             if len(parts) != 2:
@@ -245,256 +119,792 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 return None
         else:
             if not game:
-                logger.error(f"server_ip '{server_ip}' no incluye puerto y no se proporcionó el juego.")
+                logger.error(f"server_ip '{server_ip}' no incluye puerto y no se proporcionó juego.")
                 return None
-            port_part = default_ports.get((game or "").lower().strip())
-            if not port_part:
-                logger.error(f"No hay puerto predeterminado para el juego '{game}'.")
-                return None
+            port_part = game.default_port
             ip_part = server_ip
+        
+        if not self._valid_port(port_part):
+            return None
+            
         return ip_part, port_part, f"{ip_part}:{port_part}"
-
-    def convert_motd(self, motd):
-        if isinstance(motd, str):
-            text = motd.strip()
-        elif isinstance(motd, dict):
-            text = motd.get("text", "")
-            if "extra" in motd and isinstance(motd["extra"], list):
-                for extra in motd["extra"]:
-                    text += " " + self.convert_motd(extra)
-            text = text.strip()
-        elif isinstance(motd, list):
-            text = " ".join([self.convert_motd(item) for item in motd]).strip()
-        else:
-            text = ""
-        return " ".join(text.split())
-
-    def truncate_title(self, title: str, suffix: str) -> str:
+    
+    async def _get_public_ip(
+        self, 
+        guild: discord.Guild, 
+        original_ip: str
+    ) -> str:
+        """
+        Obtiene la IP pública, reemplazando IPs privadas si está configurado.
+        
+        Args:
+            guild: Guild de Discord
+            original_ip: IP original del servidor
+            
+        Returns:
+            IP pública o la original si no aplica
+        """
+        public_ip = await self.config.guild(guild).public_ip()
+        
+        # Solo reemplazar si hay IP pública configurada y la original es privada
+        if public_ip and (
+            original_ip.startswith("10.") or
+            original_ip.startswith("192.168.") or
+            original_ip.startswith("172.16.") or
+            original_ip.startswith("172.17.") or
+            original_ip.startswith("172.18.") or
+            original_ip.startswith("172.19.") or
+            original_ip.startswith("172.2") or
+            original_ip.startswith("172.30.") or
+            original_ip.startswith("172.31.")
+        ):
+            return public_ip
+        return original_ip
+    
+    async def _check_channel_permissions(
+        self, 
+        channel: discord.TextChannel
+    ) -> Tuple[bool, List[str]]:
+        """
+        Verifica que el bot tenga permisos necesarios en el canal.
+        
+        Returns:
+            Tupla (tiene_permisos, lista_permisos_faltantes)
+        """
+        permissions = channel.permissions_for(channel.guild.me)
+        missing = []
+        
+        if not permissions.send_messages:
+            missing.append("send_messages")
+        if not permissions.embed_links:
+            missing.append("embed_links")
+        if not permissions.read_message_history:
+            missing.append("read_message_history")
+        
+        return len(missing) == 0, missing
+    
+    def _truncate_title(self, title: str, suffix: str) -> str:
+        """Trunca el título del embed para cumplir con el límite de Discord."""
         max_total = 256
         allowed = max_total - len(suffix)
         if len(title) > allowed:
-            title = title[: max(allowed - 3, 0)] + "..."
+            title = title[:max(allowed - 3, 0)] + "..."
         return title + suffix
-
-    # -------------------- Core --------------------
-
-    async def _try_dayz_query(self, host: str, candidates: typing.List[int]) -> typing.Tuple[typing.Optional[int], typing.Optional[typing.Any]]:
+    
+    async def _get_timezone(self, guild: discord.Guild) -> pytz.BaseTzInfo:
+        """Obtiene la zona horaria configurada para el guild."""
+        timezone_str = await self.config.guild(guild).timezone()
+        try:
+            return pytz.timezone(timezone_str)
+        except pytz.UnknownTimeZoneError:
+            logger.warning(f"Zona horaria '{timezone_str}' inválida, usando UTC.")
+            return pytz.UTC
+    
+    # ==================== Generación de Embeds ====================
+    
+    async def _create_online_embed(
+        self,
+        guild: discord.Guild,
+        server_data: ServerData,
+        query_result: QueryResult,
+        ip_to_show: str
+    ) -> discord.Embed:
         """
-        Intenta consultar DayZ con una lista de puertos de query.
-        Devuelve (puerto_exitoso, info) o (None, None) si todos fallan.
+        Crea un embed para servidor online/maintenance.
+        
+        Args:
+            guild: Guild de Discord
+            server_data: Datos del servidor
+            query_result: Resultado de la query
+            ip_to_show: IP formateada para mostrar
+            
+        Returns:
+            Embed de Discord configurado
         """
-        for qp in candidates:
-            try:
-                s = Source(host=host, port=int(qp))
-                info = await s.get_info()
-                return qp, info
-            except Exception as e:
-                logger.debug(f"DayZ query falló en {host}:{qp} → {e!r}")
-        return None, None
-
-    async def update_server_status(self, guild, server_key, first_time=False):
+        tz = await self._get_timezone(guild)
+        local_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+        
+        embed_config_data = await self.config.guild(guild).embed_config()
+        embed_config = EmbedConfig(**embed_config_data)
+        
+        # Título y color
+        suffix = " - Server Status"
+        title = self._truncate_title(query_result.hostname, suffix)
+        color = embed_config.get_color(query_result.status)
+        
+        embed = discord.Embed(title=title, color=color)
+        
+        # Thumbnail del juego
+        if embed_config.show_thumbnail and server_data.game:
+            thumbnail_url = server_data.game.thumbnail_url
+            if thumbnail_url:
+                embed.set_thumbnail(url=thumbnail_url)
+        
+        # Status
+        status_emoji = query_result.status.emoji
+        status_name = query_result.status.display_name
+        embed.add_field(
+            name=f"{status_emoji} Status",
+            value=status_name,
+            inline=True
+        )
+        
+        # Juego
+        game_name = server_data.game.display_name if server_data.game else "Unknown"
+        embed.add_field(name="🎮 Game", value=game_name, inline=True)
+        
+        # Botón de conexión (no para Minecraft)
+        if embed_config.show_connect_button and server_data.game != GameType.MINECRAFT:
+            connect_template = await self.config.guild(guild).connect_url_template()
+            connect_url = connect_template.format(ip=ip_to_show)
+            embed.add_field(
+                name="\n\u200b\n🔗 Connect", 
+                value=f"[Connect]({connect_url})\n\u200b\n", 
+                inline=False
+            )
+        
+        # IP
+        embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
+        
+        # Mapa o Versión
+        if server_data.game == GameType.MINECRAFT:
+            embed.add_field(name="💎 Version", value=query_result.map_name, inline=True)
+        else:
+            embed.add_field(name="🗺️ Current Map", value=query_result.map_name, inline=True)
+        
+        # Jugadores
+        embed.add_field(
+            name="👥 Players", 
+            value=query_result.player_display, 
+            inline=True
+        )
+        
+        # Latencia si está disponible
+        if query_result.latency_ms:
+            embed.add_field(
+                name="📶 Ping", 
+                value=f"{query_result.latency_ms:.0f}ms", 
+                inline=True
+            )
+        
+        embed.set_footer(
+            text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}"
+        )
+        
+        return embed
+    
+    async def _create_offline_embed(
+        self,
+        guild: discord.Guild,
+        server_data: ServerData,
+        ip_to_show: str
+    ) -> discord.Embed:
+        """
+        Crea un embed para servidor offline.
+        
+        Args:
+            guild: Guild de Discord
+            server_data: Datos del servidor
+            ip_to_show: IP formateada para mostrar
+            
+        Returns:
+            Embed de Discord configurado
+        """
+        embed_config_data = await self.config.guild(guild).embed_config()
+        embed_config = EmbedConfig(**embed_config_data)
+        
+        game_name = server_data.game.display_name if server_data.game else "Game"
+        title = self._truncate_title(f"{game_name} Server", " - ❌ Offline")
+        color = embed_config.get_color(ServerStatus.OFFLINE)
+        
+        embed = discord.Embed(title=title, color=color)
+        
+        # Thumbnail
+        if embed_config.show_thumbnail and server_data.game:
+            thumbnail_url = server_data.game.thumbnail_url
+            if thumbnail_url:
+                embed.set_thumbnail(url=thumbnail_url)
+        
+        embed.add_field(name="Status", value="🔴 Offline", inline=True)
+        embed.add_field(
+            name="🎮 Game", 
+            value=game_name,
+            inline=True
+        )
+        embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
+        
+        # Botón de conexión (no para Minecraft)
+        if embed_config.show_connect_button and server_data.game != GameType.MINECRAFT:
+            connect_template = await self.config.guild(guild).connect_url_template()
+            connect_url = connect_template.format(ip=ip_to_show)
+            embed.add_field(
+                name="\n\u200b\n🔗 Connect", 
+                value=f"[Connect]({connect_url})\n\u200b\n", 
+                inline=False
+            )
+        
+        embed.set_footer(text="Game Server Monitor by Killerbite95")
+        
+        return embed
+    
+    # ==================== Core: Actualización de Estado ====================
+    
+    async def _dispatch_status_event(
+        self,
+        guild: discord.Guild,
+        server_key: str,
+        old_status: Optional[ServerStatus],
+        new_status: ServerStatus
+    ) -> None:
+        """
+        Dispara eventos personalizados cuando cambia el estado de un servidor.
+        
+        Eventos:
+            - on_gameserver_online: Cuando un servidor pasa a online
+            - on_gameserver_offline: Cuando un servidor pasa a offline
+            - on_gameserver_status_change: Cualquier cambio de estado
+        """
+        if old_status == new_status:
+            return
+        
+        # Evento general de cambio
+        self.bot.dispatch(
+            "gameserver_status_change",
+            guild=guild,
+            server_key=server_key,
+            old_status=old_status,
+            new_status=new_status
+        )
+        
+        # Eventos específicos
+        if new_status == ServerStatus.ONLINE:
+            self.bot.dispatch(
+                "gameserver_online",
+                guild=guild,
+                server_key=server_key
+            )
+        elif new_status == ServerStatus.OFFLINE:
+            self.bot.dispatch(
+                "gameserver_offline",
+                guild=guild,
+                server_key=server_key
+            )
+    
+    async def update_server_status(
+        self, 
+        guild: discord.Guild, 
+        server_key: str, 
+        first_time: bool = False
+    ) -> None:
+        """
+        Actualiza el estado de un servidor específico.
+        
+        Args:
+            guild: Guild de Discord
+            server_key: Clave del servidor (ip:puerto)
+            first_time: Si es la primera vez (crear mensaje nuevo)
+        """
         async with self.config.guild(guild).servers() as servers:
-            server_info = servers.get(server_key)
-            if not server_info:
+            server_dict = servers.get(server_key)
+            if not server_dict:
                 logger.warning(f"Servidor {server_key} no encontrado en {guild.name}.")
                 return
-
-            game = (server_info.get("game") or "").lower().strip()
-            channel = self.bot.get_channel(server_info.get("channel_id"))
-            message_id = server_info.get("message_id")
-            domain = server_info.get("domain")
-
-            if not channel:
-                logger.error(f"Canal no encontrado en {guild.name} (ID {server_info.get('channel_id')}).")
+            
+            # Convertir a dataclass
+            server_data = ServerData.from_dict(server_key, server_dict)
+            
+            if not server_data.game:
+                logger.error(f"Juego no válido para servidor {server_key}")
                 return
-
-            # Resolver host y datos base
-            if game == "dayz":
-                host = server_key.split(":")[0]
-                game_port = int(server_info.get("game_port") or server_key.split(":")[1])
-                query_port = server_info.get("query_port")
-                public_ip = "178.33.160.187" if host.startswith("10.0.0.") else host
-                game_name = "DayZ Standalone"
+            
+            # Obtener canal
+            channel = self.bot.get_channel(server_data.channel_id)
+            if not channel:
+                logger.error(
+                    f"Canal {server_data.channel_id} no encontrado para {server_key}"
+                )
+                return
+            
+            # Verificar permisos
+            has_perms, missing = await self._check_channel_permissions(channel)
+            if not has_perms:
+                logger.error(
+                    f"Permisos insuficientes en {channel.name}: {missing}"
+                )
+                return
+            
+            # Obtener IP pública
+            host = server_data.host
+            port = server_data.port
+            public_ip = await self._get_public_ip(guild, host)
+            
+            if server_data.game == GameType.DAYZ:
+                game_port = server_data.game_port or port
                 ip_to_show = f"{public_ip}:{game_port}"
-                resolver = ("dayz", host, game_port, query_port)
             else:
-                parsed_ip, parsed_port = server_key.split(":")
-                public_ip = "178.33.160.187" if parsed_ip.startswith("10.0.0.") else parsed_ip
-                ip_to_show = f"{public_ip}:{parsed_port}"
-
-                if game in {"cs2", "css", "gmod", "rust"}:
-                    game_name = {
-                        "cs2": "Counter-Strike 2",
-                        "css": "Counter-Strike: Source",
-                        "gmod": "Garry's Mod",
-                        "rust": "Rust",
-                    }.get(game, "Unknown Game")
-                    resolver = ("source", parsed_ip, int(parsed_port))
-                elif game == "minecraft":
-                    game_name = "Minecraft"
-                    resolver = ("minecraft", parsed_ip, int(parsed_port))
-                else:
-                    logger.warning(f"Juego '{game}' no soportado para el servidor {server_key}.")
-                    return
-
+                ip_to_show = f"{public_ip}:{port}"
+            
+            # Realizar query
+            query_kwargs = {}
+            if server_data.game == GameType.DAYZ:
+                query_kwargs["query_port"] = server_data.query_port
+            
+            query_result = await self.query_service.query_server(
+                host=host,
+                port=server_data.game_port if server_data.game == GameType.DAYZ else port,
+                game=server_data.game,
+                **query_kwargs
+            )
+            
+            # Actualizar estadísticas
+            old_status = server_data.last_status
+            server_data.total_queries += 1
+            if query_result.success:
+                server_data.successful_queries += 1
+                server_data.last_online = datetime.datetime.utcnow()
+            else:
+                server_data.last_offline = datetime.datetime.utcnow()
+            server_data.last_status = query_result.status
+            
+            # Disparar eventos de cambio de estado
+            await self._dispatch_status_event(
+                guild, server_key, old_status, query_result.status
+            )
+            
+            # Crear embed
+            if query_result.success:
+                embed = await self._create_online_embed(
+                    guild, server_data, query_result, ip_to_show
+                )
+            else:
+                embed = await self._create_offline_embed(
+                    guild, server_data, ip_to_show
+                )
+            
+            # Enviar o editar mensaje
             try:
-                # --------- Query (todo dentro del try) ---------
-                if resolver[0] == "minecraft":
-                    _ip, _port = resolver[1], resolver[2]
-                    s_mc = Minecraft(host=_ip, port=_port)
-                    info = await s_mc.get_status()
-                    if self.debug:
-                        logger.debug(f"Raw get_status para {server_key}: {info}")
-                    is_passworded = False
-                    players = info["players"]["online"]
-                    max_players = info["players"]["max"]
-                    raw_motd = info.get("description", "Minecraft Server")
-                    hostname = self.convert_motd(raw_motd)
-                    version_str = info.get("version", {}).get("name", "???")
-                    map_name = extract_numeric_version(version_str)
-                elif resolver[0] == "source":
-                    _ip, _port = resolver[1], resolver[2]
-                    s_src = Source(host=_ip, port=_port)
-                    info = await s_src.get_info()
-                    if self.debug:
-                        logger.debug(f"Raw get_info para {server_key}: {info}")
-                    players = getattr(info, "players", 0)
-                    max_players = getattr(info, "max_players", 0)
-                    map_name = getattr(info, "map", "N/A")
-                    hostname = getattr(info, "name", "Unknown Server")
-                    is_passworded = hasattr(info, "visibility") and info.visibility == 1
-                else:  # dayz
-                    host, game_port, query_port = resolver[1], resolver[2], resolver[3]
-                    info = None
-                    used_port = None
-                    # 1) Intentar SIEMPRE el game_port (p.ej. 2302), tal como pides
+                if first_time or not server_data.message_id:
+                    msg = await channel.send(embed=embed)
+                    server_data.message_id = msg.id
+                else:
                     try:
-                        s_src_gp = Source(host=host, port=int(game_port))
-                        info = await s_src_gp.get_info()
-                        used_port = game_port
-                        logger.info(f"DayZ {host}: respondio en game_port={game_port}")
-                    except Exception as e_gp:
-                        logger.debug(f"DayZ no respondió en game_port {host}:{game_port} → {e_gp!r}")
-                        # 2) Intentar query_port si está configurado y es distinto
-                        if query_port is not None and int(query_port) != int(game_port):
-                            try:
-                                s_src_qp = Source(host=host, port=int(query_port))
-                                info = await s_src_qp.get_info()
-                                used_port = query_port
-                                logger.info(f"DayZ {host}: respondio en query_port={query_port}")
-                            except Exception as e_qp:
-                                logger.debug(f"DayZ tampoco respondió en query_port {host}:{query_port} → {e_qp!r}")
-                        # 3) Intentar candidatos comunes
-                        if info is None:
-                            candidates = [27016, game_port + 1, game_port + 2]
-                            qp_ok, info = await self._try_dayz_query(host, candidates)
-                            if qp_ok is not None:
-                                used_port = qp_ok
-                                logger.info(f"DayZ {host}: respondio en candidato={qp_ok}")
-
-                    if info is None:
-                        # Esto saltará al fallback OFFLINE
-                        raise RuntimeError(f"DayZ no respondió en {host} (gp {game_port}, qp {query_port})")
-
-                    if self.debug:
-                        logger.debug(f"Raw get_info (DayZ) para {server_key} (puerto usado {used_port}): {info}")
-                    players = getattr(info, "players", 0)
-                    max_players = getattr(info, "max_players", 0)
-                    map_name = getattr(info, "map", "N/A")
-                    hostname = getattr(info, "name", "Unknown Server")
-                    is_passworded = hasattr(info, "visibility") and info.visibility == 1
-
-                if not hostname:
-                    hostname = "Minecraft Server" if resolver[0] == "minecraft" else "Game Server"
-
-                # --------- Embed OK ---------
-                timezone = await self.config.guild(guild).timezone()
+                        msg = await channel.fetch_message(server_data.message_id)
+                        await msg.edit(embed=embed)
+                    except discord.NotFound:
+                        # Mensaje eliminado, crear uno nuevo
+                        msg = await channel.send(embed=embed)
+                        server_data.message_id = msg.id
+            except discord.Forbidden:
+                logger.error(f"Sin permisos para enviar mensaje en {channel.name}")
+            except discord.HTTPException as e:
+                logger.error(f"Error HTTP al enviar mensaje: {e}")
+            
+            # Guardar datos actualizados
+            servers[server_key] = server_data.to_dict()
+    
+    # ==================== Tareas ====================
+    
+    @tasks.loop(seconds=60)
+    async def server_monitor(self) -> None:
+        """Tarea principal de monitoreo de servidores."""
+        # Limpiar caché expirada
+        self.query_service.cleanup_cache()
+        
+        for guild in self.bot.guilds:
+            servers = await self.config.guild(guild).servers()
+            for server_key in servers.keys():
                 try:
-                    tz = pytz.timezone(timezone)
-                except pytz.UnknownTimeZoneError:
-                    logger.error(f"Zona horaria '{timezone}' inválida en {guild.name}, usando UTC.")
-                    tz = pytz.UTC
-                local_time = datetime.datetime.now(tz).strftime("%Y-%m-%d %H:%M:%S")
+                    await self.update_server_status(guild, server_key)
+                except Exception as e:
+                    logger.error(f"Error actualizando {server_key} en {guild.name}: {e!r}")
+    
+    @server_monitor.before_loop
+    async def before_server_monitor(self) -> None:
+        """Espera a que el bot esté listo antes de iniciar el monitoreo."""
+        await self.bot.wait_until_ready()
+        
+        # Obtener refresh_time del primer guild (o usar default)
+        for guild in self.bot.guilds:
+            refresh_time = await self.config.guild(guild).refresh_time()
+            self.server_monitor.change_interval(seconds=refresh_time)
+            break
+    
+    # ==================== Comandos de Configuración ====================
+    
+    @commands.command(name="settimezone")
+    @checks.admin_or_permissions(administrator=True)
+    async def set_timezone(self, ctx: commands.Context, timezone: str) -> None:
+        """
+        Establece la zona horaria para las actualizaciones.
+        
+        Ejemplo: `[p]settimezone Europe/Madrid`
+        """
+        try:
+            pytz.timezone(timezone)
+        except pytz.UnknownTimeZoneError:
+            await ctx.send(_("❌ La zona horaria '{}' no es válida.").format(timezone))
+            return
+        
+        await self.config.guild(ctx.guild).timezone.set(timezone)
+        await ctx.send(_("✅ Zona horaria establecida en **{}**").format(timezone))
+    
+    @commands.command(name="setpublicip")
+    @checks.admin_or_permissions(administrator=True)
+    async def set_public_ip(self, ctx: commands.Context, ip: Optional[str] = None) -> None:
+        """
+        Establece la IP pública para reemplazar IPs privadas.
+        
+        Usa sin argumentos para desactivar el reemplazo.
+        
+        Ejemplo: `[p]setpublicip 123.45.67.89`
+        """
+        if ip is None:
+            await self.config.guild(ctx.guild).public_ip.set(None)
+            await ctx.send(_("✅ Reemplazo de IP pública desactivado."))
+        else:
+            await self.config.guild(ctx.guild).public_ip.set(ip)
+            await ctx.send(
+                _("✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas.").format(ip)
+            )
+    
+    @commands.command(name="setconnecturl")
+    @checks.admin_or_permissions(administrator=True)
+    async def set_connect_url(self, ctx: commands.Context, *, url: str) -> None:
+        """
+        Establece la plantilla de URL de conexión.
+        
+        Usa `{ip}` como placeholder para la IP:puerto del servidor.
+        
+        Ejemplo: `[p]setconnecturl https://mysite.com/connect?server={ip}`
+        """
+        if "{ip}" not in url:
+            await ctx.send(_("❌ La URL debe contener `{ip}` como placeholder."))
+            return
+        
+        await self.config.guild(ctx.guild).connect_url_template.set(url)
+        await ctx.send(_("✅ URL de conexión establecida: {}").format(url))
+    
+    @commands.command(name="refreshtime")
+    @checks.admin_or_permissions(administrator=True)
+    async def refresh_time(self, ctx: commands.Context, seconds: int) -> None:
+        """
+        Establece el tiempo de actualización en segundos.
+        
+        Mínimo: 10 segundos
+        
+        Ejemplo: `[p]refreshtime 120`
+        """
+        if seconds < 10:
+            await ctx.send(_("❌ El tiempo debe ser al menos 10 segundos."))
+            return
+        
+        await self.config.guild(ctx.guild).refresh_time.set(seconds)
+        self.server_monitor.change_interval(seconds=seconds)
+        await ctx.send(_("✅ Tiempo de actualización establecido en **{}** segundos.").format(seconds))
+    
+    @commands.command(name="gameservermonitordebug")
+    @checks.admin_or_permissions(administrator=True)
+    async def toggle_debug(self, ctx: commands.Context, state: bool) -> None:
+        """
+        Activa o desactiva el modo debug.
+        
+        Ejemplo: `[p]gameservermonitordebug true`
+        """
+        self.query_service.debug = state
+        status = _("activado") if state else _("desactivado")
+        await ctx.send(_("✅ Modo debug {}.").format(status))
+    
+    # ==================== Comandos de Servidores ====================
+    
+    @commands.command(name="addserver")
+    @checks.admin_or_permissions(administrator=True)
+    async def add_server(
+        self,
+        ctx: commands.Context,
+        server_ip: str,
+        game: str,
+        game_port: typing.Optional[int] = None,
+        query_port: typing.Optional[int] = None,
+        channel: typing.Optional[discord.TextChannel] = None,
+        domain: typing.Optional[str] = None,
+    ) -> None:
+        """
+        Añade un servidor para monitorear su estado.
 
-                suffix = " - Server Status"
-                title = self.truncate_title(hostname, suffix)
-                embed = discord.Embed(
-                    title=title,
-                    color=(discord.Color.orange() if is_passworded else discord.Color.green())
+        **Uso general:**
+        `[p]addserver <ip[:puerto]> <juego> [#canal] [dominio]`
+
+        **Uso DayZ (puertos separados):**
+        `[p]addserver <ip> dayz <game_port> <query_port> [#canal] [dominio]`
+
+        **Juegos soportados:** cs2, css, gmod, rust, minecraft, dayz
+        """
+        channel = channel or ctx.channel
+        game_type = GameType.from_string(game)
+        
+        if game_type is None:
+            supported = ", ".join(GameType.supported_games())
+            await ctx.send(
+                _("❌ Juego '{}' no soportado. Disponibles: {}").format(game, supported)
+            )
+            return
+        
+        # Verificar permisos del canal
+        has_perms, missing = await self._check_channel_permissions(channel)
+        if not has_perms:
+            await ctx.send(
+                _("❌ Faltan permisos en {}: {}").format(channel.mention, ", ".join(missing))
+            )
+            return
+        
+        # Manejo especial para DayZ
+        if game_type == GameType.DAYZ:
+            host = server_ip.split(":")[0]
+            
+            if game_port is None:
+                await ctx.send(
+                    _("❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\n"
+                      "Ejemplo: `{}addserver 1.2.3.4 dayz 2302 27016 #canal`").format(ctx.prefix)
                 )
-                embed.add_field(
-                    name=("🔐 Status" if is_passworded else "✅ Status"),
-                    value=("Maintenance" if is_passworded else "Online"),
-                    inline=True
+                return
+            
+            if not self._valid_port(game_port):
+                await ctx.send(_("❌ Puerto de juego inválido (1-65535)."))
+                return
+            
+            if query_port is not None and not self._valid_port(query_port):
+                await ctx.send(_("❌ Puerto de query inválido (1-65535)."))
+                return
+            
+            key = f"{host}:{game_port}"
+            
+            async with self.config.guild(ctx.guild).servers() as servers:
+                if key in servers:
+                    await ctx.send(_("❌ El servidor **{}** ya está siendo monitoreado.").format(key))
+                    return
+                
+                servers[key] = {
+                    "game": "dayz",
+                    "channel_id": channel.id,
+                    "message_id": None,
+                    "domain": domain,
+                    "game_port": game_port,
+                    "query_port": query_port,
+                    "total_queries": 0,
+                    "successful_queries": 0,
+                    "last_online": None,
+                    "last_offline": None,
+                    "last_status": None
+                }
+            
+            msg = _("✅ Servidor **{}** (DayZ) añadido en {}.\n"
+                   "Puertos → juego: **{}**").format(key, channel.mention, game_port)
+            if query_port:
+                msg += _(", query: **{}**").format(query_port)
+            if domain:
+                msg += _("\nDominio: {}").format(domain)
+            
+            await ctx.send(msg)
+            await self.update_server_status(ctx.guild, key, first_time=True)
+            return
+        
+        # Resto de juegos
+        parsed = self._parse_server_ip(server_ip, game_type)
+        if not parsed:
+            await ctx.send(
+                _("❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por defecto).")
+            )
+            return
+        
+        ip_part, port_part, server_key = parsed
+        
+        async with self.config.guild(ctx.guild).servers() as servers:
+            if server_key in servers:
+                await ctx.send(
+                    _("❌ El servidor **{}** ya está siendo monitoreado.").format(server_key)
                 )
-                embed.add_field(name="🎮 Game", value=game_name, inline=True)
-
-                if resolver[0] != "minecraft":
-                    connect_url = f"https://alienhost.ovh/connect.php?ip={ip_to_show}"
-                    embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
-
-                embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-                if resolver[0] == "minecraft":
-                    embed.add_field(name="💎 Version", value=map_name, inline=True)
-                else:
-                    embed.add_field(name="🗺️ Current Map", value=map_name, inline=True)
-
-                percent = int(players / max_players * 100) if max_players > 0 else 0
-                embed.add_field(name="👥 Players", value=f"{players}/{max_players} ({percent}%)", inline=True)
-                embed.set_footer(text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}")
-
-                if first_time or not message_id:
-                    msg = await channel.send(embed=embed)
-                    servers[server_key]["message_id"] = msg.id
-                else:
-                    msg = await channel.fetch_message(message_id)
-                    await msg.edit(embed=embed)
-
-            except Exception as e:
-                # --------- Fallback OFFLINE ---------
-                logger.error(f"Error actualizando {server_key}: {e!r}")
-                fallback_title = self.truncate_title((game_name if 'game_name' in locals() else 'Game') + " Server", " - ❌ Offline")
-                embed = discord.Embed(title=fallback_title, color=discord.Color.red())
-                embed.add_field(name="Status", value="🔴 Offline", inline=True)
-                embed.add_field(name="🎮 Game", value=(game_name if 'game_name' in locals() else game.upper()), inline=True)
-
-                # IP a mostrar en fallo
-                if game == "dayz":
-                    host = server_key.split(":")[0]
-                    gp = int(server_info.get("game_port") or server_key.split(":")[1])
-                    ip_to_show = f"{('178.33.160.187' if host.startswith('10.0.0.') else host)}:{gp}"
-                else:
-                    ip_to_show = f"{('178.33.160.187' if server_key.split(':')[0].startswith('10.0.0.') else server_key.split(':')[0])}:{server_key.split(':')[1]}"
-
-                embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
-                if game != "minecraft":
-                    connect_url = f"https://alienhost.ovh/connect.php?ip={ip_to_show}"
-                    embed.add_field(name="\n\u200b\n🔗 Connect", value=f"[Connect]({connect_url})\n\u200b\n", inline=False)
-                embed.set_footer(text="Game Server Monitor by Killerbite95")
-
-                if first_time or not message_id:
-                    msg = await channel.send(embed=embed)
-                    servers[server_key]["message_id"] = msg.id
-                else:
-                    msg = await channel.fetch_message(message_id)
-                    await msg.edit(embed=embed)
-
-    # -------------------- Dashboard --------------------
-
+                return
+            
+            servers[server_key] = {
+                "game": game_type.value,
+                "channel_id": channel.id,
+                "message_id": None,
+                "domain": domain,
+                "total_queries": 0,
+                "successful_queries": 0,
+                "last_online": None,
+                "last_offline": None,
+                "last_status": None
+            }
+        
+        msg = _("✅ Servidor **{}** ({}) añadido en {}.").format(
+            server_key, game_type.display_name, channel.mention
+        )
+        if domain:
+            msg += _("\nDominio: {}").format(domain)
+        
+        await ctx.send(msg)
+        await self.update_server_status(ctx.guild, server_key, first_time=True)
+    
+    @commands.command(name="removeserver")
+    @checks.admin_or_permissions(administrator=True)
+    async def remove_server(self, ctx: commands.Context, server_key: str) -> None:
+        """
+        Elimina el monitoreo de un servidor.
+        
+        Pasa exactamente la clave listada (ej. `ip:puerto`).
+        
+        Ejemplo: `[p]removeserver 192.168.1.1:27015`
+        """
+        if ":" not in server_key:
+            await ctx.send(_("❌ Formato: `ip:puerto`"))
+            return
+        
+        async with self.config.guild(ctx.guild).servers() as servers:
+            if server_key in servers:
+                del servers[server_key]
+                await ctx.send(_("✅ Servidor **{}** eliminado del monitoreo.").format(server_key))
+            else:
+                await ctx.send(_("❌ No se encontró servidor con clave **{}**.").format(server_key))
+    
+    @commands.command(name="forzarstatus")
+    async def force_status(self, ctx: commands.Context) -> None:
+        """Fuerza una actualización de estado en el canal actual."""
+        servers = await self.config.guild(ctx.guild).servers()
+        updated = False
+        
+        for server_key, data in servers.items():
+            if data.get("channel_id") == ctx.channel.id:
+                # Limpiar caché para este servidor
+                game = GameType.from_string(data.get("game", ""))
+                if game:
+                    host, port = server_key.split(":")
+                    self.query_service._cache.invalidate(host, int(port), game)
+                
+                await self.update_server_status(ctx.guild, server_key, first_time=True)
+                updated = True
+        
+        if updated:
+            await ctx.send(_("✅ Actualización forzada completada."))
+        else:
+            await ctx.send(_("❌ No hay servidores monitoreados en este canal."))
+    
+    @commands.command(name="listaserver")
+    async def list_servers(self, ctx: commands.Context) -> None:
+        """Lista todos los servidores monitoreados."""
+        servers = await self.config.guild(ctx.guild).servers()
+        
+        if not servers:
+            await ctx.send(_("📋 No hay servidores siendo monitoreados."))
+            return
+        
+        embed = discord.Embed(
+            title=_("📋 Servidores Monitoreados"),
+            color=discord.Color.blue()
+        )
+        
+        for server_key, data in servers.items():
+            game_type = GameType.from_string(data.get("game", ""))
+            game_name = game_type.display_name if game_type else data.get("game", "N/A").upper()
+            
+            channel = self.bot.get_channel(data.get("channel_id"))
+            channel_mention = channel.mention if channel else "Desconocido"
+            
+            value = f"**Juego:** {game_name}\n**Canal:** {channel_mention}"
+            
+            if data.get("game", "").lower() == "dayz":
+                value += f"\n**Puertos:** game:{data.get('game_port')} | query:{data.get('query_port')}"
+            
+            if data.get("domain"):
+                value += f"\n**Dominio:** {data.get('domain')}"
+            
+            # Estadísticas básicas
+            uptime = 0
+            if data.get("total_queries", 0) > 0:
+                uptime = (data.get("successful_queries", 0) / data.get("total_queries", 1)) * 100
+            value += f"\n**Uptime:** {uptime:.1f}%"
+            
+            embed.add_field(name=f"📡 {server_key}", value=value, inline=False)
+        
+        await ctx.send(embed=embed)
+    
+    @commands.command(name="serverstats")
+    async def server_stats(self, ctx: commands.Context, server_key: str) -> None:
+        """
+        Muestra estadísticas detalladas de un servidor.
+        
+        Ejemplo: `[p]serverstats 192.168.1.1:27015`
+        """
+        servers = await self.config.guild(ctx.guild).servers()
+        
+        if server_key not in servers:
+            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
+            return
+        
+        server_data = ServerData.from_dict(server_key, servers[server_key])
+        
+        if not server_data.game:
+            await ctx.send(_("❌ Datos de juego no válidos para este servidor."))
+            return
+        
+        # Obtener estado actual
+        query_kwargs = {}
+        if server_data.game == GameType.DAYZ:
+            query_kwargs["query_port"] = server_data.query_port
+            port = server_data.game_port or server_data.port
+        else:
+            port = server_data.port
+        
+        query_result = await self.query_service.query_server(
+            host=server_data.host,
+            port=port,
+            game=server_data.game,
+            use_cache=False,
+            **query_kwargs
+        )
+        
+        # Crear estadísticas
+        stats = ServerStats(
+            server_key=server_key,
+            game=server_data.game,
+            status=query_result.status,
+            uptime_percentage=server_data.uptime_percentage,
+            total_queries=server_data.total_queries,
+            successful_queries=server_data.successful_queries,
+            last_online=server_data.last_online,
+            last_offline=server_data.last_offline,
+            current_players=query_result.players,
+            max_players=query_result.max_players,
+            hostname=query_result.hostname,
+            map_name=query_result.map_name
+        )
+        
+        timezone = await self.config.guild(ctx.guild).timezone()
+        embed = stats.to_embed(timezone)
+        
+        await ctx.send(embed=embed)
+    
+    # ==================== Dashboard ====================
+    
     @dashboard_page(name="servers", description="Muestra los servidores monitorizados")
-    async def rpc_callback_servers(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
+    async def rpc_callback_servers(
+        self, 
+        guild_id: int, 
+        **kwargs
+    ) -> typing.Dict[str, typing.Any]:
+        """Página del dashboard que lista los servidores monitorizados."""
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             return {"status": 1, "error": "Guild no encontrada."}
-
+        
         servers = await self.config.guild(guild).servers()
-
+        
         html_content = """
         <link rel="stylesheet"
               href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
         <div class="container mt-4">
-          <h1 class="mb-4">Servidores Monitorizados</h1>
-          <table class="table table-bordered table-striped">
+          <h1 class="mb-4">🎮 Servidores Monitoreados</h1>
+          <table class="table table-bordered table-striped table-hover">
             <thead class="table-dark">
               <tr>
                 <th scope="col">IP (clave)</th>
@@ -502,142 +912,303 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 <th scope="col">Canal ID</th>
                 <th scope="col">Dominio</th>
                 <th scope="col">Puertos</th>
+                <th scope="col">Uptime</th>
               </tr>
             </thead>
             <tbody>
         """
+        
         for server_key, data in servers.items():
-            game = (data.get("game") or "N/A").upper()
+            game_type = GameType.from_string(data.get("game", ""))
+            game_name = game_type.display_name if game_type else data.get("game", "N/A").upper()
             channel_id = data.get("channel_id", "N/A")
-            domain = data.get("domain", "N/A") or "N/A"
+            domain = data.get("domain") or "-"
+            
             ports = "-"
-            if (data.get("game") or "").lower().strip() == "dayz":
+            if data.get("game", "").lower() == "dayz":
                 ports = f"game:{data.get('game_port')} | query:{data.get('query_port')}"
+            
+            uptime = 0
+            if data.get("total_queries", 0) > 0:
+                uptime = (data.get("successful_queries", 0) / data.get("total_queries", 1)) * 100
+            
             html_content += f"""
               <tr>
-                <td>{server_key}</td>
-                <td>{game}</td>
+                <td><code>{server_key}</code></td>
+                <td>{game_name}</td>
                 <td>{channel_id}</td>
                 <td>{domain}</td>
                 <td>{ports}</td>
+                <td>{uptime:.1f}%</td>
               </tr>
             """
+        
         html_content += """
             </tbody>
           </table>
         </div>
         """
+        
         return {"status": 0, "web_content": {"source": html_content}}
-
-    @dashboard_page(name="add_server", description="Añade un servidor al monitor", methods=("GET", "POST"))
-    async def rpc_add_server(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
-        """Página del dashboard para añadir un servidor. Para DayZ, indica game_port y opcional query_port."""
+    
+    @dashboard_page(
+        name="add_server", 
+        description="Añade un servidor al monitor", 
+        methods=("GET", "POST")
+    )
+    async def rpc_add_server(
+        self, 
+        guild_id: int, 
+        **kwargs
+    ) -> typing.Dict[str, typing.Any]:
+        """Página del dashboard para añadir un servidor."""
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             return {"status": 1, "error": "Guild no encontrada."}
+        
         import wtforms
-
+        
         class AddServerForm(kwargs["Form"]):
-            server_ip = wtforms.StringField("Server Host (IP o dominio, opcional ':puerto' salvo DayZ)", validators=[wtforms.validators.InputRequired()])
-            game = wtforms.StringField("Juego (cs2, css, gmod, rust, minecraft, dayz)", validators=[wtforms.validators.InputRequired()])
+            server_ip = wtforms.StringField(
+                "Server Host (IP o dominio)", 
+                validators=[wtforms.validators.InputRequired()]
+            )
+            game = wtforms.SelectField(
+                "Juego",
+                choices=[(g.value, g.display_name) for g in GameType],
+                validators=[wtforms.validators.InputRequired()]
+            )
             game_port = wtforms.IntegerField("DayZ Game Port (ej. 2302)", default=None)
-            query_port = wtforms.IntegerField("DayZ Query Port (ej. 27016) (opcional)", default=None)
-            channel_id = wtforms.IntegerField("Channel ID", validators=[wtforms.validators.InputRequired()])
+            query_port = wtforms.IntegerField("DayZ Query Port (opcional)", default=None)
+            channel_id = wtforms.IntegerField(
+                "Channel ID", 
+                validators=[wtforms.validators.InputRequired()]
+            )
             domain = wtforms.StringField("Dominio (opcional)")
             submit = wtforms.SubmitField("Añadir Servidor")
-
+        
         form = AddServerForm()
+        
         if form.validate_on_submit():
             server_ip = form.server_ip.data.strip()
-            game = form.game.data.strip().lower()
+            game_str = form.game.data.strip().lower()
             channel_id = form.channel_id.data
             domain = form.domain.data.strip() if form.domain.data else None
-
-            if game == "dayz":
+            game_type = GameType.from_string(game_str)
+            
+            if game_type is None:
+                return {"status": 1, "error": f"Juego '{game_str}' no soportado."}
+            
+            if game_type == GameType.DAYZ:
                 gp = form.game_port.data
                 qp = form.query_port.data
-                if gp in (None, ""):
-                    return {"status": 1, "error": "Para DayZ debes indicar al menos game_port."}
-                if not self._valid_port(int(gp)) or (qp not in (None, "") and not self._valid_port(int(qp))):
-                    return {"status": 1, "error": "Puertos inválidos (1-65535)."}
+                
+                if not gp:
+                    return {"status": 1, "error": "Para DayZ debes indicar game_port."}
+                
+                if not self._valid_port(int(gp)):
+                    return {"status": 1, "error": "Puerto de juego inválido."}
+                
+                if qp and not self._valid_port(int(qp)):
+                    return {"status": 1, "error": "Puerto de query inválido."}
+                
                 host = server_ip.split(":")[0]
                 key = f"{host}:{int(gp)}"
+                
                 async with self.config.guild(guild).servers() as servers:
                     if key in servers:
-                        return {"status": 0, "notifications": [{"message": "El servidor ya está siendo monitoreado.", "category": "warning"}]}
+                        return {
+                            "status": 0,
+                            "notifications": [{
+                                "message": "El servidor ya está siendo monitoreado.",
+                                "category": "warning"
+                            }]
+                        }
+                    
                     servers[key] = {
                         "game": "dayz",
                         "channel_id": channel_id,
                         "message_id": None,
                         "domain": domain,
                         "game_port": int(gp),
-                        "query_port": int(qp) if qp not in (None, "") else None,
+                        "query_port": int(qp) if qp else None,
+                        "total_queries": 0,
+                        "successful_queries": 0,
+                        "last_online": None,
+                        "last_offline": None,
+                        "last_status": None
                     }
+                
                 await self.update_server_status(guild, key, first_time=True)
                 return {
                     "status": 0,
-                    "notifications": [{"message": f"Servidor {key} (DayZ) añadido correctamente.", "category": "success"}],
-                    "redirect_url": kwargs["request_url"],
+                    "notifications": [{
+                        "message": f"Servidor {key} (DayZ) añadido.",
+                        "category": "success"
+                    }],
+                    "redirect_url": kwargs["request_url"]
                 }
-
-            parsed = self.parse_server_ip(server_ip, game)
+            
+            # Otros juegos
+            parsed = self._parse_server_ip(server_ip, game_type)
             if not parsed:
-                return {"status": 1, "error": "Formato de server_ip inválido o juego sin puerto por defecto."}
-            ip_part, port_part, server_ip_formatted = parsed
-
+                return {"status": 1, "error": "Formato de IP inválido."}
+            
+            ip_part, port_part, server_key = parsed
+            
             async with self.config.guild(guild).servers() as servers:
-                if server_ip_formatted in servers:
-                    return {"status": 0, "notifications": [{"message": "El servidor ya está siendo monitoreado.", "category": "warning"}]}
-                servers[server_ip_formatted] = {
-                    "game": game,
+                if server_key in servers:
+                    return {
+                        "status": 0,
+                        "notifications": [{
+                            "message": "El servidor ya está siendo monitoreado.",
+                            "category": "warning"
+                        }]
+                    }
+                
+                servers[server_key] = {
+                    "game": game_type.value,
                     "channel_id": channel_id,
                     "message_id": None,
-                    "domain": domain
+                    "domain": domain,
+                    "total_queries": 0,
+                    "successful_queries": 0,
+                    "last_online": None,
+                    "last_offline": None,
+                    "last_status": None
                 }
-            await self.update_server_status(guild, server_ip_formatted, first_time=True)
+            
+            await self.update_server_status(guild, server_key, first_time=True)
             return {
                 "status": 0,
-                "notifications": [{"message": f"Servidor {server_ip_formatted} añadido correctamente.", "category": "success"}],
-                "redirect_url": kwargs["request_url"],
+                "notifications": [{
+                    "message": f"Servidor {server_key} añadido.",
+                    "category": "success"
+                }],
+                "redirect_url": kwargs["request_url"]
             }
-
+        
         source = "{{ form|safe }}"
         return {"status": 0, "web_content": {"source": source, "form": form}}
-
-    @dashboard_page(name="remove_server", description="Elimina un servidor del monitor", methods=("GET", "POST"))
-    async def rpc_remove_server(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
-        """Página del dashboard para eliminar un servidor. Indica la clave exacta (ip:puerto_de_juego)."""
+    
+    @dashboard_page(
+        name="remove_server", 
+        description="Elimina un servidor del monitor", 
+        methods=("GET", "POST")
+    )
+    async def rpc_remove_server(
+        self, 
+        guild_id: int, 
+        **kwargs
+    ) -> typing.Dict[str, typing.Any]:
+        """Página del dashboard para eliminar un servidor."""
         guild = self.bot.get_guild(guild_id)
         if guild is None:
             return {"status": 1, "error": "Guild no encontrada."}
+        
         import wtforms
-
+        
         class RemoveServerForm(kwargs["Form"]):
-            server_key = wtforms.StringField("Server Key (ip:puerto_de_juego)", validators=[wtforms.validators.InputRequired()])
+            server_key = wtforms.StringField(
+                "Server Key (ip:puerto)", 
+                validators=[wtforms.validators.InputRequired()]
+            )
             submit = wtforms.SubmitField("Eliminar Servidor")
-
+        
         form = RemoveServerForm()
+        
         if form.validate_on_submit():
             key = form.server_key.data.strip()
+            
             async with self.config.guild(guild).servers() as servers:
                 if key not in servers:
-                    return {"status": 0, "notifications": [{"message": "El servidor no está siendo monitoreado.", "category": "warning"}]}
+                    return {
+                        "status": 0,
+                        "notifications": [{
+                            "message": "El servidor no está siendo monitoreado.",
+                            "category": "warning"
+                        }]
+                    }
                 del servers[key]
+            
             return {
                 "status": 0,
-                "notifications": [{"message": f"Servidor {key} eliminado correctamente.", "category": "success"}],
-                "redirect_url": kwargs["request_url"],
+                "notifications": [{
+                    "message": f"Servidor {key} eliminado.",
+                    "category": "success"
+                }],
+                "redirect_url": kwargs["request_url"]
             }
-
+        
         source = "{{ form|safe }}"
         return {"status": 0, "web_content": {"source": source, "form": form}}
-
-def setup(bot):
-    cog = GameServerMonitor(bot)
-    bot.add_cog(cog)
-    try:
-        from .dashboard_integration import DashboardIntegration
-    except ImportError:
-        import dashboard_integration
-        DashboardIntegration = dashboard_integration.DashboardIntegration
-    DashboardIntegration(bot, cog.config)
+    
+    @dashboard_page(name="config", description="Configuración del monitor", methods=("GET", "POST"))
+    async def rpc_config(
+        self, 
+        guild_id: int, 
+        **kwargs
+    ) -> typing.Dict[str, typing.Any]:
+        """Página del dashboard para configuración general."""
+        guild = self.bot.get_guild(guild_id)
+        if guild is None:
+            return {"status": 1, "error": "Guild no encontrada."}
+        
+        import wtforms
+        
+        current_config = {
+            "timezone": await self.config.guild(guild).timezone(),
+            "refresh_time": await self.config.guild(guild).refresh_time(),
+            "public_ip": await self.config.guild(guild).public_ip() or "",
+            "connect_url": await self.config.guild(guild).connect_url_template()
+        }
+        
+        class ConfigForm(kwargs["Form"]):
+            timezone = wtforms.StringField("Zona Horaria", default=current_config["timezone"])
+            refresh_time = wtforms.IntegerField(
+                "Tiempo de actualización (segundos)", 
+                default=current_config["refresh_time"]
+            )
+            public_ip = wtforms.StringField("IP Pública", default=current_config["public_ip"])
+            connect_url = wtforms.StringField(
+                "URL de Conexión (usar {ip})", 
+                default=current_config["connect_url"]
+            )
+            submit = wtforms.SubmitField("Guardar Configuración")
+        
+        form = ConfigForm()
+        
+        if form.validate_on_submit():
+            # Validar timezone
+            try:
+                pytz.timezone(form.timezone.data)
+            except pytz.UnknownTimeZoneError:
+                return {"status": 1, "error": f"Zona horaria '{form.timezone.data}' inválida."}
+            
+            # Validar refresh_time
+            if form.refresh_time.data < 10:
+                return {"status": 1, "error": "El tiempo de actualización debe ser al menos 10 segundos."}
+            
+            # Validar connect_url
+            if form.connect_url.data and "{ip}" not in form.connect_url.data:
+                return {"status": 1, "error": "La URL de conexión debe contener {ip}."}
+            
+            # Guardar configuración
+            await self.config.guild(guild).timezone.set(form.timezone.data)
+            await self.config.guild(guild).refresh_time.set(form.refresh_time.data)
+            await self.config.guild(guild).public_ip.set(form.public_ip.data or None)
+            await self.config.guild(guild).connect_url_template.set(form.connect_url.data)
+            
+            self.server_monitor.change_interval(seconds=form.refresh_time.data)
+            
+            return {
+                "status": 0,
+                "notifications": [{
+                    "message": "Configuración guardada correctamente.",
+                    "category": "success"
+                }],
+                "redirect_url": kwargs["request_url"]
+            }
+        
+        source = "{{ form|safe }}"
+        return {"status": 0, "web_content": {"source": source, "form": form}}
