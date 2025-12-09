@@ -293,7 +293,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             )
         
         embed.set_footer(
-            text=f"Game Server Monitor by Killerbite95 | Last update: {local_time}"
+            text=f"GSM v{self.__version__} by Killerbite95 | {local_time}"
         )
         
         return embed
@@ -348,7 +348,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 inline=False
             )
         
-        embed.set_footer(text="Game Server Monitor by Killerbite95")
+        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
         
         return embed
     
