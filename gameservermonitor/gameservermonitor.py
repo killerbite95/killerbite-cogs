@@ -135,6 +135,68 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             
         return ip_part, port_part, f"{ip_part}:{port_part}"
     
+    async def _resolve_server_key(
+        self, 
+        guild: discord.Guild, 
+        search_key: str
+    ) -> Optional[str]:
+        """
+        Resuelve la clave de servidor buscando por IP real o IP pública.
+        
+        Permite buscar servidores tanto por su IP:puerto real (privada) como por
+        la IP pública mostrada en el embed (si tiene setpublicip configurado).
+        
+        Args:
+            guild: Guild de Discord
+            search_key: IP:puerto a buscar (puede ser la real o la pública)
+            
+        Returns:
+            La clave real del servidor (IP:puerto real) o None si no se encuentra
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        # Búsqueda directa - si existe como clave, devolverla
+        if search_key in servers:
+            return search_key
+        
+        # Búsqueda por IP pública
+        # Si el usuario busca con IP_PUBLICA:PUERTO, buscar servidores con IP_PRIVADA:PUERTO
+        # que tendrían esa IP pública
+        public_ip = await self.config.guild(guild).public_ip()
+        if not public_ip:
+            return None
+        
+        # Extraer el puerto de la búsqueda
+        if ":" not in search_key:
+            return None
+        
+        search_parts = search_key.split(":")
+        if len(search_parts) != 2:
+            return None
+        
+        search_ip, search_port = search_parts
+        
+        # Si la búsqueda es con la IP pública, buscar servidor con ese puerto
+        if search_ip == public_ip:
+            for server_key, server_data in servers.items():
+                if ":" in server_key:
+                    server_ip, server_port = server_key.split(":", 1)
+                    # Si el puerto coincide y la IP del servidor es privada
+                    if server_port == search_port and (
+                        server_ip.startswith("10.") or
+                        server_ip.startswith("192.168.") or
+                        server_ip.startswith("172.16.") or
+                        server_ip.startswith("172.17.") or
+                        server_ip.startswith("172.18.") or
+                        server_ip.startswith("172.19.") or
+                        server_ip.startswith("172.2") or
+                        server_ip.startswith("172.30.") or
+                        server_ip.startswith("172.31.")
+                    ):
+                        return server_key
+        
+        return None
+    
     async def _get_public_ip(
         self, 
         guild: discord.Guild, 
@@ -477,6 +539,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 logger.warning(f"Servidor {server_key} no encontrado en {guild.name}.")
                 return
             
+            # Debug: mostrar message_id actual
+            logger.debug(f"Server {server_key} - message_id en config: {server_dict.get('message_id')}")
+            
             # Convertir a dataclass
             server_data = ServerData.from_dict(server_key, server_dict)
             
@@ -500,7 +565,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 )
                 return
             
-            # Obtener IP pública
+            # Obtener IP pública (solo para mostrar en embed)
             host = server_data.host
             port = server_data.port
             public_ip = await self._get_public_ip(guild, host)
@@ -511,7 +576,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             else:
                 ip_to_show = f"{public_ip}:{port}"
             
-            # Realizar query
+            # Realizar query (siempre usa la IP original del servidor)
             query_kwargs = {}
             if server_data.game == GameType.DAYZ:
                 query_kwargs["query_port"] = server_data.query_port
@@ -559,6 +624,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             # Enviar o editar mensaje
             try:
                 if first_time or not server_data.message_id:
+                    logger.info(f"Creando nuevo mensaje para {server_key} (first_time={first_time}, message_id={server_data.message_id})")
                     msg = await channel.send(embed=embed)
                     server_data.message_id = msg.id
                 else:
@@ -567,6 +633,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                         await msg.edit(embed=embed)
                     except discord.NotFound:
                         # Mensaje eliminado, crear uno nuevo
+                        logger.info(f"Mensaje {server_data.message_id} no encontrado para {server_key}, creando nuevo")
                         msg = await channel.send(embed=embed)
                         server_data.message_id = msg.id
             except discord.Forbidden:
@@ -938,15 +1005,19 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         Muestra estadísticas detalladas de un servidor.
         
+        Puedes usar la IP real o la IP pública (si usas setpublicip).
+        
         Ejemplo: `[p]serverstats 192.168.1.1:27015`
         """
-        servers = await self.config.guild(ctx.guild).servers()
+        # Resolver servidor por IP real o pública
+        resolved_key = await self._resolve_server_key(ctx.guild, server_key)
         
-        if server_key not in servers:
+        if not resolved_key:
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
             return
         
-        server_data = ServerData.from_dict(server_key, servers[server_key])
+        servers = await self.config.guild(ctx.guild).servers()
+        server_data = ServerData.from_dict(resolved_key, servers[resolved_key])
         
         if not server_data.game:
             await ctx.send(_("❌ Datos de juego no válidos para este servidor."))
@@ -999,6 +1070,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         Muestra el historial de jugadores de un servidor con gráfico.
         
+        Puedes usar la IP real o la IP pública (si usas setpublicip).
+        
         **Uso:**
         `[p]gsmhistory <ip:puerto> [horas]`
         
@@ -1006,11 +1079,14 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         `[p]gsmhistory 192.168.1.1:27015` - Últimas 24 horas
         `[p]gsmhistory 192.168.1.1:27015 12` - Últimas 12 horas
         """
-        servers = await self.config.guild(ctx.guild).servers()
+        # Resolver servidor por IP real o pública
+        resolved_key = await self._resolve_server_key(ctx.guild, server_key)
         
-        if server_key not in servers:
+        if not resolved_key:
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
             return
+        
+        servers = await self.config.guild(ctx.guild).servers()
         
         # Validar horas
         if hours < 1:
@@ -1019,15 +1095,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             hours = 168
         
         # Obtener historial
-        history = await self._get_player_history(ctx.guild, server_key)
+        history = await self._get_player_history(ctx.guild, resolved_key)
         
         if not history or not history.entries:
             await ctx.send(_("📊 No hay historial disponible para **{}**.\n"
-                           "El historial se generará con las próximas actualizaciones.").format(server_key))
+                           "El historial se generará con las próximas actualizaciones.").format(resolved_key))
             return
         
         # Obtener datos del servidor
-        server_data = ServerData.from_dict(server_key, servers[server_key])
+        server_data = ServerData.from_dict(resolved_key, servers[resolved_key])
         game_name = server_data.game.display_name if server_data.game else "Unknown"
         
         # Generar gráfico
@@ -1054,7 +1130,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Crear embed
         embed = discord.Embed(
-            title=f"📊 Historial - {server_key}",
+            title=f"📊 Historial - {resolved_key}",
             description=f"**Juego:** {game_name}\n**Período:** Últimas {hours} horas",
             color=discord.Color.blue()
         )
@@ -1082,6 +1158,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         Muestra la lista de jugadores conectados a un servidor.
         
+        Puedes usar la IP real o la IP pública (si usas setpublicip).
+        
         **Uso:**
         `[p]gsmplayers <ip:puerto>`
         
@@ -1090,13 +1168,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         **Nota:** Muestra nombre, puntuación y tiempo conectado.
         """
-        servers = await self.config.guild(ctx.guild).servers()
+        # Resolver servidor por IP real o pública
+        resolved_key = await self._resolve_server_key(ctx.guild, server_key)
         
-        if server_key not in servers:
+        if not resolved_key:
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
             return
         
-        server_data = ServerData.from_dict(server_key, servers[server_key])
+        servers = await self.config.guild(ctx.guild).servers()
+        server_data = ServerData.from_dict(resolved_key, servers[resolved_key])
         
         if not server_data.game:
             await ctx.send(_("❌ Datos de juego no válidos para este servidor."))
@@ -1120,7 +1200,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             )
         
         if not query_result.success:
-            await ctx.send(_("❌ El servidor **{}** está offline o no responde.").format(server_key))
+            await ctx.send(_("❌ El servidor **{}** está offline o no responde.").format(resolved_key))
             return
         
         game_name = server_data.game.display_name if server_data.game else "Unknown"

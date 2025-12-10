@@ -60,10 +60,33 @@
 |---------|-------------|
 | `[p]listaserver` | Lists all monitored servers with their status and configuration. |
 | `[p]forzarstatus` | Forces an immediate status update for servers in the current channel. |
-| `[p]serverstats <ip:port>` | Shows detailed statistics: uptime, total queries, last online/offline times. |
-| `[p]gsmhistory <ip:port> [hours]` | Shows player history with an ASCII graph. Default: 24 hours, max: 168 hours (1 week). |
-| `[p]gsmplayers <ip:port>` | Shows the list of currently connected players with name, score, and connection time. |
+| `[p]serverstats <ip:port>` | Shows detailed statistics: uptime, total queries, last online/offline times. **Accepts public or private IP.** |
+| `[p]gsmhistory <ip:port> [hours]` | Shows player history with an ASCII graph. Default: 24 hours, max: 168 hours (1 week). **Accepts public or private IP.** |
+| `[p]gsmplayers <ip:port>` | Shows the list of currently connected players with name, score, and connection time. **Accepts public or private IP.** |
 | `[p]gsmversion` | Shows the current cog version. |
+
+---
+
+### 🔄 Public IP Search Feature
+
+When you use `setpublicip`, you can search for servers using **either**:
+- The **real/private IP** (e.g., `10.0.0.100:27015`)
+- The **public IP** shown in embeds (e.g., `178.33.160.187:27015`)
+
+This makes it easier for users who only know the public IP displayed in the embed.
+
+**Example:**
+```
+# Server added with private IP
+[p]addserver 10.0.0.100:27015 cs2
+
+# Set public IP for the guild
+[p]setpublicip 178.33.160.187
+
+# Both commands work:
+[p]gsmhistory 10.0.0.100:27015      # Real IP
+[p]gsmhistory 178.33.160.187:27015   # Public IP (resolves to 10.0.0.100:27015)
+```
 
 ---
 
@@ -85,11 +108,13 @@
 # Set public IP (replaces private IPs in embeds)
 [p]setpublicip 178.33.160.187
 
-# View player history for last 12 hours
-[p]gsmhistory 178.33.160.187:27015 12
+# View player history (both work if setpublicip is configured)
+[p]gsmhistory 10.0.0.100:27015 12       # Using private IP
+[p]gsmhistory 178.33.160.187:27015 12   # Using public IP
 
-# View connected players
-[p]gsmplayers 178.33.160.187:27015
+# View connected players (both work)
+[p]gsmplayers 10.0.0.100:27015          # Using private IP
+[p]gsmplayers 178.33.160.187:27015      # Using public IP
 ```
 
 ---
@@ -203,10 +228,33 @@ The bot needs these permissions in the channel:
 |---------|-------------|
 | `[p]listaserver` | Lista todos los servidores monitorizados con su estado y configuración. |
 | `[p]forzarstatus` | Fuerza una actualización inmediata de los servidores en el canal actual. |
-| `[p]serverstats <ip:puerto>` | Muestra estadísticas detalladas: uptime, queries totales, últimas veces online/offline. |
-| `[p]gsmhistory <ip:puerto> [horas]` | Muestra el historial de jugadores con un gráfico ASCII. Por defecto: 24 horas, máximo: 168 horas (1 semana). |
-| `[p]gsmplayers <ip:puerto>` | Muestra la lista de jugadores conectados actualmente con nombre, puntuación y tiempo de conexión. |
+| `[p]serverstats <ip:puerto>` | Muestra estadísticas detalladas: uptime, queries totales, últimas veces online/offline. **Acepta IP pública o privada.** |
+| `[p]gsmhistory <ip:puerto> [horas]` | Muestra el historial de jugadores con un gráfico ASCII. Por defecto: 24 horas, máximo: 168 horas (1 semana). **Acepta IP pública o privada.** |
+| `[p]gsmplayers <ip:puerto>` | Muestra la lista de jugadores conectados actualmente con nombre, puntuación y tiempo de conexión. **Acepta IP pública o privada.** |
 | `[p]gsmversion` | Muestra la versión actual del cog. |
+
+---
+
+### 🔄 Búsqueda por IP Pública
+
+Cuando usas `setpublicip`, puedes buscar servidores usando **cualquiera**:
+- La **IP real/privada** (ej: `10.0.0.100:27015`)
+- La **IP pública** mostrada en los embeds (ej: `178.33.160.187:27015`)
+
+Esto facilita a los usuarios que solo conocen la IP pública mostrada en el embed.
+
+**Ejemplo:**
+```
+# Servidor añadido con IP privada
+[p]addserver 10.0.0.100:27015 cs2
+
+# Establecer IP pública para el guild
+[p]setpublicip 178.33.160.187
+
+# Ambos comandos funcionan:
+[p]gsmhistory 10.0.0.100:27015       # IP real
+[p]gsmhistory 178.33.160.187:27015   # IP pública (resuelve a 10.0.0.100:27015)
+```
 
 ---
 
@@ -228,11 +276,13 @@ The bot needs these permissions in the channel:
 # Establecer IP pública (reemplaza IPs privadas en embeds)
 [p]setpublicip 123.45.67.89
 
-# Ver historial de jugadores de las últimas 12 horas
-[p]gsmhistory 192.168.1.1:27015 12
+# Ver historial de jugadores (ambos funcionan si setpublicip está configurado)
+[p]gsmhistory 10.0.0.100:27015 12      # Usando IP privada
+[p]gsmhistory 123.45.67.89:27015 12    # Usando IP pública
 
-# Ver jugadores conectados
-[p]gsmplayers 192.168.1.1:27015
+# Ver jugadores conectados (ambos funcionan)
+[p]gsmplayers 10.0.0.100:27015         # Usando IP privada
+[p]gsmplayers 123.45.67.89:27015       # Usando IP pública
 ```
 
 ---
