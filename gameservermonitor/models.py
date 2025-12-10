@@ -6,8 +6,8 @@ By Killerbite95
 
 from dataclasses import dataclass, field
 from enum import Enum, auto
-from typing import Optional, Dict, Any, List
-from datetime import datetime
+from typing import Optional, Dict, Any, List, Tuple
+from datetime import datetime, timedelta
 import discord
 
 
@@ -137,6 +137,7 @@ class QueryResult:
     error_message: Optional[str] = None
     query_time: datetime = field(default_factory=datetime.utcnow)
     latency_ms: Optional[float] = None
+    player_list: List[Dict[str, Any]] = field(default_factory=list)  # Lista de jugadores con detalles
     
     @property
     def player_percentage(self) -> int:
@@ -363,3 +364,201 @@ class ServerStats:
         embed.set_footer(text=f"Server Key: {self.server_key}")
         
         return embed
+
+
+@dataclass
+class PlayerHistoryEntry:
+    """Una entrada en el historial de jugadores."""
+    timestamp: datetime
+    player_count: int
+    max_players: int
+    status: ServerStatus
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convierte a diccionario para almacenamiento."""
+        return {
+            "timestamp": self.timestamp.isoformat(),
+            "player_count": self.player_count,
+            "max_players": self.max_players,
+            "status": self.status.name
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "PlayerHistoryEntry":
+        """Crea una instancia desde un diccionario."""
+        try:
+            timestamp = datetime.fromisoformat(data["timestamp"])
+        except (ValueError, KeyError):
+            timestamp = datetime.utcnow()
+        
+        try:
+            status = ServerStatus[data.get("status", "UNKNOWN")]
+        except KeyError:
+            status = ServerStatus.UNKNOWN
+        
+        return cls(
+            timestamp=timestamp,
+            player_count=data.get("player_count", 0),
+            max_players=data.get("max_players", 0),
+            status=status
+        )
+
+
+@dataclass
+class PlayerHistory:
+    """Historial de jugadores de un servidor."""
+    server_key: str
+    entries: List[PlayerHistoryEntry] = field(default_factory=list)
+    max_entries: int = 1440  # 24 horas con actualizaciones cada minuto
+    
+    def add_entry(self, player_count: int, max_players: int, status: ServerStatus) -> None:
+        """Añade una entrada al historial."""
+        entry = PlayerHistoryEntry(
+            timestamp=datetime.utcnow(),
+            player_count=player_count,
+            max_players=max_players,
+            status=status
+        )
+        self.entries.append(entry)
+        
+        # Limitar tamaño del historial
+        if len(self.entries) > self.max_entries:
+            self.entries = self.entries[-self.max_entries:]
+    
+    def get_entries_for_period(self, hours: int = 24) -> List[PlayerHistoryEntry]:
+        """Obtiene las entradas del historial para un período de tiempo."""
+        cutoff = datetime.utcnow() - timedelta(hours=hours)
+        return [e for e in self.entries if e.timestamp >= cutoff]
+    
+    def generate_ascii_graph(self, hours: int = 24, width: int = 24) -> str:
+        """
+        Genera un gráfico ASCII del historial de jugadores.
+        
+        Args:
+            hours: Número de horas a mostrar
+            width: Ancho del gráfico en caracteres
+            
+        Returns:
+            String con el gráfico ASCII
+        """
+        entries = self.get_entries_for_period(hours)
+        
+        if not entries:
+            return "```\nNo hay datos de historial disponibles.\n```"
+        
+        # Agrupar entradas por intervalos de tiempo
+        interval_minutes = (hours * 60) // width
+        buckets: List[List[PlayerHistoryEntry]] = [[] for _ in range(width)]
+        
+        now = datetime.utcnow()
+        start_time = now - timedelta(hours=hours)
+        
+        for entry in entries:
+            # Calcular en qué bucket cae esta entrada
+            time_diff = (entry.timestamp - start_time).total_seconds() / 60
+            bucket_idx = min(int(time_diff / interval_minutes), width - 1)
+            if 0 <= bucket_idx < width:
+                buckets[bucket_idx].append(entry)
+        
+        # Calcular promedio de jugadores por bucket
+        avg_players: List[float] = []
+        for bucket in buckets:
+            if bucket:
+                avg_players.append(sum(e.player_count for e in bucket) / len(bucket))
+            else:
+                avg_players.append(0)
+        
+        # Obtener max_players del último dato disponible
+        max_players = max(
+            (e.max_players for e in entries if e.max_players > 0),
+            default=1
+        )
+        
+        # Generar gráfico
+        height = 8
+        graph_lines: List[str] = []
+        
+        # Caracteres para el gráfico
+        blocks = ["▁", "▂", "▃", "▄", "▅", "▆", "▇", "█"]
+        
+        # Línea del gráfico
+        graph_row = ""
+        for avg in avg_players:
+            if avg == 0:
+                graph_row += "░"
+            else:
+                # Normalizar a 0-7
+                level = min(int((avg / max_players) * 8), 7)
+                graph_row += blocks[level]
+        
+        # Calcular estadísticas
+        online_entries = [e for e in entries if e.status != ServerStatus.OFFLINE]
+        if online_entries:
+            peak = max(e.player_count for e in online_entries)
+            avg_total = sum(e.player_count for e in online_entries) / len(online_entries)
+        else:
+            peak = 0
+            avg_total = 0
+        
+        # Construir el gráfico completo
+        result = "```\n"
+        result += f"📊 Historial de jugadores ({hours}h)\n"
+        result += "─" * (width + 2) + "\n"
+        result += f"Max: {max_players:>3} │{graph_row}│\n"
+        result += f"    0 │{'─' * width}│\n"
+        result += "─" * (width + 2) + "\n"
+        result += f"      -{hours}h" + " " * (width - 8) + "Ahora\n"
+        result += f"\n📈 Peak: {peak} | 📊 Promedio: {avg_total:.1f}\n"
+        result += "```"
+        
+        return result
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """Convierte a diccionario para almacenamiento."""
+        return {
+            "server_key": self.server_key,
+            "entries": [e.to_dict() for e in self.entries[-self.max_entries:]]
+        }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "PlayerHistory":
+        """Crea una instancia desde un diccionario."""
+        entries = [
+            PlayerHistoryEntry.from_dict(e) 
+            for e in data.get("entries", [])
+        ]
+        return cls(
+            server_key=data.get("server_key", ""),
+            entries=entries
+        )
+
+
+@dataclass
+class PlayerInfo:
+    """Información de un jugador conectado."""
+    name: str
+    score: int = 0
+    duration_seconds: float = 0
+    
+    @property
+    def duration_formatted(self) -> str:
+        """Formatea la duración de conexión."""
+        total_seconds = int(self.duration_seconds)
+        hours, remainder = divmod(total_seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        
+        if hours > 0:
+            return f"{hours}h {minutes}m"
+        elif minutes > 0:
+            return f"{minutes}m {seconds}s"
+        else:
+            return f"{seconds}s"
+    
+    @classmethod
+    def from_source_player(cls, player_data: Any) -> "PlayerInfo":
+        """Crea una instancia desde datos de Source query."""
+        return cls(
+            name=getattr(player_data, "name", "Unknown"),
+            score=getattr(player_data, "score", 0),
+            duration_seconds=getattr(player_data, "duration", 0)
+        )

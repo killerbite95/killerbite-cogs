@@ -1,9 +1,9 @@
-# GameServerMonitor v2.0.0 - Documentación Completa
+# GameServerMonitor v2.1.0 - Documentación Completa
 
 ## Índice
 
 1. [Descripción General](#descripción-general)
-2. [Novedades en v2.0.0](#novedades-en-v200)
+2. [Novedades en v2.1.0](#novedades-en-v210)
 3. [Requisitos y Dependencias](#requisitos-y-dependencias)
 4. [Instalación](#instalación)
 5. [Arquitectura del Proyecto](#arquitectura-del-proyecto)
@@ -13,15 +13,16 @@
 9. [Sistema de Embeds](#sistema-de-embeds)
 10. [Sistema de Eventos](#sistema-de-eventos)
 11. [Sistema de Caché](#sistema-de-caché)
-12. [Integración con Dashboard](#integración-con-dashboard)
-13. [Sistema de Logging](#sistema-de-logging)
-14. [Patrones de Diseño](#patrones-de-diseño)
-15. [Estructura de Datos](#estructura-de-datos)
-16. [Manejo de Errores](#manejo-de-errores)
-17. [Extensibilidad](#extensibilidad)
-18. [Migración desde v1.x](#migración-desde-v1x)
-19. [FAQ y Troubleshooting](#faq-y-troubleshooting)
-20. [Changelog](#changelog)
+12. [Sistema de Historial](#sistema-de-historial)
+13. [Integración con Dashboard](#integración-con-dashboard)
+14. [Sistema de Logging](#sistema-de-logging)
+15. [Patrones de Diseño](#patrones-de-diseño)
+16. [Estructura de Datos](#estructura-de-datos)
+17. [Manejo de Errores](#manejo-de-errores)
+18. [Extensibilidad](#extensibilidad)
+19. [Migración desde v1.x](#migración-desde-v1x)
+20. [FAQ y Troubleshooting](#faq-y-troubleshooting)
+21. [Changelog](#changelog)
 
 ---
 
@@ -35,6 +36,8 @@
 - ✅ Soporte para múltiples protocolos (Source Query, Minecraft Status)
 - ✅ Sistema de caché para optimizar queries
 - ✅ Estadísticas de uptime por servidor
+- ✅ **Historial de jugadores con gráficos ASCII** (NUEVO)
+- ✅ **Lista de jugadores conectados en tiempo real** (NUEVO)
 - ✅ Sistema de eventos para integración con otros cogs
 - ✅ Configuración dinámica (IP pública, URL de conexión)
 - ✅ Validación de permisos de canal
@@ -49,9 +52,18 @@
 
 ---
 
-## Novedades en v2.0.0
+## Novedades en v2.1.0
 
 ### Nuevas Funcionalidades
+
+| Característica | Descripción |
+|----------------|-------------|
+| 📊 `gsmhistory` | **NUEVO** - Historial de jugadores con gráfico ASCII |
+| 👥 `gsmplayers` | **NUEVO** - Lista de jugadores conectados |
+| 📈 Historial 24h | Almacena datos de jugadores de las últimas 24 horas |
+| 📉 Gráficos ASCII | Visualización de actividad del servidor |
+
+### Funcionalidades de v2.0.0
 
 | Característica | Descripción |
 |----------------|-------------|
@@ -206,7 +218,8 @@ default_guild = {
         "color_online": None,                                   # Color personalizado
         "color_offline": None,
         "color_maintenance": None
-    }
+    },
+    "player_history": {}                                        # Historial de jugadores
 }
 ```
 
@@ -233,6 +246,70 @@ default_guild = {
 | `[p]listaserver` | Todos | Lista servidores |
 | `[p]forzarstatus` | Todos | Fuerza actualización |
 | `[p]serverstats <clave>` | Todos | Estadísticas del servidor |
+| `[p]gsmhistory <clave> [horas]` | Todos | **NUEVO** - Historial con gráfico |
+| `[p]gsmplayers <clave>` | Todos | **NUEVO** - Lista de jugadores |
+| `[p]gsmversion` | Todos | Muestra versión del cog |
+
+### Comandos de Historial y Jugadores (NUEVO en v2.1.0)
+
+#### gsmhistory
+Muestra el historial de jugadores de un servidor con un gráfico ASCII de actividad.
+
+```
+[p]gsmhistory <ip:puerto> [horas]
+```
+
+**Ejemplos:**
+```
+!gsmhistory 192.168.1.1:27015          # Últimas 24 horas
+!gsmhistory 192.168.1.1:27015 12       # Últimas 12 horas
+!gsmhistory 192.168.1.1:27015 168      # Última semana
+```
+
+**Salida de ejemplo:**
+```
+📊 Historial de jugadores (24h)
+──────────────────────────
+Max:  25 │▂▃▄▅▆▇▇▆▅▄▃▂▁░░▁▂▃▄▅▆▇█▇│
+     0 │────────────────────────│
+──────────────────────────
+      -24h                  Ahora
+
+📈 Peak: 23 | 📊 Promedio: 12.5
+```
+
+#### gsmplayers
+Muestra la lista de jugadores actualmente conectados a un servidor.
+
+```
+[p]gsmplayers <ip:puerto>
+```
+
+**Ejemplo:**
+```
+!gsmplayers 192.168.1.1:27015
+```
+
+**Salida de ejemplo:**
+```
+👥 Jugadores - Mi Servidor de GMod
+
+Juego: Garry's Mod
+Mapa: rp_downtown_v4c
+Jugadores: 15/32
+
+📋 Lista de Jugadores
+┌────────────────────────────────────────┐
+│ Nombre               Puntos    Tiempo  │
+│ ────────────────────────────────────── │
+│ Player1                  150     2h 30m│
+│ Player2                   85     1h 15m│
+│ Player3                   42       45m │
+│ ...                                    │
+└────────────────────────────────────────┘
+
+📶 Ping: 25ms
+```
 
 ### Sintaxis de addserver
 

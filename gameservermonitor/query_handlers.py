@@ -12,7 +12,7 @@ from typing import Optional, Dict, Any, List, Tuple, Type
 
 from opengsq.protocols import Source, Minecraft
 
-from .models import QueryResult, ServerStatus, GameType, CacheEntry
+from .models import QueryResult, ServerStatus, GameType, CacheEntry, PlayerInfo
 from .exceptions import (
     QueryTimeoutError,
     QueryConnectionError,
@@ -87,6 +87,7 @@ class SourceQueryHandler(QueryHandler):
     async def query(self, host: str, port: int, **kwargs) -> QueryResult:
         """Realiza query usando Source Query Protocol."""
         debug = kwargs.get("debug", False)
+        fetch_players = kwargs.get("fetch_players", False)
         start_time = datetime.utcnow()
         
         try:
@@ -107,6 +108,24 @@ class SourceQueryHandler(QueryHandler):
             
             status = ServerStatus.MAINTENANCE if is_passworded else ServerStatus.ONLINE
             
+            # Obtener lista de jugadores si se solicita
+            player_list: List[Dict[str, Any]] = []
+            if fetch_players and players > 0:
+                try:
+                    player_data = await source.get_players()
+                    for p in player_data:
+                        player_info = PlayerInfo.from_source_player(p)
+                        player_list.append({
+                            "name": player_info.name,
+                            "score": player_info.score,
+                            "duration": player_info.duration_seconds,
+                            "duration_formatted": player_info.duration_formatted
+                        })
+                    # Ordenar por duración (más tiempo primero)
+                    player_list.sort(key=lambda x: x["duration"], reverse=True)
+                except Exception as e:
+                    logger.debug(f"No se pudo obtener lista de jugadores: {e}")
+            
             return QueryResult(
                 success=True,
                 status=status,
@@ -117,7 +136,8 @@ class SourceQueryHandler(QueryHandler):
                 is_passworded=is_passworded,
                 raw_data={"info": info},
                 query_time=datetime.utcnow(),
-                latency_ms=latency_ms
+                latency_ms=latency_ms,
+                player_list=player_list
             )
             
         except TimeoutError as e:
@@ -146,6 +166,7 @@ class MinecraftQueryHandler(QueryHandler):
     async def query(self, host: str, port: int, **kwargs) -> QueryResult:
         """Realiza query usando Minecraft Status Protocol."""
         debug = kwargs.get("debug", False)
+        fetch_players = kwargs.get("fetch_players", False)
         start_time = datetime.utcnow()
         
         try:
@@ -165,6 +186,18 @@ class MinecraftQueryHandler(QueryHandler):
             version_str = info.get("version", {}).get("name", "???")
             version = extract_numeric_version(version_str)
             
+            # Obtener lista de jugadores (si está disponible en el status)
+            player_list: List[Dict[str, Any]] = []
+            if fetch_players:
+                sample = info.get("players", {}).get("sample", [])
+                for p in sample:
+                    player_list.append({
+                        "name": p.get("name", "Unknown"),
+                        "score": 0,
+                        "duration": 0,
+                        "duration_formatted": "N/A"
+                    })
+            
             return QueryResult(
                 success=True,
                 status=ServerStatus.ONLINE,
@@ -176,7 +209,8 @@ class MinecraftQueryHandler(QueryHandler):
                 version=version_str,
                 raw_data=info,
                 query_time=datetime.utcnow(),
-                latency_ms=latency_ms
+                latency_ms=latency_ms,
+                player_list=player_list
             )
             
         except TimeoutError as e:
@@ -202,17 +236,40 @@ class DayZQueryHandler(QueryHandler):
     def supported_games(self) -> List[GameType]:
         return [GameType.DAYZ]
     
-    async def _try_query(self, host: str, port: int, debug: bool = False) -> Tuple[bool, Optional[Any]]:
+    async def _try_query(
+        self, 
+        host: str, 
+        port: int, 
+        debug: bool = False,
+        fetch_players: bool = False
+    ) -> Tuple[bool, Optional[Any], List[Dict[str, Any]]]:
         """Intenta una query en un puerto específico."""
         try:
             source = Source(host=host, port=port)
             info = await source.get_info()
+            
+            player_list: List[Dict[str, Any]] = []
+            if fetch_players:
+                try:
+                    player_data = await source.get_players()
+                    for p in player_data:
+                        player_info = PlayerInfo.from_source_player(p)
+                        player_list.append({
+                            "name": player_info.name,
+                            "score": player_info.score,
+                            "duration": player_info.duration_seconds,
+                            "duration_formatted": player_info.duration_formatted
+                        })
+                    player_list.sort(key=lambda x: x["duration"], reverse=True)
+                except Exception as e:
+                    logger.debug(f"No se pudo obtener lista de jugadores DayZ: {e}")
+            
             if debug:
                 logger.debug(f"DayZ query exitosa en {host}:{port}")
-            return True, info
+            return True, info, player_list
         except Exception as e:
             logger.debug(f"DayZ query falló en {host}:{port}: {e!r}")
-            return False, None
+            return False, None, []
     
     async def query(self, host: str, port: int, **kwargs) -> QueryResult:
         """
@@ -224,24 +281,27 @@ class DayZQueryHandler(QueryHandler):
             **kwargs:
                 query_port: Puerto de query alternativo
                 debug: Modo debug
+                fetch_players: Obtener lista de jugadores
         """
         debug = kwargs.get("debug", False)
         query_port = kwargs.get("query_port")
+        fetch_players = kwargs.get("fetch_players", False)
         game_port = port
         
         start_time = datetime.utcnow()
         info = None
+        player_list: List[Dict[str, Any]] = []
         used_port = None
         
         # 1. Intentar game_port primero
-        success, info = await self._try_query(host, game_port, debug)
+        success, info, player_list = await self._try_query(host, game_port, debug, fetch_players)
         if success:
             used_port = game_port
             logger.info(f"DayZ {host}: respondió en game_port={game_port}")
         
         # 2. Intentar query_port si está configurado y es diferente
         if info is None and query_port and int(query_port) != int(game_port):
-            success, info = await self._try_query(host, int(query_port), debug)
+            success, info, player_list = await self._try_query(host, int(query_port), debug, fetch_players)
             if success:
                 used_port = query_port
                 logger.info(f"DayZ {host}: respondió en query_port={query_port}")
@@ -252,7 +312,7 @@ class DayZQueryHandler(QueryHandler):
             for candidate_port in candidates:
                 if candidate_port in (game_port, query_port):
                     continue
-                success, info = await self._try_query(host, candidate_port, debug)
+                success, info, player_list = await self._try_query(host, candidate_port, debug, fetch_players)
                 if success:
                     used_port = candidate_port
                     logger.info(f"DayZ {host}: respondió en candidato={candidate_port}")
@@ -289,7 +349,8 @@ class DayZQueryHandler(QueryHandler):
             is_passworded=is_passworded,
             raw_data={"info": info, "used_port": used_port},
             query_time=datetime.utcnow(),
-            latency_ms=latency_ms
+            latency_ms=latency_ms,
+            player_list=player_list
         )
 
 

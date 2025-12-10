@@ -1,10 +1,10 @@
 {
     "author": ["Killerbite95"],
-    "install_msg": "¡Gracias por instalar GameServerMonitor! Usa `[p]help GameServerMonitor` para ver los comandos disponibles.",
+    "install_msg": "¡Gracias por instalar GameServerMonitor v2.1.0! Usa `[p]help GameServerMonitor` para ver los comandos disponibles. Nuevos comandos: `gsmhistory` y `gsmplayers`.",
     "name": "GameServerMonitor",
-    "short": "Monitoriza servidores de juegos (CS2, CSS, GMOD, Rust, Minecraft, DayZ)",
-    "description": "Cog avanzado para monitorizar el estado de servidores de juegos en Discord. Soporta múltiples protocolos de query, estadísticas de uptime, thumbnails de juegos, sistema de eventos y panel de configuración web.",
-    "end_user_data_statement": "Este cog almacena IDs de canales y mensajes de Discord para actualizar el estado de los servidores. No almacena datos personales de usuarios.",
+    "short": "Monitoriza servidores de juegos (CS2, CSS, GMOD, Rust, Minecraft, DayZ) con historial y lista de jugadores",
+    "description": "Cog avanzado para monitorizar el estado de servidores de juegos en Discord. Incluye historial de jugadores con gráficos ASCII, lista de jugadores conectados en tiempo real, estadísticas de uptime, thumbnails de juegos, sistema de eventos y panel de configuración web.",
+    "end_user_data_statement": "Este cog almacena IDs de canales y mensajes de Discord para actualizar el estado de los servidores, así como historial de conteo de jugadores. No almacena datos personales de usuarios.",
     "hidden": false,
     "disabled": false,
     "min_bot_version": "3.5.0",
@@ -20,7 +20,9 @@
         "dayz",
         "rust",
         "gmod",
-        "query"
+        "query",
+        "history",
+        "players"
     ],
     "type": "COG",
     "permissions": ["send_messages", "embed_links", "read_message_history"]
