@@ -1,6 +1,11 @@
-# SimpleSuggestions v2.0.0
+# SimpleSuggestions v2.0.1
 
 Sistema de sugerencias completo para Discord con botones interactivos, votaciones persistentes, múltiples estados y panel de control web.
+
+## 🐛 Correcciones en v2.0.1
+
+- **🔒 Permisos de staff corregidos**: Los botones Aprobar/Rechazar/Cambiar estado ahora verifican correctamente los permisos del usuario
+- **♻️ Handlers optimizados**: Se eliminó el problema de handlers duplicados al recargar el cog
 
 ## ✨ Novedades en v2.0.0
 
