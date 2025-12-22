@@ -4,7 +4,7 @@
   ],
   "end_user_data_statement": "Este cog almacena la ID de usuario, votos y contenido de sugerencias.",
   "description": "Sistema de sugerencias completo con botones interactivos, votaciones persistentes, múltiples estados y panel de control web.",
-  "install_msg": "SimpleSuggestions v2.0.0 instalado!\n\nConfigura el canal con: `[p]suggestset channel #canal`\nVer configuración: `[p]suggestset settings`",
+  "install_msg": "SimpleSuggestions v2.0.1 instalado!\n\nConfigura el canal con: `[p]suggestset channel #canal`\nVer configuración: `[p]suggestset settings`",
   "short": "Sistema de sugerencias avanzado",
   "tags": [
     "suggestions",

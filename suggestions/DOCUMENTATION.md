@@ -148,6 +148,11 @@ Cada sugerencia incluye botones:
 - ❌ **Rechazar** - Cambiar a rechazado
 - 📋 **Cambiar estado** - Menú de estados
 
+> ⚠️ **Nota sobre permisos**: Los botones de Staff son visibles para todos (limitación de Discord), pero **solo funcionan** para usuarios con:
+> - Permiso de **Administrador**
+> - Permiso de **Gestionar servidor**
+> - El **rol de staff** configurado (`[p]suggestset staffrole`)
+
 ### Sistema de votos
 - Los votos se **persisten** en la base de datos
 - Un usuario solo puede votar **una vez** (up o down)
@@ -285,6 +290,11 @@ Por cada sugerencia se guarda:
 ---
 
 ## 📜 Changelog
+
+### v2.0.1
+- Fix: Los botones de staff ahora verifican permisos antes de ejecutar acciones
+- Fix: Orden correcto de botones (👍 antes que 👎)
+- Fix: Mensaje de voto muestra correctamente "añadido"/"removido"
 
 ### v2.0.0
 - Refactor completo del código en módulos
