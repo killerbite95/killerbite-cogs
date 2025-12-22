@@ -592,6 +592,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     ) -> List[app_commands.Choice[str]]:
         """
         Autocomplete para seleccionar servidores en slash commands.
+        Muestra hostname o IP pública, nunca IP privada.
         
         Args:
             interaction: Interacción de Discord
@@ -604,6 +605,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             return []
         
         servers = await self.config.guild(interaction.guild).servers()
+        public_ip = await self.config.guild(interaction.guild).public_ip()
         choices = []
         
         current_lower = current.lower()
@@ -612,11 +614,33 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             game_type = GameType.from_string(server_data.get("game", ""))
             game_name = game_type.display_name if game_type else "Unknown"
             
-            # Crear nombre amigable
-            display_name = f"{server_key} ({game_name})"
+            # Obtener nombre para mostrar (hostname > IP pública > dominio > juego)
+            # Intentar obtener hostname de caché
+            server_obj = ServerData.from_dict(server_key, server_data)
+            port = server_obj.port
             
-            # Filtrar por texto actual
-            if current_lower in server_key.lower() or current_lower in game_name.lower():
+            # Intentar obtener hostname desde caché
+            display_id = None
+            cache_key = f"{server_obj.game.value if server_obj.game else 'unknown'}:{server_obj.host}:{port}"
+            if hasattr(self, 'query_service') and hasattr(self.query_service, '_cache'):
+                cached = self.query_service._cache.get(server_obj.host, port, server_obj.game)
+                if cached and cached.hostname:
+                    display_id = cached.hostname[:40]
+            
+            # Si no hay hostname en caché, usar IP pública o dominio
+            if not display_id:
+                if public_ip:
+                    display_id = f"{public_ip}:{port}"
+                elif server_obj.domain:
+                    display_id = server_obj.domain
+                else:
+                    display_id = game_name
+            
+            # Crear nombre amigable para mostrar
+            display_name = f"{display_id} ({game_name})"
+            
+            # Filtrar por texto actual (buscar en display_name y game_name)
+            if current_lower in display_name.lower() or current_lower in game_name.lower():
                 server_id = server_data.get("server_id", server_key)
                 choices.append(
                     app_commands.Choice(name=display_name[:100], value=server_id)
