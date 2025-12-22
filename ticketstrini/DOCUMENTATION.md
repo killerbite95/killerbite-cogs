@@ -32,6 +32,21 @@ Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 [p]load ticketstrini
 ```
 
+### Migrating from Tickets (vertyco)
+
+If you were using the original `tickets` cog, you need to migrate your config:
+
+1. Unload the old cog: `[p]unload tickets`
+2. Install ticketstrini: `[p]cog install killerbite-cogs ticketstrini`
+3. **Move your config folder**:
+   ```bash
+   # On the server, move the config directory:
+   mv /path/to/Red-DiscordBot/data/<instance>/cogs/Tickets /path/to/Red-DiscordBot/data/<instance>/cogs/TicketsTrini
+   ```
+4. Load the new cog: `[p]load ticketstrini`
+
+Your panels and settings will be preserved!
+
 ### Requirements
 - Red-DiscordBot 3.5.0+
 - Python 3.10+
