@@ -1,16 +1,30 @@
-# SimpleSuggestions
+# SimpleSuggestions v2.0.0
 
-Sistema de sugerencias para Discord con soporte para hilos, votaciones y panel de control web.
+Sistema de sugerencias completo para Discord con botones interactivos, votaciones persistentes, múltiples estados y panel de control web.
+
+## ✨ Novedades en v2.0.0
+
+- **🔘 Botones interactivos**: Vota, edita y gestiona sugerencias con botones
+- **♻️ Views persistentes**: Los botones funcionan incluso tras reiniciar el bot
+- **🔒 Contador atómico**: Sin duplicados de ID aunque haya spam simultáneo
+- **📊 9 estados diferentes**: Pendiente, En revisión, Planeado, En progreso, Aprobado, Implementado, Rechazado, Duplicado, No se hará
+- **📜 Historial de cambios**: Auditoría completa de cada sugerencia
+- **🔔 Notificaciones**: DM al autor cuando cambia el estado
+- **🛠️ Comandos de mantenimiento**: resync, repost, purge
+- **⚡ Comandos híbridos**: Funcionan con prefix y slash commands
+- **🌐 Dashboard mejorado**: Filtros, paginación y gestión web
+
+---
 
 ## 📋 Características
 
 - **Canal de sugerencias dedicado**: Las sugerencias se envían a un canal específico
-- **Sistema de votación**: Reacciones automáticas 👍/👎 en cada sugerencia
+- **Sistema de votación**: Botones 👍/👎 o reacciones (configurable)
 - **Numeración automática**: Cada sugerencia recibe un ID único incremental
-- **Gestión de estados**: Aprobar o rechazar sugerencias con indicadores visuales
+- **Gestión de estados**: Múltiples estados con indicadores visuales de color
 - **Hilos de discusión**: Opción para crear hilos automáticos por sugerencia
 - **Edición de sugerencias**: Los usuarios pueden editar sus propias sugerencias pendientes
-- **Integración con Dashboard**: Panel web para gestionar sugerencias
+- **Integración con Dashboard**: Panel web completo para gestionar sugerencias
 
 ---
 
@@ -26,24 +40,14 @@ Sistema de sugerencias para Discord con soporte para hilos, votaciones y panel d
 
 ## ⚙️ Configuración Inicial
 
-### 1. Establecer el canal de sugerencias (Requerido)
+### Configuración rápida
 ```
-[p]setsuggestionchannel #canal-sugerencias
-```
-
-### 2. Establecer el canal de logs (Opcional)
-```
-[p]setlogchannel #logs-sugerencias
+[p]suggestset channel #sugerencias
 ```
 
-### 3. Activar hilos para sugerencias (Opcional)
+### Ver toda la configuración
 ```
-[p]togglesuggestionthreads
-```
-
-### 4. Activar archivado automático de hilos (Opcional)
-```
-[p]togglethreadarchive
+[p]suggestset settings
 ```
 
 ---
@@ -55,137 +59,221 @@ Sistema de sugerencias para Discord con soporte para hilos, votaciones y panel d
 | Comando | Descripción |
 |---------|-------------|
 | `[p]suggest <texto>` | Envía una nueva sugerencia |
-| `[p]editsuggest <message_id> <nuevo_texto>` | Edita una sugerencia propia (solo si está pendiente) |
+| `/suggest` | Envía sugerencia con modal interactivo |
+| `[p]editsuggest <ref> <nuevo_texto>` | Edita una sugerencia propia |
+| `[p]mysuggestions` | Ver tus propias sugerencias |
+| `[p]suggestioninfo <ref>` | Ver información detallada |
+
+### Comandos de Staff
+
+| Comando | Descripción |
+|---------|-------------|
+| `[p]approve <ref> [motivo]` | Aprueba una sugerencia |
+| `[p]deny <ref> [motivo]` | Rechaza una sugerencia |
+| `[p]setstatus <ref> <estado> [motivo]` | Cambia el estado |
+| `[p]suggestions [estado]` | Lista sugerencias (con filtro opcional) |
+| `[p]suggestionhistory <ref>` | Ver historial de cambios |
 
 ### Comandos de Administración
 
-| Comando | Descripción | Permisos |
-|---------|-------------|----------|
-| `[p]setsuggestionchannel <canal>` | Establece el canal de sugerencias | Admin |
-| `[p]setlogchannel <canal>` | Establece el canal de logs | Admin |
-| `[p]approve <message_id>` | Aprueba una sugerencia | Admin |
-| `[p]deny <message_id>` | Rechaza una sugerencia | Admin |
-| `[p]togglesuggestionthreads` | Activa/desactiva hilos automáticos | Admin |
-| `[p]togglethreadarchive` | Activa/desactiva archivado de hilos | Admin |
+| Comando | Descripción |
+|---------|-------------|
+| `[p]suggestadmin resync` | Sincroniza mensajes eliminados |
+| `[p]suggestadmin repost <ref>` | Re-publica una sugerencia |
+| `[p]suggestadmin purge deleted` | Elimina registros huérfanos |
+
+### Configuración (`[p]suggestset`)
+
+| Subcomando | Descripción |
+|------------|-------------|
+| `channel <#canal>` | Canal de sugerencias |
+| `logchannel [#canal]` | Canal de logs |
+| `notifychannel [#canal]` | Canal alternativo para notificaciones |
+| `staffrole [@rol]` | Rol de staff |
+| `buttons` | Alternar botones/reacciones |
+| `threads` | Activar/desactivar hilos |
+| `autoarchive` | Archivar hilos al cerrar |
+| `notify` | Notificar al autor por DM |
+| `settings` | Ver configuración actual |
+
+---
+
+## 🔍 Referencias a Sugerencias
+
+Puedes referenciar sugerencias de varias formas:
+
+| Formato | Ejemplo |
+|---------|---------|
+| ID de sugerencia | `#123` |
+| ID de mensaje | `1234567890123456789` |
+| URL del mensaje | `https://discord.com/channels/...` |
+
+**Ejemplos:**
+```
+[p]approve #123 Buena idea!
+[p]deny 1234567890 No es viable
+[p]setstatus #45 planned Lo haremos en enero
+```
 
 ---
 
 ## 🎨 Estados de Sugerencias
 
-| Estado | Color | Descripción |
-|--------|-------|-------------|
-| **Pendiente** | 🔵 Azul | Sugerencia nueva sin revisar |
-| **Aprobado** | 🟢 Verde | Sugerencia aceptada |
-| **Rechazado** | 🔴 Rojo | Sugerencia denegada |
+| Estado | Emoji | Color | Descripción |
+|--------|-------|-------|-------------|
+| Pendiente | 🔵 | Azul | Nueva sin revisar |
+| En revisión | 🟡 | Oro | Siendo evaluada |
+| Planeado | 🟣 | Púrpura | Aprobada para futuro |
+| En progreso | 🟠 | Naranja | En desarrollo |
+| Aprobado | 🟢 | Verde | Aceptada |
+| Implementado | ✅ | Verde oscuro | Ya implementada |
+| Rechazado | 🔴 | Rojo | Denegada |
+| Duplicado | 🔄 | Gris | Ya existe otra igual |
+| No se hará | ⛔ | Gris oscuro | Descartada |
 
 ---
 
-## 📖 Ejemplos de Uso
+## 🔘 Botones Interactivos
 
-### Enviar una sugerencia
-```
-[p]suggest Añadir un canal de música para escuchar juntos
-```
+Cada sugerencia incluye botones:
 
-**Resultado:**
-- Se crea un embed azul con el título "Sugerencia #1"
-- Se añaden reacciones 👍 y 👎 automáticamente
-- Si los hilos están activados, se crea un hilo de discusión
+**Fila 1 - Usuarios:**
+- 👍 **Upvote** - Votar a favor (toggle)
+- 👎 **Downvote** - Votar en contra (toggle)
+- 📊 **Ver votos** - Estadísticas detalladas
+- ✏️ **Editar** - Solo autor, solo si pendiente
 
-### Aprobar una sugerencia
-```
-[p]approve 1234567890123456789
-```
+**Fila 2 - Staff:**
+- ✅ **Aprobar** - Cambiar a aprobado
+- ❌ **Rechazar** - Cambiar a rechazado
+- 📋 **Cambiar estado** - Menú de estados
 
-**Resultado:**
-- El embed cambia a color verde
-- Se añade el footer "Aprobado"
-- Si está configurado, el hilo se archiva y bloquea
-
-### Rechazar una sugerencia
-```
-[p]deny 1234567890123456789
-```
-
-**Resultado:**
-- El embed cambia a color rojo
-- Se añade el footer "Rechazado"
-- Si está configurado, el hilo se archiva y bloquea
-
-### Editar una sugerencia
-```
-[p]editsuggest 1234567890123456789 Nuevo texto de mi sugerencia
-```
-
-> ⚠️ Solo puedes editar tus propias sugerencias que estén en estado "Pendiente"
+### Sistema de votos
+- Los votos se **persisten** en la base de datos
+- Un usuario solo puede votar **una vez** (up o down)
+- Pulsar el mismo botón **retira** el voto (toggle)
+- Pulsar el botón contrario **cambia** el voto
 
 ---
 
-## 🌐 Integración con Dashboard
+## 🌐 Dashboard Web
 
-Si tienes el cog **Red-Dashboard** instalado, puedes gestionar las sugerencias desde el panel web:
+Si tienes **Red-Dashboard** instalado:
 
-### Páginas disponibles:
+### Página principal (`/suggestions`)
+- Lista paginada de sugerencias
+- Filtro por estado
+- Búsqueda por contenido
+- Estadísticas
 
-| Página | Descripción |
-|--------|-------------|
-| **Ver sugerencias** | Tabla con todas las sugerencias del servidor |
-| **Aprobar sugerencia** | Formulario para aprobar por ID de mensaje |
-| **Rechazar sugerencia** | Formulario para rechazar por ID de mensaje |
+### Gestión individual (`/manage_suggestion`)
+- Ver detalles completos
+- Cambiar estado con motivo
+- Ver historial de cambios
 
-La tabla de sugerencias muestra:
-- ID del mensaje
-- Número de sugerencia
-- Contenido
-- Autor
-- Estado actual
+---
+
+## 🔔 Notificaciones
+
+Cuando cambia el estado de una sugerencia:
+
+1. Se intenta enviar **DM al autor**
+2. Si los DMs están cerrados, se envía al **canal de notificaciones** (si está configurado)
+
+El embed incluye:
+- Contenido de la sugerencia
+- Estado anterior → nuevo
+- Motivo (si se proporcionó)
+- Quién realizó el cambio
+
+---
+
+## 🛠️ Mantenimiento
+
+### Sincronizar mensajes eliminados
+```
+[p]suggestadmin resync
+```
+Verifica qué mensajes existen y marca como eliminadas las sugerencias huérfanas.
+
+### Re-publicar una sugerencia
+```
+[p]suggestadmin repost #123
+```
+Crea un nuevo mensaje para una sugerencia eliminada, manteniendo su ID original.
+
+### Limpiar registros
+```
+[p]suggestadmin purge deleted
+```
+Elimina permanentemente los registros marcados como eliminados.
 
 ---
 
 ## 💡 Configuración Recomendada
 
-### Para servidores pequeños/medianos:
+### Servidor pequeño
 ```
-[p]setsuggestionchannel #sugerencias
-```
-
-### Para servidores grandes:
-```
-[p]setsuggestionchannel #sugerencias
-[p]togglesuggestionthreads
-[p]togglethreadarchive
+[p]suggestset channel #sugerencias
 ```
 
-Los hilos permiten discusiones organizadas sin llenar el canal principal.
+### Servidor mediano
+```
+[p]suggestset channel #sugerencias
+[p]suggestset threads
+```
+
+### Servidor grande
+```
+[p]suggestset channel #sugerencias
+[p]suggestset threads
+[p]suggestset autoarchive
+[p]suggestset staffrole @Moderadores
+[p]suggestset notifychannel #notificaciones
+```
 
 ---
 
-## ❓ Preguntas Frecuentes
+## 🔄 Migración desde v1.x
 
-### ¿Dónde encuentro el ID del mensaje?
-1. Activa el **Modo Desarrollador** en Discord (Ajustes > Avanzado)
-2. Haz clic derecho en el mensaje de la sugerencia
-3. Selecciona "Copiar ID del mensaje"
-
-### ¿Puedo cambiar el canal de sugerencias después?
-Sí, simplemente usa `[p]setsuggestionchannel #nuevo-canal`. Las sugerencias anteriores permanecerán en el canal antiguo.
-
-### ¿Qué pasa si elimino un mensaje de sugerencia?
-La sugerencia seguirá registrada en la base de datos pero no podrá ser gestionada (aprobar/rechazar).
-
-### ¿Los usuarios pueden eliminar sus sugerencias?
-No directamente. Un administrador debe eliminar el mensaje manualmente si es necesario.
+La migración es **automática**:
+- Los datos se convierten al nuevo formato al usar cualquier comando
+- Las sugerencias existentes mantienen sus IDs
+- Los estados antiguos se mapean a los nuevos
 
 ---
 
-## 📊 Almacenamiento de Datos
+## ❓ FAQ
 
-Este cog almacena por servidor:
-- ID del canal de sugerencias
-- ID del canal de logs
-- Configuración de hilos
-- Contador de sugerencias
-- Registro de sugerencias (ID mensaje, contenido, autor, estado)
+### ¿Los botones funcionan tras reiniciar el bot?
+Sí, gracias al sistema de **persistent views**.
+
+### ¿Qué pasa si varios usuarios votan a la vez?
+El sistema usa **locks** para evitar race conditions.
+
+### ¿Puedo usar reacciones en lugar de botones?
+Sí: `[p]suggestset buttons` para alternar.
+
+### ¿Puedo tener varios canales de sugerencias?
+No, actualmente solo uno por servidor.
+
+---
+
+## 📊 Almacenamiento
+
+Por cada sugerencia se guarda:
+- ID de sugerencia (numérico incremental)
+- ID del mensaje
+- Contenido
+- ID del autor
+- Estado actual
+- Fecha de creación
+- ID del hilo (si existe)
+- Lista de votos positivos
+- Lista de votos negativos
+- Motivo del último cambio
+- Historial completo de cambios
+- Flag de eliminado
 
 ---
 
@@ -193,11 +281,24 @@ Este cog almacena por servidor:
 
 - **Repositorio**: [killerbite-cogs](https://github.com/killerbite95/killerbite-cogs)
 - **Autor**: Killerbite95
-- **Soporte**: Abre un issue en GitHub
 
 ---
 
 ## 📜 Changelog
+
+### v2.0.0
+- Refactor completo del código en módulos
+- Sistema de botones interactivos
+- Persistent views
+- Contador atómico con locks
+- Sistema de votos con persistencia
+- 9 estados de sugerencias
+- Historial de cambios con auditoría
+- Notificaciones al autor
+- Comandos de mantenimiento
+- Dashboard mejorado con filtros y paginación
+- Comandos híbridos (prefix + slash)
+- Migración automática desde v1.x
 
 ### v1.0.0
 - Sistema básico de sugerencias

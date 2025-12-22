@@ -1,0 +1,515 @@
+"""
+Views module for SimpleSuggestions.
+Handles buttons, modals, and persistent views.
+"""
+import discord
+from discord import ui
+from typing import Optional, TYPE_CHECKING
+import logging
+
+from .storage import SuggestionStorage, SuggestionStatus, STATUS_CONFIG
+from .embeds import (
+    create_suggestion_embed,
+    create_vote_result_embed,
+    create_votes_detail_embed,
+    create_status_change_embed,
+)
+
+if TYPE_CHECKING:
+    from redbot.core.bot import Red
+    from redbot.core import Config
+
+logger = logging.getLogger("red.killerbite95.suggestions.views")
+
+
+# ==================== MODALS ====================
+
+class SuggestionModal(ui.Modal, title="Nueva Sugerencia"):
+    """Modal for creating a new suggestion."""
+    
+    suggestion_text = ui.TextInput(
+        label="Tu sugerencia",
+        style=discord.TextStyle.paragraph,
+        placeholder="Describe tu sugerencia con detalle...",
+        min_length=10,
+        max_length=2000,
+        required=True
+    )
+    
+    async def on_submit(self, interaction: discord.Interaction):
+        # This will be handled by the cog
+        self.interaction = interaction
+        self.value = self.suggestion_text.value
+        self.stop()
+
+
+class EditSuggestionModal(ui.Modal, title="Editar Sugerencia"):
+    """Modal for editing an existing suggestion."""
+    
+    def __init__(self, current_content: str, suggestion_id: int):
+        super().__init__()
+        self.suggestion_id = suggestion_id
+        self.new_content = ui.TextInput(
+            label="Contenido de la sugerencia",
+            style=discord.TextStyle.paragraph,
+            default=current_content,
+            min_length=10,
+            max_length=2000,
+            required=True
+        )
+        self.add_item(self.new_content)
+    
+    async def on_submit(self, interaction: discord.Interaction):
+        self.interaction = interaction
+        self.value = self.new_content.value
+        self.stop()
+
+
+class StatusChangeModal(ui.Modal, title="Cambiar Estado"):
+    """Modal for changing suggestion status with reason."""
+    
+    reason = ui.TextInput(
+        label="Motivo (opcional)",
+        style=discord.TextStyle.paragraph,
+        placeholder="Explica el motivo del cambio de estado...",
+        max_length=500,
+        required=False
+    )
+    
+    def __init__(self, new_status: SuggestionStatus):
+        super().__init__()
+        self.new_status = new_status
+        status_info = STATUS_CONFIG.get(new_status, {})
+        self.title = f"Cambiar a: {status_info.get('label', new_status.value)}"
+    
+    async def on_submit(self, interaction: discord.Interaction):
+        self.interaction = interaction
+        self.value = self.reason.value or None
+        self.stop()
+
+
+# ==================== PERSISTENT VIEWS ====================
+
+class SuggestionView(ui.View):
+    """
+    Persistent view for suggestion interactions.
+    Attached to each suggestion message.
+    """
+    
+    def __init__(self, cog: "SimpleSuggestions", suggestion_id: int):
+        super().__init__(timeout=None)
+        self.cog = cog
+        self.suggestion_id = suggestion_id
+        
+        # Set custom_id for persistence
+        self.upvote_button.custom_id = f"suggestion:upvote:{suggestion_id}"
+        self.downvote_button.custom_id = f"suggestion:downvote:{suggestion_id}"
+        self.votes_button.custom_id = f"suggestion:votes:{suggestion_id}"
+        self.edit_button.custom_id = f"suggestion:edit:{suggestion_id}"
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Check if the interaction is valid."""
+        if not interaction.guild:
+            return False
+        return True
+    
+    @ui.button(label="0", emoji="👍", style=discord.ButtonStyle.success, row=0)
+    async def upvote_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Handle upvote."""
+        await self._handle_vote(interaction, "up")
+    
+    @ui.button(label="0", emoji="👎", style=discord.ButtonStyle.danger, row=0)
+    async def downvote_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Handle downvote."""
+        await self._handle_vote(interaction, "down")
+    
+    @ui.button(label="Ver votos", emoji="📊", style=discord.ButtonStyle.secondary, row=0)
+    async def votes_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Show detailed votes."""
+        suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
+        if not suggestion:
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            return
+        
+        embed = create_votes_detail_embed(suggestion, self.cog.bot)
+        await interaction.response.send_message(embed=embed, ephemeral=True)
+    
+    @ui.button(label="Editar", emoji="✏️", style=discord.ButtonStyle.secondary, row=0)
+    async def edit_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Edit suggestion (author only, pending only)."""
+        suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
+        if not suggestion:
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            return
+        
+        if suggestion.author_id != interaction.user.id:
+            await interaction.response.send_message("❌ Solo el autor puede editar esta sugerencia.", ephemeral=True)
+            return
+        
+        if suggestion.status != SuggestionStatus.PENDING:
+            status_info = STATUS_CONFIG.get(suggestion.status, {})
+            await interaction.response.send_message(
+                f"❌ No puedes editar una sugerencia con estado: {status_info.get('label', suggestion.status.value)}",
+                ephemeral=True
+            )
+            return
+        
+        modal = EditSuggestionModal(suggestion.content, self.suggestion_id)
+        await interaction.response.send_modal(modal)
+        
+        if await modal.wait():
+            return
+        
+        # Update content
+        suggestion.content = modal.value
+        await self.cog.storage.update_suggestion(interaction.guild, suggestion)
+        
+        # Update message
+        author = interaction.guild.get_member(suggestion.author_id)
+        embed = create_suggestion_embed(suggestion, author)
+        await interaction.message.edit(embed=embed)
+        
+        await modal.interaction.response.send_message("✅ Sugerencia editada.", ephemeral=True)
+    
+    async def _handle_vote(self, interaction: discord.Interaction, vote_type: str):
+        """Handle vote button press."""
+        result = await self.cog.storage.add_vote(
+            interaction.guild,
+            self.suggestion_id,
+            interaction.user.id,
+            vote_type
+        )
+        
+        if not result:
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            return
+        
+        suggestion, action = result
+        
+        # Update button labels
+        self.upvote_button.label = str(suggestion.upvotes)
+        self.downvote_button.label = str(suggestion.downvotes)
+        
+        # Update message embed
+        author = interaction.guild.get_member(suggestion.author_id)
+        embed = create_suggestion_embed(suggestion, author)
+        await interaction.message.edit(embed=embed, view=self)
+        
+        # Send ephemeral response
+        response_embed = create_vote_result_embed(suggestion, action, vote_type, interaction.user)
+        await interaction.response.send_message(embed=response_embed, ephemeral=True)
+    
+    def update_vote_counts(self, upvotes: int, downvotes: int):
+        """Update the vote count labels."""
+        self.upvote_button.label = str(upvotes)
+        self.downvote_button.label = str(downvotes)
+
+
+class StaffActionsView(ui.View):
+    """
+    Staff-only actions view.
+    Added as a second row for staff members.
+    """
+    
+    def __init__(self, cog: "SimpleSuggestions", suggestion_id: int):
+        super().__init__(timeout=None)
+        self.cog = cog
+        self.suggestion_id = suggestion_id
+        
+        # Set custom_id for persistence
+        self.approve_button.custom_id = f"suggestion:approve:{suggestion_id}"
+        self.deny_button.custom_id = f"suggestion:deny:{suggestion_id}"
+        self.status_button.custom_id = f"suggestion:status:{suggestion_id}"
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        """Check if user has staff permissions."""
+        if not interaction.guild:
+            return False
+        
+        # Check for admin or manage_guild permission
+        if interaction.user.guild_permissions.administrator:
+            return True
+        if interaction.user.guild_permissions.manage_guild:
+            return True
+        
+        # Check for configured staff role
+        staff_role_id = await self.cog.config.guild(interaction.guild).staff_role()
+        if staff_role_id:
+            staff_role = interaction.guild.get_role(staff_role_id)
+            if staff_role and staff_role in interaction.user.roles:
+                return True
+        
+        await interaction.response.send_message(
+            "❌ No tienes permisos para realizar esta acción.",
+            ephemeral=True
+        )
+        return False
+    
+    @ui.button(label="Aprobar", emoji="✅", style=discord.ButtonStyle.success, row=1)
+    async def approve_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Approve the suggestion."""
+        await self._change_status(interaction, SuggestionStatus.APPROVED)
+    
+    @ui.button(label="Rechazar", emoji="❌", style=discord.ButtonStyle.danger, row=1)
+    async def deny_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Deny the suggestion."""
+        await self._change_status(interaction, SuggestionStatus.DENIED)
+    
+    @ui.button(label="Cambiar estado", emoji="📋", style=discord.ButtonStyle.secondary, row=1)
+    async def status_button(self, interaction: discord.Interaction, button: ui.Button):
+        """Show status selection menu."""
+        view = StatusSelectView(self.cog, self.suggestion_id)
+        await interaction.response.send_message(
+            "Selecciona el nuevo estado:",
+            view=view,
+            ephemeral=True
+        )
+    
+    async def _change_status(self, interaction: discord.Interaction, new_status: SuggestionStatus):
+        """Change suggestion status with optional reason."""
+        suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
+        if not suggestion:
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            return
+        
+        old_status = suggestion.status
+        
+        # Show modal for reason
+        modal = StatusChangeModal(new_status)
+        await interaction.response.send_modal(modal)
+        
+        if await modal.wait():
+            return
+        
+        # Update status
+        suggestion = await self.cog.storage.update_status(
+            interaction.guild,
+            self.suggestion_id,
+            new_status,
+            interaction.user.id,
+            modal.value
+        )
+        
+        if not suggestion:
+            await modal.interaction.response.send_message("❌ Error al actualizar.", ephemeral=True)
+            return
+        
+        # Update message
+        author = interaction.guild.get_member(suggestion.author_id)
+        embed = create_suggestion_embed(suggestion, author)
+        
+        # Create new view with updated state
+        user_view = SuggestionView(self.cog, self.suggestion_id)
+        user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
+        
+        # Disable edit button if not pending
+        if suggestion.status != SuggestionStatus.PENDING:
+            user_view.edit_button.disabled = True
+        
+        await interaction.message.edit(embed=embed, view=user_view)
+        
+        # Handle thread archiving
+        await self.cog._handle_thread_archive(interaction.guild, suggestion)
+        
+        # Notify author
+        await self.cog._notify_author(interaction.guild, suggestion, old_status, interaction.user, modal.value)
+        
+        status_info = STATUS_CONFIG.get(new_status, {})
+        await modal.interaction.response.send_message(
+            f"✅ Estado cambiado a: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+            ephemeral=True
+        )
+
+
+class StatusSelectView(ui.View):
+    """View with dropdown to select status."""
+    
+    def __init__(self, cog: "SimpleSuggestions", suggestion_id: int):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.suggestion_id = suggestion_id
+        
+        # Create options for each status
+        options = []
+        for status in SuggestionStatus:
+            info = STATUS_CONFIG.get(status, {})
+            options.append(discord.SelectOption(
+                label=info.get("label", status.value),
+                value=status.value,
+                emoji=info.get("emoji", "")
+            ))
+        
+        self.select = ui.Select(
+            placeholder="Selecciona un estado...",
+            options=options
+        )
+        self.select.callback = self.select_callback
+        self.add_item(self.select)
+    
+    async def select_callback(self, interaction: discord.Interaction):
+        """Handle status selection."""
+        selected_value = self.select.values[0]
+        new_status = SuggestionStatus(selected_value)
+        
+        suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
+        if not suggestion:
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            return
+        
+        old_status = suggestion.status
+        
+        # Show modal for reason
+        modal = StatusChangeModal(new_status)
+        await interaction.response.send_modal(modal)
+        
+        if await modal.wait():
+            return
+        
+        # Update status
+        suggestion = await self.cog.storage.update_status(
+            interaction.guild,
+            self.suggestion_id,
+            new_status,
+            interaction.user.id,
+            modal.value
+        )
+        
+        if suggestion:
+            # Notify author
+            await self.cog._notify_author(interaction.guild, suggestion, old_status, interaction.user, modal.value)
+            
+            status_info = STATUS_CONFIG.get(new_status, {})
+            await modal.interaction.response.send_message(
+                f"✅ Estado cambiado a: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+                ephemeral=True
+            )
+        else:
+            await modal.interaction.response.send_message("❌ Error al actualizar.", ephemeral=True)
+
+
+# ==================== PAGINATION VIEW ====================
+
+class SuggestionListView(ui.View):
+    """Paginated view for listing suggestions."""
+    
+    def __init__(
+        self,
+        cog: "SimpleSuggestions",
+        suggestions: list,
+        page: int = 1,
+        per_page: int = 10,
+        status_filter: Optional[SuggestionStatus] = None
+    ):
+        super().__init__(timeout=120)
+        self.cog = cog
+        self.all_suggestions = suggestions
+        self.page = page
+        self.per_page = per_page
+        self.status_filter = status_filter
+        self.total_pages = max(1, (len(suggestions) + per_page - 1) // per_page)
+        
+        self._update_buttons()
+    
+    def _update_buttons(self):
+        self.prev_button.disabled = self.page <= 1
+        self.next_button.disabled = self.page >= self.total_pages
+        self.page_label.label = f"{self.page}/{self.total_pages}"
+    
+    def get_current_page_items(self) -> list:
+        start = (self.page - 1) * self.per_page
+        end = start + self.per_page
+        return self.all_suggestions[start:end]
+    
+    @ui.button(emoji="⬅️", style=discord.ButtonStyle.secondary)
+    async def prev_button(self, interaction: discord.Interaction, button: ui.Button):
+        self.page = max(1, self.page - 1)
+        self._update_buttons()
+        await self._update_message(interaction)
+    
+    @ui.button(label="1/1", style=discord.ButtonStyle.secondary, disabled=True)
+    async def page_label(self, interaction: discord.Interaction, button: ui.Button):
+        pass
+    
+    @ui.button(emoji="➡️", style=discord.ButtonStyle.secondary)
+    async def next_button(self, interaction: discord.Interaction, button: ui.Button):
+        self.page = min(self.total_pages, self.page + 1)
+        self._update_buttons()
+        await self._update_message(interaction)
+    
+    async def _update_message(self, interaction: discord.Interaction):
+        from .embeds import create_suggestion_list_embed
+        
+        current_items = self.get_current_page_items()
+        embed = create_suggestion_list_embed(
+            current_items,
+            self.page,
+            self.total_pages,
+            self.status_filter
+        )
+        await interaction.response.edit_message(embed=embed, view=self)
+
+
+# ==================== SETUP FUNCTIONS ====================
+
+async def setup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
+    """
+    Register all persistent views for the cog.
+    Called on cog load to restore button functionality.
+    """
+    logger.info("Setting up persistent views for SimpleSuggestions")
+    
+    # We need to register a persistent view handler
+    # The views will be recreated when buttons are clicked
+    
+    @bot.listen("on_interaction")
+    async def on_suggestion_interaction(interaction: discord.Interaction):
+        if interaction.type != discord.InteractionType.component:
+            return
+        
+        custom_id = interaction.data.get("custom_id", "")
+        if not custom_id.startswith("suggestion:"):
+            return
+        
+        parts = custom_id.split(":")
+        if len(parts) < 3:
+            return
+        
+        action = parts[1]
+        try:
+            suggestion_id = int(parts[2])
+        except ValueError:
+            return
+        
+        # Create the appropriate view and handle the interaction
+        if action in ["upvote", "downvote", "votes", "edit"]:
+            view = SuggestionView(cog, suggestion_id)
+            if action == "upvote":
+                await view._handle_vote(interaction, "up")
+            elif action == "downvote":
+                await view._handle_vote(interaction, "down")
+            elif action == "votes":
+                await view.votes_button.callback(interaction)
+            elif action == "edit":
+                await view.edit_button.callback(interaction)
+        
+        elif action in ["approve", "deny", "status"]:
+            view = StaffActionsView(cog, suggestion_id)
+            if not await view.interaction_check(interaction):
+                return
+            
+            if action == "approve":
+                await view._change_status(interaction, SuggestionStatus.APPROVED)
+            elif action == "deny":
+                await view._change_status(interaction, SuggestionStatus.DENIED)
+            elif action == "status":
+                await view.status_button.callback(interaction)
+    
+    cog._persistent_view_handler = on_suggestion_interaction
+    logger.info("Persistent views setup complete")
+
+
+async def cleanup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
+    """Remove the persistent view handler on cog unload."""
+    if hasattr(cog, "_persistent_view_handler"):
+        bot.remove_listener(cog._persistent_view_handler, "on_interaction")
+        logger.info("Persistent views cleaned up")
