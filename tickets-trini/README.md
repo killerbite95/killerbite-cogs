@@ -1,4 +1,10 @@
-Support ticket system with multi-panel functionality
+# Tickets-Trini
+
+Sistema de tickets de soporte multi-panel con botones (Trini Edition)
+
+**Original**: [vertyco](https://github.com/vertyco/vrt-cogs) | **Modified by**: Killerbite95
+
+---
 
 # [p]add (Hybrid Command)
 Add a user to your ticket<br/>

@@ -1,12 +1,12 @@
-# 🎫 Guía Completa del Sistema de Tickets
+# 🎫 Guía Completa del Sistema de Tickets-Trini
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/Version-2.9.12-blue)
+![Version](https://img.shields.io/badge/Version-3.0.0-blue)
 ![Discord](https://img.shields.io/badge/Platform-Discord-5865F2)
 ![Red-DiscordBot](https://img.shields.io/badge/Red--DiscordBot-Cog-red)
 
-**Sistema de tickets de soporte multi-panel para Red-DiscordBot**
+**Sistema de tickets de soporte multi-panel para Red-DiscordBot (Trini Edition)**
 
 </div>
 
@@ -36,7 +36,7 @@
 
 ## 📖 Introducción
 
-El **COG de Tickets** es un sistema completo de soporte por tickets diseñado para servidores de Discord que utilizan Red-DiscordBot. Permite crear múltiples paneles de tickets con botones interactivos, formularios modales, transcripciones automáticas y mucho más.
+**Tickets-Trini** es un sistema completo de soporte por tickets diseñado para servidores de Discord que utilizan Red-DiscordBot. Permite crear múltiples paneles de tickets con botones interactivos, formularios modales, transcripciones automáticas y mucho más.
 
 ### ¿Qué es un Panel de Tickets?
 
@@ -101,7 +101,7 @@ Antes de comenzar, asegúrate de que tu bot tenga los siguientes permisos:
 ### Paso 1: Cargar el COG
 
 ```
-[p]load tickets
+[p]load tickets-trini
 ```
 
 > **Nota**: Reemplaza `[p]` con el prefijo de tu bot (ej: `!`, `.`, `?`, etc.)

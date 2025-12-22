@@ -25,16 +25,16 @@ from .common.views import CloseView, LogView, PanelView
 # ----------------- Agregamos la integración del Dashboard -----------------
 from .dashboard_integration import DashboardIntegration, dashboard_page
 
-log = logging.getLogger("red.vrt.tickets")
-_ = Translator("Tickets", __file__)
+log = logging.getLogger("red.killerbite95.tickets-trini")
+_ = Translator("TicketsTrini", __file__)
 
 @cog_i18n(_)
-class Tickets(TicketCommands, Functions, DashboardIntegration, commands.Cog, metaclass=CompositeMetaClass):
+class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog, metaclass=CompositeMetaClass):
     """
-    Support ticket system with multi-panel functionality
+    Sistema de tickets de soporte multi-panel con botones (Trini Edition)
     """
-    __author__ = "[vertyco](https://github.com/vertyco/vrt-cogs)"
-    __version__ = "2.9.12"
+    __author__ = "[vertyco](https://github.com/vertyco/vrt-cogs), Killerbite95"
+    __version__ = "3.0.0"
 
     def format_help_for_context(self, ctx):
         helpcmd = super().format_help_for_context(ctx)

@@ -1,8 +1,9 @@
-# Tickets v2.9.12
+# Tickets-Trini v3.0.0
 
 Multi-panel support ticket system with buttons for Red-DiscordBot.
 
-**Original Author**: [vertyco](https://github.com/vertyco/vrt-cogs)
+**Original Author**: [vertyco](https://github.com/vertyco/vrt-cogs)  
+**Modified by**: Killerbite95
 
 ---
 
@@ -28,8 +29,8 @@ Multi-panel support ticket system with buttons for Red-DiscordBot.
 
 ```
 [p]repo add killerbite-cogs https://github.com/killerbite95/killerbite-cogs
-[p]cog install killerbite-cogs tickets
-[p]load tickets
+[p]cog install killerbite-cogs tickets-trini
+[p]load tickets-trini
 ```
 
 ### Requirements
@@ -380,7 +381,8 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 
 ## 📜 Version History
 
-### v2.9.12
+### v3.0.0 (Trini Edition)
+- Renamed to tickets-trini
 - Dashboard integration
 - Multi-language support
 - Bug fixes and improvements
