@@ -1,15 +1,24 @@
 {
-    "author": ["Killerbite95"],
-    "install_msg": "¡Gracias por instalar GameServerMonitor v2.1.0! Usa `[p]help GameServerMonitor` para ver los comandos disponibles. Nuevos comandos: `gsmhistory` y `gsmplayers`.",
+    "author": [
+        "Killerbite95"
+    ],
+    "install_msg": "¡Gracias por instalar GameServerMonitor v2.2.0! Usa `[p]help GameServerMonitor` para ver los comandos. Nuevo: ¡Botones interactivos en embeds y slash commands!",
     "name": "GameServerMonitor",
-    "short": "Monitoriza servidores de juegos (CS2, CSS, GMOD, Rust, Minecraft, DayZ) con historial y lista de jugadores",
-    "description": "Cog avanzado para monitorizar el estado de servidores de juegos en Discord. Incluye historial de jugadores con gráficos ASCII, lista de jugadores conectados en tiempo real, estadísticas de uptime, thumbnails de juegos, sistema de eventos y panel de configuración web.",
+    "short": "Monitoriza servidores de juegos con botones interactivos, slash commands e historial",
+    "description": "Cog avanzado para monitorizar servidores de juegos en Discord. Incluye botones interactivos (Players/Stats/History) con respuestas ephemeral, slash commands con autocomplete, historial con gráficos ASCII, lista de jugadores en tiempo real, estadísticas de uptime y panel web.",
     "end_user_data_statement": "Este cog almacena IDs de canales y mensajes de Discord para actualizar el estado de los servidores, así como historial de conteo de jugadores. No almacena datos personales de usuarios.",
     "hidden": false,
     "disabled": false,
     "min_bot_version": "3.5.0",
-    "min_python_version": [3, 9, 0],
-    "requirements": ["opengsq", "pytz"],
+    "min_python_version": [
+        3,
+        9,
+        0
+    ],
+    "requirements": [
+        "opengsq",
+        "pytz"
+    ],
     "tags": [
         "game",
         "server",
@@ -22,8 +31,15 @@
         "gmod",
         "query",
         "history",
-        "players"
+        "players",
+        "buttons",
+        "slash",
+        "interactions"
     ],
     "type": "COG",
-    "permissions": ["send_messages", "embed_links", "read_message_history"]
+    "permissions": [
+        "send_messages",
+        "embed_links",
+        "read_message_history"
+    ]
 }

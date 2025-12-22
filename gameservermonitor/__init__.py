@@ -10,6 +10,7 @@ Estructura del paquete:
     - query_handlers.py: Handlers de query con patrón Strategy
     - exceptions.py: Excepciones personalizadas
     - dashboard_integration.py: Integración con Red-Dashboard
+    - views.py: Views persistentes y botones interactivos (v2.2.0)
 """
 
 from redbot.core.bot import Red
@@ -17,7 +18,7 @@ from redbot.core.bot import Red
 from .gameservermonitor import GameServerMonitor
 
 __all__ = ["GameServerMonitor", "setup"]
-__version__ = "2.0.0"
+__version__ = "2.2.0"
 __author__ = "Killerbite95"
 
 

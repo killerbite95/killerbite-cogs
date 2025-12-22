@@ -3,11 +3,12 @@ GameServerMonitor - Cog para Red Discord Bot
 Monitoriza servidores de juegos y actualiza su estado en Discord.
 By Killerbite95
 
-Versión: 2.0.0
+Versión: 2.2.0
 Compatible con: Red-DiscordBot 3.5.22+
 """
 
 import discord
+from discord import app_commands
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
@@ -16,6 +17,7 @@ import datetime
 import pytz
 import logging
 import typing
+import uuid
 from typing import Optional, Dict, Any, List, Tuple
 
 # Importaciones locales
@@ -30,6 +32,7 @@ from .exceptions import (
     InvalidPortError, UnsupportedGameError, ChannelNotFoundError,
     InsufficientPermissionsError, InvalidTimezoneError
 )
+from .views import ServerActionsView, setup_persistent_views, create_server_view
 
 # Configuración de logging
 logger = logging.getLogger("red.killerbite95.gameservermonitor")
@@ -43,7 +46,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
     
     __author__ = "Killerbite95"
-    __version__ = "2.1.0"
+    __version__ = "2.2.0"
     
     def __init__(self, bot: Red) -> None:
         self.bot: Red = bot
@@ -67,7 +70,16 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 "color_offline": None,
                 "color_maintenance": None
             },
-            "player_history": {}  # Historial de jugadores por servidor
+            "player_history": {},  # Historial de jugadores por servidor
+            # Nueva configuración para interacciones v2.2.0
+            "interaction_features": {
+                "enabled": True,
+                "buttons_enabled": True,
+                "ephemeral_default": True,
+                "delete_after_prefix_seconds": 20,  # None para no borrar
+                "history_default_hours": 24,
+                "history_max_hours": 168
+            }
         }
         self.config.register_guild(**default_guild)
         
@@ -78,14 +90,49 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # Formato: {"guild_id:server_key": timestamp}
         self._recently_updated: Dict[str, datetime.datetime] = {}
         
+        # Registrar views persistentes
+        self._views_registered = False
+        
         # Iniciar tarea de monitoreo
         self.server_monitor.start()
+    
+    async def cog_load(self) -> None:
+        """Se ejecuta cuando el cog se carga."""
+        # Registrar views persistentes para botones
+        if not self._views_registered:
+            setup_persistent_views(self.bot, self)
+            self._views_registered = True
+            logger.info("Views persistentes registradas en cog_load")
+        
+        # Migrar servidores sin server_id
+        await self._migrate_server_ids()
     
     def cog_unload(self) -> None:
         """Limpieza al descargar el cog."""
         self.server_monitor.cancel()
         self.query_service.clear_cache()
         self._recently_updated.clear()
+    
+    async def _migrate_server_ids(self) -> None:
+        """
+        Migración automática: añade server_id a servidores existentes que no lo tengan.
+        """
+        for guild in self.bot.guilds:
+            async with self.config.guild(guild).servers() as servers:
+                modified = False
+                for server_key, server_data in servers.items():
+                    if "server_id" not in server_data or not server_data["server_id"]:
+                        # Generar un UUID corto único
+                        server_data["server_id"] = self._generate_server_id()
+                        modified = True
+                        logger.info(f"Migrado server_id para {server_key} en {guild.name}")
+                
+                if modified:
+                    logger.info(f"Migración de server_ids completada para {guild.name}")
+    
+    def _generate_server_id(self) -> str:
+        """Genera un ID único corto para un servidor."""
+        return uuid.uuid4().hex[:8]
     
     async def red_delete_data_for_user(self, **kwargs) -> None:
         """Requerido por Red para GDPR compliance."""
@@ -196,6 +243,351 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                         return server_key
         
         return None
+    
+    async def _resolve_server_key_by_id(
+        self,
+        guild: discord.Guild,
+        server_id: str
+    ) -> Optional[str]:
+        """
+        Resuelve la clave de servidor (IP:puerto) a partir del server_id.
+        
+        Args:
+            guild: Guild de Discord
+            server_id: ID único del servidor
+            
+        Returns:
+            La clave real del servidor (IP:puerto) o None si no se encuentra
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        for server_key, server_data in servers.items():
+            if server_data.get("server_id") == server_id:
+                return server_key
+        
+        return None
+    
+    async def _get_server_id(
+        self,
+        guild: discord.Guild,
+        server_key: str
+    ) -> Optional[str]:
+        """
+        Obtiene el server_id para una clave de servidor.
+        
+        Args:
+            guild: Guild de Discord
+            server_key: Clave del servidor (IP:puerto)
+            
+        Returns:
+            El server_id o None si no se encuentra
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        if server_key in servers:
+            return servers[server_key].get("server_id")
+        
+        return None
+    
+    # ==================== Payload Builders (para botones y comandos) ====================
+    
+    async def _build_players_payload(
+        self,
+        guild: discord.Guild,
+        server_key: str
+    ) -> Dict[str, Any]:
+        """
+        Construye el payload para mostrar lista de jugadores.
+        Reutilizable por comandos de prefijo, slash y botones.
+        
+        Args:
+            guild: Guild de Discord
+            server_key: Clave del servidor
+            
+        Returns:
+            Dict con 'embed', 'content', 'file' o 'error'
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        if server_key not in servers:
+            return {"error": f"Servidor **{server_key}** no encontrado."}
+        
+        server_data = ServerData.from_dict(server_key, servers[server_key])
+        
+        if not server_data.game:
+            return {"error": "Datos de juego no válidos para este servidor."}
+        
+        # Obtener estado actual con lista de jugadores
+        query_kwargs = {"fetch_players": True}
+        if server_data.game == GameType.DAYZ:
+            query_kwargs["query_port"] = server_data.query_port
+            port = server_data.game_port or server_data.port
+        else:
+            port = server_data.port
+        
+        query_result = await self.query_service.query_server(
+            host=server_data.host,
+            port=port,
+            game=server_data.game,
+            use_cache=False,
+            **query_kwargs
+        )
+        
+        if not query_result.success:
+            return {"error": f"El servidor **{server_key}** está offline o no responde."}
+        
+        game_name = server_data.game.display_name if server_data.game else "Unknown"
+        
+        # Crear embed
+        embed = discord.Embed(
+            title=f"👥 Jugadores - {query_result.hostname[:50]}",
+            description=f"**Juego:** {game_name}\n"
+                       f"**Mapa:** {query_result.map_name}\n"
+                       f"**Jugadores:** {query_result.players}/{query_result.max_players}",
+            color=query_result.status.color
+        )
+        
+        if server_data.game and server_data.game.thumbnail_url:
+            embed.set_thumbnail(url=server_data.game.thumbnail_url)
+        
+        if query_result.player_list:
+            player_list = query_result.player_list[:25]
+            
+            player_text = "```\n"
+            player_text += f"{'Nombre':<20} {'Puntos':>6} {'Tiempo':>10}\n"
+            player_text += "─" * 38 + "\n"
+            
+            for player in player_list:
+                name = player["name"][:18] if player["name"] else "Unknown"
+                score = player.get("score", 0)
+                duration = player.get("duration_formatted", "N/A")
+                player_text += f"{name:<20} {score:>6} {duration:>10}\n"
+            
+            player_text += "```"
+            
+            if len(query_result.player_list) > 25:
+                player_text += f"\n*... y {len(query_result.player_list) - 25} jugadores más*"
+            
+            embed.add_field(name="📋 Lista de Jugadores", value=player_text, inline=False)
+        else:
+            if query_result.players > 0:
+                if server_data.game == GameType.MINECRAFT:
+                    embed.add_field(
+                        name="📋 Lista de Jugadores",
+                        value="*El servidor de Minecraft no expone la lista completa de jugadores.*",
+                        inline=False
+                    )
+                else:
+                    embed.add_field(
+                        name="📋 Lista de Jugadores",
+                        value="*No se pudo obtener la lista de jugadores.*",
+                        inline=False
+                    )
+            else:
+                embed.add_field(
+                    name="📋 Lista de Jugadores",
+                    value="*No hay jugadores conectados.*",
+                    inline=False
+                )
+        
+        if query_result.latency_ms:
+            embed.add_field(name="📶 Ping", value=f"{query_result.latency_ms:.0f}ms", inline=True)
+        
+        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
+        
+        return {"embed": embed}
+    
+    async def _build_stats_payload(
+        self,
+        guild: discord.Guild,
+        server_key: str
+    ) -> Dict[str, Any]:
+        """
+        Construye el payload para mostrar estadísticas del servidor.
+        
+        Args:
+            guild: Guild de Discord
+            server_key: Clave del servidor
+            
+        Returns:
+            Dict con 'embed', 'content', 'file' o 'error'
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        if server_key not in servers:
+            return {"error": f"Servidor **{server_key}** no encontrado."}
+        
+        server_data = ServerData.from_dict(server_key, servers[server_key])
+        
+        if not server_data.game:
+            return {"error": "Datos de juego no válidos para este servidor."}
+        
+        # Obtener estado actual
+        query_kwargs = {}
+        if server_data.game == GameType.DAYZ:
+            query_kwargs["query_port"] = server_data.query_port
+            port = server_data.game_port or server_data.port
+        else:
+            port = server_data.port
+        
+        query_result = await self.query_service.query_server(
+            host=server_data.host,
+            port=port,
+            game=server_data.game,
+            use_cache=False,
+            **query_kwargs
+        )
+        
+        # Crear estadísticas
+        stats = ServerStats(
+            server_key=server_key,
+            game=server_data.game,
+            status=query_result.status,
+            uptime_percentage=server_data.uptime_percentage,
+            total_queries=server_data.total_queries,
+            successful_queries=server_data.successful_queries,
+            last_online=server_data.last_online,
+            last_offline=server_data.last_offline,
+            current_players=query_result.players,
+            max_players=query_result.max_players,
+            hostname=query_result.hostname,
+            map_name=query_result.map_name
+        )
+        
+        timezone = await self.config.guild(guild).timezone()
+        embed = stats.to_embed(timezone)
+        
+        return {"embed": embed}
+    
+    async def _build_history_payload(
+        self,
+        guild: discord.Guild,
+        server_key: str,
+        hours: int = 24
+    ) -> Dict[str, Any]:
+        """
+        Construye el payload para mostrar historial de jugadores.
+        
+        Args:
+            guild: Guild de Discord
+            server_key: Clave del servidor
+            hours: Horas de historial a mostrar
+            
+        Returns:
+            Dict con 'embed', 'content', 'file' o 'error'
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        if server_key not in servers:
+            return {"error": f"Servidor **{server_key}** no encontrado."}
+        
+        # Validar horas
+        interaction_config = await self.config.guild(guild).interaction_features()
+        max_hours = interaction_config.get("history_max_hours", 168)
+        
+        if hours < 1:
+            hours = 1
+        elif hours > max_hours:
+            hours = max_hours
+        
+        # Obtener historial
+        history = await self._get_player_history(guild, server_key)
+        
+        if not history or not history.entries:
+            return {"error": f"No hay historial disponible para **{server_key}**.\n"
+                           "El historial se generará con las próximas actualizaciones."}
+        
+        # Obtener datos del servidor
+        server_data = ServerData.from_dict(server_key, servers[server_key])
+        game_name = server_data.game.display_name if server_data.game else "Unknown"
+        
+        # Generar gráfico
+        graph = history.generate_ascii_graph(hours=hours, width=24)
+        
+        # Obtener estadísticas del período
+        entries = history.get_entries_for_period(hours)
+        if entries:
+            online_entries = [e for e in entries if e.status != ServerStatus.OFFLINE]
+            total_entries = len(entries)
+            online_count = len(online_entries)
+            uptime_pct = (online_count / total_entries * 100) if total_entries > 0 else 0
+            
+            if online_entries:
+                peak_players = max(e.player_count for e in online_entries)
+                avg_players = sum(e.player_count for e in online_entries) / len(online_entries)
+            else:
+                peak_players = 0
+                avg_players = 0
+        else:
+            uptime_pct = 0
+            peak_players = 0
+            avg_players = 0
+        
+        # Crear embed
+        embed = discord.Embed(
+            title=f"📊 Historial - {server_key}",
+            description=f"**Juego:** {game_name}\n**Período:** Últimas {hours} horas",
+            color=discord.Color.blue()
+        )
+        
+        embed.add_field(
+            name="📈 Estadísticas del Período",
+            value=f"🔝 **Peak:** {peak_players} jugadores\n"
+                  f"📊 **Promedio:** {avg_players:.1f} jugadores\n"
+                  f"⏱️ **Uptime:** {uptime_pct:.1f}%",
+            inline=False
+        )
+        
+        embed.add_field(
+            name="📉 Gráfico de Actividad",
+            value=graph,
+            inline=False
+        )
+        
+        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
+        
+        return {"embed": embed}
+    
+    # ==================== Autocomplete ====================
+    
+    async def _server_autocomplete(
+        self,
+        interaction: discord.Interaction,
+        current: str
+    ) -> List[app_commands.Choice[str]]:
+        """
+        Autocomplete para seleccionar servidores en slash commands.
+        
+        Args:
+            interaction: Interacción de Discord
+            current: Texto actual ingresado por el usuario
+            
+        Returns:
+            Lista de opciones para autocompletar
+        """
+        if not interaction.guild:
+            return []
+        
+        servers = await self.config.guild(interaction.guild).servers()
+        choices = []
+        
+        current_lower = current.lower()
+        
+        for server_key, server_data in servers.items():
+            game_type = GameType.from_string(server_data.get("game", ""))
+            game_name = game_type.display_name if game_type else "Unknown"
+            
+            # Crear nombre amigable
+            display_name = f"{server_key} ({game_name})"
+            
+            # Filtrar por texto actual
+            if current_lower in server_key.lower() or current_lower in game_name.lower():
+                server_id = server_data.get("server_id", server_key)
+                choices.append(
+                    app_commands.Choice(name=display_name[:100], value=server_id)
+                )
+        
+        return choices[:25]  # Discord limita a 25 opciones
     
     async def _get_public_ip(
         self, 
@@ -621,28 +1013,42 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     guild, server_data, ip_to_show
                 )
             
+            # Obtener o generar server_id para botones
+            server_id = server_dict.get("server_id")
+            if not server_id:
+                server_id = self._generate_server_id()
+                server_dict["server_id"] = server_id
+            
+            # Crear View con botones si está habilitado
+            interaction_config = await self.config.guild(guild).interaction_features()
+            buttons_enabled = interaction_config.get("buttons_enabled", True)
+            
+            view = create_server_view(server_id) if buttons_enabled else None
+            
             # Enviar o editar mensaje
             try:
                 if first_time or not server_data.message_id:
                     logger.info(f"Creando nuevo mensaje para {server_key} (first_time={first_time}, message_id={server_data.message_id})")
-                    msg = await channel.send(embed=embed)
+                    msg = await channel.send(embed=embed, view=view)
                     server_data.message_id = msg.id
                 else:
                     try:
                         msg = await channel.fetch_message(server_data.message_id)
-                        await msg.edit(embed=embed)
+                        await msg.edit(embed=embed, view=view)
                     except discord.NotFound:
                         # Mensaje eliminado, crear uno nuevo
                         logger.info(f"Mensaje {server_data.message_id} no encontrado para {server_key}, creando nuevo")
-                        msg = await channel.send(embed=embed)
+                        msg = await channel.send(embed=embed, view=view)
                         server_data.message_id = msg.id
             except discord.Forbidden:
                 logger.error(f"Sin permisos para enviar mensaje en {channel.name}")
             except discord.HTTPException as e:
                 logger.error(f"Error HTTP al enviar mensaje: {e}")
             
-            # Guardar datos actualizados
-            servers[server_key] = server_data.to_dict()
+            # Guardar datos actualizados (incluyendo server_id si fue generado)
+            server_dict_to_save = server_data.to_dict()
+            server_dict_to_save["server_id"] = server_id
+            servers[server_key] = server_dict_to_save
     
     # ==================== Tareas ====================
     
@@ -851,7 +1257,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     "successful_queries": 0,
                     "last_online": None,
                     "last_offline": None,
-                    "last_status": None
+                    "last_status": None,
+                    "server_id": self._generate_server_id()  # Nuevo: ID único para botones
                 }
             
             msg = _("✅ Servidor **{}** (DayZ) añadido en {}.\n"
@@ -896,7 +1303,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 "successful_queries": 0,
                 "last_online": None,
                 "last_offline": None,
-                "last_status": None
+                "last_status": None,
+                "server_id": self._generate_server_id()  # Nuevo: ID único para botones
             }
         
         msg = _("✅ Servidor **{}** ({}) añadido en {}.").format(
@@ -1000,277 +1408,154 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         await ctx.send(embed=embed)
     
-    @commands.command(name="serverstats")
-    async def server_stats(self, ctx: commands.Context, server_key: str) -> None:
+    @commands.hybrid_command(name="serverstats")
+    @app_commands.describe(
+        server="Servidor a consultar (IP:puerto o selecciona de la lista)"
+    )
+    @app_commands.autocomplete(server=_server_autocomplete)
+    async def server_stats(
+        self, 
+        ctx: commands.Context, 
+        server: str
+    ) -> None:
         """
         Muestra estadísticas detalladas de un servidor.
         
-        Puedes usar la IP real o la IP pública (si usas setpublicip).
+        Puedes usar la IP real, IP pública, o server_id.
         
-        Ejemplo: `[p]serverstats 192.168.1.1:27015`
+        **Ejemplo:** `[p]serverstats 192.168.1.1:27015`
         """
-        # Resolver servidor por IP real o pública
-        resolved_key = await self._resolve_server_key(ctx.guild, server_key)
+        # Determinar si es server_id o IP:puerto
+        resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
+        if not resolved_key:
+            resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
+            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        servers = await self.config.guild(ctx.guild).servers()
-        server_data = ServerData.from_dict(resolved_key, servers[resolved_key])
+        # Usar payload builder
+        async with ctx.typing():
+            payload = await self._build_stats_payload(ctx.guild, resolved_key)
         
-        if not server_data.game:
-            await ctx.send(_("❌ Datos de juego no válidos para este servidor."))
+        if "error" in payload:
+            await ctx.send(f"❌ {payload['error']}", ephemeral=True)
             return
         
-        # Obtener estado actual
-        query_kwargs = {}
-        if server_data.game == GameType.DAYZ:
-            query_kwargs["query_port"] = server_data.query_port
-            port = server_data.game_port or server_data.port
-        else:
-            port = server_data.port
+        # Determinar si borrar después (solo para prefijo)
+        interaction_config = await self.config.guild(ctx.guild).interaction_features()
+        delete_after = None
         
-        query_result = await self.query_service.query_server(
-            host=server_data.host,
-            port=port,
-            game=server_data.game,
-            use_cache=False,
-            **query_kwargs
+        if ctx.interaction is None:  # Es comando de prefijo
+            delete_seconds = interaction_config.get("delete_after_prefix_seconds")
+            if delete_seconds:
+                delete_after = delete_seconds
+        
+        await ctx.send(
+            embed=payload.get("embed"),
+            ephemeral=ctx.interaction is not None,  # Ephemeral solo en slash
+            delete_after=delete_after
         )
-        
-        # Crear estadísticas
-        stats = ServerStats(
-            server_key=server_key,
-            game=server_data.game,
-            status=query_result.status,
-            uptime_percentage=server_data.uptime_percentage,
-            total_queries=server_data.total_queries,
-            successful_queries=server_data.successful_queries,
-            last_online=server_data.last_online,
-            last_offline=server_data.last_offline,
-            current_players=query_result.players,
-            max_players=query_result.max_players,
-            hostname=query_result.hostname,
-            map_name=query_result.map_name
-        )
-        
-        timezone = await self.config.guild(ctx.guild).timezone()
-        embed = stats.to_embed(timezone)
-        
-        await ctx.send(embed=embed)
     
-    @commands.command(name="gsmhistory")
+    @commands.hybrid_command(name="gsmhistory")
+    @app_commands.describe(
+        server="Servidor a consultar (IP:puerto o selecciona de la lista)",
+        hours="Horas de historial a mostrar (por defecto: 24, máximo: 168)"
+    )
+    @app_commands.autocomplete(server=_server_autocomplete)
     async def gsm_history(
         self, 
         ctx: commands.Context, 
-        server_key: str, 
+        server: str, 
         hours: typing.Optional[int] = 24
     ) -> None:
         """
-        Muestra el historial de jugadores de un servidor con gráfico.
-        
-        Puedes usar la IP real o la IP pública (si usas setpublicip).
-        
-        **Uso:**
-        `[p]gsmhistory <ip:puerto> [horas]`
+        Muestra el historial de jugadores de un servidor con gráfico ASCII.
         
         **Ejemplos:**
         `[p]gsmhistory 192.168.1.1:27015` - Últimas 24 horas
         `[p]gsmhistory 192.168.1.1:27015 12` - Últimas 12 horas
         """
-        # Resolver servidor por IP real o pública
-        resolved_key = await self._resolve_server_key(ctx.guild, server_key)
+        # Determinar si es server_id o IP:puerto
+        resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
+        if not resolved_key:
+            resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
+            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        servers = await self.config.guild(ctx.guild).servers()
+        # Usar payload builder
+        async with ctx.typing():
+            payload = await self._build_history_payload(ctx.guild, resolved_key, hours or 24)
         
-        # Validar horas
-        if hours < 1:
-            hours = 1
-        elif hours > 168:  # Máximo 1 semana
-            hours = 168
-        
-        # Obtener historial
-        history = await self._get_player_history(ctx.guild, resolved_key)
-        
-        if not history or not history.entries:
-            await ctx.send(_("📊 No hay historial disponible para **{}**.\n"
-                           "El historial se generará con las próximas actualizaciones.").format(resolved_key))
+        if "error" in payload:
+            await ctx.send(f"❌ {payload['error']}", ephemeral=True)
             return
         
-        # Obtener datos del servidor
-        server_data = ServerData.from_dict(resolved_key, servers[resolved_key])
-        game_name = server_data.game.display_name if server_data.game else "Unknown"
+        # Determinar si borrar después (solo para prefijo)
+        interaction_config = await self.config.guild(ctx.guild).interaction_features()
+        delete_after = None
         
-        # Generar gráfico
-        graph = history.generate_ascii_graph(hours=hours, width=24)
+        if ctx.interaction is None:  # Es comando de prefijo
+            delete_seconds = interaction_config.get("delete_after_prefix_seconds")
+            if delete_seconds:
+                delete_after = delete_seconds
         
-        # Obtener estadísticas del período
-        entries = history.get_entries_for_period(hours)
-        if entries:
-            online_entries = [e for e in entries if e.status != ServerStatus.OFFLINE]
-            total_entries = len(entries)
-            online_count = len(online_entries)
-            uptime_pct = (online_count / total_entries * 100) if total_entries > 0 else 0
-            
-            if online_entries:
-                peak_players = max(e.player_count for e in online_entries)
-                avg_players = sum(e.player_count for e in online_entries) / len(online_entries)
-            else:
-                peak_players = 0
-                avg_players = 0
-        else:
-            uptime_pct = 0
-            peak_players = 0
-            avg_players = 0
-        
-        # Crear embed
-        embed = discord.Embed(
-            title=f"📊 Historial - {resolved_key}",
-            description=f"**Juego:** {game_name}\n**Período:** Últimas {hours} horas",
-            color=discord.Color.blue()
+        await ctx.send(
+            embed=payload.get("embed"),
+            ephemeral=ctx.interaction is not None,
+            delete_after=delete_after
         )
-        
-        embed.add_field(
-            name="📈 Estadísticas del Período",
-            value=f"🔝 **Peak:** {peak_players} jugadores\n"
-                  f"📊 **Promedio:** {avg_players:.1f} jugadores\n"
-                  f"⏱️ **Uptime:** {uptime_pct:.1f}%",
-            inline=False
-        )
-        
-        embed.add_field(
-            name="📉 Gráfico de Actividad",
-            value=graph,
-            inline=False
-        )
-        
-        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
-        
-        await ctx.send(embed=embed)
     
-    @commands.command(name="gsmplayers")
-    async def gsm_players(self, ctx: commands.Context, server_key: str) -> None:
+    @commands.hybrid_command(name="gsmplayers")
+    @app_commands.describe(
+        server="Servidor a consultar (IP:puerto o selecciona de la lista)"
+    )
+    @app_commands.autocomplete(server=_server_autocomplete)
+    async def gsm_players(
+        self, 
+        ctx: commands.Context, 
+        server: str
+    ) -> None:
         """
         Muestra la lista de jugadores conectados a un servidor.
         
-        Puedes usar la IP real o la IP pública (si usas setpublicip).
+        Muestra nombre, puntuación y tiempo conectado.
         
-        **Uso:**
-        `[p]gsmplayers <ip:puerto>`
-        
-        **Ejemplo:**
-        `[p]gsmplayers 192.168.1.1:27015`
-        
-        **Nota:** Muestra nombre, puntuación y tiempo conectado.
+        **Ejemplo:** `[p]gsmplayers 192.168.1.1:27015`
         """
-        # Resolver servidor por IP real o pública
-        resolved_key = await self._resolve_server_key(ctx.guild, server_key)
+        # Determinar si es server_id o IP:puerto
+        resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
+        if not resolved_key:
+            resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server_key))
+            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        servers = await self.config.guild(ctx.guild).servers()
-        server_data = ServerData.from_dict(resolved_key, servers[resolved_key])
-        
-        if not server_data.game:
-            await ctx.send(_("❌ Datos de juego no válidos para este servidor."))
-            return
-        
-        # Obtener estado actual con lista de jugadores
-        query_kwargs = {"fetch_players": True}
-        if server_data.game == GameType.DAYZ:
-            query_kwargs["query_port"] = server_data.query_port
-            port = server_data.game_port or server_data.port
-        else:
-            port = server_data.port
-        
+        # Usar payload builder
         async with ctx.typing():
-            query_result = await self.query_service.query_server(
-                host=server_data.host,
-                port=port,
-                game=server_data.game,
-                use_cache=False,
-                **query_kwargs
-            )
+            payload = await self._build_players_payload(ctx.guild, resolved_key)
         
-        if not query_result.success:
-            await ctx.send(_("❌ El servidor **{}** está offline o no responde.").format(resolved_key))
+        if "error" in payload:
+            await ctx.send(f"❌ {payload['error']}", ephemeral=True)
             return
         
-        game_name = server_data.game.display_name if server_data.game else "Unknown"
+        # Determinar si borrar después (solo para prefijo)
+        interaction_config = await self.config.guild(ctx.guild).interaction_features()
+        delete_after = None
         
-        # Crear embed
-        embed = discord.Embed(
-            title=f"👥 Jugadores - {query_result.hostname[:50]}",
-            description=f"**Juego:** {game_name}\n"
-                       f"**Mapa:** {query_result.map_name}\n"
-                       f"**Jugadores:** {query_result.players}/{query_result.max_players}",
-            color=query_result.status.color
+        if ctx.interaction is None:  # Es comando de prefijo
+            delete_seconds = interaction_config.get("delete_after_prefix_seconds")
+            if delete_seconds:
+                delete_after = delete_seconds
+        
+        await ctx.send(
+            embed=payload.get("embed"),
+            ephemeral=ctx.interaction is not None,
+            delete_after=delete_after
         )
-        
-        if server_data.game and server_data.game.thumbnail_url:
-            embed.set_thumbnail(url=server_data.game.thumbnail_url)
-        
-        if query_result.player_list:
-            # Mostrar jugadores (máximo 25 para no exceder límites de embed)
-            player_list = query_result.player_list[:25]
-            
-            # Crear tabla de jugadores
-            player_text = "```\n"
-            player_text += f"{'Nombre':<20} {'Puntos':>6} {'Tiempo':>10}\n"
-            player_text += "─" * 38 + "\n"
-            
-            for player in player_list:
-                name = player["name"][:18] if player["name"] else "Unknown"
-                score = player.get("score", 0)
-                duration = player.get("duration_formatted", "N/A")
-                player_text += f"{name:<20} {score:>6} {duration:>10}\n"
-            
-            player_text += "```"
-            
-            if len(query_result.player_list) > 25:
-                player_text += f"\n*... y {len(query_result.player_list) - 25} jugadores más*"
-            
-            embed.add_field(name="📋 Lista de Jugadores", value=player_text, inline=False)
-        else:
-            if query_result.players > 0:
-                # Hay jugadores pero no podemos obtener la lista
-                if server_data.game == GameType.MINECRAFT:
-                    embed.add_field(
-                        name="📋 Lista de Jugadores",
-                        value="*El servidor de Minecraft no expone la lista completa de jugadores.*",
-                        inline=False
-                    )
-                else:
-                    embed.add_field(
-                        name="📋 Lista de Jugadores",
-                        value="*No se pudo obtener la lista de jugadores.*",
-                        inline=False
-                    )
-            else:
-                embed.add_field(
-                    name="📋 Lista de Jugadores",
-                    value="*No hay jugadores conectados.*",
-                    inline=False
-                )
-        
-        # Añadir ping si está disponible
-        if query_result.latency_ms:
-            embed.add_field(
-                name="📶 Ping",
-                value=f"{query_result.latency_ms:.0f}ms",
-                inline=True
-            )
-        
-        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
-        
-        await ctx.send(embed=embed)
     
     # ==================== Dashboard ====================
     
