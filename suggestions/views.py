@@ -293,6 +293,12 @@ class StaffActionsView(ui.View):
     
     async def _check_staff_permission(self, interaction: discord.Interaction) -> bool:
         """Check if user has staff permissions."""
+        import logging
+        log = logging.getLogger("red.suggestions.views")
+        
+        log.info(f"[PERM CHECK] User: {interaction.user} ({interaction.user.id})")
+        log.info(f"[PERM CHECK] Guild: {interaction.guild}")
+        
         if not interaction.guild:
             await interaction.response.send_message(
                 "❌ Este comando solo puede usarse en un servidor.",
@@ -302,32 +308,47 @@ class StaffActionsView(ui.View):
         
         # Get the member object - interaction.user may be User or Member
         member = interaction.guild.get_member(interaction.user.id)
+        log.info(f"[PERM CHECK] Member from cache: {member}")
+        
         if not member:
             # Try to fetch if not in cache
             try:
                 member = await interaction.guild.fetch_member(interaction.user.id)
-            except Exception:
+                log.info(f"[PERM CHECK] Member fetched: {member}")
+            except Exception as e:
+                log.error(f"[PERM CHECK] Failed to fetch member: {e}")
                 await interaction.response.send_message(
                     "❌ No se pudo verificar tu membresía en el servidor.",
                     ephemeral=True
                 )
                 return False
         
+        is_admin = member.guild_permissions.administrator
+        is_manage_guild = member.guild_permissions.manage_guild
+        log.info(f"[PERM CHECK] is_admin: {is_admin}, is_manage_guild: {is_manage_guild}")
+        
         # Check for admin permission
-        if member.guild_permissions.administrator:
+        if is_admin:
+            log.info("[PERM CHECK] PASSED: User is admin")
             return True
         
         # Check for manage_guild permission
-        if member.guild_permissions.manage_guild:
+        if is_manage_guild:
+            log.info("[PERM CHECK] PASSED: User has manage_guild")
             return True
         
         # Check for configured staff role
         staff_role_id = await self.cog.config.guild(interaction.guild).staff_role()
+        log.info(f"[PERM CHECK] Staff role ID from config: {staff_role_id}")
+        
         if staff_role_id:
             member_role_ids = [r.id for r in member.roles]
+            log.info(f"[PERM CHECK] Member role IDs: {member_role_ids}")
             if staff_role_id in member_role_ids:
+                log.info("[PERM CHECK] PASSED: User has staff role")
                 return True
         
+        log.info("[PERM CHECK] FAILED: No permissions")
         await interaction.response.send_message(
             "❌ No tienes permisos para realizar esta acción.\n"
             "Necesitas ser **Administrador**, tener permiso de **Gestionar servidor**, "
