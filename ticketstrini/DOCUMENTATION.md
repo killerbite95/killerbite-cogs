@@ -1,6 +1,6 @@
-# Tickets-Trini v3.0.0
+# TicketsTrini v3.0.0
 
-Multi-panel support ticket system with buttons for Red-DiscordBot.
+Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 
 **Author**: [Killerbite95](https://github.com/killerbite95/killerbite-cogs)
 
@@ -381,7 +381,7 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 ## 📜 Version History
 
 ### v3.0.0 (Trini Edition)
-- Renamed to tickets-trini
+- Renamed to ticketstrini
 - Dashboard integration
 - Multi-language support
 - Bug fixes and improvements

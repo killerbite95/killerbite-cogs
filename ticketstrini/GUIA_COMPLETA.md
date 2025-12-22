@@ -1,4 +1,4 @@
-# 🎫 Guía Completa del Sistema de Tickets-Trini
+# 🎫 Guía Completa del Sistema de TicketsTrini
 
 <div align="center">
 

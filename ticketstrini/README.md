@@ -1,4 +1,4 @@
-# Tickets-Trini
+# TicketsTrini
 
 Sistema de tickets de soporte multi-panel con botones (Trini Edition)
 
