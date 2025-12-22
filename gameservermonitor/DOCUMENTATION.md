@@ -1,4 +1,4 @@
-# GameServerMonitor v2.1.0 - Documentación Completa
+# GameServerMonitor v2.2.0 - Documentación Completa
 
 ## Índice
 
@@ -36,8 +36,11 @@
 - ✅ Soporte para múltiples protocolos (Source Query, Minecraft Status)
 - ✅ Sistema de caché para optimizar queries
 - ✅ Estadísticas de uptime por servidor
-- ✅ **Historial de jugadores con gráficos ASCII** (NUEVO)
-- ✅ **Lista de jugadores conectados en tiempo real** (NUEVO)
+- ✅ Historial de jugadores con gráficos ASCII
+- ✅ Lista de jugadores conectados en tiempo real
+- ✅ **Botones interactivos en embeds** (NUEVO v2.2.0)
+- ✅ **Comandos slash con autocompletado** (NUEVO v2.2.0)
+- ✅ **Respuestas ephemeral (privadas)** (NUEVO v2.2.0)
 - ✅ Sistema de eventos para integración con otros cogs
 - ✅ Configuración dinámica (IP pública, URL de conexión)
 - ✅ Validación de permisos de canal
@@ -52,14 +55,25 @@
 
 ---
 
-## Novedades en v2.1.0
+## Novedades en v2.2.0
 
 ### Nuevas Funcionalidades
 
 | Característica | Descripción |
 |----------------|-------------|
-| 📊 `gsmhistory` | **NUEVO** - Historial de jugadores con gráfico ASCII |
-| 👥 `gsmplayers` | **NUEVO** - Lista de jugadores conectados |
+| 🔘 Botones en embeds | **NUEVO** - Botones Players/Stats/History en embeds de servidor |
+| ⌨️ Slash Commands | **NUEVO** - `/serverstats`, `/gsmhistory`, `/gsmplayers` con autocompletado |
+| 👁️ Respuestas ephemeral | **NUEVO** - Respuestas privadas solo visibles para quien interactúa |
+| 🆔 server_id estable | **NUEVO** - UUID para routing de botones que sobrevive reinicios |
+| ⏱️ CooldownManager | **NUEVO** - Anti-spam 5s por usuario/acción |
+| 📁 views.py | **NUEVO** - Módulo de componentes UI persistentes |
+
+### Funcionalidades de v2.1.0
+
+| Característica | Descripción |
+|----------------|-------------|
+| 📊 `gsmhistory` | Historial de jugadores con gráfico ASCII |
+| 👥 `gsmplayers` | Lista de jugadores conectados |
 | 📈 Historial 24h | Almacena datos de jugadores de las últimas 24 horas |
 | 📉 Gráficos ASCII | Visualización de actividad del servidor |
 
@@ -135,6 +149,7 @@ pip install opengsq pytz
 gameservermonitor/
 ├── __init__.py                 # Punto de entrada, setup()
 ├── gameservermonitor.py        # Cog principal (comandos, lógica)
+├── views.py                    # UI Components (botones, views) - NUEVO v2.2.0
 ├── models.py                   # Dataclasses, Enums
 ├── query_handlers.py           # Handlers de query (Strategy Pattern)
 ├── exceptions.py               # Excepciones personalizadas
@@ -219,7 +234,15 @@ default_guild = {
         "color_offline": None,
         "color_maintenance": None
     },
-    "player_history": {}                                        # Historial de jugadores
+    "player_history": {},                                       # Historial de jugadores
+    "interaction_features": {                                   # NUEVO v2.2.0
+        "enabled": True,                                        # Habilitar interacciones
+        "buttons_enabled": True,                                # Mostrar botones en embeds
+        "ephemeral_default": True,                              # Respuestas privadas por defecto
+        "delete_after_prefix_seconds": 20,                      # Auto-eliminar respuestas de prefijo
+        "history_default_hours": 24,                            # Horas por defecto para historial
+        "history_max_hours": 168                                # Máximo de horas (1 semana)
+    }
 }
 ```
 
@@ -246,9 +269,49 @@ default_guild = {
 | `[p]listaserver` | Todos | Lista servidores |
 | `[p]forzarstatus` | Todos | Fuerza actualización |
 | `[p]serverstats <clave>` | Todos | Estadísticas del servidor |
-| `[p]gsmhistory <clave> [horas]` | Todos | **NUEVO** - Historial con gráfico |
-| `[p]gsmplayers <clave>` | Todos | **NUEVO** - Lista de jugadores |
+| `[p]gsmhistory <clave> [horas]` | Todos | Historial con gráfico |
+| `[p]gsmplayers <clave>` | Todos | Lista de jugadores |
 | `[p]gsmversion` | Todos | Muestra versión del cog |
+
+### Comandos Híbridos (Slash + Prefijo) - NUEVO v2.2.0
+
+Los siguientes comandos ahora funcionan tanto con prefijo como con slash:
+
+| Slash Command | Prefijo Equivalente | Descripción |
+|---------------|---------------------|-------------|
+| `/serverstats` | `[p]serverstats` | Estadísticas con autocompletado de servidor |
+| `/gsmhistory` | `[p]gsmhistory` | Historial con autocompletado y selector de horas |
+| `/gsmplayers` | `[p]gsmplayers` | Lista de jugadores con autocompletado |
+
+**Características de Slash Commands:**
+- ✅ Autocompletado de servidores al escribir
+- ✅ Respuestas ephemeral (solo visibles para ti)
+- ✅ Validación de parámetros automática
+
+### Botones Interactivos en Embeds - NUEVO v2.2.0
+
+Los embeds de estado de servidor ahora incluyen botones interactivos:
+
+| Botón | Emoji | Acción |
+|-------|-------|--------|
+| **Players** | 👥 | Muestra lista de jugadores conectados |
+| **Stats** | 📈 | Muestra estadísticas del servidor |
+| **History** | 📊 | Muestra historial de jugadores (24h por defecto) |
+
+**Características de los botones:**
+- ✅ Respuestas ephemeral (privadas, solo las ve quien pulsa)
+- ✅ Cooldown de 5 segundos por usuario/acción
+- ✅ Funcionan incluso después de reiniciar el bot
+- ✅ Routing estable mediante `server_id` (UUID)
+
+```
+┌─────────────────────────────────────────┐
+│           [Embed del Servidor]          │
+│                  ...                    │
+├─────────────────────────────────────────┤
+│  [👥 Players]  [📈 Stats]  [📊 History] │
+└─────────────────────────────────────────┘
+```
 
 ### Comandos de Historial y Jugadores (NUEVO en v2.1.0)
 
@@ -670,6 +733,31 @@ Usar formato estándar: `Europe/Madrid`, `America/New_York`, `UTC`
 
 ## Changelog
 
+### v2.2.0 (2025-12-22)
+
+**Nuevas características:**
+- Botones interactivos en embeds de servidor (Players/Stats/History)
+- Comandos híbridos con soporte slash (`/serverstats`, `/gsmhistory`, `/gsmplayers`)
+- Autocompletado de servidores en comandos slash
+- Respuestas ephemeral (privadas) para botones y slash commands
+- Sistema `server_id` basado en UUID para routing estable de botones
+- CooldownManager para anti-spam (5s por usuario/acción)
+- Nuevo módulo `views.py` con componentes UI persistentes
+- Configuración `interaction_features` para personalizar comportamiento
+
+**Mejoras de arquitectura:**
+- Payload builders reutilizables (`_build_players_payload`, etc.)
+- Migración automática de `server_id` para servidores existentes
+- Views persistentes que sobreviven reinicios del bot
+
+### v2.1.0 (2025-12-15)
+
+**Nuevas características:**
+- Comando `gsmhistory` para historial de jugadores con gráfico ASCII
+- Comando `gsmplayers` para lista de jugadores conectados
+- Almacenamiento de historial de las últimas 168 horas
+- Gráficos ASCII de actividad del servidor
+
 ### v2.0.0 (2025-12-10)
 
 **Nuevas características:**
@@ -709,6 +797,6 @@ Este proyecto forma parte del repositorio **killerbite-cogs** bajo la licencia e
 
 ---
 
-*Documentación actualizada: 10 de Diciembre de 2025*  
-*Versión: 2.0.0*  
+*Documentación actualizada: 22 de Diciembre de 2025*  
+*Versión: 2.2.0*  
 *Compatible con: Red-DiscordBot 3.5.22+*

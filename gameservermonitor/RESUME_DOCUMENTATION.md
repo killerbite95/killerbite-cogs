@@ -1,5 +1,5 @@
-# GameServerMonitor v2.1.0 - Quick Reference Guide
-# GameServerMonitor v2.1.0 - Guía de Referencia Rápida
+# GameServerMonitor v2.2.0 - Quick Reference Guide
+# GameServerMonitor v2.2.0 - Guía de Referencia Rápida
 
 ---
 
@@ -27,6 +27,9 @@
 - ✅ Server latency/ping display
 - ✅ Player history with ASCII graphs (24h)
 - ✅ Live player list with connection time
+- ✅ **Interactive buttons on embeds** (NEW v2.2.0)
+- ✅ **Slash commands with autocomplete** (NEW v2.2.0)
+- ✅ **Ephemeral (private) responses** (NEW v2.2.0)
 - ✅ Game thumbnails in embeds
 - ✅ Uptime statistics
 - ✅ Custom connection URLs
@@ -64,6 +67,26 @@
 | `[p]gsmhistory <ip:port> [hours]` | Shows player history with an ASCII graph. Default: 24 hours, max: 168 hours (1 week). **Accepts public or private IP.** |
 | `[p]gsmplayers <ip:port>` | Shows the list of currently connected players with name, score, and connection time. **Accepts public or private IP.** |
 | `[p]gsmversion` | Shows the current cog version. |
+
+#### Slash Commands with Autocomplete (NEW v2.2.0)
+
+| Command | Description |
+|---------|-------------|
+| `/serverstats [server]` | Server statistics with autocomplete selection |
+| `/gsmhistory [server] [hours]` | Player history with autocomplete and hour selector |
+| `/gsmplayers [server]` | Connected players list with autocomplete |
+
+#### Interactive Buttons on Embeds (NEW v2.2.0)
+
+Server status embeds now have interactive buttons:
+- **👥 Players** - Shows connected players (ephemeral response)
+- **📈 Stats** - Shows server statistics (ephemeral response)
+- **📊 History** - Shows player history graph (ephemeral response)
+
+Features:
+- ✅ Ephemeral responses (only visible to you)
+- ✅ 5-second cooldown per user/action
+- ✅ Works after bot restarts
 
 ---
 
@@ -194,6 +217,9 @@ The bot needs these permissions in the channel:
 - ✅ Muestra latencia/ping del servidor
 - ✅ Historial de jugadores con gráficos ASCII (24h)
 - ✅ Lista de jugadores en vivo con tiempo de conexión
+- ✅ **Botones interactivos en embeds** (NUEVO v2.2.0)
+- ✅ **Comandos slash con autocompletado** (NUEVO v2.2.0)
+- ✅ **Respuestas ephemeral (privadas)** (NUEVO v2.2.0)
 - ✅ Miniaturas de juegos en embeds
 - ✅ Estadísticas de uptime
 - ✅ URLs de conexión personalizables
@@ -232,6 +258,26 @@ The bot needs these permissions in the channel:
 | `[p]gsmhistory <ip:puerto> [horas]` | Muestra el historial de jugadores con un gráfico ASCII. Por defecto: 24 horas, máximo: 168 horas (1 semana). **Acepta IP pública o privada.** |
 | `[p]gsmplayers <ip:puerto>` | Muestra la lista de jugadores conectados actualmente con nombre, puntuación y tiempo de conexión. **Acepta IP pública o privada.** |
 | `[p]gsmversion` | Muestra la versión actual del cog. |
+
+#### Comandos Slash con Autocompletado (NUEVO v2.2.0)
+
+| Comando | Descripción |
+|---------|-------------|
+| `/serverstats [servidor]` | Estadísticas del servidor con selección por autocompletado |
+| `/gsmhistory [servidor] [horas]` | Historial de jugadores con autocompletado y selector de horas |
+| `/gsmplayers [servidor]` | Lista de jugadores conectados con autocompletado |
+
+#### Botones Interactivos en Embeds (NUEVO v2.2.0)
+
+Los embeds de estado del servidor ahora tienen botones interactivos:
+- **👥 Players** - Muestra jugadores conectados (respuesta ephemeral)
+- **📈 Stats** - Muestra estadísticas del servidor (respuesta ephemeral)
+- **📊 History** - Muestra gráfico de historial de jugadores (respuesta ephemeral)
+
+Características:
+- ✅ Respuestas ephemeral (solo visibles para ti)
+- ✅ Cooldown de 5 segundos por usuario/acción
+- ✅ Funcionan después de reiniciar el bot
 
 ---
 
@@ -342,4 +388,4 @@ El bot necesita estos permisos en el canal:
 
 ## Version / Versión
 
-**2.1.0**
+**2.2.0**
