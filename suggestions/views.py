@@ -291,7 +291,7 @@ class StaffActionsView(ui.View):
         self.status_button.callback = self._status_callback
         self.add_item(self.status_button)
     
-    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+    async def _check_staff_permission(self, interaction: discord.Interaction) -> bool:
         """Check if user has staff permissions."""
         if not interaction.guild:
             return False
@@ -310,21 +310,29 @@ class StaffActionsView(ui.View):
                 return True
         
         await interaction.response.send_message(
-            "❌ No tienes permisos para realizar esta acción.",
+            "❌ No tienes permisos para realizar esta acción.\n"
+            "Necesitas ser **Administrador**, tener permiso de **Gestionar servidor**, "
+            "o tener el rol de staff configurado.",
             ephemeral=True
         )
         return False
     
     async def _approve_callback(self, interaction: discord.Interaction):
         """Approve the suggestion."""
+        if not await self._check_staff_permission(interaction):
+            return
         await self._change_status(interaction, SuggestionStatus.APPROVED)
     
     async def _deny_callback(self, interaction: discord.Interaction):
         """Deny the suggestion."""
+        if not await self._check_staff_permission(interaction):
+            return
         await self._change_status(interaction, SuggestionStatus.DENIED)
     
     async def _status_callback(self, interaction: discord.Interaction):
         """Show status selection menu."""
+        if not await self._check_staff_permission(interaction):
+            return
         view = StatusSelectView(self.cog, self.suggestion_id)
         await interaction.response.send_message(
             "Selecciona el nuevo estado:",
