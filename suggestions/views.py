@@ -53,7 +53,7 @@ class EditSuggestionModal(ui.Modal, title="Editar Sugerencia"):
             label="Contenido de la sugerencia",
             style=discord.TextStyle.paragraph,
             default=current_content,
-            min_length=10,
+            min_length=1,
             max_length=2000,
             required=True
         )
