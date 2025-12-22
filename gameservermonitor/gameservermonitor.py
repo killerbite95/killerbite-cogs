@@ -361,24 +361,42 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             embed.set_thumbnail(url=server_data.game.thumbnail_url)
         
         if query_result.player_list:
-            player_list = query_result.player_list[:25]
+            # Dividir jugadores en chunks para no exceder 1024 caracteres por field
+            all_players = query_result.player_list
+            header = f"{_('Name'):<20} {_('Score'):>6} {_('Time'):>10}\n" + "─" * 38 + "\n"
             
-            player_text = "```\n"
-            player_text += f"{_('Name'):<20} {_('Score'):>6} {_('Time'):>10}\n"
-            player_text += "─" * 38 + "\n"
+            # Calcular cuántos jugadores caben por field (~40 chars por línea, max ~900 para seguridad)
+            players_per_field = 20
+            chunks = [all_players[i:i + players_per_field] for i in range(0, len(all_players), players_per_field)]
             
-            for player in player_list:
-                name = player["name"][:18] if player["name"] else "Unknown"
-                score = player.get("score", 0)
-                duration = player.get("duration_formatted", "N/A")
-                player_text += f"{name:<20} {score:>6} {duration:>10}\n"
+            for idx, chunk in enumerate(chunks[:3]):  # Máximo 3 fields (60 jugadores)
+                player_text = "```\n"
+                if idx == 0:
+                    player_text += header
+                
+                for player in chunk:
+                    name = player["name"][:18] if player["name"] else "Unknown"
+                    score = player.get("score", 0)
+                    duration = player.get("duration_formatted", "N/A")
+                    player_text += f"{name:<20} {score:>6} {duration:>10}\n"
+                
+                player_text += "```"
+                
+                # Nombre del field
+                if len(chunks) == 1:
+                    field_name = f"📋 {_('Player List')}"
+                else:
+                    field_name = f"📋 {_('Player List')} ({idx + 1}/{min(len(chunks), 3)})"
+                
+                embed.add_field(name=field_name, value=player_text, inline=False)
             
-            player_text += "```"
-            
-            if len(query_result.player_list) > 25:
-                player_text += f"\n*{_('... and {count} more players').format(count=len(query_result.player_list) - 25)}*"
-            
-            embed.add_field(name=f"📋 {_('Player List')}", value=player_text, inline=False)
+            # Si hay más de 60 jugadores, indicarlo
+            if len(all_players) > 60:
+                embed.add_field(
+                    name="📋 ...",
+                    value=f"*{_('... and {count} more players').format(count=len(all_players) - 60)}*",
+                    inline=False
+                )
         else:
             if query_result.players > 0:
                 if server_data.game == GameType.MINECRAFT:
