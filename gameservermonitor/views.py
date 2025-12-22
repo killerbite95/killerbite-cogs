@@ -250,12 +250,17 @@ async def handle_button_callback(
                 ephemeral=True
             )
         else:
-            await interaction.followup.send(
-                content=payload.get("content"),
-                embed=payload.get("embed"),
-                file=payload.get("file"),
-                ephemeral=True
-            )
+            # Construir kwargs solo con valores no-None para evitar
+            # AttributeError: 'NoneType' object has no attribute 'to_dict'
+            send_kwargs = {"ephemeral": True}
+            if payload.get("content"):
+                send_kwargs["content"] = payload["content"]
+            if payload.get("embed"):
+                send_kwargs["embed"] = payload["embed"]
+            if payload.get("file"):
+                send_kwargs["file"] = payload["file"]
+            
+            await interaction.followup.send(**send_kwargs)
     
     except Exception as e:
         logger.error(f"Error en callback de botón {action}: {e!r}")
