@@ -205,6 +205,9 @@ class SuggestionView(ui.View):
     
     async def _handle_vote(self, interaction: discord.Interaction, vote_type: str):
         """Handle vote button press."""
+        # Defer the response first
+        await interaction.response.defer(ephemeral=True)
+        
         result = await self.cog.storage.add_vote(
             interaction.guild,
             self.suggestion_id,
@@ -213,23 +216,32 @@ class SuggestionView(ui.View):
         )
         
         if not result:
-            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            await interaction.followup.send("❌ Sugerencia no encontrada.", ephemeral=True)
             return
         
         suggestion, action = result
         
-        # Update button labels
-        self.upvote_button.label = str(suggestion.upvotes)
-        self.downvote_button.label = str(suggestion.downvotes)
+        # Create a fresh view with correct vote counts
+        new_view = SuggestionView(self.cog, self.suggestion_id)
+        new_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
+        
+        # Disable edit if not pending
+        if suggestion.status != SuggestionStatus.PENDING:
+            new_view.edit_button.disabled = True
+        
+        # Add staff buttons
+        staff_view = StaffActionsView(self.cog, self.suggestion_id)
+        for item in staff_view.children:
+            new_view.add_item(item)
         
         # Update message embed
         author = interaction.guild.get_member(suggestion.author_id)
         embed = create_suggestion_embed(suggestion, author)
-        await interaction.message.edit(embed=embed, view=self)
+        await interaction.message.edit(embed=embed, view=new_view)
         
         # Send ephemeral response
         response_embed = create_vote_result_embed(suggestion, action, vote_type, interaction.user)
-        await interaction.response.send_message(embed=response_embed, ephemeral=True)
+        await interaction.followup.send(embed=response_embed, ephemeral=True)
     
     def update_vote_counts(self, upvotes: int, downvotes: int):
         """Update the vote count labels."""
