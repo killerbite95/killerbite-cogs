@@ -2,8 +2,7 @@
 
 Multi-panel support ticket system with buttons for Red-DiscordBot.
 
-**Original Author**: [vertyco](https://github.com/vertyco/vrt-cogs)  
-**Modified by**: Killerbite95
+**Author**: [Killerbite95](https://github.com/killerbite95/killerbite-cogs)
 
 ---
 

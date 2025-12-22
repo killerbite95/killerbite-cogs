@@ -33,7 +33,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     """
     Sistema de tickets de soporte multi-panel con botones (Trini Edition)
     """
-    __author__ = "[vertyco](https://github.com/vertyco/vrt-cogs), Killerbite95"
+    __author__ = "[Killerbite95](https://github.com/killerbite95/killerbite-cogs)"
     __version__ = "3.0.0"
 
     def format_help_for_context(self, ctx):

@@ -2,7 +2,7 @@
 
 Sistema de tickets de soporte multi-panel con botones (Trini Edition)
 
-**Original**: [vertyco](https://github.com/vertyco/vrt-cogs) | **Modified by**: Killerbite95
+**Author**: [Killerbite95](https://github.com/killerbite95/killerbite-cogs)
 
 ---
 
