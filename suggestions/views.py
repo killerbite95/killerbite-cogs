@@ -293,12 +293,6 @@ class StaffActionsView(ui.View):
     
     async def _check_staff_permission(self, interaction: discord.Interaction) -> bool:
         """Check if user has staff permissions."""
-        import logging
-        log = logging.getLogger("red.suggestions.views")
-        
-        log.info(f"[PERM CHECK] User: {interaction.user} ({interaction.user.id})")
-        log.info(f"[PERM CHECK] Guild: {interaction.guild}")
-        
         if not interaction.guild:
             await interaction.response.send_message(
                 "❌ Este comando solo puede usarse en un servidor.",
@@ -308,47 +302,33 @@ class StaffActionsView(ui.View):
         
         # Get the member object - interaction.user may be User or Member
         member = interaction.guild.get_member(interaction.user.id)
-        log.info(f"[PERM CHECK] Member from cache: {member}")
         
         if not member:
             # Try to fetch if not in cache
             try:
                 member = await interaction.guild.fetch_member(interaction.user.id)
-                log.info(f"[PERM CHECK] Member fetched: {member}")
-            except Exception as e:
-                log.error(f"[PERM CHECK] Failed to fetch member: {e}")
+            except Exception:
                 await interaction.response.send_message(
                     "❌ No se pudo verificar tu membresía en el servidor.",
                     ephemeral=True
                 )
                 return False
         
-        is_admin = member.guild_permissions.administrator
-        is_manage_guild = member.guild_permissions.manage_guild
-        log.info(f"[PERM CHECK] is_admin: {is_admin}, is_manage_guild: {is_manage_guild}")
-        
         # Check for admin permission
-        if is_admin:
-            log.info("[PERM CHECK] PASSED: User is admin")
+        if member.guild_permissions.administrator:
             return True
         
         # Check for manage_guild permission
-        if is_manage_guild:
-            log.info("[PERM CHECK] PASSED: User has manage_guild")
+        if member.guild_permissions.manage_guild:
             return True
         
         # Check for configured staff role
         staff_role_id = await self.cog.config.guild(interaction.guild).staff_role()
-        log.info(f"[PERM CHECK] Staff role ID from config: {staff_role_id}")
-        
         if staff_role_id:
             member_role_ids = [r.id for r in member.roles]
-            log.info(f"[PERM CHECK] Member role IDs: {member_role_ids}")
             if staff_role_id in member_role_ids:
-                log.info("[PERM CHECK] PASSED: User has staff role")
                 return True
         
-        log.info("[PERM CHECK] FAILED: No permissions")
         await interaction.response.send_message(
             "❌ No tienes permisos para realizar esta acción.\n"
             "Necesitas ser **Administrador**, tener permiso de **Gestionar servidor**, "
@@ -615,29 +595,44 @@ async def setup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
     Called on cog load to restore button functionality.
     """
     logger.info("Setting up persistent views for SimpleSuggestions")
+    # Nothing to do here anymore - the handler is in the cog itself
+    logger.info("Persistent views setup complete")
+
+
+async def cleanup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
+    """Remove the persistent view handler on cog unload."""
+    # Nothing to do here anymore - the handler is in the cog itself
+    logger.info("Persistent views cleaned up")
+
+
+async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: discord.Interaction):
+    """
+    Handle suggestion button interactions.
+    This is called from the cog's on_interaction listener.
+    """
+    if interaction.type != discord.InteractionType.component:
+        return False
     
-    # We need to register a persistent view handler
-    # The views will be recreated when buttons are clicked
+    custom_id = interaction.data.get("custom_id", "")
+    if not custom_id.startswith("suggestion:"):
+        return False
     
-    @bot.listen("on_interaction")
-    async def on_suggestion_interaction(interaction: discord.Interaction):
-        if interaction.type != discord.InteractionType.component:
-            return
-        
-        custom_id = interaction.data.get("custom_id", "")
-        if not custom_id.startswith("suggestion:"):
-            return
-        
-        parts = custom_id.split(":")
-        if len(parts) < 3:
-            return
-        
-        action = parts[1]
-        try:
-            suggestion_id = int(parts[2])
-        except ValueError:
-            return
-        
+    parts = custom_id.split(":")
+    if len(parts) < 3:
+        return False
+    
+    action = parts[1]
+    try:
+        suggestion_id = int(parts[2])
+    except ValueError:
+        return False
+    
+    # Check if interaction was already responded to
+    if interaction.response.is_done():
+        logger.warning(f"Interaction already responded to for action {action}")
+        return True
+    
+    try:
         # Create the appropriate view and handle the interaction
         if action in ["upvote", "downvote", "votes", "edit"]:
             view = SuggestionView(cog, suggestion_id)
@@ -655,7 +650,7 @@ async def setup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
             
             # Check staff permission first
             if not await view._check_staff_permission(interaction):
-                return
+                return True  # Handled, but denied
             
             if action == "approve":
                 await view._change_status(interaction, SuggestionStatus.APPROVED)
@@ -669,13 +664,11 @@ async def setup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
                     view=status_view,
                     ephemeral=True
                 )
-    
-    cog._persistent_view_handler = on_suggestion_interaction
-    logger.info("Persistent views setup complete")
-
-
-async def cleanup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
-    """Remove the persistent view handler on cog unload."""
-    if hasattr(cog, "_persistent_view_handler"):
-        bot.remove_listener(cog._persistent_view_handler, "on_interaction")
-        logger.info("Persistent views cleaned up")
+        
+        return True  # Interaction handled
+        
+    except discord.errors.HTTPException as e:
+        if e.code == 40060:  # Interaction already acknowledged
+            logger.warning(f"Interaction already acknowledged for {action}")
+            return True
+        raise

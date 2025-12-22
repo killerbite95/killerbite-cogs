@@ -38,6 +38,7 @@ from .views import (
     SuggestionListView,
     setup_persistent_views,
     cleanup_persistent_views,
+    handle_suggestion_interaction,
 )
 from .dashboard_integration import DashboardIntegration, dashboard_page
 
@@ -102,6 +103,11 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         """Called when cog is unloaded."""
         await cleanup_persistent_views(self.bot, self)
         logger.info("SimpleSuggestions unloaded")
+    
+    @commands.Cog.listener()
+    async def on_interaction(self, interaction: discord.Interaction):
+        """Handle suggestion button interactions."""
+        await handle_suggestion_interaction(self, interaction)
     
     # ==================== HELPER METHODS ====================
     
