@@ -462,6 +462,3 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
             return {"status": 0, "notifications": [{"message": "Ticket cerrado con éxito.", "category": "success"}], "redirect_url": kwargs["request_url"]}
         source = "{{ form|safe }}"
         return {"status": 0, "web_content": {"source": source, "form": form}}
-
-def setup(bot: Red):
-    bot.add_cog(Tickets(bot))
