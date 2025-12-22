@@ -434,8 +434,51 @@ class StatusSelectView(ui.View):
         self.select.callback = self.select_callback
         self.add_item(self.select)
     
+    async def _check_staff_permission(self, interaction: discord.Interaction) -> bool:
+        """Check if user has staff permissions."""
+        if not interaction.guild:
+            await interaction.response.send_message(
+                "❌ Este comando solo puede usarse en un servidor.",
+                ephemeral=True
+            )
+            return False
+        
+        # Get the member object - interaction.user may be User or Member
+        member = interaction.guild.get_member(interaction.user.id)
+        if not member:
+            await interaction.response.send_message(
+                "❌ No se pudo verificar tu membresía en el servidor.",
+                ephemeral=True
+            )
+            return False
+        
+        # Check for admin or manage_guild permission
+        if member.guild_permissions.administrator:
+            return True
+        if member.guild_permissions.manage_guild:
+            return True
+        
+        # Check for configured staff role
+        staff_role_id = await self.cog.config.guild(interaction.guild).staff_role()
+        if staff_role_id:
+            staff_role = interaction.guild.get_role(staff_role_id)
+            if staff_role and staff_role in member.roles:
+                return True
+        
+        await interaction.response.send_message(
+            "❌ No tienes permisos para realizar esta acción.\n"
+            "Necesitas ser **Administrador**, tener permiso de **Gestionar servidor**, "
+            "o tener el rol de staff configurado.",
+            ephemeral=True
+        )
+        return False
+    
     async def select_callback(self, interaction: discord.Interaction):
         """Handle status selection."""
+        # Check permissions first
+        if not await self._check_staff_permission(interaction):
+            return
+        
         selected_value = self.select.values[0]
         new_status = SuggestionStatus(selected_value)
         
