@@ -101,11 +101,47 @@ class SuggestionView(ui.View):
         self.cog = cog
         self.suggestion_id = suggestion_id
         
-        # Set custom_id for persistence
-        self.upvote_button.custom_id = f"suggestion:upvote:{suggestion_id}"
-        self.downvote_button.custom_id = f"suggestion:downvote:{suggestion_id}"
-        self.votes_button.custom_id = f"suggestion:votes:{suggestion_id}"
-        self.edit_button.custom_id = f"suggestion:edit:{suggestion_id}"
+        # Create buttons manually to guarantee order
+        # Row 0: Upvote, Downvote, Ver votos, Editar
+        self.upvote_button = ui.Button(
+            label="0",
+            emoji="👍",
+            style=discord.ButtonStyle.success,
+            custom_id=f"suggestion:upvote:{suggestion_id}",
+            row=0
+        )
+        self.upvote_button.callback = self._upvote_callback
+        self.add_item(self.upvote_button)
+        
+        self.downvote_button = ui.Button(
+            label="0",
+            emoji="👎",
+            style=discord.ButtonStyle.danger,
+            custom_id=f"suggestion:downvote:{suggestion_id}",
+            row=0
+        )
+        self.downvote_button.callback = self._downvote_callback
+        self.add_item(self.downvote_button)
+        
+        self.votes_button = ui.Button(
+            label="Ver votos",
+            emoji="📊",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"suggestion:votes:{suggestion_id}",
+            row=0
+        )
+        self.votes_button.callback = self._votes_callback
+        self.add_item(self.votes_button)
+        
+        self.edit_button = ui.Button(
+            label="Editar",
+            emoji="✏️",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"suggestion:edit:{suggestion_id}",
+            row=0
+        )
+        self.edit_button.callback = self._edit_callback
+        self.add_item(self.edit_button)
     
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """Check if the interaction is valid."""
@@ -113,18 +149,15 @@ class SuggestionView(ui.View):
             return False
         return True
     
-    @ui.button(label="0", emoji="👍", style=discord.ButtonStyle.success, row=0)
-    async def upvote_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _upvote_callback(self, interaction: discord.Interaction):
         """Handle upvote."""
         await self._handle_vote(interaction, "up")
     
-    @ui.button(label="0", emoji="👎", style=discord.ButtonStyle.danger, row=0)
-    async def downvote_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _downvote_callback(self, interaction: discord.Interaction):
         """Handle downvote."""
         await self._handle_vote(interaction, "down")
     
-    @ui.button(label="Ver votos", emoji="📊", style=discord.ButtonStyle.secondary, row=0)
-    async def votes_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _votes_callback(self, interaction: discord.Interaction):
         """Show detailed votes."""
         suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
         if not suggestion:
@@ -134,8 +167,7 @@ class SuggestionView(ui.View):
         embed = create_votes_detail_embed(suggestion, self.cog.bot)
         await interaction.response.send_message(embed=embed, ephemeral=True)
     
-    @ui.button(label="Editar", emoji="✏️", style=discord.ButtonStyle.secondary, row=0)
-    async def edit_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _edit_callback(self, interaction: discord.Interaction):
         """Edit suggestion (author only, pending only)."""
         suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
         if not suggestion:
@@ -216,10 +248,36 @@ class StaffActionsView(ui.View):
         self.cog = cog
         self.suggestion_id = suggestion_id
         
-        # Set custom_id for persistence
-        self.approve_button.custom_id = f"suggestion:approve:{suggestion_id}"
-        self.deny_button.custom_id = f"suggestion:deny:{suggestion_id}"
-        self.status_button.custom_id = f"suggestion:status:{suggestion_id}"
+        # Create buttons manually to guarantee order (row 1)
+        self.approve_button = ui.Button(
+            label="Aprobar",
+            emoji="✅",
+            style=discord.ButtonStyle.success,
+            custom_id=f"suggestion:approve:{suggestion_id}",
+            row=1
+        )
+        self.approve_button.callback = self._approve_callback
+        self.add_item(self.approve_button)
+        
+        self.deny_button = ui.Button(
+            label="Rechazar",
+            emoji="❌",
+            style=discord.ButtonStyle.danger,
+            custom_id=f"suggestion:deny:{suggestion_id}",
+            row=1
+        )
+        self.deny_button.callback = self._deny_callback
+        self.add_item(self.deny_button)
+        
+        self.status_button = ui.Button(
+            label="Cambiar estado",
+            emoji="📋",
+            style=discord.ButtonStyle.secondary,
+            custom_id=f"suggestion:status:{suggestion_id}",
+            row=1
+        )
+        self.status_button.callback = self._status_callback
+        self.add_item(self.status_button)
     
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """Check if user has staff permissions."""
@@ -245,18 +303,15 @@ class StaffActionsView(ui.View):
         )
         return False
     
-    @ui.button(label="Aprobar", emoji="✅", style=discord.ButtonStyle.success, row=1)
-    async def approve_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _approve_callback(self, interaction: discord.Interaction):
         """Approve the suggestion."""
         await self._change_status(interaction, SuggestionStatus.APPROVED)
     
-    @ui.button(label="Rechazar", emoji="❌", style=discord.ButtonStyle.danger, row=1)
-    async def deny_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _deny_callback(self, interaction: discord.Interaction):
         """Deny the suggestion."""
         await self._change_status(interaction, SuggestionStatus.DENIED)
     
-    @ui.button(label="Cambiar estado", emoji="📋", style=discord.ButtonStyle.secondary, row=1)
-    async def status_button(self, interaction: discord.Interaction, button: ui.Button):
+    async def _status_callback(self, interaction: discord.Interaction):
         """Show status selection menu."""
         view = StatusSelectView(self.cog, self.suggestion_id)
         await interaction.response.send_message(

@@ -6,7 +6,14 @@
   "description": "Sistema de sugerencias completo con botones interactivos, votaciones persistentes, múltiples estados y panel de control web.",
   "install_msg": "SimpleSuggestions v2.0.0 instalado!\n\nConfigura el canal con: `[p]suggestset channel #canal`\nVer configuración: `[p]suggestset settings`",
   "short": "Sistema de sugerencias avanzado",
-  "tags": ["suggestions", "voting", "feedback", "dashboard", "buttons", "interactive"],
+  "tags": [
+    "suggestions",
+    "voting",
+    "feedback",
+    "dashboard",
+    "buttons",
+    "interactive"
+  ],
   "min_bot_version": "3.5.0",
   "requirements": []
 }
