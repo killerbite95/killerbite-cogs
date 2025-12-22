@@ -53,7 +53,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     By Killerbite95
     """
     __author__ = "Killerbite95"
-    __version__ = "2.0.0"
+    __version__ = "2.0.2"
     
     def __init__(self, bot: Red):
         self.bot = bot

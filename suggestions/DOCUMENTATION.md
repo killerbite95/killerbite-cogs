@@ -1,6 +1,10 @@
-# SimpleSuggestions v2.0.1
+# SimpleSuggestions v2.0.2
 
 Sistema de sugerencias completo para Discord con botones interactivos, votaciones persistentes, múltiples estados y panel de control web.
+
+## 🐛 Correcciones en v2.0.2
+
+- **✏️ Edición de sugerencias cortas**: Ahora se pueden editar sugerencias con menos de 10 caracteres
 
 ## 🐛 Correcciones en v2.0.1
 
