@@ -23,7 +23,8 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | **gameservermonitor** | Monitors game servers (CS2, Minecraft, DayZ, etc.) with live embeds |
 | **listroles** | Lists server roles and their members |
 | **maptrack** | Tracks map changes in game servers |
-| **suggestions** | Simple suggestion system for servers |
+| **suggestions** | Complete suggestion system with buttons, voting, and staff management |
+| **ticketstrini** | Multi-panel support ticket system with buttons (Trini Edition) |
 
 ## Support
 
