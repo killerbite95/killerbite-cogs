@@ -358,21 +358,15 @@ class StaffActionsView(ui.View):
         return False
     
     async def _approve_callback(self, interaction: discord.Interaction):
-        """Approve the suggestion."""
-        if not await self._check_staff_permission(interaction):
-            return
+        """Approve the suggestion. Permission check done by persistent view handler."""
         await self._change_status(interaction, SuggestionStatus.APPROVED)
     
     async def _deny_callback(self, interaction: discord.Interaction):
-        """Deny the suggestion."""
-        if not await self._check_staff_permission(interaction):
-            return
+        """Deny the suggestion. Permission check done by persistent view handler."""
         await self._change_status(interaction, SuggestionStatus.DENIED)
     
     async def _status_callback(self, interaction: discord.Interaction):
-        """Show status selection menu."""
-        if not await self._check_staff_permission(interaction):
-            return
+        """Show status selection menu. Permission check done by persistent view handler."""
         view = StatusSelectView(self.cog, self.suggestion_id)
         await interaction.response.send_message(
             "Selecciona el nuevo estado:",
@@ -658,7 +652,9 @@ async def setup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
         
         elif action in ["approve", "deny", "status"]:
             view = StaffActionsView(cog, suggestion_id)
-            if not await view.interaction_check(interaction):
+            
+            # Check staff permission first
+            if not await view._check_staff_permission(interaction):
                 return
             
             if action == "approve":
@@ -666,7 +662,13 @@ async def setup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
             elif action == "deny":
                 await view._change_status(interaction, SuggestionStatus.DENIED)
             elif action == "status":
-                await view.status_button.callback(interaction)
+                # Permission already checked, show the status select menu
+                status_view = StatusSelectView(cog, suggestion_id)
+                await interaction.response.send_message(
+                    "Selecciona el nuevo estado:",
+                    view=status_view,
+                    ephemeral=True
+                )
     
     cog._persistent_view_handler = on_suggestion_interaction
     logger.info("Persistent views setup complete")
