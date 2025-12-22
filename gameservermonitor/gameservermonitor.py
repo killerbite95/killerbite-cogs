@@ -310,7 +310,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(guild).servers()
         
         if server_key not in servers:
-            return {"error": f"Servidor **{server_key}** no encontrado."}
+            return {"error": "Servidor no encontrado."}
         
         server_data = ServerData.from_dict(server_key, servers[server_key])
         
@@ -334,7 +334,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         )
         
         if not query_result.success:
-            return {"error": f"El servidor **{server_key}** está offline o no responde."}
+            server_name = server_data.domain or server_data.game.display_name if server_data.game else "El servidor"
+            return {"error": f"**{server_name}** está offline o no responde."}
         
         game_name = server_data.game.display_name if server_data.game else "Unknown"
         
@@ -415,7 +416,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(guild).servers()
         
         if server_key not in servers:
-            return {"error": f"Servidor **{server_key}** no encontrado."}
+            return {"error": "Servidor no encontrado."}
         
         server_data = ServerData.from_dict(server_key, servers[server_key])
         
@@ -479,7 +480,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(guild).servers()
         
         if server_key not in servers:
-            return {"error": f"Servidor **{server_key}** no encontrado."}
+            return {"error": "Servidor no encontrado."}
         
         # Validar horas
         interaction_config = await self.config.guild(guild).interaction_features()
@@ -494,12 +495,32 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         history = await self._get_player_history(guild, server_key)
         
         if not history or not history.entries:
-            return {"error": f"No hay historial disponible para **{server_key}**.\n"
+            return {"error": "No hay historial disponible para este servidor.\n"
                            "El historial se generará con las próximas actualizaciones."}
         
         # Obtener datos del servidor
         server_data = ServerData.from_dict(server_key, servers[server_key])
         game_name = server_data.game.display_name if server_data.game else "Unknown"
+        
+        # Obtener hostname del servidor (query rápido)
+        query_kwargs = {}
+        if server_data.game == GameType.DAYZ:
+            query_kwargs["query_port"] = server_data.query_port
+            port = server_data.game_port or server_data.port
+        else:
+            port = server_data.port
+        
+        query_result = await self.query_service.query_server(
+            host=server_data.host,
+            port=port,
+            game=server_data.game,
+            use_cache=True  # Usar caché para rapidez
+        )
+        
+        # Usar hostname si está disponible, sino el dominio o un nombre genérico
+        display_name = query_result.hostname if query_result.success else None
+        if not display_name:
+            display_name = server_data.domain or game_name
         
         # Generar gráfico
         graph = history.generate_ascii_graph(hours=hours, width=24)
@@ -525,7 +546,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Crear embed
         embed = discord.Embed(
-            title=f"📊 Historial - {server_key}",
+            title=f"📊 Historial - {display_name[:50]}",
             description=f"**Juego:** {game_name}\n**Período:** Últimas {hours} horas",
             color=discord.Color.blue()
         )

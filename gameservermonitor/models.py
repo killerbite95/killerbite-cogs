@@ -361,7 +361,6 @@ class ServerStats:
             embed.add_field(name="🔴 Último Offline", value=local_time, inline=True)
         
         embed.add_field(name="🗺️ Mapa", value=self.map_name, inline=True)
-        embed.set_footer(text=f"Server Key: {self.server_key}")
         
         return embed
 
