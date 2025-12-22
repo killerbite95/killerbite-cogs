@@ -303,23 +303,29 @@ class StaffActionsView(ui.View):
         # Get the member object - interaction.user may be User or Member
         member = interaction.guild.get_member(interaction.user.id)
         if not member:
-            await interaction.response.send_message(
-                "❌ No se pudo verificar tu membresía en el servidor.",
-                ephemeral=True
-            )
-            return False
+            # Try to fetch if not in cache
+            try:
+                member = await interaction.guild.fetch_member(interaction.user.id)
+            except Exception:
+                await interaction.response.send_message(
+                    "❌ No se pudo verificar tu membresía en el servidor.",
+                    ephemeral=True
+                )
+                return False
         
-        # Check for admin or manage_guild permission
+        # Check for admin permission
         if member.guild_permissions.administrator:
             return True
+        
+        # Check for manage_guild permission
         if member.guild_permissions.manage_guild:
             return True
         
         # Check for configured staff role
         staff_role_id = await self.cog.config.guild(interaction.guild).staff_role()
         if staff_role_id:
-            staff_role = interaction.guild.get_role(staff_role_id)
-            if staff_role and staff_role in member.roles:
+            member_role_ids = [r.id for r in member.roles]
+            if staff_role_id in member_role_ids:
                 return True
         
         await interaction.response.send_message(
@@ -446,23 +452,29 @@ class StatusSelectView(ui.View):
         # Get the member object - interaction.user may be User or Member
         member = interaction.guild.get_member(interaction.user.id)
         if not member:
-            await interaction.response.send_message(
-                "❌ No se pudo verificar tu membresía en el servidor.",
-                ephemeral=True
-            )
-            return False
+            # Try to fetch if not in cache
+            try:
+                member = await interaction.guild.fetch_member(interaction.user.id)
+            except Exception:
+                await interaction.response.send_message(
+                    "❌ No se pudo verificar tu membresía en el servidor.",
+                    ephemeral=True
+                )
+                return False
         
-        # Check for admin or manage_guild permission
+        # Check for admin permission
         if member.guild_permissions.administrator:
             return True
+        
+        # Check for manage_guild permission
         if member.guild_permissions.manage_guild:
             return True
         
         # Check for configured staff role
         staff_role_id = await self.cog.config.guild(interaction.guild).staff_role()
         if staff_role_id:
-            staff_role = interaction.guild.get_role(staff_role_id)
-            if staff_role and staff_role in member.roles:
+            member_role_ids = [r.id for r in member.roles]
+            if staff_role_id in member_role_ids:
                 return True
         
         await interaction.response.send_message(
