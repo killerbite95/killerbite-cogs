@@ -78,13 +78,17 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
 
         t1 = perf_counter()
         conf = await self.config.all_guilds()
+        log.info(f"Found {len(conf)} guilds in config")
         for gid, data in conf.items():
             if not data:
+                log.debug(f"No data for guild {gid}")
                 continue
             guild = self.bot.get_guild(gid)
             if not guild:
+                log.debug(f"Could not find guild {gid}")
                 continue
             try:
+                log.info(f"Initializing tickets for {guild.name} ({gid})")
                 await self._init_guild(guild, data)
             except Exception as e:
                 log.error(f"Failed to initialize tickets for {guild.name}", exc_info=e)
@@ -119,14 +123,17 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         # Refresh buttons for all panels
         migrations = False
         all_panels = data["panels"]
+        log.info(f"Found {len(all_panels)} panels for {guild.name}")
         prefetched = []
         to_deploy = {}  # Message ID keys for multi-button support
         for panel_name, panel in all_panels.items():
             category_id = panel["category_id"]
             channel_id = panel["channel_id"]
             message_id = panel["message_id"]
+            log.debug(f"Panel {panel_name}: cat={category_id}, ch={channel_id}, msg={message_id}")
             if any([not category_id, not channel_id, not message_id]):
                 # Panel does not have all channels set
+                log.warning(f"Panel {panel_name} missing required IDs: cat={category_id}, ch={channel_id}, msg={message_id}")
                 continue
 
             category = guild.get_channel(category_id)
