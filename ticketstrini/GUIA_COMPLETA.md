@@ -101,7 +101,7 @@ Antes de comenzar, asegúrate de que tu bot tenga los siguientes permisos:
 ### Paso 1: Cargar el COG
 
 ```
-[p]load tickets-trini
+[p]load ticketstrini
 ```
 
 > **Nota**: Reemplaza `[p]` con el prefijo de tu bot (ej: `!`, `.`, `?`, etc.)

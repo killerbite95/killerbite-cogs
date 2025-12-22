@@ -25,7 +25,7 @@ from .common.views import CloseView, LogView, PanelView
 # ----------------- Agregamos la integración del Dashboard -----------------
 from .dashboard_integration import DashboardIntegration, dashboard_page
 
-log = logging.getLogger("red.killerbite95.tickets-trini")
+log = logging.getLogger("red.killerbite95.ticketstrini")
 _ = Translator("TicketsTrini", __file__)
 
 @cog_i18n(_)

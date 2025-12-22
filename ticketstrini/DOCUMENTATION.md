@@ -28,8 +28,8 @@ Multi-panel support ticket system with buttons for Red-DiscordBot.
 
 ```
 [p]repo add killerbite-cogs https://github.com/killerbite95/killerbite-cogs
-[p]cog install killerbite-cogs tickets-trini
-[p]load tickets-trini
+[p]cog install killerbite-cogs ticketstrini
+[p]load ticketstrini
 ```
 
 ### Requirements
