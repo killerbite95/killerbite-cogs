@@ -224,8 +224,9 @@ async def handle_button_callback(
         # Resolver server_key desde server_id
         server_key = await cog._resolve_server_key_by_id(guild, server_id)
         if not server_key:
+            not_found_msg = _("Server not found (ID: `{server_id}`).\nThe server may have been deleted.").format(server_id=server_id)
             await interaction.followup.send(
-                f"❌ {_('Server not found (ID: `{server_id}`).\nThe server may have been deleted.').format(server_id=server_id)}",
+                f"❌ {not_found_msg}",
                 ephemeral=True
             )
             return
