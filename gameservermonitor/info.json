@@ -2,11 +2,11 @@
     "author": [
         "Killerbite95"
     ],
-    "install_msg": "¡Gracias por instalar GameServerMonitor v2.2.0! Usa `[p]help GameServerMonitor` para ver los comandos. Nuevo: ¡Botones interactivos en embeds y slash commands!",
+    "install_msg": "Thanks for installing GameServerMonitor v2.3.0! Use `[p]help GameServerMonitor` to see commands. New: Multi-language support (English/Spanish)!",
     "name": "GameServerMonitor",
-    "short": "Monitoriza servidores de juegos con botones interactivos, slash commands e historial",
-    "description": "Cog avanzado para monitorizar servidores de juegos en Discord. Incluye botones interactivos (Players/Stats/History) con respuestas ephemeral, slash commands con autocomplete, historial con gráficos ASCII, lista de jugadores en tiempo real, estadísticas de uptime y panel web.",
-    "end_user_data_statement": "Este cog almacena IDs de canales y mensajes de Discord para actualizar el estado de los servidores, así como historial de conteo de jugadores. No almacena datos personales de usuarios.",
+    "short": "Monitor game servers with interactive buttons, slash commands and history",
+    "description": "Advanced cog to monitor game servers in Discord. Includes interactive buttons (Players/Stats/History) with ephemeral responses, slash commands with autocomplete, ASCII graph history, real-time player list, uptime statistics and web dashboard. Supports English and Spanish.",
+    "end_user_data_statement": "This cog stores Discord channel and message IDs to update server status, as well as player count history. No personal user data is stored.",
     "hidden": false,
     "disabled": false,
     "min_bot_version": "3.5.0",
@@ -34,7 +34,9 @@
         "players",
         "buttons",
         "slash",
-        "interactions"
+        "interactions",
+        "i18n",
+        "multilanguage"
     ],
     "type": "COG",
     "permissions": [

@@ -1,0 +1,286 @@
+# GameServerMonitor - Translation Template
+# Copyright (C) 2025 Killerbite95
+# This file is distributed under the same license as the GameServerMonitor package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GameServerMonitor 2.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-22 00:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: \n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: gameservermonitor.py (cog docstring)
+msgid "Monitors game servers and updates their status in Discord. By Killerbite95"
+msgstr ""
+
+#: gameservermonitor.py (error messages)
+msgid "Server not found."
+msgstr ""
+
+msgid "Invalid game data for this server."
+msgstr ""
+
+msgid "**{server_name}** is offline or not responding."
+msgstr ""
+
+msgid "No history available for this server.\nHistory will be generated with the next updates."
+msgstr ""
+
+msgid "Unknown action: {action}"
+msgstr ""
+
+#: gameservermonitor.py (embed titles)
+msgid "Players - {hostname}"
+msgstr ""
+
+msgid "History - {display_name}"
+msgstr ""
+
+msgid "Statistics - {hostname}"
+msgstr ""
+
+#: gameservermonitor.py (embed fields)
+msgid "Game"
+msgstr ""
+
+msgid "Map"
+msgstr ""
+
+msgid "Players"
+msgstr ""
+
+msgid "Player List"
+msgstr ""
+
+msgid "Ping"
+msgstr ""
+
+msgid "Period Statistics"
+msgstr ""
+
+msgid "Activity Graph"
+msgstr ""
+
+msgid "Peak"
+msgstr ""
+
+msgid "Average"
+msgstr ""
+
+msgid "Uptime"
+msgstr ""
+
+msgid "players"
+msgstr ""
+
+msgid "Last {hours} hours"
+msgstr ""
+
+#: gameservermonitor.py (player list)
+msgid "Name"
+msgstr ""
+
+msgid "Score"
+msgstr ""
+
+msgid "Time"
+msgstr ""
+
+msgid "... and {count} more players"
+msgstr ""
+
+msgid "The Minecraft server does not expose the full player list."
+msgstr ""
+
+msgid "Could not retrieve the player list."
+msgstr ""
+
+msgid "No players connected."
+msgstr ""
+
+#: gameservermonitor.py (stats embed)
+msgid "Current Status"
+msgstr ""
+
+msgid "Total Queries"
+msgstr ""
+
+msgid "Successful Queries"
+msgstr ""
+
+msgid "Last Online"
+msgstr ""
+
+msgid "Last Offline"
+msgstr ""
+
+#: gameservermonitor.py (server status)
+msgid "Online"
+msgstr ""
+
+msgid "Offline"
+msgstr ""
+
+msgid "Maintenance"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+#: gameservermonitor.py (commands)
+msgid "Sets the timezone for this server."
+msgstr ""
+
+msgid "Timezone set to **{timezone}**."
+msgstr ""
+
+msgid "Invalid timezone. Use format like `Europe/Madrid` or `America/New_York`."
+msgstr ""
+
+msgid "Sets the public IP to replace private IPs in embeds."
+msgstr ""
+
+msgid "Public IP set to **{ip}**. Private IPs will be replaced in embeds."
+msgstr ""
+
+msgid "Public IP disabled. Real IPs will be shown."
+msgstr ""
+
+msgid "Sets the connection URL template."
+msgstr ""
+
+msgid "Connection URL template set to: {url}"
+msgstr ""
+
+msgid "Sets the refresh interval in seconds."
+msgstr ""
+
+msgid "Refresh interval set to **{seconds}** seconds."
+msgstr ""
+
+msgid "Minimum interval is 10 seconds."
+msgstr ""
+
+msgid "Adds a game server to monitor."
+msgstr ""
+
+msgid "Server **{key}** added and monitoring in {channel}."
+msgstr ""
+
+msgid "A server with this IP:port already exists."
+msgstr ""
+
+msgid "Unsupported game: {game}. Supported: {supported}"
+msgstr ""
+
+msgid "Channel not found or no permission to send messages."
+msgstr ""
+
+msgid "Removes a server from monitoring."
+msgstr ""
+
+msgid "Server **{key}** removed from monitoring."
+msgstr ""
+
+msgid "Server not found. Use `listaserver` to see available servers."
+msgstr ""
+
+msgid "Lists all monitored servers."
+msgstr ""
+
+msgid "No servers configured."
+msgstr ""
+
+msgid "Monitored Servers"
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Channel"
+msgstr ""
+
+msgid "Forces an immediate status update."
+msgstr ""
+
+msgid "Status updated for {count} server(s) in this channel."
+msgstr ""
+
+msgid "No servers found in this channel."
+msgstr ""
+
+msgid "Shows statistics for a server."
+msgstr ""
+
+msgid "Shows player history with an ASCII graph."
+msgstr ""
+
+msgid "Shows the list of currently connected players."
+msgstr ""
+
+msgid "Shows the cog version."
+msgstr ""
+
+msgid "GameServerMonitor v{version} by {author}"
+msgstr ""
+
+msgid "Enables or disables debug mode."
+msgstr ""
+
+msgid "Debug mode **enabled**."
+msgstr ""
+
+msgid "Debug mode **disabled**."
+msgstr ""
+
+#: views.py (button labels)
+msgid "Players"
+msgstr ""
+
+msgid "Stats"
+msgstr ""
+
+msgid "History"
+msgstr ""
+
+#: views.py (cooldown)
+msgid "Please wait **{seconds:.1f}s** before using this button again."
+msgstr ""
+
+#: views.py (errors)
+msgid "The GameServerMonitor module is not available."
+msgstr ""
+
+msgid "This command only works in servers."
+msgstr ""
+
+msgid "Server not found (ID: `{server_id}`).\nThe server may have been deleted."
+msgstr ""
+
+msgid "An error occurred while processing the request."
+msgstr ""
+
+#: models.py (game names - already defined as display_name)
+msgid "Counter-Strike 2"
+msgstr ""
+
+msgid "Counter-Strike: Source"
+msgstr ""
+
+msgid "Garry's Mod"
+msgstr ""
+
+msgid "Rust"
+msgstr ""
+
+msgid "Minecraft"
+msgstr ""
+
+msgid "DayZ"
+msgstr ""

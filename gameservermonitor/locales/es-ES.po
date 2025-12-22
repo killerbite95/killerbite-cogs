@@ -1,0 +1,287 @@
+# Spanish translations for GameServerMonitor
+# Copyright (C) 2025 Killerbite95
+# This file is distributed under the same license as the GameServerMonitor package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: GameServerMonitor 2.2.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-12-22 00:00+0000\n"
+"PO-Revision-Date: 2025-12-22 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gameservermonitor.py (cog docstring)
+msgid "Monitors game servers and updates their status in Discord. By Killerbite95"
+msgstr "Monitoriza servidores de juegos y actualiza su estado en Discord. Por Killerbite95"
+
+#: gameservermonitor.py (error messages)
+msgid "Server not found."
+msgstr "Servidor no encontrado."
+
+msgid "Invalid game data for this server."
+msgstr "Datos de juego no válidos para este servidor."
+
+msgid "**{server_name}** is offline or not responding."
+msgstr "**{server_name}** está offline o no responde."
+
+msgid "No history available for this server.\nHistory will be generated with the next updates."
+msgstr "No hay historial disponible para este servidor.\nEl historial se generará con las próximas actualizaciones."
+
+msgid "Unknown action: {action}"
+msgstr "Acción desconocida: {action}"
+
+#: gameservermonitor.py (embed titles)
+msgid "Players - {hostname}"
+msgstr "Jugadores - {hostname}"
+
+msgid "History - {display_name}"
+msgstr "Historial - {display_name}"
+
+msgid "Statistics - {hostname}"
+msgstr "Estadísticas - {hostname}"
+
+#: gameservermonitor.py (embed fields)
+msgid "Game"
+msgstr "Juego"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "Players"
+msgstr "Jugadores"
+
+msgid "Player List"
+msgstr "Lista de Jugadores"
+
+msgid "Ping"
+msgstr "Ping"
+
+msgid "Period Statistics"
+msgstr "Estadísticas del Período"
+
+msgid "Activity Graph"
+msgstr "Gráfico de Actividad"
+
+msgid "Peak"
+msgstr "Pico"
+
+msgid "Average"
+msgstr "Promedio"
+
+msgid "Uptime"
+msgstr "Tiempo activo"
+
+msgid "players"
+msgstr "jugadores"
+
+msgid "Last {hours} hours"
+msgstr "Últimas {hours} horas"
+
+#: gameservermonitor.py (player list)
+msgid "Name"
+msgstr "Nombre"
+
+msgid "Score"
+msgstr "Puntos"
+
+msgid "Time"
+msgstr "Tiempo"
+
+msgid "... and {count} more players"
+msgstr "... y {count} jugadores más"
+
+msgid "The Minecraft server does not expose the full player list."
+msgstr "El servidor de Minecraft no expone la lista completa de jugadores."
+
+msgid "Could not retrieve the player list."
+msgstr "No se pudo obtener la lista de jugadores."
+
+msgid "No players connected."
+msgstr "No hay jugadores conectados."
+
+#: gameservermonitor.py (stats embed)
+msgid "Current Status"
+msgstr "Estado Actual"
+
+msgid "Total Queries"
+msgstr "Consultas Totales"
+
+msgid "Successful Queries"
+msgstr "Consultas Exitosas"
+
+msgid "Last Online"
+msgstr "Último Online"
+
+msgid "Last Offline"
+msgstr "Último Offline"
+
+#: gameservermonitor.py (server status)
+msgid "Online"
+msgstr "En línea"
+
+msgid "Offline"
+msgstr "Desconectado"
+
+msgid "Maintenance"
+msgstr "Mantenimiento"
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: gameservermonitor.py (commands)
+msgid "Sets the timezone for this server."
+msgstr "Establece la zona horaria para este servidor."
+
+msgid "Timezone set to **{timezone}**."
+msgstr "Zona horaria establecida a **{timezone}**."
+
+msgid "Invalid timezone. Use format like `Europe/Madrid` or `America/New_York`."
+msgstr "Zona horaria inválida. Usa el formato `Europe/Madrid` o `America/New_York`."
+
+msgid "Sets the public IP to replace private IPs in embeds."
+msgstr "Establece la IP pública para reemplazar IPs privadas en embeds."
+
+msgid "Public IP set to **{ip}**. Private IPs will be replaced in embeds."
+msgstr "IP pública establecida a **{ip}**. Las IPs privadas serán reemplazadas en los embeds."
+
+msgid "Public IP disabled. Real IPs will be shown."
+msgstr "IP pública desactivada. Se mostrarán las IPs reales."
+
+msgid "Sets the connection URL template."
+msgstr "Establece la plantilla de URL de conexión."
+
+msgid "Connection URL template set to: {url}"
+msgstr "Plantilla de URL de conexión establecida: {url}"
+
+msgid "Sets the refresh interval in seconds."
+msgstr "Establece el intervalo de actualización en segundos."
+
+msgid "Refresh interval set to **{seconds}** seconds."
+msgstr "Intervalo de actualización establecido a **{seconds}** segundos."
+
+msgid "Minimum interval is 10 seconds."
+msgstr "El intervalo mínimo es de 10 segundos."
+
+msgid "Adds a game server to monitor."
+msgstr "Añade un servidor de juego para monitorizar."
+
+msgid "Server **{key}** added and monitoring in {channel}."
+msgstr "Servidor **{key}** añadido y monitorizando en {channel}."
+
+msgid "A server with this IP:port already exists."
+msgstr "Ya existe un servidor con esta IP:puerto."
+
+msgid "Unsupported game: {game}. Supported: {supported}"
+msgstr "Juego no soportado: {game}. Soportados: {supported}"
+
+msgid "Channel not found or no permission to send messages."
+msgstr "Canal no encontrado o sin permiso para enviar mensajes."
+
+msgid "Removes a server from monitoring."
+msgstr "Elimina un servidor de la monitorización."
+
+msgid "Server **{key}** removed from monitoring."
+msgstr "Servidor **{key}** eliminado de la monitorización."
+
+msgid "Server not found. Use `listaserver` to see available servers."
+msgstr "Servidor no encontrado. Usa `listaserver` para ver los servidores disponibles."
+
+msgid "Lists all monitored servers."
+msgstr "Lista todos los servidores monitorizados."
+
+msgid "No servers configured."
+msgstr "No hay servidores configurados."
+
+msgid "Monitored Servers"
+msgstr "Servidores Monitorizados"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Channel"
+msgstr "Canal"
+
+msgid "Forces an immediate status update."
+msgstr "Fuerza una actualización de estado inmediata."
+
+msgid "Status updated for {count} server(s) in this channel."
+msgstr "Estado actualizado para {count} servidor(es) en este canal."
+
+msgid "No servers found in this channel."
+msgstr "No se encontraron servidores en este canal."
+
+msgid "Shows statistics for a server."
+msgstr "Muestra estadísticas de un servidor."
+
+msgid "Shows player history with an ASCII graph."
+msgstr "Muestra el historial de jugadores con un gráfico ASCII."
+
+msgid "Shows the list of currently connected players."
+msgstr "Muestra la lista de jugadores conectados actualmente."
+
+msgid "Shows the cog version."
+msgstr "Muestra la versión del cog."
+
+msgid "GameServerMonitor v{version} by {author}"
+msgstr "GameServerMonitor v{version} por {author}"
+
+msgid "Enables or disables debug mode."
+msgstr "Activa o desactiva el modo debug."
+
+msgid "Debug mode **enabled**."
+msgstr "Modo debug **activado**."
+
+msgid "Debug mode **disabled**."
+msgstr "Modo debug **desactivado**."
+
+#: views.py (button labels)
+#msgid "Players"
+#msgstr "Jugadores"
+
+msgid "Stats"
+msgstr "Stats"
+
+msgid "History"
+msgstr "Historial"
+
+#: views.py (cooldown)
+msgid "Please wait **{seconds:.1f}s** before using this button again."
+msgstr "Por favor espera **{seconds:.1f}s** antes de usar este botón de nuevo."
+
+#: views.py (errors)
+msgid "The GameServerMonitor module is not available."
+msgstr "El módulo GameServerMonitor no está disponible."
+
+msgid "This command only works in servers."
+msgstr "Este comando solo funciona en servidores."
+
+msgid "Server not found (ID: `{server_id}`).\nThe server may have been deleted."
+msgstr "Servidor no encontrado (ID: `{server_id}`).\nEs posible que el servidor haya sido eliminado."
+
+msgid "An error occurred while processing the request."
+msgstr "Ocurrió un error al procesar la solicitud."
+
+#: models.py (game names)
+msgid "Counter-Strike 2"
+msgstr "Counter-Strike 2"
+
+msgid "Counter-Strike: Source"
+msgstr "Counter-Strike: Source"
+
+msgid "Garry's Mod"
+msgstr "Garry's Mod"
+
+msgid "Rust"
+msgstr "Rust"
+
+msgid "Minecraft"
+msgstr "Minecraft"
+
+msgid "DayZ"
+msgstr "DayZ"

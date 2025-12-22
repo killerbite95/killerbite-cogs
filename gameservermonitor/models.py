@@ -9,6 +9,10 @@ from enum import Enum, auto
 from typing import Optional, Dict, Any, List, Tuple
 from datetime import datetime, timedelta
 import discord
+from redbot.core.i18n import Translator
+
+# Internacionalización
+_ = Translator("GameServerMonitor", __file__)
 
 
 class ServerStatus(Enum):
@@ -316,51 +320,51 @@ class ServerStats:
             tz = pytz.UTC
         
         embed = discord.Embed(
-            title=f"📊 Estadísticas - {self.hostname}",
+            title=_("Statistics - {hostname}").format(hostname=self.hostname),
             color=self.status.color
         )
         
         embed.add_field(
-            name="Estado Actual",
+            name=_("Current Status"),
             value=f"{self.status.emoji} {self.status.display_name}",
             inline=True
         )
         embed.add_field(
-            name="Juego",
+            name=_("Game"),
             value=self.game.display_name if self.game else "N/A",
             inline=True
         )
         embed.add_field(
-            name="Jugadores",
+            name=_("Players"),
             value=f"{self.current_players}/{self.max_players}",
             inline=True
         )
         
         embed.add_field(
-            name="📈 Uptime",
+            name=f"📈 {_('Uptime')}",
             value=f"{self.uptime_percentage:.1f}%",
             inline=True
         )
         embed.add_field(
-            name="📊 Queries Totales",
+            name=f"📊 {_('Total Queries')}",
             value=str(self.total_queries),
             inline=True
         )
         embed.add_field(
-            name="✅ Queries Exitosas",
+            name=f"✅ {_('Successful Queries')}",
             value=str(self.successful_queries),
             inline=True
         )
         
         if self.last_online:
             local_time = self.last_online.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S")
-            embed.add_field(name="🟢 Último Online", value=local_time, inline=True)
+            embed.add_field(name=f"🟢 {_('Last Online')}", value=local_time, inline=True)
         
         if self.last_offline:
             local_time = self.last_offline.astimezone(tz).strftime("%Y-%m-%d %H:%M:%S")
-            embed.add_field(name="🔴 Último Offline", value=local_time, inline=True)
+            embed.add_field(name=f"🔴 {_('Last Offline')}", value=local_time, inline=True)
         
-        embed.add_field(name="🗺️ Mapa", value=self.map_name, inline=True)
+        embed.add_field(name=f"🗺️ {_('Map')}", value=self.map_name, inline=True)
         
         return embed
 

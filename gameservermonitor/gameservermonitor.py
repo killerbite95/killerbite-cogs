@@ -46,7 +46,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
     
     __author__ = "Killerbite95"
-    __version__ = "2.2.0"
+    __version__ = "2.3.0"
     
     def __init__(self, bot: Red) -> None:
         self.bot: Red = bot
@@ -310,12 +310,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(guild).servers()
         
         if server_key not in servers:
-            return {"error": "Servidor no encontrado."}
+            return {"error": _("Server not found.")}
         
         server_data = ServerData.from_dict(server_key, servers[server_key])
         
         if not server_data.game:
-            return {"error": "Datos de juego no válidos para este servidor."}
+            return {"error": _("Invalid game data for this server.")}
         
         # Obtener estado actual con lista de jugadores
         query_kwargs = {"fetch_players": True}
@@ -343,17 +343,17 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             elif server_data.game:
                 server_name = server_data.game.display_name
             else:
-                server_name = "El servidor"
-            return {"error": f"**{server_name}** está offline o no responde."}
+                server_name = "Server"
+            return {"error": _("**{server_name}** is offline or not responding.").format(server_name=server_name)}
         
         game_name = server_data.game.display_name if server_data.game else "Unknown"
         
         # Crear embed
         embed = discord.Embed(
-            title=f"👥 Jugadores - {query_result.hostname[:50]}",
-            description=f"**Juego:** {game_name}\n"
-                       f"**Mapa:** {query_result.map_name}\n"
-                       f"**Jugadores:** {query_result.players}/{query_result.max_players}",
+            title=_("Players - {hostname}").format(hostname=query_result.hostname[:50]),
+            description=f"**{_('Game')}:** {game_name}\n"
+                       f"**{_('Map')}:** {query_result.map_name}\n"
+                       f"**{_('Players')}:** {query_result.players}/{query_result.max_players}",
             color=query_result.status.color
         )
         
@@ -364,7 +364,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             player_list = query_result.player_list[:25]
             
             player_text = "```\n"
-            player_text += f"{'Nombre':<20} {'Puntos':>6} {'Tiempo':>10}\n"
+            player_text += f"{_('Name'):<20} {_('Score'):>6} {_('Time'):>10}\n"
             player_text += "─" * 38 + "\n"
             
             for player in player_list:
@@ -376,32 +376,32 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             player_text += "```"
             
             if len(query_result.player_list) > 25:
-                player_text += f"\n*... y {len(query_result.player_list) - 25} jugadores más*"
+                player_text += f"\n*{_('... and {count} more players').format(count=len(query_result.player_list) - 25)}*"
             
-            embed.add_field(name="📋 Lista de Jugadores", value=player_text, inline=False)
+            embed.add_field(name=f"📋 {_('Player List')}", value=player_text, inline=False)
         else:
             if query_result.players > 0:
                 if server_data.game == GameType.MINECRAFT:
                     embed.add_field(
-                        name="📋 Lista de Jugadores",
-                        value="*El servidor de Minecraft no expone la lista completa de jugadores.*",
+                        name=f"📋 {_('Player List')}",
+                        value=f"*{_('The Minecraft server does not expose the full player list.')}*",
                         inline=False
                     )
                 else:
                     embed.add_field(
-                        name="📋 Lista de Jugadores",
-                        value="*No se pudo obtener la lista de jugadores.*",
+                        name=f"📋 {_('Player List')}",
+                        value=f"*{_('Could not retrieve the player list.')}*",
                         inline=False
                     )
             else:
                 embed.add_field(
-                    name="📋 Lista de Jugadores",
-                    value="*No hay jugadores conectados.*",
+                    name=f"📋 {_('Player List')}",
+                    value=f"*{_('No players connected.')}*",
                     inline=False
                 )
         
         if query_result.latency_ms:
-            embed.add_field(name="📶 Ping", value=f"{query_result.latency_ms:.0f}ms", inline=True)
+            embed.add_field(name=f"📶 {_('Ping')}", value=f"{query_result.latency_ms:.0f}ms", inline=True)
         
         embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
         
@@ -425,12 +425,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(guild).servers()
         
         if server_key not in servers:
-            return {"error": "Servidor no encontrado."}
+            return {"error": _("Server not found.")}
         
         server_data = ServerData.from_dict(server_key, servers[server_key])
         
         if not server_data.game:
-            return {"error": "Datos de juego no válidos para este servidor."}
+            return {"error": _("Invalid game data for this server.")}
         
         # Obtener estado actual
         query_kwargs = {}
@@ -489,7 +489,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(guild).servers()
         
         if server_key not in servers:
-            return {"error": "Servidor no encontrado."}
+            return {"error": _("Server not found.")}
         
         # Validar horas
         interaction_config = await self.config.guild(guild).interaction_features()
@@ -504,8 +504,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         history = await self._get_player_history(guild, server_key)
         
         if not history or not history.entries:
-            return {"error": "No hay historial disponible para este servidor.\n"
-                           "El historial se generará con las próximas actualizaciones."}
+            return {"error": _("No history available for this server.\nHistory will be generated with the next updates.")}
         
         # Obtener datos del servidor
         server_data = ServerData.from_dict(server_key, servers[server_key])
@@ -560,21 +559,21 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Crear embed
         embed = discord.Embed(
-            title=f"📊 Historial - {display_name[:50]}",
-            description=f"**Juego:** {game_name}\n**Período:** Últimas {hours} horas",
+            title=_("History - {display_name}").format(display_name=display_name[:50]),
+            description=f"**{_('Game')}:** {game_name}\n**{_('Period Statistics')}:** {_('Last {hours} hours').format(hours=hours)}",
             color=discord.Color.blue()
         )
         
         embed.add_field(
-            name="📈 Estadísticas del Período",
-            value=f"🔝 **Peak:** {peak_players} jugadores\n"
-                  f"📊 **Promedio:** {avg_players:.1f} jugadores\n"
-                  f"⏱️ **Uptime:** {uptime_pct:.1f}%",
+            name=f"📈 {_('Period Statistics')}",
+            value=f"🔝 **{_('Peak')}:** {peak_players} {_('players')}\n"
+                  f"📊 **{_('Average')}:** {avg_players:.1f} {_('players')}\n"
+                  f"⏱️ **{_('Uptime')}:** {uptime_pct:.1f}%",
             inline=False
         )
         
         embed.add_field(
-            name="📉 Gráfico de Actividad",
+            name=f"📉 {_('Activity Graph')}",
             value=graph,
             inline=False
         )

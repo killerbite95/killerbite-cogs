@@ -12,11 +12,15 @@ import logging
 from typing import Optional, Dict, Any, TYPE_CHECKING
 from datetime import datetime, timedelta
 from collections import defaultdict
+from redbot.core.i18n import Translator
 
 if TYPE_CHECKING:
     from .gameservermonitor import GameServerMonitor
 
 logger = logging.getLogger("red.killerbite95.gameservermonitor.views")
+
+# Internacionalización
+_ = Translator("GameServerMonitor", __file__)
 
 
 # ==================== Cooldown Manager ====================
@@ -190,7 +194,7 @@ async def handle_button_callback(
     
     if on_cooldown:
         await interaction.response.send_message(
-            f"⏳ Por favor espera **{remaining:.1f}s** antes de usar este botón de nuevo.",
+            _("Please wait **{seconds:.1f}s** before using this button again.").format(seconds=remaining),
             ephemeral=True
         )
         return
@@ -203,7 +207,7 @@ async def handle_button_callback(
         cog = interaction.client.get_cog("GameServerMonitor")
         if not cog:
             await interaction.followup.send(
-                "❌ El módulo GameServerMonitor no está disponible.",
+                f"❌ {_('The GameServerMonitor module is not available.')}",
                 ephemeral=True
             )
             return
@@ -212,7 +216,7 @@ async def handle_button_callback(
         guild = interaction.guild
         if not guild:
             await interaction.followup.send(
-                "❌ Este comando solo funciona en servidores.",
+                f"❌ {_('This command only works in servers.')}",
                 ephemeral=True
             )
             return
@@ -221,8 +225,7 @@ async def handle_button_callback(
         server_key = await cog._resolve_server_key_by_id(guild, server_id)
         if not server_key:
             await interaction.followup.send(
-                f"❌ Servidor no encontrado (ID: `{server_id}`).\n"
-                "Es posible que el servidor haya sido eliminado.",
+                f"❌ {_('Server not found (ID: `{server_id}`).\nThe server may have been deleted.').format(server_id=server_id)}",
                 ephemeral=True
             )
             return
@@ -241,7 +244,7 @@ async def handle_button_callback(
             hours = interaction_config.get("history_default_hours", 24)
             payload = await cog._build_history_payload(guild, server_key, hours)
         else:
-            payload = {"error": f"Acción desconocida: {action}"}
+            payload = {"error": _("Unknown action: {action}").format(action=action)}
         
         # Enviar respuesta
         if "error" in payload:
@@ -265,7 +268,7 @@ async def handle_button_callback(
     except Exception as e:
         logger.error(f"Error en callback de botón {action}: {e!r}")
         await interaction.followup.send(
-            f"❌ Ocurrió un error al procesar la solicitud.\n"
+            f"❌ {_('An error occurred while processing the request.')}\n"
             f"```{type(e).__name__}: {str(e)[:100]}```",
             ephemeral=True
         )
