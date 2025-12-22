@@ -334,7 +334,16 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         )
         
         if not query_result.success:
-            server_name = server_data.domain or server_data.game.display_name if server_data.game else "El servidor"
+            # Construir nombre para mostrar: IP pública > dominio > nombre del juego
+            public_ip = await self.config.guild(guild).public_ip()
+            if public_ip:
+                server_name = f"{public_ip}:{port}"
+            elif server_data.domain:
+                server_name = server_data.domain
+            elif server_data.game:
+                server_name = server_data.game.display_name
+            else:
+                server_name = "El servidor"
             return {"error": f"**{server_name}** está offline o no responde."}
         
         game_name = server_data.game.display_name if server_data.game else "Unknown"
@@ -517,10 +526,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             use_cache=True  # Usar caché para rapidez
         )
         
-        # Usar hostname si está disponible, sino el dominio o un nombre genérico
+        # Usar hostname si está disponible, sino IP pública, dominio o nombre del juego
         display_name = query_result.hostname if query_result.success else None
         if not display_name:
-            display_name = server_data.domain or game_name
+            # Intentar con IP pública configurada
+            public_ip = await self.config.guild(guild).public_ip()
+            if public_ip:
+                display_name = f"{public_ip}:{port}"
+            else:
+                display_name = server_data.domain or game_name
         
         # Generar gráfico
         graph = history.generate_ascii_graph(hours=hours, width=24)
