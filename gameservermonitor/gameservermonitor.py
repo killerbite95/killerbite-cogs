@@ -685,6 +685,17 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         game_name = server_data.game.display_name if server_data.game else _("Unknown")
         
+        # Obtener nombre para mostrar con fallback
+        display_name = query_result.hostname
+        if not display_name or display_name == "Unknown Server":
+            public_ip = await self.config.guild(guild).public_ip()
+            if public_ip:
+                display_name = f"{public_ip}:{port}"
+            elif server_data.domain:
+                display_name = server_data.domain
+            else:
+                display_name = game_name
+        
         # Para Minecraft, map_name contiene la versión
         if server_data.game == GameType.MINECRAFT:
             map_label = _("Version")
@@ -693,7 +704,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Crear embed
         embed = discord.Embed(
-            title=f"🗺️ {map_label} - {query_result.hostname[:50]}",
+            title=f"🗺️ {map_label} - {display_name[:50]}",
             color=query_result.status.color
         )
         
