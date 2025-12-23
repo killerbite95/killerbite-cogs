@@ -325,23 +325,25 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                         time_since_staff = (now - last_staff_dt).total_seconds() / 3600
                     
                     # Check if we should send warning or close
+                    # Priority: New smart auto-close system, then legacy fallback
+                    
                     if status == "awaiting_user" and auto_close_user_hours > 0:
+                        # User needs to respond - check time since staff last responded
                         if time_since_staff and time_since_staff >= auto_close_user_hours:
                             should_close = True
-                            close_reason = _("(Auto-Close) User did not respond for {} hours").format(
-                                auto_close_user_hours
+                            close_reason = _("(Auto-Close) User did not respond for {hours} hours").format(
+                                hours=auto_close_user_hours
                             )
-                        elif auto_close_warning_hours > 0 and time_since_staff:
+                        elif auto_close_warning_hours > 0 and time_since_staff and close_warnings == 0:
                             warning_threshold = auto_close_user_hours - auto_close_warning_hours
-                            if time_since_staff >= warning_threshold and close_warnings == 0:
-                                # Send warning
+                            if time_since_staff >= warning_threshold:
+                                # Send warning to user
                                 warning = _(
-                                    "⚠️ {mention}\nThis ticket will be **automatically closed** in "
+                                    "⚠️ {mention}\n\nThis ticket will be **automatically closed** in "
                                     "approximately **{hours} hours** if you do not respond."
                                 ).format(mention=member.mention, hours=auto_close_warning_hours)
                                 try:
                                     await channel.send(warning)
-                                    # Update warnings sent
                                     async with self.config.guild(guild).opened() as op:
                                         if uid in op and channel_id in op[uid]:
                                             op[uid][channel_id]["close_warnings_sent"] = 1
@@ -350,14 +352,15 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                                 continue
                     
                     elif status == "awaiting_staff" and auto_close_staff_hours > 0:
+                        # Staff needs to respond - check time since user last responded
                         if time_since_user and time_since_user >= auto_close_staff_hours:
                             should_close = True
-                            close_reason = _("(Auto-Close) No staff response for {} hours").format(
-                                auto_close_staff_hours
+                            close_reason = _("(Auto-Close) No staff response for {hours} hours").format(
+                                hours=auto_close_staff_hours
                             )
                     
-                    # Legacy behavior fallback
-                    if not should_close and inactive > 0:
+                    # Legacy behavior fallback (only if no smart auto-close is configured)
+                    elif not auto_close_user_hours and not auto_close_staff_hours and inactive > 0:
                         opened_on = datetime.datetime.fromisoformat(ticket["opened"])
                         hastyped = await ticket_owner_hastyped(channel, member)
                         if hastyped and channel_id not in self.valid:
@@ -366,19 +369,24 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                         td = (now - opened_on).total_seconds() / 3600
                         next_td = td + 0.33
                         
-                        if td < inactive <= next_td:
+                        if td < inactive <= next_td and close_warnings == 0:
                             warning = _(
-                                "If you do not respond to this ticket "
+                                "⚠️ {mention}\n\nIf you do not respond to this ticket "
                                 "within the next 20 minutes it will be closed automatically."
-                            )
-                            await channel.send(f"{member.mention}\n{warning}")
+                            ).format(mention=member.mention)
+                            try:
+                                await channel.send(warning)
+                                async with self.config.guild(guild).opened() as op:
+                                    if uid in op and channel_id in op[uid]:
+                                        op[uid][channel_id]["close_warnings_sent"] = 1
+                            except discord.HTTPException:
+                                pass
                             continue
                         elif td < inactive:
                             continue
                         
                         should_close = True
-                        time_word = "hours" if inactive != 1 else "hour"
-                        close_reason = _("(Auto-Close) Opened ticket with no response for ") + f"{inactive} {time_word}"
+                        close_reason = _("(Auto-Close) No response for {hours} hours").format(hours=inactive)
                     
                     if should_close and close_reason:
                         try:

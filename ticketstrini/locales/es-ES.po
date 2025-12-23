@@ -296,6 +296,22 @@ msgstr "Ticket cerrado por {}"
 msgid "Reason: {}"
 msgstr "Motivo: {}"
 
+#: Auto-close warning messages (tickets.py)
+msgid "(Auto-Close) User did not respond for {hours} hours"
+msgstr "(Auto-Cierre) El usuario no respondió durante {hours} horas"
+
+msgid "(Auto-Close) No staff response for {hours} hours"
+msgstr "(Auto-Cierre) Sin respuesta del personal durante {hours} horas"
+
+msgid "(Auto-Close) No response for {hours} hours"
+msgstr "(Auto-Cierre) Sin respuesta durante {hours} horas"
+
+msgid "⚠️ {mention}\n\nThis ticket will be **automatically closed** in approximately **{hours} hours** if you do not respond."
+msgstr "⚠️ {mention}\n\nEste ticket será **cerrado automáticamente** en aproximadamente **{hours} horas** si no respondes."
+
+msgid "⚠️ {mention}\n\nIf you do not respond to this ticket within the next 20 minutes it will be closed automatically."
+msgstr "⚠️ {mention}\n\nSi no respondes a este ticket en los próximos 20 minutos, será cerrado automáticamente."
+
 #: General
 msgid "minutes"
 msgstr "minutos"
