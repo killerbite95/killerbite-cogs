@@ -1,19 +1,41 @@
 import asyncio
+import json
 import logging
 from contextlib import suppress
+from datetime import datetime, timedelta
 from typing import Optional, Union
 
 import discord
 from discord import Embed
 from redbot.core import commands
 from redbot.core.i18n import Translator
-from redbot.core.utils.chat_formatting import box
+from redbot.core.utils.chat_formatting import box, pagify
 
 from ..abc import MixinMeta
-from ..common.constants import MODAL_SCHEMA, TICKET_PANEL_SCHEMA
+from ..common.constants import MODAL_SCHEMA, TICKET_PANEL_SCHEMA, QUICK_REPLY_SCHEMA, TICKET_STATUSES
 from ..common.menu import SMALL_CONTROLS, MenuButton, menu
-from ..common.utils import prune_invalid_tickets, update_active_overview
-from ..common.views import PanelView, TestButton, confirm, wait_reply
+from ..common.models import TimeParser, QuickReply, BlacklistEntry
+from ..common.utils import (
+    prune_invalid_tickets,
+    update_active_overview,
+    add_to_blacklist,
+    remove_from_blacklist,
+    export_config,
+    import_config,
+    preflight_check_panel,
+    preflight_check_all_panels,
+    log_audit_action,
+    get_overview_stats,
+)
+from ..common.views import (
+    PanelView,
+    TestButton,
+    confirm,
+    wait_reply,
+    EmbedWizardView,
+    OverviewView,
+    QuickReplyView,
+)
 
 log = logging.getLogger("red.vrt.admincommands")
 _ = Translator("TicketsCommands", __file__)
@@ -1746,6 +1768,983 @@ class AdminCommands(MixinMeta):
             description=desc, color=await self.bot.get_embed_color(ctx)
         )
         await ctx.send(embed=embed, view=view, delete_after=120)
+
+    # ============================================================================
+    # Anti-Spam / Control de Abuso
+    # ============================================================================
+
+    @tickets.group(name="cooldown")
+    async def ticket_cooldown(self, ctx: commands.Context):
+        """Manage ticket creation cooldowns"""
+        pass
+
+    @ticket_cooldown.command(name="set")
+    async def cooldown_set(self, ctx: commands.Context, seconds: int):
+        """
+        Set the cooldown between ticket creations per user
+        
+        Set to 0 to disable
+        """
+        if seconds < 0:
+            return await ctx.send(_("Cooldown must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).ticket_cooldown.set(seconds)
+        if seconds == 0:
+            await ctx.send(_("Ticket cooldown disabled"))
+        else:
+            await ctx.send(_("Users must now wait {} seconds between creating tickets").format(seconds))
+
+    @ticket_cooldown.command(name="view")
+    async def cooldown_view(self, ctx: commands.Context):
+        """View the current cooldown settings"""
+        conf = await self.config.guild(ctx.guild).all()
+        cooldown = conf.get("ticket_cooldown", 0)
+        rate_limit = conf.get("global_rate_limit", 0)
+        
+        embed = discord.Embed(
+            title=_("Cooldown Settings"),
+            color=ctx.author.color,
+        )
+        embed.add_field(
+            name=_("Per-User Cooldown"),
+            value=_("{} seconds").format(cooldown) if cooldown else _("Disabled"),
+        )
+        embed.add_field(
+            name=_("Global Rate Limit"),
+            value=_("{} tickets/hour").format(rate_limit) if rate_limit else _("Disabled"),
+        )
+        await ctx.send(embed=embed)
+
+    @tickets.command(name="ratelimit")
+    async def ticket_ratelimit(self, ctx: commands.Context, tickets_per_hour: int):
+        """
+        Set the global rate limit for ticket creation (tickets per hour)
+        
+        Set to 0 to disable
+        """
+        if tickets_per_hour < 0:
+            return await ctx.send(_("Rate limit must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).global_rate_limit.set(tickets_per_hour)
+        if tickets_per_hour == 0:
+            await ctx.send(_("Global rate limit disabled"))
+        else:
+            await ctx.send(_("Maximum {} tickets can now be created per hour").format(tickets_per_hour))
+
+    @tickets.group(name="agegate")
+    async def age_gate(self, ctx: commands.Context):
+        """Set account or server membership age requirements"""
+        pass
+
+    @age_gate.command(name="account")
+    async def age_account(self, ctx: commands.Context, days: int):
+        """
+        Set minimum account age in days to open tickets
+        
+        Set to 0 to disable
+        """
+        if days < 0:
+            return await ctx.send(_("Days must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).min_account_age.set(days)
+        if days == 0:
+            await ctx.send(_("Account age requirement disabled"))
+        else:
+            await ctx.send(_("Users must now have accounts at least {} days old to open tickets").format(days))
+
+    @age_gate.command(name="server")
+    async def age_server(self, ctx: commands.Context, days: int):
+        """
+        Set minimum server membership age in days to open tickets
+        
+        Set to 0 to disable
+        """
+        if days < 0:
+            return await ctx.send(_("Days must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).min_server_age.set(days)
+        if days == 0:
+            await ctx.send(_("Server membership age requirement disabled"))
+        else:
+            await ctx.send(_("Users must now be server members for at least {} days to open tickets").format(days))
+
+    # ============================================================================
+    # Blacklist Avanzado
+    # ============================================================================
+
+    @tickets.group(name="blacklist")
+    async def blacklist_cmd(self, ctx: commands.Context):
+        """Manage the ticket blacklist"""
+        pass
+
+    @blacklist_cmd.command(name="add")
+    async def blacklist_add(
+        self,
+        ctx: commands.Context,
+        user: discord.Member,
+        duration: Optional[str] = None,
+        *,
+        reason: Optional[str] = None,
+    ):
+        """
+        Add a user to the ticket blacklist
+        
+        Duration can be: 1h, 2d, 1w, 30d, permanent
+        If no duration is specified, the ban is permanent
+        
+        Examples:
+        - `[p]tickets blacklist add @user` - permanent ban
+        - `[p]tickets blacklist add @user 7d spamming` - 7 day ban with reason
+        """
+        expires_at = None
+        if duration and duration.lower() != "permanent":
+            parsed = TimeParser.parse(duration)
+            if parsed:
+                expires_at = datetime.now() + parsed
+            else:
+                return await ctx.send(_("Invalid duration format. Use: 1h, 2d, 1w, 30d, or permanent"))
+        
+        success, message = await add_to_blacklist(
+            guild=ctx.guild,
+            user=user,
+            moderator=ctx.author,
+            reason=reason,
+            expires_at=expires_at,
+            config=self.config,
+        )
+        
+        if success:
+            # Log the action
+            conf = await self.config.guild(ctx.guild).all()
+            await log_audit_action(
+                guild=ctx.guild,
+                action="blacklist_add",
+                user=user,
+                moderator=ctx.author,
+                details=f"Duration: {duration or 'permanent'}, Reason: {reason or 'None'}",
+                config=self.config,
+                conf=conf,
+            )
+        
+        await ctx.send(message)
+
+    @blacklist_cmd.command(name="remove")
+    async def blacklist_remove(self, ctx: commands.Context, user: discord.Member):
+        """Remove a user from the ticket blacklist"""
+        success, message = await remove_from_blacklist(
+            guild=ctx.guild,
+            user=user,
+            config=self.config,
+        )
+        
+        if success:
+            conf = await self.config.guild(ctx.guild).all()
+            await log_audit_action(
+                guild=ctx.guild,
+                action="blacklist_remove",
+                user=user,
+                moderator=ctx.author,
+                details="User removed from blacklist",
+                config=self.config,
+                conf=conf,
+            )
+        
+        await ctx.send(message)
+
+    @blacklist_cmd.command(name="list")
+    async def blacklist_list(self, ctx: commands.Context):
+        """View the ticket blacklist"""
+        conf = await self.config.guild(ctx.guild).all()
+        
+        # Combine simple blacklist and advanced blacklist
+        simple_bl = conf.get("blacklist", [])
+        advanced_bl = conf.get("blacklist_advanced", {})
+        
+        if not simple_bl and not advanced_bl:
+            return await ctx.send(_("The blacklist is empty"))
+        
+        embed = discord.Embed(
+            title=_("Ticket Blacklist"),
+            color=ctx.author.color,
+        )
+        
+        lines = []
+        now = datetime.now()
+        
+        # Simple blacklist entries
+        for uid in simple_bl:
+            member = ctx.guild.get_member(uid)
+            name = member.display_name if member else f"Unknown ({uid})"
+            lines.append(f"• **{name}** - Permanent (legacy)")
+        
+        # Advanced blacklist entries
+        for uid, data in advanced_bl.items():
+            member = ctx.guild.get_member(int(uid))
+            name = member.display_name if member else f"Unknown ({uid})"
+            
+            expires = data.get("expires_at")
+            if expires:
+                expires_dt = datetime.fromisoformat(expires)
+                if expires_dt <= now:
+                    remaining = "Expired"
+                else:
+                    remaining = f"<t:{int(expires_dt.timestamp())}:R>"
+            else:
+                remaining = "Permanent"
+            
+            reason = data.get("reason", "No reason")[:50]
+            lines.append(f"• **{name}** - {remaining}\n  └ {reason}")
+        
+        if lines:
+            description = "\n".join(lines[:20])  # Limit to 20 entries
+            if len(lines) > 20:
+                description += _("\n\n... and {} more").format(len(lines) - 20)
+            embed.description = description
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Auto-Close Inteligente
+    # ============================================================================
+
+    @tickets.group(name="autoclose")
+    async def auto_close_settings(self, ctx: commands.Context):
+        """Configure smart auto-close settings"""
+        pass
+
+    @auto_close_settings.command(name="user")
+    async def autoclose_user(self, ctx: commands.Context, hours: int):
+        """
+        Set hours to auto-close if user doesn't respond after staff reply
+        
+        Set to 0 to disable
+        """
+        if hours < 0:
+            return await ctx.send(_("Hours must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).auto_close_user_hours.set(hours)
+        if hours == 0:
+            await ctx.send(_("User inactivity auto-close disabled"))
+        else:
+            await ctx.send(
+                _("Tickets will auto-close after {} hours if user doesn't respond to staff").format(hours)
+            )
+
+    @auto_close_settings.command(name="staff")
+    async def autoclose_staff(self, ctx: commands.Context, hours: int):
+        """
+        Set hours to auto-close if no staff responds
+        
+        Set to 0 to disable
+        """
+        if hours < 0:
+            return await ctx.send(_("Hours must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).auto_close_staff_hours.set(hours)
+        if hours == 0:
+            await ctx.send(_("Staff inactivity auto-close disabled"))
+        else:
+            await ctx.send(
+                _("Tickets will auto-close after {} hours if no staff responds").format(hours)
+            )
+
+    @auto_close_settings.command(name="warning")
+    async def autoclose_warning(self, ctx: commands.Context, hours: int):
+        """
+        Set hours before auto-close to send warning
+        
+        Set to 0 to disable warnings
+        """
+        if hours < 0:
+            return await ctx.send(_("Hours must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).auto_close_warning_hours.set(hours)
+        if hours == 0:
+            await ctx.send(_("Auto-close warnings disabled"))
+        else:
+            await ctx.send(
+                _("Users will be warned {} hours before ticket auto-closes").format(hours)
+            )
+
+    @auto_close_settings.command(name="reopen")
+    async def autoclose_reopen(self, ctx: commands.Context, hours: int):
+        """
+        Set hours after close during which user can reopen ticket
+        
+        Set to 0 to disable reopening
+        """
+        if hours < 0:
+            return await ctx.send(_("Hours must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).reopen_hours.set(hours)
+        if hours == 0:
+            await ctx.send(_("Ticket reopening disabled"))
+        else:
+            await ctx.send(
+                _("Users can reopen tickets within {} hours of closing").format(hours)
+            )
+
+    @auto_close_settings.command(name="view")
+    async def autoclose_view(self, ctx: commands.Context):
+        """View current auto-close settings"""
+        conf = await self.config.guild(ctx.guild).all()
+        
+        embed = discord.Embed(
+            title=_("Auto-Close Settings"),
+            color=ctx.author.color,
+        )
+        
+        embed.add_field(
+            name=_("Legacy Inactive Hours"),
+            value=str(conf.get("inactive", 0)) or _("Disabled"),
+        )
+        embed.add_field(
+            name=_("User Inactivity"),
+            value=_("{} hours").format(conf.get("auto_close_user_hours", 0)) or _("Disabled"),
+        )
+        embed.add_field(
+            name=_("Staff Inactivity"),
+            value=_("{} hours").format(conf.get("auto_close_staff_hours", 0)) or _("Disabled"),
+        )
+        embed.add_field(
+            name=_("Warning Before Close"),
+            value=_("{} hours").format(conf.get("auto_close_warning_hours", 0)) or _("Disabled"),
+        )
+        embed.add_field(
+            name=_("Reopen Window"),
+            value=_("{} hours").format(conf.get("reopen_hours", 0)) or _("Disabled"),
+        )
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Claim Settings
+    # ============================================================================
+
+    @tickets.group(name="claim")
+    async def claim_settings(self, ctx: commands.Context):
+        """Configure ticket claim settings"""
+        pass
+
+    @claim_settings.command(name="maxperstaff")
+    async def claim_max(self, ctx: commands.Context, max_claims: int):
+        """
+        Set maximum tickets a staff member can claim at once
+        
+        Set to 0 for unlimited
+        """
+        if max_claims < 0:
+            return await ctx.send(_("Must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).max_claims_per_staff.set(max_claims)
+        if max_claims == 0:
+            await ctx.send(_("Staff members can now claim unlimited tickets"))
+        else:
+            await ctx.send(
+                _("Staff members can now claim a maximum of {} tickets").format(max_claims)
+            )
+
+    @claim_settings.command(name="view")
+    async def claim_view(self, ctx: commands.Context):
+        """View current claim settings"""
+        conf = await self.config.guild(ctx.guild).all()
+        
+        embed = discord.Embed(
+            title=_("Claim Settings"),
+            color=ctx.author.color,
+        )
+        
+        max_claims = conf.get("max_claims_per_staff", 0)
+        embed.add_field(
+            name=_("Max Claims Per Staff"),
+            value=str(max_claims) if max_claims else _("Unlimited"),
+        )
+        
+        # Count current claims per staff
+        opened = conf.get("opened", {})
+        claims = {}
+        for uid, tickets in opened.items():
+            for cid, ticket in tickets.items():
+                claimed_by = ticket.get("claimed_by")
+                if claimed_by:
+                    claims[claimed_by] = claims.get(claimed_by, 0) + 1
+        
+        if claims:
+            claims_text = "\n".join([
+                f"<@{uid}>: {count}" for uid, count in sorted(
+                    claims.items(), key=lambda x: x[1], reverse=True
+                )[:10]
+            ])
+            embed.add_field(
+                name=_("Current Claims"),
+                value=claims_text,
+                inline=False,
+            )
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Escalation Settings
+    # ============================================================================
+
+    @tickets.group(name="escalation")
+    async def escalation_settings(self, ctx: commands.Context):
+        """Configure ticket escalation settings"""
+        pass
+
+    @escalation_settings.command(name="channel")
+    async def escalation_channel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
+        """Set the channel for escalation alerts (leave empty to disable)"""
+        if channel:
+            await self.config.guild(ctx.guild).escalation_channel.set(channel.id)
+            await ctx.send(_("Escalation alerts will be sent to {}").format(channel.mention))
+        else:
+            await self.config.guild(ctx.guild).escalation_channel.set(0)
+            await ctx.send(_("Escalation channel disabled"))
+
+    @escalation_settings.command(name="role")
+    async def escalation_role(self, ctx: commands.Context, role: Optional[discord.Role] = None):
+        """Set the role to ping for escalations (leave empty to disable)"""
+        if role:
+            await self.config.guild(ctx.guild).escalation_role.set(role.id)
+            await ctx.send(_("Escalation alerts will mention {}").format(role.mention))
+        else:
+            await self.config.guild(ctx.guild).escalation_role.set(0)
+            await ctx.send(_("Escalation role disabled"))
+
+    @escalation_settings.command(name="minutes")
+    async def escalation_minutes(self, ctx: commands.Context, minutes: int):
+        """
+        Set minutes of inactivity before escalating an unclaimed ticket
+        
+        Set to 0 to disable
+        """
+        if minutes < 0:
+            return await ctx.send(_("Minutes must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).escalation_minutes.set(minutes)
+        if minutes == 0:
+            await ctx.send(_("Automatic escalation disabled"))
+        else:
+            await ctx.send(
+                _("Tickets will be escalated after {} minutes without a claim").format(minutes)
+            )
+
+    @escalation_settings.command(name="view")
+    async def escalation_view(self, ctx: commands.Context):
+        """View current escalation settings"""
+        conf = await self.config.guild(ctx.guild).all()
+        
+        embed = discord.Embed(
+            title=_("Escalation Settings"),
+            color=ctx.author.color,
+        )
+        
+        channel_id = conf.get("escalation_channel", 0)
+        channel = ctx.guild.get_channel(channel_id) if channel_id else None
+        embed.add_field(
+            name=_("Channel"),
+            value=channel.mention if channel else _("Not set"),
+        )
+        
+        role_id = conf.get("escalation_role", 0)
+        role = ctx.guild.get_role(role_id) if role_id else None
+        embed.add_field(
+            name=_("Role"),
+            value=role.mention if role else _("Not set"),
+        )
+        
+        minutes = conf.get("escalation_minutes", 0)
+        embed.add_field(
+            name=_("Minutes"),
+            value=str(minutes) if minutes else _("Disabled"),
+        )
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Quick Replies
+    # ============================================================================
+
+    @tickets.group(name="quickreply", aliases=["qr"])
+    async def quick_reply(self, ctx: commands.Context):
+        """Manage quick reply templates"""
+        pass
+
+    @quick_reply.command(name="add")
+    async def qr_add(self, ctx: commands.Context, name: str, *, content: str):
+        """
+        Add a quick reply template
+        
+        Example: `[p]tickets quickreply add greeting Hello! How can I help you today?`
+        """
+        name = name.lower()
+        
+        async with self.config.guild(ctx.guild).quick_replies() as replies:
+            if name in replies:
+                return await ctx.send(_("A quick reply with that name already exists"))
+            
+            replies[name] = {
+                "title": "",
+                "content": content,
+                "close_after": False,
+                "delay_close": 0,
+            }
+        
+        await ctx.send(_("Quick reply '{}' added!").format(name))
+
+    @quick_reply.command(name="addadvanced")
+    async def qr_add_advanced(
+        self,
+        ctx: commands.Context,
+        name: str,
+        close_after: bool = False,
+        delay_seconds: int = 0,
+    ):
+        """
+        Add an advanced quick reply with more options
+        
+        You will be prompted for title and content
+        """
+        name = name.lower()
+        
+        conf = await self.config.guild(ctx.guild).all()
+        if name in conf.get("quick_replies", {}):
+            return await ctx.send(_("A quick reply with that name already exists"))
+        
+        # Get title
+        await ctx.send(_("Enter the title for this quick reply (or 'skip' for no title):"))
+        title_msg = await wait_reply(ctx, timeout=120)
+        title = "" if title_msg.lower() == "skip" else title_msg
+        
+        # Get content
+        await ctx.send(_("Enter the content/message for this quick reply:"))
+        content = await wait_reply(ctx, timeout=300)
+        if not content:
+            return await ctx.send(_("Cancelled - no content provided"))
+        
+        async with self.config.guild(ctx.guild).quick_replies() as replies:
+            replies[name] = {
+                "title": title,
+                "content": content,
+                "close_after": close_after,
+                "delay_close": delay_seconds,
+            }
+        
+        await ctx.send(_("Advanced quick reply '{}' added!").format(name))
+
+    @quick_reply.command(name="remove")
+    async def qr_remove(self, ctx: commands.Context, name: str):
+        """Remove a quick reply template"""
+        name = name.lower()
+        
+        async with self.config.guild(ctx.guild).quick_replies() as replies:
+            if name not in replies:
+                return await ctx.send(_("Quick reply not found"))
+            del replies[name]
+        
+        await ctx.send(_("Quick reply '{}' removed!").format(name))
+
+    @quick_reply.command(name="list")
+    async def qr_list(self, ctx: commands.Context):
+        """List all quick reply templates"""
+        conf = await self.config.guild(ctx.guild).all()
+        replies = conf.get("quick_replies", {})
+        
+        if not replies:
+            return await ctx.send(_("No quick replies configured"))
+        
+        embed = discord.Embed(
+            title=_("Quick Replies"),
+            color=ctx.author.color,
+        )
+        
+        for name, data in list(replies.items())[:25]:
+            content_preview = data.get("content", "")[:100]
+            if len(data.get("content", "")) > 100:
+                content_preview += "..."
+            
+            extras = []
+            if data.get("title"):
+                extras.append(f"Title: {data['title'][:30]}")
+            if data.get("close_after"):
+                delay = data.get("delay_close", 0)
+                extras.append(f"Closes after {delay}s" if delay else "Closes immediately")
+            
+            value = content_preview
+            if extras:
+                value += f"\n*{', '.join(extras)}*"
+            
+            embed.add_field(name=name, value=value, inline=False)
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Audit Log
+    # ============================================================================
+
+    @tickets.command(name="auditlog")
+    async def audit_log_channel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
+        """Set the audit log channel for ticket actions (leave empty to disable)"""
+        if channel:
+            await self.config.guild(ctx.guild).audit_log_channel.set(channel.id)
+            await ctx.send(_("Audit logs will be sent to {}").format(channel.mention))
+        else:
+            await self.config.guild(ctx.guild).audit_log_channel.set(0)
+            await ctx.send(_("Audit logging disabled"))
+
+    # ============================================================================
+    # Export/Import Config
+    # ============================================================================
+
+    @tickets.command(name="export")
+    async def export_cmd(self, ctx: commands.Context):
+        """Export ticket configuration to a JSON file"""
+        export_data = await export_config(ctx.guild, self.config)
+        
+        # Create file
+        json_str = json.dumps(export_data, indent=2, default=str)
+        
+        file = discord.File(
+            fp=__import__("io").BytesIO(json_str.encode()),
+            filename=f"tickets_config_{ctx.guild.id}.json"
+        )
+        
+        await ctx.send(
+            _("Here's your ticket configuration export:"),
+            file=file,
+        )
+
+    @tickets.command(name="import")
+    async def import_cmd(self, ctx: commands.Context):
+        """Import ticket configuration from a JSON file"""
+        if not ctx.message.attachments:
+            return await ctx.send(_("Please attach a JSON file to import"))
+        
+        attachment = ctx.message.attachments[0]
+        if not attachment.filename.endswith(".json"):
+            return await ctx.send(_("Please attach a JSON file"))
+        
+        try:
+            content = await attachment.read()
+            import_data = json.loads(content.decode())
+        except json.JSONDecodeError:
+            return await ctx.send(_("Invalid JSON file"))
+        except Exception as e:
+            return await ctx.send(_("Failed to read file: {}").format(str(e)))
+        
+        # Confirm
+        embed = discord.Embed(
+            title=_("⚠️ Import Configuration"),
+            description=_(
+                "This will **overwrite** the following settings:\n"
+                "• Support roles\n"
+                "• Panel configurations\n"
+                "• Quick replies\n"
+                "• Blacklist\n"
+                "• All other ticket settings\n\n"
+                "**This action cannot be undone!**\n"
+                "Are you sure you want to continue?"
+            ),
+            color=discord.Color.orange(),
+        )
+        msg = await ctx.send(embed=embed)
+        yes = await confirm(ctx, msg)
+        
+        if not yes:
+            return await ctx.send(_("Import cancelled"))
+        
+        success, message = await import_config(
+            guild=ctx.guild,
+            config=self.config,
+            import_data=import_data,
+        )
+        
+        if success:
+            await log_audit_action(
+                guild=ctx.guild,
+                action="config_import",
+                user=ctx.author,
+                moderator=ctx.author,
+                details="Configuration imported",
+                config=self.config,
+                conf=await self.config.guild(ctx.guild).all(),
+            )
+            await self.initialize(ctx.guild)
+        
+        await ctx.send(message)
+
+    # ============================================================================
+    # Preflight Check
+    # ============================================================================
+
+    @tickets.command(name="preflight")
+    async def preflight_cmd(self, ctx: commands.Context, panel_name: Optional[str] = None):
+        """
+        Run preflight checks on panel configurations
+        
+        Checks permissions, channel validity, and other potential issues
+        """
+        conf = await self.config.guild(ctx.guild).all()
+        
+        if panel_name:
+            panel_name = panel_name.lower()
+            if panel_name not in conf.get("panels", {}):
+                return await ctx.send(_("Panel not found"))
+            
+            panel = conf["panels"][panel_name]
+            issues = await preflight_check_panel(ctx.guild, panel_name, panel, self.bot)
+            
+            if not issues:
+                embed = discord.Embed(
+                    title=_("✅ Panel Check Passed"),
+                    description=_("No issues found with panel '{}'").format(panel_name),
+                    color=discord.Color.green(),
+                )
+            else:
+                embed = discord.Embed(
+                    title=_("⚠️ Panel Issues Found"),
+                    description="\n".join([f"• {issue}" for issue in issues]),
+                    color=discord.Color.orange(),
+                )
+        else:
+            # Check all panels
+            all_issues = await preflight_check_all_panels(ctx.guild, conf, self.bot)
+            
+            if not all_issues:
+                embed = discord.Embed(
+                    title=_("✅ All Panels OK"),
+                    description=_("No issues found with any panels"),
+                    color=discord.Color.green(),
+                )
+            else:
+                embed = discord.Embed(
+                    title=_("⚠️ Issues Found"),
+                    color=discord.Color.orange(),
+                )
+                for panel_name, issues in all_issues.items():
+                    if issues:
+                        embed.add_field(
+                            name=panel_name,
+                            value="\n".join([f"• {i}" for i in issues[:5]]),
+                            inline=False,
+                        )
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Enhanced Embed Wizard
+    # ============================================================================
+
+    @tickets.command(name="embedwizard")
+    async def embed_wizard(self, ctx: commands.Context):
+        """
+        Interactive embed creation wizard with buttons
+        
+        Create embeds visually with live preview
+        """
+        view = EmbedWizardView(ctx)
+        
+        embed = discord.Embed(
+            title=_("(No title)"),
+            description=_("(No description)"),
+            color=ctx.author.color,
+        )
+        embed.set_author(name=_("Preview"))
+        
+        msg = await ctx.send(
+            _("Use the buttons below to build your embed:"),
+            embed=embed,
+            view=view,
+        )
+        
+        await view.wait()
+        
+        if view.cancelled:
+            await msg.edit(view=None)
+        elif view.channel:
+            await msg.edit(
+                content=_("Embed sent to {}!").format(view.channel.mention),
+                embed=None,
+                view=None,
+            )
+        else:
+            await msg.edit(view=None)
+
+    # ============================================================================
+    # Enhanced Overview
+    # ============================================================================
+
+    @tickets.command(name="overviewpro")
+    async def overview_pro(self, ctx: commands.Context):
+        """
+        Enhanced ticket overview with pagination, filters, and stats
+        """
+        conf = await self.config.guild(ctx.guild).all()
+        
+        view = OverviewView(
+            bot=self.bot,
+            guild=ctx.guild,
+            config=self.config,
+            conf=conf,
+        )
+        
+        # Initial render
+        from ..common.utils import prep_overview_text_paginated
+        text, page, total_pages = prep_overview_text_paginated(
+            ctx.guild,
+            conf.get("opened", {}),
+            mention=conf.get("overview_mention", False),
+        )
+        
+        embed = discord.Embed(
+            title=_("Ticket Overview"),
+            description=text,
+            color=discord.Color.greyple(),
+            timestamp=datetime.now(),
+        )
+        if total_pages > 0:
+            embed.set_footer(text=_("Page {}/{}").format(1, total_pages))
+        
+        await ctx.send(embed=embed, view=view)
+
+    # ============================================================================
+    # Statistics
+    # ============================================================================
+
+    @tickets.command(name="stats")
+    async def ticket_stats(self, ctx: commands.Context):
+        """View ticket statistics and KPIs"""
+        conf = await self.config.guild(ctx.guild).all()
+        stats = get_overview_stats(ctx.guild, conf.get("opened", {}), conf)
+        
+        embed = discord.Embed(
+            title=_("📊 Ticket Statistics"),
+            color=ctx.author.color,
+            timestamp=datetime.now(),
+        )
+        
+        # Current status
+        status_text = []
+        status_text.append(_("**Total Open:** {}").format(stats["total_open"]))
+        for status, emoji in TICKET_STATUSES.items():
+            count = stats["by_status"].get(status, 0)
+            if count > 0:
+                status_text.append(f"{emoji} {status.replace('_', ' ').title()}: {count}")
+        
+        embed.add_field(
+            name=_("Current Tickets"),
+            value="\n".join(status_text) or _("No open tickets"),
+            inline=True,
+        )
+        
+        # All time stats
+        embed.add_field(
+            name=_("All Time"),
+            value=_(
+                "**Opened:** {opened}\n"
+                "**Closed:** {closed}\n"
+                "**Avg Claim Time:** {claim}\n"
+                "**Avg Close Time:** {close}"
+            ).format(
+                opened=stats["total_opened_all_time"],
+                closed=stats["total_closed_all_time"],
+                claim=stats["avg_claim_time"],
+                close=stats["avg_close_time"],
+            ),
+            inline=True,
+        )
+        
+        # By panel
+        if stats["by_panel"]:
+            panel_text = "\n".join([f"**{k}:** {v}" for k, v in stats["by_panel"].items()])
+            if len(panel_text) <= 1024:
+                embed.add_field(name=_("By Panel"), value=panel_text, inline=False)
+        
+        # By staff
+        if stats["by_staff"]:
+            staff_text = "\n".join([
+                f"<@{uid}>: {count}" 
+                for uid, count in sorted(
+                    stats["by_staff"].items(), 
+                    key=lambda x: x[1], 
+                    reverse=True
+                )[:10]
+            ])
+            embed.add_field(name=_("Claims by Staff"), value=staff_text, inline=False)
+        
+        await ctx.send(embed=embed)
+
+    # ============================================================================
+    # Transcript Settings
+    # ============================================================================
+
+    @tickets.group(name="transcript")
+    async def transcript_settings(self, ctx: commands.Context):
+        """Configure transcript settings"""
+        pass
+
+    @transcript_settings.command(name="retention")
+    async def transcript_retention(self, ctx: commands.Context, days: int):
+        """
+        Set how many days to keep transcript logs
+        
+        Set to 0 for unlimited retention
+        """
+        if days < 0:
+            return await ctx.send(_("Days must be 0 or greater"))
+        
+        await self.config.guild(ctx.guild).transcript_retention_days.set(days)
+        if days == 0:
+            await ctx.send(_("Transcript retention set to unlimited"))
+        else:
+            await ctx.send(_("Transcripts will be kept for {} days").format(days))
+
+    @transcript_settings.command(name="formats")
+    async def transcript_formats(self, ctx: commands.Context, *formats: str):
+        """
+        Set transcript export formats
+        
+        Available formats: html, txt, json
+        Example: `[p]tickets transcript formats html txt`
+        """
+        valid_formats = ["html", "txt", "json"]
+        selected = []
+        
+        for fmt in formats:
+            fmt = fmt.lower()
+            if fmt in valid_formats and fmt not in selected:
+                selected.append(fmt)
+        
+        if not selected:
+            return await ctx.send(_("Please specify at least one valid format: html, txt, json"))
+        
+        await self.config.guild(ctx.guild).transcript_formats.set(selected)
+        await ctx.send(_("Transcript formats set to: {}").format(", ".join(selected)))
+
+    @transcript_settings.command(name="view")
+    async def transcript_view(self, ctx: commands.Context):
+        """View current transcript settings"""
+        conf = await self.config.guild(ctx.guild).all()
+        
+        embed = discord.Embed(
+            title=_("Transcript Settings"),
+            color=ctx.author.color,
+        )
+        
+        retention = conf.get("transcript_retention_days", 0)
+        embed.add_field(
+            name=_("Retention"),
+            value=_("{} days").format(retention) if retention else _("Unlimited"),
+        )
+        
+        formats = conf.get("transcript_formats", ["html"])
+        embed.add_field(
+            name=_("Formats"),
+            value=", ".join(formats) if formats else "html",
+        )
+        
+        await ctx.send(embed=embed)
         await asyncio.sleep(120)
         if not ctx.interaction:
             await ctx.tick()

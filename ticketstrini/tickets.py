@@ -12,15 +12,21 @@ from redbot.core.i18n import Translator, cog_i18n
 
 from .abc import CompositeMetaClass
 from .commands import TicketCommands
-from .common.constants import DEFAULT_GUILD
+from .common.constants import DEFAULT_GUILD, SCHEMA_VERSION
 from .common.functions import Functions
 from .common.utils import (
     close_ticket,
     prune_invalid_tickets,
     ticket_owner_hastyped,
     update_active_overview,
+    migrate_schema,
+    log_audit_action,
+    check_auto_close_warnings,
+    should_auto_close,
+    update_last_message,
+    escalate_ticket,
 )
-from .common.views import CloseView, LogView, PanelView
+from .common.views import CloseView, LogView, PanelView, StaffActionsView
 
 # ----------------- Agregamos la integración del Dashboard -----------------
 from .dashboard_integration import DashboardIntegration, dashboard_page
@@ -34,7 +40,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     Sistema de tickets de soporte multi-panel con botones (Trini Edition)
     """
     __author__ = "[Killerbite95](https://github.com/killerbite95/killerbite-cogs)"
-    __version__ = "3.0.0"
+    __version__ = "4.0.0"
 
     def format_help_for_context(self, ctx):
         helpcmd = super().format_help_for_context(ctx)
@@ -55,14 +61,19 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         self.views = []  # Saved views to end on reload
         self.view_cache: t.Dict[int, t.List[discord.ui.View]] = {}  # Saved views to end on reload
         self.initializing = False
+        
+        # Track message timestamps for smart auto-close
+        self.last_activity: t.Dict[str, datetime.datetime] = {}  # channel_id -> last message time
 
         self.auto_close.start()
+        self.escalation_check.start()
 
     async def cog_load(self) -> None:
         asyncio.create_task(self._startup())
 
     async def cog_unload(self) -> None:
         self.auto_close.cancel()
+        self.escalation_check.cancel()
         for view in self.views:
             view.stop()
 
@@ -98,6 +109,13 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         for view in views:
             view.stop()
         self.view_cache[guild.id].clear()
+
+        # Schema migration check
+        current_version = data.get("schema_version", 1)
+        if current_version < SCHEMA_VERSION:
+            log.info(f"Migrating schema for {guild.name} from v{current_version} to v{SCHEMA_VERSION}")
+            data = await migrate_schema(guild, data, self.config)
+            await self.config.guild(guild).schema_version.set(SCHEMA_VERSION)
 
         pruned = await prune_invalid_tickets(guild, data, self.config)
         if pruned:
@@ -241,71 +259,141 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
 
     @tasks.loop(minutes=20)
     async def auto_close(self):
+        """Smart auto-close that differentiates user vs staff inactivity"""
         actasks = []
         conf = await self.config.all_guilds()
-        for gid, conf in conf.items():
-            if not conf:
+        for gid, gconf in conf.items():
+            if not gconf:
                 continue
             guild = self.bot.get_guild(gid)
             if not guild:
                 continue
-            inactive = conf["inactive"]
-            if not inactive:
+            
+            # Check both legacy inactive and new auto_close settings
+            inactive = gconf.get("inactive", 0)
+            auto_close_user_hours = gconf.get("auto_close_user_hours", 0)
+            auto_close_staff_hours = gconf.get("auto_close_staff_hours", 0)
+            auto_close_warning_hours = gconf.get("auto_close_warning_hours", 0)
+            
+            # Skip if no auto-close configured
+            if not inactive and not auto_close_user_hours and not auto_close_staff_hours:
                 continue
-            opened = conf["opened"]
+            
+            opened = gconf.get("opened", {})
             if not opened:
                 continue
+            
             for uid, tickets in opened.items():
                 member = guild.get_member(int(uid))
                 if not member:
                     continue
+                
                 for channel_id, ticket in tickets.items():
+                    channel = guild.get_channel_or_thread(int(channel_id))
+                    if not channel:
+                        continue
+                    
+                    # Legacy behavior: check has_response flag
                     has_response = ticket.get("has_response")
                     if has_response and channel_id not in self.valid:
                         self.valid.append(channel_id)
                         continue
                     if channel_id in self.valid:
                         continue
-                    channel = guild.get_channel_or_thread(int(channel_id))
-                    if not channel:
-                        continue
+                    
                     now = datetime.datetime.now().astimezone()
-                    opened_on = datetime.datetime.fromisoformat(ticket["opened"])
-                    hastyped = await ticket_owner_hastyped(channel, member)
-                    if hastyped and channel_id not in self.valid:
-                        self.valid.append(channel_id)
-                        continue
-                    td = (now - opened_on).total_seconds() / 3600
-                    next_td = td + 0.33
-                    if td < inactive <= next_td:
-                        warning = _(
-                            "If you do not respond to this ticket "
-                            "within the next 20 minutes it will be closed automatically."
-                        )
-                        await channel.send(f"{member.mention}\n{warning}")
-                        continue
-                    elif td < inactive:
-                        continue
-
-                    time = "hours" if inactive != 1 else "hour"
-                    try:
-                        await close_ticket(
-                            self.bot,
-                            member,
-                            guild,
-                            channel,
-                            conf,
-                            _("(Auto-Close) Opened ticket with no response for ") + f"{inactive} {time}",
-                            self.bot.user.name,
-                            self.config,
-                        )
-                        log.info(
-                            f"Ticket opened by {member.name} has been auto-closed.\n"
-                            f"Has typed: {hastyped}\n"
-                            f"Hours elapsed: {td}"
-                        )
-                    except Exception as e:
-                        log.error(f"Failed to auto-close ticket for {member} in {guild.name}\nException: {e}")
+                    
+                    # Get status and timestamps for smart auto-close
+                    status = ticket.get("status", "open")
+                    last_user_msg = ticket.get("last_user_message")
+                    last_staff_msg = ticket.get("last_staff_message")
+                    close_warnings = ticket.get("close_warnings_sent", 0)
+                    
+                    # Smart auto-close based on who needs to respond
+                    should_close = False
+                    close_reason = None
+                    time_since_user = None
+                    time_since_staff = None
+                    
+                    if last_user_msg:
+                        last_user_dt = datetime.datetime.fromisoformat(last_user_msg)
+                        time_since_user = (now - last_user_dt).total_seconds() / 3600
+                    
+                    if last_staff_msg:
+                        last_staff_dt = datetime.datetime.fromisoformat(last_staff_msg)
+                        time_since_staff = (now - last_staff_dt).total_seconds() / 3600
+                    
+                    # Check if we should send warning or close
+                    if status == "awaiting_user" and auto_close_user_hours > 0:
+                        if time_since_staff and time_since_staff >= auto_close_user_hours:
+                            should_close = True
+                            close_reason = _("(Auto-Close) User did not respond for {} hours").format(
+                                auto_close_user_hours
+                            )
+                        elif auto_close_warning_hours > 0 and time_since_staff:
+                            warning_threshold = auto_close_user_hours - auto_close_warning_hours
+                            if time_since_staff >= warning_threshold and close_warnings == 0:
+                                # Send warning
+                                warning = _(
+                                    "⚠️ {mention}\nThis ticket will be **automatically closed** in "
+                                    "approximately **{hours} hours** if you do not respond."
+                                ).format(mention=member.mention, hours=auto_close_warning_hours)
+                                try:
+                                    await channel.send(warning)
+                                    # Update warnings sent
+                                    async with self.config.guild(guild).opened() as op:
+                                        if uid in op and channel_id in op[uid]:
+                                            op[uid][channel_id]["close_warnings_sent"] = 1
+                                except discord.HTTPException:
+                                    pass
+                                continue
+                    
+                    elif status == "awaiting_staff" and auto_close_staff_hours > 0:
+                        if time_since_user and time_since_user >= auto_close_staff_hours:
+                            should_close = True
+                            close_reason = _("(Auto-Close) No staff response for {} hours").format(
+                                auto_close_staff_hours
+                            )
+                    
+                    # Legacy behavior fallback
+                    if not should_close and inactive > 0:
+                        opened_on = datetime.datetime.fromisoformat(ticket["opened"])
+                        hastyped = await ticket_owner_hastyped(channel, member)
+                        if hastyped and channel_id not in self.valid:
+                            self.valid.append(channel_id)
+                            continue
+                        td = (now - opened_on).total_seconds() / 3600
+                        next_td = td + 0.33
+                        
+                        if td < inactive <= next_td:
+                            warning = _(
+                                "If you do not respond to this ticket "
+                                "within the next 20 minutes it will be closed automatically."
+                            )
+                            await channel.send(f"{member.mention}\n{warning}")
+                            continue
+                        elif td < inactive:
+                            continue
+                        
+                        should_close = True
+                        time_word = "hours" if inactive != 1 else "hour"
+                        close_reason = _("(Auto-Close) Opened ticket with no response for ") + f"{inactive} {time_word}"
+                    
+                    if should_close and close_reason:
+                        try:
+                            await close_ticket(
+                                self.bot,
+                                member,
+                                guild,
+                                channel,
+                                gconf,
+                                close_reason,
+                                self.bot.user.name,
+                                self.config,
+                            )
+                            log.info(f"Ticket opened by {member.name} has been auto-closed: {close_reason}")
+                        except Exception as e:
+                            log.error(f"Failed to auto-close ticket for {member} in {guild.name}\nException: {e}")
 
         if actasks:
             await asyncio.gather(*actasks)
@@ -314,6 +402,124 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     async def before_auto_close(self):
         await self.bot.wait_until_red_ready()
         await asyncio.sleep(300)
+
+    @tasks.loop(minutes=15)
+    async def escalation_check(self):
+        """Check tickets that need escalation based on time without response"""
+        conf = await self.config.all_guilds()
+        for gid, gconf in conf.items():
+            if not gconf:
+                continue
+            guild = self.bot.get_guild(gid)
+            if not guild:
+                continue
+            
+            escalation_minutes = gconf.get("escalation_minutes", 0)
+            escalation_channel_id = gconf.get("escalation_channel", 0)
+            escalation_role_id = gconf.get("escalation_role", 0)
+            
+            if not escalation_minutes or (not escalation_channel_id and not escalation_role_id):
+                continue
+            
+            escalation_channel = guild.get_channel(escalation_channel_id) if escalation_channel_id else None
+            escalation_role = guild.get_role(escalation_role_id) if escalation_role_id else None
+            
+            opened = gconf.get("opened", {})
+            now = datetime.datetime.now().astimezone()
+            
+            for uid, tickets in opened.items():
+                for channel_id, ticket in tickets.items():
+                    # Skip already escalated tickets
+                    if ticket.get("escalated"):
+                        continue
+                    
+                    # Skip claimed tickets (they're being handled)
+                    if ticket.get("claimed_by"):
+                        continue
+                    
+                    status = ticket.get("status", "open")
+                    if status != "open" and status != "awaiting_staff":
+                        continue
+                    
+                    # Check time since last user message
+                    last_user_msg = ticket.get("last_user_message")
+                    if not last_user_msg:
+                        # Use opened time
+                        last_user_msg = ticket.get("opened")
+                    
+                    if not last_user_msg:
+                        continue
+                    
+                    last_user_dt = datetime.datetime.fromisoformat(last_user_msg)
+                    minutes_elapsed = (now - last_user_dt).total_seconds() / 60
+                    
+                    if minutes_elapsed >= escalation_minutes:
+                        channel = guild.get_channel_or_thread(int(channel_id))
+                        if not channel:
+                            continue
+                        
+                        # Escalate the ticket
+                        await escalate_ticket(
+                            guild=guild,
+                            channel=channel,
+                            config=self.config,
+                            conf=gconf,
+                            escalation_channel=escalation_channel,
+                            escalation_role=escalation_role,
+                        )
+                        log.info(f"Escalated ticket {channel_id} in {guild.name} after {minutes_elapsed:.0f} minutes")
+
+    @escalation_check.before_loop
+    async def before_escalation_check(self):
+        await self.bot.wait_until_red_ready()
+        await asyncio.sleep(600)  # Wait 10 minutes after startup
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        """Track messages in ticket channels for smart auto-close"""
+        if message.author.bot:
+            return
+        if not message.guild:
+            return
+        
+        # Check if this is a ticket channel
+        conf = await self.config.guild(message.guild).all()
+        opened = conf.get("opened", {})
+        
+        channel_id = str(message.channel.id)
+        ticket_owner_id = None
+        ticket_data = None
+        
+        for uid, tickets in opened.items():
+            if channel_id in tickets:
+                ticket_owner_id = uid
+                ticket_data = tickets[channel_id]
+                break
+        
+        if not ticket_owner_id or not ticket_data:
+            return
+        
+        # Determine if message is from user or staff
+        is_owner = str(message.author.id) == ticket_owner_id
+        
+        # Get support roles
+        support_roles = [i[0] for i in conf.get("support_roles", [])]
+        panel_name = ticket_data.get("panel")
+        if panel_name and panel_name in conf.get("panels", {}):
+            panel_roles = conf["panels"][panel_name].get("roles", [])
+            support_roles.extend([i[0] for i in panel_roles])
+        
+        user_roles = [r.id for r in message.author.roles]
+        is_staff = any(rid in support_roles for rid in user_roles)
+        
+        # Update last message timestamps
+        await update_last_message(
+            guild=message.guild,
+            channel_id=channel_id,
+            owner_id=ticket_owner_id,
+            is_staff=is_staff,
+            config=self.config,
+        )
 
     @commands.Cog.listener()
     async def on_member_remove(self, member: discord.Member):

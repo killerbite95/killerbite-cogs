@@ -11,7 +11,16 @@ from redbot.core.i18n import Translator
 from redbot.core.utils.mod import is_admin_or_superior
 
 from ..abc import MixinMeta
-from ..common.utils import can_close, close_ticket, get_ticket_owner
+from ..common.utils import (
+    can_close,
+    close_ticket,
+    get_ticket_owner,
+    claim_ticket,
+    unclaim_ticket,
+    transfer_ticket,
+    add_ticket_note,
+)
+from ..common.views import QuickReplyView, NoteModal, TransferView
 
 LOADING = "https://i.imgur.com/l3p6EMX.gif"
 log = logging.getLogger("red.vrt.tickets.base")
@@ -180,3 +189,381 @@ class BaseCommands(MixinMeta):
             closedby=ctx.author.name,
             config=self.config,
         )
+
+    # ============================================================================
+    # Claim / Unclaim / Transfer Commands
+    # ============================================================================
+
+    @commands.hybrid_command(name="claim", description="Claim this ticket")
+    @commands.guild_only()
+    async def claim_cmd(self, ctx: commands.Context):
+        """Claim this ticket as your own to handle"""
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        # Check if user is support staff
+        panel_name = conf["opened"][owner_id][str(ctx.channel.id)]["panel"]
+        panel_roles = conf["panels"][panel_name]["roles"] if panel_name in conf["panels"] else []
+        user_roles = [r.id for r in ctx.author.roles]
+        
+        support_roles = [i[0] for i in conf["support_roles"]]
+        support_roles.extend([i[0] for i in panel_roles])
+        
+        is_staff = any(i in support_roles for i in user_roles)
+        if not is_staff and ctx.author.id != ctx.guild.owner_id:
+            if not await is_admin_or_superior(self.bot, ctx.author):
+                return await ctx.send(_("Only support staff can claim tickets"))
+        
+        success, message = await claim_ticket(
+            guild=ctx.guild,
+            channel=ctx.channel,
+            staff=ctx.author,
+            config=self.config,
+            conf=conf,
+        )
+        
+        await ctx.send(message)
+
+    @commands.hybrid_command(name="unclaim", description="Unclaim this ticket")
+    @commands.guild_only()
+    async def unclaim_cmd(self, ctx: commands.Context):
+        """Unclaim this ticket so others can claim it"""
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        success, message = await unclaim_ticket(
+            guild=ctx.guild,
+            channel=ctx.channel,
+            staff=ctx.author,
+            config=self.config,
+            conf=conf,
+        )
+        
+        await ctx.send(message)
+
+    @commands.hybrid_command(name="transfer", description="Transfer this ticket to another staff member")
+    @app_commands.describe(new_staff="The staff member to transfer the ticket to")
+    @commands.guild_only()
+    async def transfer_cmd(self, ctx: commands.Context, new_staff: discord.Member):
+        """Transfer this ticket to another staff member"""
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        # Check if user is support staff or current claimant
+        ticket_data = conf["opened"][owner_id][str(ctx.channel.id)]
+        claimed_by = ticket_data.get("claimed_by")
+        
+        panel_name = ticket_data.get("panel")
+        panel_roles = conf["panels"][panel_name]["roles"] if panel_name in conf["panels"] else []
+        user_roles = [r.id for r in ctx.author.roles]
+        
+        support_roles = [i[0] for i in conf["support_roles"]]
+        support_roles.extend([i[0] for i in panel_roles])
+        
+        is_staff = any(i in support_roles for i in user_roles)
+        is_claimant = claimed_by == ctx.author.id
+        is_admin = ctx.author.id == ctx.guild.owner_id or await is_admin_or_superior(self.bot, ctx.author)
+        
+        if not (is_staff or is_claimant or is_admin):
+            return await ctx.send(_("Only staff or the current claimant can transfer tickets"))
+        
+        # Check if target is staff
+        new_staff_roles = [r.id for r in new_staff.roles]
+        if not any(i in support_roles for i in new_staff_roles):
+            if new_staff.id != ctx.guild.owner_id and not await is_admin_or_superior(self.bot, new_staff):
+                return await ctx.send(_("The target user must be a support staff member"))
+        
+        success, message = await transfer_ticket(
+            guild=ctx.guild,
+            channel=ctx.channel,
+            from_staff=ctx.author,
+            to_staff=new_staff,
+            config=self.config,
+            conf=conf,
+        )
+        
+        await ctx.send(message)
+
+    # ============================================================================
+    # Notes Command
+    # ============================================================================
+
+    @commands.hybrid_command(name="note", description="Add an internal note to this ticket")
+    @app_commands.describe(note="The note to add (optional, will prompt if not provided)")
+    @commands.guild_only()
+    async def note_cmd(self, ctx: commands.Context, *, note: Optional[str] = None):
+        """
+        Add an internal staff note to this ticket
+        
+        Notes are only visible to staff and stored with the ticket
+        """
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        # Check if user is support staff
+        panel_name = conf["opened"][owner_id][str(ctx.channel.id)]["panel"]
+        panel_roles = conf["panels"][panel_name]["roles"] if panel_name in conf["panels"] else []
+        user_roles = [r.id for r in ctx.author.roles]
+        
+        support_roles = [i[0] for i in conf["support_roles"]]
+        support_roles.extend([i[0] for i in panel_roles])
+        
+        is_staff = any(i in support_roles for i in user_roles)
+        if not is_staff and ctx.author.id != ctx.guild.owner_id:
+            if not await is_admin_or_superior(self.bot, ctx.author):
+                return await ctx.send(_("Only support staff can add notes"))
+        
+        if not note:
+            # Use modal for input
+            if ctx.interaction:
+                modal = NoteModal()
+                await ctx.interaction.response.send_modal(modal)
+                await modal.wait()
+                note = modal.note_content
+                if not note:
+                    return
+            else:
+                return await ctx.send(_("Please provide a note: `{}note Your note here`").format(ctx.prefix))
+        
+        success = await add_ticket_note(
+            guild=ctx.guild,
+            channel=ctx.channel,
+            staff=ctx.author,
+            content=note,
+            config=self.config,
+            conf=conf,
+        )
+        
+        if success:
+            if ctx.interaction and not ctx.interaction.response.is_done():
+                await ctx.interaction.response.send_message(_("📝 Note added!"), ephemeral=True)
+            else:
+                await ctx.send(_("📝 Note added!"))
+        else:
+            await ctx.send(_("Failed to add note"))
+
+    @commands.hybrid_command(name="notes", description="View notes for this ticket")
+    @commands.guild_only()
+    async def notes_list(self, ctx: commands.Context):
+        """View all internal notes for this ticket"""
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        # Check if user is support staff
+        panel_name = conf["opened"][owner_id][str(ctx.channel.id)]["panel"]
+        panel_roles = conf["panels"][panel_name]["roles"] if panel_name in conf["panels"] else []
+        user_roles = [r.id for r in ctx.author.roles]
+        
+        support_roles = [i[0] for i in conf["support_roles"]]
+        support_roles.extend([i[0] for i in panel_roles])
+        
+        is_staff = any(i in support_roles for i in user_roles)
+        if not is_staff and ctx.author.id != ctx.guild.owner_id:
+            if not await is_admin_or_superior(self.bot, ctx.author):
+                return await ctx.send(_("Only support staff can view notes"))
+        
+        ticket_data = conf["opened"][owner_id][str(ctx.channel.id)]
+        notes = ticket_data.get("notes", [])
+        
+        if not notes:
+            return await ctx.send(_("No notes for this ticket"))
+        
+        embed = discord.Embed(
+            title=_("📝 Ticket Notes"),
+            color=ctx.author.color,
+        )
+        
+        for i, note in enumerate(notes[-10:], 1):  # Last 10 notes
+            staff_id = note.get("staff_id")
+            staff = ctx.guild.get_member(staff_id) if staff_id else None
+            staff_name = staff.display_name if staff else "Unknown"
+            
+            timestamp = note.get("timestamp", "Unknown")
+            content = note.get("content", "")[:200]
+            
+            embed.add_field(
+                name=f"#{i} - {staff_name}",
+                value=f"{content}\n*{timestamp}*",
+                inline=False,
+            )
+        
+        await ctx.send(embed=embed, ephemeral=True if ctx.interaction else False)
+
+    # ============================================================================
+    # Quick Reply Command
+    # ============================================================================
+
+    @commands.hybrid_command(name="quickreply", aliases=["qr"], description="Send a quick reply template")
+    @app_commands.describe(template_name="Name of the quick reply template (optional)")
+    @commands.guild_only()
+    async def quick_reply_cmd(self, ctx: commands.Context, template_name: Optional[str] = None):
+        """
+        Send a quick reply template in this ticket
+        
+        Use without arguments to see a dropdown of available templates
+        """
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        # Check if user is support staff
+        panel_name = conf["opened"][owner_id][str(ctx.channel.id)]["panel"]
+        panel_roles = conf["panels"][panel_name]["roles"] if panel_name in conf["panels"] else []
+        user_roles = [r.id for r in ctx.author.roles]
+        
+        support_roles = [i[0] for i in conf["support_roles"]]
+        support_roles.extend([i[0] for i in panel_roles])
+        
+        is_staff = any(i in support_roles for i in user_roles)
+        if not is_staff and ctx.author.id != ctx.guild.owner_id:
+            if not await is_admin_or_superior(self.bot, ctx.author):
+                return await ctx.send(_("Only support staff can use quick replies"))
+        
+        templates = conf.get("quick_replies", {})
+        if not templates:
+            return await ctx.send(_("No quick reply templates configured"))
+        
+        if template_name:
+            # Send specific template
+            template_name = template_name.lower()
+            if template_name not in templates:
+                return await ctx.send(_("Template '{}' not found").format(template_name))
+            
+            template = templates[template_name]
+            title = template.get("title", "")
+            content = template.get("content", "")
+            
+            if title:
+                embed = discord.Embed(
+                    title=title,
+                    description=content,
+                    color=discord.Color.blue(),
+                )
+                await ctx.channel.send(embed=embed)
+            else:
+                await ctx.channel.send(content)
+            
+            if ctx.interaction:
+                await ctx.interaction.response.send_message(_("Quick reply sent!"), ephemeral=True)
+            else:
+                # Delete the command message
+                try:
+                    await ctx.message.delete()
+                except discord.HTTPException:
+                    pass
+            
+            # Handle close_after
+            if template.get("close_after"):
+                delay = template.get("delay_close", 0)
+                if delay > 0:
+                    await asyncio.sleep(delay)
+                
+                owner = ctx.guild.get_member(int(owner_id))
+                if not owner:
+                    owner = await self.bot.fetch_user(int(owner_id))
+                
+                await close_ticket(
+                    bot=self.bot,
+                    member=owner,
+                    guild=ctx.guild,
+                    channel=ctx.channel,
+                    conf=conf,
+                    reason=f"Quick reply: {template_name}",
+                    closedby=ctx.author.name,
+                    config=self.config,
+                )
+        else:
+            # Show dropdown
+            view = QuickReplyView(templates, self.config, ctx.channel)
+            await ctx.send(_("Select a quick reply:"), view=view, ephemeral=True)
+
+    # ============================================================================
+    # Ticket Info Command
+    # ============================================================================
+
+    @commands.hybrid_command(name="ticketinfo", description="View information about this ticket")
+    @commands.guild_only()
+    async def ticket_info(self, ctx: commands.Context):
+        """View detailed information about this ticket"""
+        conf = await self.config.guild(ctx.guild).all()
+        owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel"))
+        
+        ticket_data = conf["opened"][owner_id][str(ctx.channel.id)]
+        
+        owner = ctx.guild.get_member(int(owner_id))
+        owner_name = owner.display_name if owner else f"Unknown ({owner_id})"
+        
+        embed = discord.Embed(
+            title=_("🎫 Ticket Information"),
+            color=ctx.author.color,
+        )
+        
+        # Basic info
+        embed.add_field(name=_("Owner"), value=owner.mention if owner else owner_name, inline=True)
+        embed.add_field(name=_("Panel"), value=ticket_data.get("panel", "Unknown"), inline=True)
+        
+        # Status
+        from ..common.constants import TICKET_STATUSES
+        status = ticket_data.get("status", "open")
+        status_emoji = TICKET_STATUSES.get(status, "❓")
+        embed.add_field(name=_("Status"), value=f"{status_emoji} {status.replace('_', ' ').title()}", inline=True)
+        
+        # Claim info
+        claimed_by = ticket_data.get("claimed_by")
+        if claimed_by:
+            claimer = ctx.guild.get_member(claimed_by)
+            claimer_name = claimer.mention if claimer else f"Unknown ({claimed_by})"
+            embed.add_field(name=_("Claimed By"), value=claimer_name, inline=True)
+            
+            claimed_at = ticket_data.get("claimed_at")
+            if claimed_at:
+                embed.add_field(name=_("Claimed At"), value=f"<t:{int(datetime.datetime.fromisoformat(claimed_at).timestamp())}:R>", inline=True)
+        
+        # Timestamps
+        opened_at = ticket_data.get("opened")
+        if opened_at:
+            embed.add_field(
+                name=_("Opened"),
+                value=f"<t:{int(datetime.datetime.fromisoformat(opened_at).timestamp())}:R>",
+                inline=True,
+            )
+        
+        last_user = ticket_data.get("last_user_message")
+        if last_user:
+            embed.add_field(
+                name=_("Last User Message"),
+                value=f"<t:{int(datetime.datetime.fromisoformat(last_user).timestamp())}:R>",
+                inline=True,
+            )
+        
+        last_staff = ticket_data.get("last_staff_message")
+        if last_staff:
+            embed.add_field(
+                name=_("Last Staff Message"),
+                value=f"<t:{int(datetime.datetime.fromisoformat(last_staff).timestamp())}:R>",
+                inline=True,
+            )
+        
+        # Notes count
+        notes = ticket_data.get("notes", [])
+        if notes:
+            embed.add_field(name=_("Notes"), value=str(len(notes)), inline=True)
+        
+        # Escalation
+        if ticket_data.get("escalated"):
+            embed.add_field(name=_("Escalated"), value="⚠️ Yes", inline=True)
+        
+        await ctx.send(embed=embed)

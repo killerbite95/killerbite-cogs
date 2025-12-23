@@ -1,4 +1,4 @@
-# TicketsTrini v3.0.0
+# TicketsTrini v4.0.0
 
 Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 
@@ -13,14 +13,80 @@ Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 | 🎛️ **Multi-Panel** | Create multiple panels with different configurations |
 | 🧵 **Threads or Channels** | Choose between private threads or text channels |
 | 📝 **Modals/Forms** | Request information from users before opening a ticket |
-| 📊 **Transcripts** | Automatically save conversation history |
+| 📊 **Transcripts** | Automatically save conversation history (HTML/TXT/JSON) |
 | 🔔 **Notifications** | Configurable mentions and DMs |
 | 🎨 **Full Customization** | Colors, emojis, text, and names |
 | 👥 **Role System** | Global and per-panel support roles |
-| ⏰ **Auto-close** | Automatically close inactive tickets |
-| 📋 **Live Overview** | Panel showing all active tickets |
-| 🚫 **Blacklist** | Block users or roles from opening tickets |
+| ⏰ **Smart Auto-close** | Differentiate user vs staff inactivity |
+| 📋 **Live Overview Pro** | Paginated panel with filters and stats |
+| 🚫 **Advanced Blacklist** | Time-based bans with reasons |
 | 🌐 **Dashboard** | Web integration for Red-Dashboard |
+| 🙋 **Claim System** | Staff can claim/unclaim/transfer tickets |
+| ⚡ **Quick Replies** | Predefined response templates |
+| 📝 **Internal Notes** | Staff-only notes per ticket |
+| 📈 **Statistics/KPIs** | Track claim times, close times, etc. |
+| ⬆️ **Escalation** | Auto-escalate unclaimed tickets |
+| 🔐 **Audit Logging** | Track all ticket actions |
+| 🛡️ **Preflight Checks** | Verify panel configurations |
+| 💾 **Export/Import** | Backup and restore configurations |
+
+---
+
+## 🆕 What's New in v4.0.0
+
+### Claim System
+Staff can now claim tickets to indicate they're handling them:
+- `[p]claim` - Claim the current ticket
+- `[p]unclaim` - Release the ticket
+- `[p]transfer @staff` - Transfer to another staff member
+
+### Smart Auto-Close
+Different timeouts for different situations:
+- Auto-close if **user** doesn't respond after staff reply
+- Auto-close if **staff** doesn't respond (with escalation option)
+- Warning messages before closing
+
+### Quick Replies
+Create template responses that staff can quickly send:
+```
+[p]tickets quickreply add greeting Hello! How can I help you?
+[p]qr    # Use quick reply in ticket
+```
+
+### Internal Notes
+Staff can add private notes to tickets:
+```
+[p]note Customer mentioned they're a VIP
+[p]notes   # View all notes
+```
+
+### Advanced Blacklist
+Time-based bans with reasons:
+```
+[p]tickets blacklist add @user 7d Spamming tickets
+[p]tickets blacklist add @user permanent Permanent ban
+```
+
+### Escalation System
+Auto-escalate tickets that go unclaimed:
+```
+[p]tickets escalation channel #staff-alerts
+[p]tickets escalation role @Senior-Staff
+[p]tickets escalation minutes 30
+```
+
+### Statistics
+Track ticket KPIs:
+```
+[p]tickets stats
+```
+
+### Preflight Checks
+Verify your configuration:
+```
+[p]tickets preflight          # Check all panels
+[p]tickets preflight support  # Check specific panel
+```
 
 ---
 
@@ -395,8 +461,112 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 
 ## 📜 Version History
 
+### v4.0.0 (Major Update)
+- **Claim System**: Staff can claim/unclaim/transfer tickets
+- **Smart Auto-Close**: Different timeouts for user vs staff inactivity
+- **Quick Replies**: Template responses for common situations
+- **Internal Notes**: Staff-only notes per ticket
+- **Advanced Blacklist**: Time-based bans with reasons
+- **Escalation System**: Auto-escalate unclaimed tickets
+- **Statistics/KPIs**: Track claim times, close times, volumes
+- **Enhanced Overview**: Pagination, filters, quick actions
+- **Audit Logging**: Track all ticket actions
+- **Preflight Checks**: Verify panel configurations
+- **Export/Import**: Backup and restore configurations
+- **Embed Wizard**: Interactive embed creation
+- **Schema Versioning**: Automatic migration of configs
+
 ### v3.0.0 (Trini Edition)
 - Renamed to ticketstrini
 - Dashboard integration
 - Multi-language support
 - Bug fixes and improvements
+
+---
+
+## 📝 New Commands Reference (v4.0.0)
+
+### User Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]claim` | Claim the current ticket |
+| `[p]unclaim` | Unclaim the current ticket |
+| `[p]transfer <@staff>` | Transfer ticket to another staff |
+| `[p]note [content]` | Add internal note |
+| `[p]notes` | View ticket notes |
+| `[p]quickreply [name]` | Use quick reply template |
+| `[p]ticketinfo` | View ticket details |
+
+### Anti-Spam Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets cooldown set <seconds>` | Set user cooldown |
+| `[p]tickets cooldown view` | View cooldown settings |
+| `[p]tickets ratelimit <tickets/hour>` | Set global rate limit |
+| `[p]tickets agegate account <days>` | Minimum account age |
+| `[p]tickets agegate server <days>` | Minimum server membership |
+
+### Blacklist Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets blacklist add <@user> [duration] [reason]` | Add to blacklist |
+| `[p]tickets blacklist remove <@user>` | Remove from blacklist |
+| `[p]tickets blacklist list` | View blacklist |
+
+### Auto-Close Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets autoclose user <hours>` | Close if user inactive |
+| `[p]tickets autoclose staff <hours>` | Close if staff inactive |
+| `[p]tickets autoclose warning <hours>` | Warning before close |
+| `[p]tickets autoclose reopen <hours>` | Allow reopen window |
+| `[p]tickets autoclose view` | View settings |
+
+### Claim Settings
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets claim maxperstaff <num>` | Max claims per staff |
+| `[p]tickets claim view` | View claim settings |
+
+### Escalation Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets escalation channel <#channel>` | Alert channel |
+| `[p]tickets escalation role <@role>` | Role to ping |
+| `[p]tickets escalation minutes <num>` | Minutes before escalate |
+| `[p]tickets escalation view` | View settings |
+
+### Quick Reply Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets quickreply add <name> <content>` | Add simple reply |
+| `[p]tickets quickreply addadvanced <name>` | Add with options |
+| `[p]tickets quickreply remove <name>` | Remove template |
+| `[p]tickets quickreply list` | View all templates |
+
+### Transcript Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets transcript retention <days>` | Set retention period |
+| `[p]tickets transcript formats <html/txt/json>` | Set formats |
+| `[p]tickets transcript view` | View settings |
+
+### Admin Commands
+
+| Command | Description |
+|---------|-------------|
+| `[p]tickets auditlog <#channel>` | Set audit log channel |
+| `[p]tickets export` | Export configuration |
+| `[p]tickets import` | Import configuration |
+| `[p]tickets preflight [panel]` | Run preflight checks |
+| `[p]tickets embedwizard` | Interactive embed creator |
+| `[p]tickets overviewpro` | Enhanced overview |
+| `[p]tickets stats` | View statistics |
