@@ -2469,7 +2469,7 @@ class AdminCommands(MixinMeta):
                 return await ctx.send(_("Panel not found"))
             
             panel = conf["panels"][panel_name]
-            issues = await preflight_check_panel(ctx.guild, panel_name, panel, self.bot)
+            issues = await preflight_check_panel(ctx.guild, panel_name, panel)
             
             if not issues:
                 embed = discord.Embed(
@@ -2485,7 +2485,7 @@ class AdminCommands(MixinMeta):
                 )
         else:
             # Check all panels
-            all_issues = await preflight_check_all_panels(ctx.guild, conf, self.bot)
+            all_issues = await preflight_check_all_panels(ctx.guild, conf)
             
             if not all_issues:
                 embed = discord.Embed(
