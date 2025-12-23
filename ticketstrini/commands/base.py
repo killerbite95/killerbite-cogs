@@ -8,6 +8,7 @@ from discord import app_commands
 from redbot.core import commands
 from redbot.core.commands import parse_timedelta
 from redbot.core.i18n import Translator
+import pathlib
 from redbot.core.utils.mod import is_admin_or_superior
 
 from ..abc import MixinMeta
@@ -24,7 +25,7 @@ from ..common.views import QuickReplyView, NoteModal, TransferView
 
 LOADING = "https://i.imgur.com/l3p6EMX.gif"
 log = logging.getLogger("red.vrt.tickets.base")
-_ = Translator("Tickets", __file__)
+_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 
 
 class BaseCommands(MixinMeta):

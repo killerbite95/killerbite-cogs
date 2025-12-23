@@ -32,7 +32,7 @@ from .common.views import CloseView, LogView, PanelView, StaffActionsView
 from .dashboard_integration import DashboardIntegration, dashboard_page
 
 log = logging.getLogger("red.killerbite95.ticketstrini")
-_ = Translator("TicketsTrini", __file__)
+_ = Translator("Tickets", __file__)
 
 @cog_i18n(_)
 class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog, metaclass=CompositeMetaClass):

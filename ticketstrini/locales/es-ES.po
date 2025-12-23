@@ -833,3 +833,140 @@ msgstr "Ver notas del ticket"
 #, docstring
 msgid "Use a quick reply"
 msgstr "Usar una respuesta rápida"
+
+# ============================================================================
+# Common/Utils Translations
+# ============================================================================
+
+msgid "I am missing the `Manage Channels` permission to close this ticket!"
+msgstr "¡Me falta el permiso `Manage Channels` para cerrar este ticket!"
+
+msgid "I am missing the `Manage Threads` permission to close this ticket!"
+msgstr "¡Me falta el permiso `Manage Threads` para cerrar este ticket!"
+
+msgid "Ticket created by **{}-{}** has been closed.\n`PanelType: `{}\n`Opened on: `<t:{}:F>\n`Closed on: `<t:{}:F>\n`Closed by: `{}\n`Reason:    `{}\n"
+msgstr "El ticket creado por **{}-{}** ha sido cerrado.\n`Tipo de panel: `{}\n`Abierto el: `<t:{}:F>\n`Cerrado el: `<t:{}:F>\n`Cerrado por: `{}\n`Motivo:    `{}\n"
+
+msgid "`Thread:    `{}\n"
+msgstr "`Hilo:    `{}\n"
+
+msgid "Ticket Closed\n{}\nCurrently missing permissions to send embeds to this channel!"
+msgstr "¡Ticket Cerrado!\n{}\n¡Actualmente faltan permisos para enviar incrustaciones a este canal!"
+
+msgid "Ticket Closed"
+msgstr "Ticket cerrado"
+
+msgid "Archiving Ticket..."
+msgstr "Archivando Ticket..."
+
+msgid "Question: {}\nResponse: {}\n"
+msgstr "Pregunta: {}\nRespuesta: {}\n"
+
+msgid "Files uploaded: "
+msgstr "Archivos cargados: "
+
+msgid "View Transcript"
+msgstr "Ver Transcripción"
+
+msgid "There are no tickets stored in the database."
+msgstr "No hay tickets almacenados en la base de datos."
+
+msgid "ticket"
+msgstr "ticket"
+
+msgid "tickets"
+msgstr "tickets"
+
+msgid "Pruned `{}` invalid {}"
+msgstr "Podado `{}` inválido {}"
+
+msgid "There are no tickets to prune"
+msgstr "No hay tickets para podar"
+
+msgid "There are no active tickets."
+msgstr "No hay tickets activos."
+
+msgid "Ticket Overview"
+msgstr "Resumen de tickets"
+
+msgid "Too many active tickets to include in message!"
+msgstr "¡Demasiados tickets activos para incluir en el mensaje!"
+
+msgid "Active Tickets"
+msgstr "Tickets Activos"
+
+# ============================================================================
+# Common/Views Translations
+# ============================================================================
+
+msgid "cancel"
+msgstr "cancelar"
+
+msgid "You are not allowed to interact with this button."
+msgstr "No está permitido interactuar con este botón."
+
+msgid "Closing your ticket"
+msgstr "Cerrar tu ticket"
+
+msgid "You been blacklisted from creating tickets!"
+msgstr "¡Se te ha prohibido crear tickets!"
+
+msgid "You have a role that has been blacklisted from creating tickets!"
+msgstr "¡Tienes un rol que ha sido incluido en la lista negra para crear tickets!"
+
+msgid "You must have one of the following roles to open this ticket: "
+msgstr "Debes tener uno de los siguientes roles para abrir este ticket: "
+
+msgid "You have the maximum amount of tickets opened already!{}"
+msgstr "¡Ya tienes la cantidad máxima de tickets abiertos!{}"
+
+msgid "The category for this support panel cannot be found!\nplease contact an admin!"
+msgstr "¡No se puede encontrar la categoría para este panel de soporte!\n¡Por favor, contacta a un administrador!"
+
+msgid "Submission Info"
+msgstr "Información de envío"
+
+msgid "Unanswered"
+msgstr "Sin respuesta"
+
+msgid "Your response cannot contain the word 'Discord' in discoverable servers."
+msgstr "Tu respuesta no puede contener la palabra 'Discord' en servidores descubiertos."
+
+msgid "Your ticket is being created, one moment..."
+msgstr "Tu ticket se está creando, un momento..."
+
+msgid "{} ticket for {}"
+msgstr "Ticket {} para {}"
+
+msgid "I am missing the required permissions to create a ticket for you. Please contact an admin so they may fix my permissions."
+msgstr "Me faltan los permisos necesarios para crear un ticket para ti. Por favor, contacta a un administrador para que pueda solucionar mis permisos."
+
+msgid "There was an error while preparing your ticket, please contact an admin!\n{}"
+msgstr "Se ha producido un error al preparar tu ticket, por favor contacta a un administrador.\n{}"
+
+msgid "Welcome to your ticket channel "
+msgstr "Bienvenido a tu canal de ticket "
+
+msgid "\nYou or an admin can close this with the `{}close` command"
+msgstr "\nTú o un administrador pueden cerrar esto con el comando `{}close`"
+
+msgid "Ticket form questions"
+msgstr "Preguntas del formulario de ticket"
+
+msgid "I tried to pin the response message but don't have the manage messages permissions!"
+msgstr "¡Intenté fijar el mensaje de respuesta pero no tengo los permisos para gestionar mensajes!"
+
+msgid "Your ticket has been created! {}"
+msgstr "¡Tu ticket ha sido creado! {}"
+
+msgid "`Created By: `{user}\n`User ID:    `{userid}\n`Opened:     `{timestamp}\n`Ticket:     `{channelname}\n`Panel Name: `{panelname}\n**[Click to Jump!]({jumpurl})**"
+msgstr "`Creado por: `{user}\n`ID de usuario: `{userid}\n`Abierto:     `{timestamp}\n`Ticket:     `{channelname}\n`Nombre del panel: `{panelname}\n**[¡Clic para ir!]({jumpurl})**"
+
+msgid "Ticket Opened"
+msgstr "Ticket abierto"
+
+msgid "You have been added to the ticket **{}**"
+msgstr "Has sido añadido al ticket **{}**"
+
+msgid "Enter a reason for closing this ticket"
+msgstr "Introduce un motivo para cerrar este ticket"

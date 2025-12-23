@@ -7,8 +7,9 @@ from discord import ButtonStyle, Interaction
 from discord.ui import Button, View
 from redbot.core import commands
 from redbot.core.i18n import Translator
+import pathlib
 
-_ = Translator("SupportViews", __file__)
+_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 
 mapping = {
     "\N{LEFTWARDS BLACK ARROW}\N{VARIATION SELECTOR-16}": (

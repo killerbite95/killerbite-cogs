@@ -7,13 +7,14 @@ import discord
 import numpy as np
 from redbot.core import commands
 from redbot.core.i18n import Translator
+import pathlib
 from redbot.core.utils.chat_formatting import pagify
 
 from ..abc import MixinMeta
 from ..common.utils import update_active_overview
 from ..common.views import CloseView, LogView
 
-_ = Translator("SupportViews", __file__)
+_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 log = logging.getLogger("red.vrt.tickets.functions")
 
 

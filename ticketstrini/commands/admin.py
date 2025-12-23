@@ -36,9 +36,10 @@ from ..common.views import (
     OverviewView,
     QuickReplyView,
 )
+import pathlib
 
 log = logging.getLogger("red.vrt.admincommands")
-_ = Translator("TicketsCommands", __file__)
+_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 
 
 class AdminCommands(MixinMeta):

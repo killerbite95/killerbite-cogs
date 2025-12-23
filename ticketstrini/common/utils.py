@@ -16,6 +16,7 @@ from discord.utils import escape_markdown
 from redbot.core import Config, commands
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator
+import pathlib
 from redbot.core.utils.chat_formatting import humanize_list, pagify, text_to_file
 from redbot.core.utils.mod import is_admin_or_superior
 
@@ -31,7 +32,7 @@ from .constants import SCHEMA_VERSION, TICKET_STATUSES
 
 LOADING = "https://i.imgur.com/l3p6EMX.gif"
 log = logging.getLogger("red.killerbite95.tickets.utils")
-_ = Translator("Tickets", __file__)
+_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 
 
 # ============================================================================

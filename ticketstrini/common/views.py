@@ -12,6 +12,7 @@ from discord.ui.item import Item
 from redbot.core import Config, commands
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator
+import pathlib
 from redbot.core.utils.chat_formatting import box, humanize_list, pagify
 from redbot.core.utils.mod import is_admin_or_superior
 
@@ -39,7 +40,7 @@ from .utils import (
 from .models import PanelSchedule, WelcomeSections, TimeParser
 from .constants import TICKET_STATUSES
 
-_ = Translator("SupportViews", __file__)
+_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 log = logging.getLogger("red.killerbite95.ticketstrini.views")
 
 
