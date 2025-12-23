@@ -281,7 +281,7 @@ msgid "Open"
 msgstr "Abiertos"
 
 msgid "Claimed"
-msgstr "Reclamados"
+msgstr "Reclamado"
 
 msgid "Unclaimed"
 msgstr "Sin Reclamar"
