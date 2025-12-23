@@ -363,20 +363,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         game_name = server_data.game.display_name if server_data.game else "Unknown"
         
-        # Obtener nombre para mostrar con fallback
-        display_name = query_result.hostname
-        if not display_name or display_name == "Unknown Server":
-            public_ip = await self.config.guild(guild).public_ip()
-            if public_ip:
-                display_name = f"{public_ip}:{port}"
-            elif server_data.domain:
-                display_name = server_data.domain
-            else:
-                display_name = game_name
-        
         # Crear embed
         embed = discord.Embed(
-            title=_("Players - {hostname}").format(hostname=display_name[:50]),
+            title=_("Players - {hostname}").format(hostname=query_result.hostname[:50]),
             description=f"**{_('Game')}:** {game_name}\n"
                        f"**{_('Map')}:** {query_result.map_name}\n"
                        f"**{_('Players')}:** {query_result.players}/{query_result.max_players}",
@@ -492,19 +481,6 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             **query_kwargs
         )
         
-        # Obtener nombre para mostrar con fallback
-        display_name = query_result.hostname
-        if not display_name or display_name == "Unknown Server":
-            public_ip = await self.config.guild(guild).public_ip()
-            if public_ip:
-                display_name = f"{public_ip}:{port}"
-            elif server_data.domain:
-                display_name = server_data.domain
-            elif server_data.game:
-                display_name = server_data.game.display_name
-            else:
-                display_name = server_key
-        
         # Crear estadísticas
         stats = ServerStats(
             server_key=server_key,
@@ -517,7 +493,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             last_offline=server_data.last_offline,
             current_players=query_result.players,
             max_players=query_result.max_players,
-            hostname=display_name,
+            hostname=query_result.hostname,
             map_name=query_result.map_name
         )
         
@@ -584,7 +560,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Usar hostname si está disponible, sino IP pública, dominio o nombre del juego
         display_name = query_result.hostname if query_result.success else None
-        if not display_name or display_name == "Unknown Server":
+        if not display_name:
             # Intentar con IP pública configurada
             public_ip = await self.config.guild(guild).public_ip()
             if public_ip:
@@ -685,17 +661,6 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         game_name = server_data.game.display_name if server_data.game else _("Unknown")
         
-        # Obtener nombre para mostrar con fallback
-        display_name = query_result.hostname
-        if not display_name or display_name == "Unknown Server":
-            public_ip = await self.config.guild(guild).public_ip()
-            if public_ip:
-                display_name = f"{public_ip}:{port}"
-            elif server_data.domain:
-                display_name = server_data.domain
-            else:
-                display_name = game_name
-        
         # Para Minecraft, map_name contiene la versión
         if server_data.game == GameType.MINECRAFT:
             map_label = _("Version")
@@ -704,7 +669,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Crear embed
         embed = discord.Embed(
-            title=f"🗺️ {map_label} - {display_name[:50]}",
+            title=f"🗺️ {map_label} - {query_result.hostname[:50]}",
             color=query_result.status.color
         )
         

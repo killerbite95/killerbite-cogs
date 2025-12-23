@@ -2,7 +2,7 @@
 Embed builders for SimpleSuggestions.
 Handles all embed creation and formatting.
 """
-import discord
+import discord # pyright: ignore[reportMissingImports]
 from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 
