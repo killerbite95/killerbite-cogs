@@ -48,12 +48,12 @@ class ServerStatus(Enum):
     def display_name(self) -> str:
         """Retorna el nombre para mostrar del estado."""
         names = {
-            ServerStatus.ONLINE: "Online",
-            ServerStatus.OFFLINE: "Offline",
-            ServerStatus.MAINTENANCE: "Maintenance",
-            ServerStatus.UNKNOWN: "Unknown"
+            ServerStatus.ONLINE: _("Online"),
+            ServerStatus.OFFLINE: _("Offline"),
+            ServerStatus.MAINTENANCE: _("Maintenance"),
+            ServerStatus.UNKNOWN: _("Unknown")
         }
-        return names.get(self, "Unknown")
+        return names.get(self, _("Unknown"))
 
 
 class GameType(Enum):
@@ -69,12 +69,12 @@ class GameType(Enum):
     def display_name(self) -> str:
         """Retorna el nombre completo del juego."""
         names = {
-            GameType.CS2: "Counter-Strike 2",
-            GameType.CSS: "Counter-Strike: Source",
-            GameType.GMOD: "Garry's Mod",
-            GameType.RUST: "Rust",
-            GameType.MINECRAFT: "Minecraft",
-            GameType.DAYZ: "DayZ Standalone"
+            GameType.CS2: _("Counter-Strike 2"),
+            GameType.CSS: _("Counter-Strike: Source"),
+            GameType.GMOD: _("Garry's Mod"),
+            GameType.RUST: _("Rust"),
+            GameType.MINECRAFT: _("Minecraft"),
+            GameType.DAYZ: _("DayZ")
         }
         return names.get(self, self.value.upper())
     
@@ -447,7 +447,7 @@ class PlayerHistory:
         entries = self.get_entries_for_period(hours)
         
         if not entries:
-            return "```\nNo hay datos de historial disponibles.\n```"
+            return _("```\nNo history data available.\n```")
         
         # Agrupar entradas por intervalos de tiempo
         interval_minutes = (hours * 60) // width
@@ -505,13 +505,13 @@ class PlayerHistory:
         
         # Construir el gráfico completo
         result = "```\n"
-        result += f"📊 Historial de jugadores ({hours}h)\n"
+        result += f"📊 {_('Player history')} ({hours}h)\n"
         result += "─" * (width + 2) + "\n"
         result += f"Max: {max_players:>3} │{graph_row}│\n"
         result += f"    0 │{'─' * width}│\n"
         result += "─" * (width + 2) + "\n"
-        result += f"      -{hours}h" + " " * (width - 8) + "Ahora\n"
-        result += f"\n📈 Peak: {peak} | 📊 Promedio: {avg_total:.1f}\n"
+        result += f"      -{hours}h" + " " * (width - 8) + _("Now") + "\n"
+        result += f"\n📈 {_('Peak')}: {peak} | 📊 {_('Average')}: {avg_total:.1f}\n"
         result += "```"
         
         return result

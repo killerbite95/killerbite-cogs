@@ -4,9 +4,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: GameServerMonitor 2.2.0\n"
+"Project-Id-Version: GameServerMonitor 2.3.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-12-22 00:00+0000\n"
+"POT-Creation-Date: 2025-01-20 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: Killerbite95\n"
 "Language-Team: \n"
@@ -46,7 +46,22 @@ msgid "Statistics - {hostname}"
 msgstr ""
 
 #: gameservermonitor.py (embed fields)
+msgid "Status"
+msgstr ""
+
 msgid "Game"
+msgstr ""
+
+msgid "Connect"
+msgstr ""
+
+msgid "IP"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Current Map"
 msgstr ""
 
 msgid "Map"
@@ -120,7 +135,7 @@ msgstr ""
 msgid "Last Offline"
 msgstr ""
 
-#: gameservermonitor.py (server status)
+#: models.py (server status)
 msgid "Online"
 msgstr ""
 
@@ -133,116 +148,36 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#: gameservermonitor.py (commands)
-msgid "Sets the timezone for this server."
+#: models.py (game names)
+msgid "Counter-Strike 2"
 msgstr ""
 
-msgid "Timezone set to **{timezone}**."
+msgid "Counter-Strike: Source"
 msgstr ""
 
-msgid "Invalid timezone. Use format like `Europe/Madrid` or `America/New_York`."
+msgid "Garry's Mod"
 msgstr ""
 
-msgid "Sets the public IP to replace private IPs in embeds."
+msgid "Rust"
 msgstr ""
 
-msgid "Public IP set to **{ip}**. Private IPs will be replaced in embeds."
+msgid "Minecraft"
 msgstr ""
 
-msgid "Public IP disabled. Real IPs will be shown."
+msgid "DayZ"
 msgstr ""
 
-msgid "Sets the connection URL template."
+#: models.py (history graph)
+msgid "```\nNo history data available.\n```"
 msgstr ""
 
-msgid "Connection URL template set to: {url}"
+msgid "Player history"
 msgstr ""
 
-msgid "Sets the refresh interval in seconds."
-msgstr ""
-
-msgid "Refresh interval set to **{seconds}** seconds."
-msgstr ""
-
-msgid "Minimum interval is 10 seconds."
-msgstr ""
-
-msgid "Adds a game server to monitor."
-msgstr ""
-
-msgid "Server **{key}** added and monitoring in {channel}."
-msgstr ""
-
-msgid "A server with this IP:port already exists."
-msgstr ""
-
-msgid "Unsupported game: {game}. Supported: {supported}"
-msgstr ""
-
-msgid "Channel not found or no permission to send messages."
-msgstr ""
-
-msgid "Removes a server from monitoring."
-msgstr ""
-
-msgid "Server **{key}** removed from monitoring."
-msgstr ""
-
-msgid "Server not found. Use `listaserver` to see available servers."
-msgstr ""
-
-msgid "Lists all monitored servers."
-msgstr ""
-
-msgid "No servers configured."
-msgstr ""
-
-msgid "Monitored Servers"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Channel"
-msgstr ""
-
-msgid "Forces an immediate status update."
-msgstr ""
-
-msgid "Status updated for {count} server(s) in this channel."
-msgstr ""
-
-msgid "No servers found in this channel."
-msgstr ""
-
-msgid "Shows statistics for a server."
-msgstr ""
-
-msgid "Shows player history with an ASCII graph."
-msgstr ""
-
-msgid "Shows the list of currently connected players."
-msgstr ""
-
-msgid "Shows the cog version."
-msgstr ""
-
-msgid "GameServerMonitor v{version} by {author}"
-msgstr ""
-
-msgid "Enables or disables debug mode."
-msgstr ""
-
-msgid "Debug mode **enabled**."
-msgstr ""
-
-msgid "Debug mode **disabled**."
+msgid "Now"
 msgstr ""
 
 #: views.py (button labels)
-msgid "Players"
-msgstr ""
-
 msgid "Stats"
 msgstr ""
 
@@ -266,21 +201,100 @@ msgstr ""
 msgid "An error occurred while processing the request."
 msgstr ""
 
-#: models.py (game names - already defined as display_name)
-msgid "Counter-Strike 2"
+#: gameservermonitor.py (commands - timezone)
+msgid "❌ La zona horaria '{}' no es válida."
 msgstr ""
 
-msgid "Counter-Strike: Source"
+msgid "✅ Zona horaria establecida en **{}**"
 msgstr ""
 
-msgid "Garry's Mod"
+#: gameservermonitor.py (commands - public ip)
+msgid "✅ Reemplazo de IP pública desactivado."
 msgstr ""
 
-msgid "Rust"
+msgid "✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas."
 msgstr ""
 
-msgid "Minecraft"
+#: gameservermonitor.py (commands - connect url)
+msgid "❌ La URL debe contener `{ip}` como placeholder."
 msgstr ""
 
-msgid "DayZ"
+msgid "✅ URL de conexión establecida: {}"
 msgstr ""
+
+#: gameservermonitor.py (commands - refresh)
+msgid "❌ El tiempo debe ser al menos 10 segundos."
+msgstr ""
+
+msgid "✅ Tiempo de actualización establecido en **{}** segundos."
+msgstr ""
+
+#: gameservermonitor.py (commands - debug)
+msgid "activado"
+msgstr ""
+
+msgid "desactivado"
+msgstr ""
+
+msgid "✅ Modo debug {}."
+msgstr ""
+
+#: gameservermonitor.py (commands - addserver)
+msgid "❌ Juego '{}' no soportado. Disponibles: {}"
+msgstr ""
+
+msgid "❌ Faltan permisos en {}: {}"
+msgstr ""
+
+msgid "❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\nOpcionalmente `query_port` (por defecto: game_port + 24714)."
+msgstr ""
+
+msgid "❌ Puerto de juego inválido. Debe ser entre 1 y 65535."
+msgstr ""
+
+msgid "❌ Puerto de query inválido. Debe ser entre 1 y 65535."
+msgstr ""
+
+msgid "❌ El servidor `{}` ya está siendo monitoreado."
+msgstr ""
+
+msgid "✅ Servidor **{}** ({}) añadido.\nMonitoreando en {}."
+msgstr ""
+
+msgid "❌ Formato de servidor inválido. Usa `IP:puerto` (ej. 192.168.1.1:27015)."
+msgstr ""
+
+#: gameservermonitor.py (commands - removeserver)
+msgid "❌ Servidor **{}** no encontrado."
+msgstr ""
+
+msgid "✅ Servidor **{}** eliminado del monitoreo."
+msgstr ""
+
+#: gameservermonitor.py (commands - listservers)
+msgid "📋 Servidores Monitorizados"
+msgstr ""
+
+msgid "No hay servidores configurados."
+msgstr ""
+
+#: gameservermonitor.py (commands - refresh status)
+msgid "✅ Actualizados {} servidores."
+msgstr ""
+
+msgid "❌ No hay servidores configurados para actualizar."
+msgstr ""
+
+#: gameservermonitor.py (version command)
+msgid "🎮 GameServerMonitor v{}"
+msgstr ""
+
+msgid "Autor"
+msgstr ""
+
+msgid "Versión"
+msgstr ""
+
+msgid "Juegos Soportados"
+msgstr ""
+

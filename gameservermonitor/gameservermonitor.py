@@ -780,37 +780,37 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         status_emoji = query_result.status.emoji
         status_name = query_result.status.display_name
         embed.add_field(
-            name=f"{status_emoji} Status",
+            name=f"{status_emoji} {_('Status')}",
             value=status_name,
             inline=True
         )
         
         # Juego
-        game_name = server_data.game.display_name if server_data.game else "Unknown"
-        embed.add_field(name="🎮 Game", value=game_name, inline=True)
+        game_name = server_data.game.display_name if server_data.game else _("Unknown")
+        embed.add_field(name=f"🎮 {_('Game')}", value=game_name, inline=True)
         
         # Botón de conexión (no para Minecraft)
         if embed_config.show_connect_button and server_data.game != GameType.MINECRAFT:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
-                name="\n\u200b\n🔗 Connect", 
-                value=f"[Connect]({connect_url})\n\u200b\n", 
+                name=f"\n\u200b\n🔗 {_('Connect')}", 
+                value=f"[{_('Connect')}]({connect_url})\n\u200b\n", 
                 inline=False
             )
         
         # IP
-        embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
+        embed.add_field(name=f"📌 {_('IP')}", value=ip_to_show, inline=True)
         
         # Mapa o Versión
         if server_data.game == GameType.MINECRAFT:
-            embed.add_field(name="💎 Version", value=query_result.map_name, inline=True)
+            embed.add_field(name=f"💎 {_('Version')}", value=query_result.map_name, inline=True)
         else:
-            embed.add_field(name="🗺️ Current Map", value=query_result.map_name, inline=True)
+            embed.add_field(name=f"🗺️ {_('Current Map')}", value=query_result.map_name, inline=True)
         
         # Jugadores
         embed.add_field(
-            name="👥 Players", 
+            name=f"👥 {_('Players')}", 
             value=query_result.player_display, 
             inline=True
         )
@@ -818,7 +818,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # Latencia si está disponible
         if query_result.latency_ms:
             embed.add_field(
-                name="📶 Ping", 
+                name=f"📶 {_('Ping')}", 
                 value=f"{query_result.latency_ms:.0f}ms", 
                 inline=True
             )
@@ -849,7 +849,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         embed_config_data = await self.config.guild(guild).embed_config()
         embed_config = EmbedConfig(**embed_config_data)
         
-        game_name = server_data.game.display_name if server_data.game else "Game"
+        game_name = server_data.game.display_name if server_data.game else _("Game")
         title = self._truncate_title(f"{game_name} Server", " - ❌ Offline")
         color = embed_config.get_color(ServerStatus.OFFLINE)
         
@@ -861,21 +861,21 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             if thumbnail_url:
                 embed.set_thumbnail(url=thumbnail_url)
         
-        embed.add_field(name="Status", value="🔴 Offline", inline=True)
+        embed.add_field(name=_("Status"), value=f"🔴 {_('Offline')}", inline=True)
         embed.add_field(
-            name="🎮 Game", 
+            name=f"🎮 {_('Game')}", 
             value=game_name,
             inline=True
         )
-        embed.add_field(name="📌 IP", value=ip_to_show, inline=True)
+        embed.add_field(name=f"📌 {_('IP')}", value=ip_to_show, inline=True)
         
         # Botón de conexión (no para Minecraft)
         if embed_config.show_connect_button and server_data.game != GameType.MINECRAFT:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
-                name="\n\u200b\n🔗 Connect", 
-                value=f"[Connect]({connect_url})\n\u200b\n", 
+                name=f"\n\u200b\n🔗 {_('Connect')}", 
+                value=f"[{_('Connect')}]({connect_url})\n\u200b\n", 
                 inline=False
             )
         
@@ -1099,7 +1099,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             interaction_config = await self.config.guild(guild).interaction_features()
             buttons_enabled = interaction_config.get("buttons_enabled", True)
             
-            view = create_server_view(server_id) if buttons_enabled else None
+            # Labels traducidos para los botones
+            button_labels = {
+                "players": _("Players"),
+                "stats": _("Stats"),
+                "history": _("History")
+            }
+            view = create_server_view(server_id, labels=button_labels) if buttons_enabled else None
             
             # Enviar o editar mensaje
             try:
@@ -1443,7 +1449,10 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @commands.command(name="gsmversion")
     async def gsm_version(self, ctx: commands.Context) -> None:
         """Muestra la versión actual del cog GameServerMonitor."""
-        await ctx.send(f"🎮 **GameServerMonitor** v{self.__version__} by {self.__author__}")
+        await ctx.send(_("🎮 **GameServerMonitor** v{version} by {author}").format(
+            version=self.__version__, 
+            author=self.__author__
+        ))
     
     @commands.command(name="listaserver")
     async def list_servers(self, ctx: commands.Context) -> None:

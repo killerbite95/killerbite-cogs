@@ -12,7 +12,7 @@ import logging
 from typing import Optional, Dict, Any, TYPE_CHECKING
 from datetime import datetime, timedelta
 from collections import defaultdict
-from redbot.core.i18n import Translator
+from redbot.core.i18n import Translator, set_contextual_locales_from_guild
 
 if TYPE_CHECKING:
     from .gameservermonitor import GameServerMonitor
@@ -90,22 +90,32 @@ class ServerActionsView(ui.View):
     funcionar incluso después de reinicios del bot.
     """
     
-    def __init__(self, server_id: str, cog: Optional["GameServerMonitor"] = None):
+    def __init__(
+        self, 
+        server_id: str, 
+        cog: Optional["GameServerMonitor"] = None,
+        labels: Optional[dict] = None
+    ):
         """
         Inicializa la view.
         
         Args:
             server_id: ID único y estable del servidor
             cog: Referencia al cog (opcional, se obtiene del bot en callbacks)
+            labels: Dict con traducciones {"players": ..., "stats": ..., "history": ...}
         """
         super().__init__(timeout=None)  # Persistente
         self.server_id = server_id
         self._cog = cog
         
+        # Usar labels traducidos o por defecto
+        if labels is None:
+            labels = {"players": "Players", "stats": "Stats", "history": "History"}
+        
         # Crear botones con custom_id que incluye server_id
-        self.add_item(PlayersButton(server_id))
-        self.add_item(StatsButton(server_id))
-        self.add_item(HistoryButton(server_id))
+        self.add_item(PlayersButton(server_id, label=labels.get("players", "Players")))
+        self.add_item(StatsButton(server_id, label=labels.get("stats", "Stats")))
+        self.add_item(HistoryButton(server_id, label=labels.get("history", "History")))
     
     @classmethod
     def from_custom_id(cls, custom_id: str) -> Optional[str]:
@@ -127,10 +137,10 @@ class ServerActionsView(ui.View):
 class PlayersButton(ui.Button):
     """Botón para ver jugadores conectados."""
     
-    def __init__(self, server_id: str):
+    def __init__(self, server_id: str, label: str = "Players"):
         super().__init__(
             style=discord.ButtonStyle.primary,
-            label="Players",
+            label=label,
             emoji="👥",
             custom_id=f"gsm:players:{server_id}"
         )
@@ -143,10 +153,10 @@ class PlayersButton(ui.Button):
 class StatsButton(ui.Button):
     """Botón para ver estadísticas del servidor."""
     
-    def __init__(self, server_id: str):
+    def __init__(self, server_id: str, label: str = "Stats"):
         super().__init__(
             style=discord.ButtonStyle.secondary,
-            label="Stats",
+            label=label,
             emoji="📈",
             custom_id=f"gsm:stats:{server_id}"
         )
@@ -159,10 +169,10 @@ class StatsButton(ui.Button):
 class HistoryButton(ui.Button):
     """Botón para ver historial de jugadores."""
     
-    def __init__(self, server_id: str):
+    def __init__(self, server_id: str, label: str = "History"):
         super().__init__(
             style=discord.ButtonStyle.secondary,
-            label="History",
+            label=label,
             emoji="📊",
             custom_id=f"gsm:history:{server_id}"
         )
@@ -187,6 +197,10 @@ async def handle_button_callback(
         server_id: ID del servidor
         action: Acción a realizar (players/stats/history)
     """
+    # Establecer locale contextual para i18n
+    if interaction.guild:
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+    
     # Verificar cooldown
     on_cooldown, remaining = cooldown_manager.is_on_cooldown(
         interaction.user.id, action, server_id
@@ -342,14 +356,15 @@ def setup_persistent_views(bot: commands.Bot, cog: "GameServerMonitor") -> None:
     logger.info("Views persistentes de GSM registradas correctamente")
 
 
-def create_server_view(server_id: str) -> ServerActionsView:
+def create_server_view(server_id: str, labels: Optional[dict] = None) -> ServerActionsView:
     """
     Crea una nueva instancia de ServerActionsView para un servidor.
     
     Args:
         server_id: ID único del servidor
+        labels: Dict con traducciones {"players": ..., "stats": ..., "history": ...}
         
     Returns:
         ServerActionsView configurada
     """
-    return ServerActionsView(server_id=server_id)
+    return ServerActionsView(server_id=server_id, labels=labels)
