@@ -42,7 +42,7 @@ _ = Translator("TicketsCommands", __file__)
 
 
 class AdminCommands(MixinMeta):
-    @commands.group(aliases=["tset"])
+    @commands.group(name="ticketst", aliases=["tset", "tickets"])
     @commands.guild_only()
     @commands.admin_or_permissions(administrator=True)
     async def tickets(self, ctx: commands.Context):
@@ -1379,30 +1379,6 @@ class AdminCommands(MixinMeta):
         await self.initialize(ctx.guild)
 
     @tickets.command()
-    async def blacklist(
-        self,
-        ctx: commands.Context,
-        *,
-        user_or_role: Union[discord.Member, discord.Role],
-    ):
-        """
-        Add/Remove users or roles from the blacklist
-
-        Users and roles in the blacklist will not be able to create a ticket
-        """
-        async with self.config.guild(ctx.guild).blacklist() as bl:
-            if user_or_role.id in bl:
-                bl.remove(user_or_role.id)
-                await ctx.send(
-                    user_or_role.name + _(" has been removed from the blacklist")
-                )
-            else:
-                bl.append(user_or_role.id)
-                await ctx.send(
-                    user_or_role.name + _(" has been added to the blacklist")
-                )
-
-    @tickets.command()
     async def noresponse(self, ctx: commands.Context, hours: int):
         """
         Auto-close ticket if opener doesn't say anything after X hours of opening
@@ -1872,7 +1848,7 @@ class AdminCommands(MixinMeta):
     # Blacklist Avanzado
     # ============================================================================
 
-    @tickets.group(name="tblacklist", aliases=["tbl"])
+    @tickets.group(name="blacklist")
     async def blacklist_cmd(self, ctx: commands.Context):
         """Manage the ticket blacklist (advanced)"""
         pass

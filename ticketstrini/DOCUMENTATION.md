@@ -4,6 +4,9 @@ Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 
 **Author**: [Killerbite95](https://github.com/killerbite95/killerbite-cogs)
 
+> ⚠️ **Nota sobre comandos**: El comando principal es `[p]ticketst` para evitar conflictos con otros cogs.
+> El alias `[p]tickets` también está disponible. En esta documentación usamos `[p]tickets` por brevedad.
+
 ---
 
 ## ✨ Features
@@ -63,8 +66,8 @@ Staff can add private notes to tickets:
 ### Advanced Blacklist
 Time-based bans with reasons:
 ```
-[p]tickets tblacklist add @user 7d Spamming tickets
-[p]tickets tblacklist add @user permanent Permanent ban
+[p]tickets blacklist add @user 7d Spamming tickets
+[p]tickets blacklist add @user permanent Permanent ban
 ```
 
 ### Escalation System
@@ -223,7 +226,7 @@ Done! The button should now appear.
 | `[p]tickets supportrole <role> [mention]` | Add/remove global support role |
 | `[p]tickets panelrole <panel> <role> [mention]` | Add/remove panel-specific role |
 | `[p]tickets openrole <panel> <role>` | Require role to open ticket |
-| `[p]tickets blacklist <user_or_role>` | Add/remove from blacklist |
+| `[p]tickets blacklist add/remove/list` | Manage blacklist |
 
 ### Modals (Forms)
 
@@ -512,10 +515,9 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 
 | Command | Description |
 |---------|-------------|
-| `[p]tickets blacklist <user_or_role>` | Simple add/remove toggle |
-| `[p]tickets tblacklist add <@user> [duration] [reason]` | Add with duration/reason |
-| `[p]tickets tblacklist remove <@user>` | Remove from blacklist |
-| `[p]tickets tblacklist list` | View blacklist |
+| `[p]tickets blacklist add <@user> [duration] [reason]` | Add with duration/reason |
+| `[p]tickets blacklist remove <@user>` | Remove from blacklist |
+| `[p]tickets blacklist list` | View blacklist |
 
 ### Auto-Close Commands
 
