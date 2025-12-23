@@ -1007,17 +1007,24 @@ async def close_ticket(
     # Set locale for translations in non-command context
     await set_contextual_locales_from_guild(bot, guild)
     
-    opened = conf["opened"]
-    if not opened:
-        return
     uid = str(member.id)
     cid = str(channel.id)
-    if uid not in opened:
-        return
-    if cid not in opened[uid]:
-        return
-
-    ticket = opened[uid][cid]
+    
+    # Early removal from config to prevent duplicate close attempts (race condition protection)
+    # We need to verify and remove atomically
+    async with config.guild(guild).opened() as opened:
+        if uid not in opened:
+            return
+        if cid not in opened[uid]:
+            return
+        # Get ticket data before removing
+        ticket = opened[uid][cid].copy()
+        # Remove immediately to prevent duplicate closes
+        del opened[uid][cid]
+        if not opened[uid]:
+            del opened[uid]
+    
+    # Now process the close with the ticket data we saved
     pfp = ticket["pfp"]
     panel_name = ticket["panel"]
     panel = conf["panels"][panel_name]
@@ -1278,17 +1285,8 @@ async def close_ticket(
     except (ValueError, TypeError):
         pass
 
+    # Update overview (ticket was already removed at start of function)
     async with config.guild(guild).all() as conf:
-        tickets = conf["opened"]
-        if uid not in tickets:
-            return
-        if cid not in tickets[uid]:
-            return
-        del tickets[uid][cid]
-        # If user has no more tickets, clean up their key from the config
-        if not tickets[uid]:
-            del tickets[uid]
-
         new_id = await update_active_overview(guild, conf)
         if new_id:
             conf["overview_msg"] = new_id
