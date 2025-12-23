@@ -1539,8 +1539,8 @@ class AdminCommands(MixinMeta):
                 _("Support and panel roles will be auto-added to thread tickets")
             )
 
-    @tickets.command()
-    async def transcript(self, ctx: commands.Context):
+    @tickets.command(name="transcripts", aliases=["transcript"])
+    async def transcripts_toggle(self, ctx: commands.Context):
         """
         (Toggle) Ticket transcripts
 
