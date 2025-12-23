@@ -411,6 +411,7 @@ class Functions(MixinMeta):
             self.config,
             user.id,
             channel_or_thread,
+            claimed_by=None,
         )
         if messages:
             embeds = []

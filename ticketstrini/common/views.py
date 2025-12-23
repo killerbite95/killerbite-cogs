@@ -173,14 +173,58 @@ class CloseView(View):
         config: Config,
         owner_id: int,
         channel: Union[discord.TextChannel, discord.Thread],
+        claimed_by: Optional[int] = None,
     ):
         super().__init__(timeout=None)
         self.bot = bot
         self.config = config
         self.owner_id = owner_id
         self.channel = channel
+        self.claimed_by = claimed_by
 
-        self.closeticket.custom_id = str(channel.id)
+        self.closeticket.custom_id = f"close_{channel.id}"
+        self.claimticket.custom_id = f"claim_{channel.id}"
+        
+        # Update claim button appearance based on status
+        self._update_claim_button()
+
+    def _update_claim_button(self):
+        """Update claim button appearance based on claimed status"""
+        if self.claimed_by:
+            self.claimticket.label = "Claimed"
+            self.claimticket.style = ButtonStyle.red
+            self.claimticket.emoji = "✅"
+        else:
+            self.claimticket.label = "Claim"
+            self.claimticket.style = ButtonStyle.green
+            self.claimticket.emoji = "🙋"
+
+    async def _is_support_staff(self, user: discord.Member, conf: dict) -> bool:
+        """Check if user is support staff"""
+        user_roles = [r.id for r in user.roles]
+        support_roles = [i[0] for i in conf.get("support_roles", [])]
+        
+        # Get panel-specific roles
+        ticket_data = None
+        for uid, tickets in conf.get("opened", {}).items():
+            if str(self.channel.id) in tickets:
+                ticket_data = tickets[str(self.channel.id)]
+                break
+        
+        if ticket_data:
+            panel_name = ticket_data.get("panel")
+            if panel_name and panel_name in conf.get("panels", {}):
+                panel_roles = conf["panels"][panel_name].get("roles", [])
+                support_roles.extend([i[0] for i in panel_roles])
+        
+        if any(rid in support_roles for rid in user_roles):
+            return True
+        if user.id == user.guild.owner_id:
+            return True
+        if await is_admin_or_superior(self.bot, user):
+            return True
+        
+        return False
 
     async def on_error(self, interaction: Interaction, error: Exception, item: Item[Any]):
         log.warning(
@@ -189,7 +233,89 @@ class CloseView(View):
         )
         return await super().on_error(interaction, error, item)
 
-    @discord.ui.button(label="Close", style=ButtonStyle.danger)
+    @discord.ui.button(label="Claim", style=ButtonStyle.green, emoji="🙋", row=0)
+    async def claimticket(self, interaction: Interaction, button: Button):
+        if not interaction.guild or not interaction.channel:
+            return
+        user = interaction.guild.get_member(interaction.user.id)
+        if not user:
+            return
+
+        conf = await self.config.guild(interaction.guild).all()
+        
+        # Check if staff
+        if not await self._is_support_staff(user, conf):
+            return await interaction.response.send_message(
+                _("Only support staff can claim tickets."),
+                ephemeral=True,
+            )
+        
+        # Get current ticket data
+        ticket_data = None
+        for uid, tickets in conf.get("opened", {}).items():
+            if str(self.channel.id) in tickets:
+                ticket_data = tickets[str(self.channel.id)]
+                break
+        
+        if not ticket_data:
+            return await interaction.response.send_message(
+                _("This ticket no longer exists."),
+                ephemeral=True,
+            )
+        
+        current_claimer = ticket_data.get("claimed_by")
+        
+        if current_claimer:
+            # Already claimed - show who
+            claimer = interaction.guild.get_member(current_claimer)
+            claimer_name = claimer.display_name if claimer else "Unknown"
+            
+            if current_claimer == user.id:
+                # User is the claimer - unclaim
+                success, message = await unclaim_ticket(
+                    interaction.guild,
+                    self.channel,
+                    user,
+                    self.config,
+                    conf,
+                )
+                if success:
+                    self.claimed_by = None
+                    self._update_claim_button()
+                    await interaction.response.edit_message(view=self)
+                    await interaction.followup.send(
+                        _("✅ You have released this ticket."),
+                        ephemeral=True,
+                    )
+                else:
+                    await interaction.response.send_message(message, ephemeral=True)
+            else:
+                # Someone else claimed it
+                await interaction.response.send_message(
+                    _("🔒 This ticket is already claimed by **{}**.").format(claimer_name),
+                    ephemeral=True,
+                )
+        else:
+            # Not claimed - claim it
+            success, message = await claim_ticket(
+                interaction.guild,
+                self.channel,
+                user,
+                self.config,
+                conf,
+            )
+            if success:
+                self.claimed_by = user.id
+                self._update_claim_button()
+                await interaction.response.edit_message(view=self)
+                await interaction.followup.send(
+                    _("✅ You have claimed this ticket!"),
+                    ephemeral=True,
+                )
+            else:
+                await interaction.response.send_message(message, ephemeral=True)
+
+    @discord.ui.button(label="Close", style=ButtonStyle.danger, row=0)
     async def closeticket(self, interaction: Interaction, button: Button):
         if not interaction.guild or not interaction.channel:
             return
@@ -627,6 +753,7 @@ class SupportButton(Button):
             self.view.config,
             user.id,
             channel_or_thread,
+            claimed_by=None,
         )
         if messages:
             embeds = []

@@ -234,7 +234,8 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
 
                 # v2.0.0 stores message id for close button to re-init views on reload
                 if message_id := ticket_info.get("message_id"):
-                    view = CloseView(self.bot, self.config, int(uid), ticket_channel)
+                    claimed_by = ticket_info.get("claimed_by")
+                    view = CloseView(self.bot, self.config, int(uid), ticket_channel, claimed_by=claimed_by)
                     self.bot.add_view(view, message_id=message_id)
                     self.view_cache[guild.id].append(view)
 
