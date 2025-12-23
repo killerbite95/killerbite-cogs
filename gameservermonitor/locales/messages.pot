@@ -298,3 +298,59 @@ msgstr ""
 msgid "Juegos Soportados"
 msgstr ""
 
+#: gameservermonitor.py (list_servers embed)
+msgid "Channel"
+msgstr ""
+
+msgid "Ports"
+msgstr ""
+
+msgid "Domain"
+msgstr ""
+
+#: gameservermonitor.py (command docstrings)
+msgid "Sets the timezone for status updates.\n\nExample: `[p]settimezone Europe/Madrid`"
+msgstr ""
+
+msgid "Sets the public IP to replace private IPs in embeds.\n\nUse without arguments to disable replacement.\n\nExample: `[p]setpublicip 123.45.67.89`"
+msgstr ""
+
+msgid "Sets the connection URL template.\n\nUse `{ip}` as placeholder for the server IP:port.\n\nExample: `[p]setconnecturl https://mysite.com/connect?server={ip}`"
+msgstr ""
+
+msgid "Sets the refresh interval in seconds.\n\nMinimum: 10 seconds\n\nExample: `[p]refreshtime 120`"
+msgstr ""
+
+msgid "Enables or disables debug mode.\n\nExample: `[p]gameservermonitordebug true`"
+msgstr ""
+
+msgid "Adds a server to monitor its status.\n\n**General usage:**\n`[p]addserver <ip[:port]> <game> [#channel] [domain]`\n\n**DayZ usage (separate ports):**\n`[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]`\n\n**Supported games:** cs2, css, gmod, rust, minecraft, dayz"
+msgstr ""
+
+msgid "Removes a server from monitoring.\n\nPass exactly the listed key (e.g. `ip:port`).\n\nExample: `[p]removeserver 192.168.1.1:27015`"
+msgstr ""
+
+msgid "Forces a status update in the current channel."
+msgstr ""
+
+msgid "Shows the current GameServerMonitor cog version."
+msgstr ""
+
+msgid "Lists all monitored servers."
+msgstr ""
+
+msgid "Shows detailed server statistics.\n\nYou can use the real IP, public IP, or server_id.\n\n**Example:** `[p]serverstats 192.168.1.1:27015`"
+msgstr ""
+
+msgid "Shows the player history of a server with an ASCII graph.\n\n**Examples:**\n`[p]gsmhistory 192.168.1.1:27015` - Last 24 hours\n`[p]gsmhistory 192.168.1.1:27015 12` - Last 12 hours"
+msgstr ""
+
+msgid "Shows the list of players connected to a server.\n\nDisplays name, score and connection time.\n\n**Example:** `[p]gsmplayers 192.168.1.1:27015`"
+msgstr ""
+
+#: gameservermonitor.py (slash command descriptions)
+msgid "Server to query (IP:port or select from the list)"
+msgstr ""
+
+msgid "Hours of history to show (default: 24, max: 168)"
+msgstr ""

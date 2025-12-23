@@ -1180,9 +1180,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def set_timezone(self, ctx: commands.Context, timezone: str) -> None:
         """
-        Establece la zona horaria para las actualizaciones.
+        Sets the timezone for status updates.
         
-        Ejemplo: `[p]settimezone Europe/Madrid`
+        Example: `[p]settimezone Europe/Madrid`
         """
         try:
             pytz.timezone(timezone)
@@ -1197,11 +1197,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def set_public_ip(self, ctx: commands.Context, ip: Optional[str] = None) -> None:
         """
-        Establece la IP pública para reemplazar IPs privadas.
+        Sets the public IP to replace private IPs in embeds.
         
-        Usa sin argumentos para desactivar el reemplazo.
+        Use without arguments to disable replacement.
         
-        Ejemplo: `[p]setpublicip 123.45.67.89`
+        Example: `[p]setpublicip 123.45.67.89`
         """
         if ip is None:
             await self.config.guild(ctx.guild).public_ip.set(None)
@@ -1216,11 +1216,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def set_connect_url(self, ctx: commands.Context, *, url: str) -> None:
         """
-        Establece la plantilla de URL de conexión.
+        Sets the connection URL template.
         
-        Usa `{ip}` como placeholder para la IP:puerto del servidor.
+        Use `{ip}` as placeholder for the server IP:port.
         
-        Ejemplo: `[p]setconnecturl https://mysite.com/connect?server={ip}`
+        Example: `[p]setconnecturl https://mysite.com/connect?server={ip}`
         """
         if "{ip}" not in url:
             await ctx.send(_("❌ La URL debe contener `{ip}` como placeholder."))
@@ -1233,11 +1233,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def refresh_time(self, ctx: commands.Context, seconds: int) -> None:
         """
-        Establece el tiempo de actualización en segundos.
+        Sets the refresh interval in seconds.
         
-        Mínimo: 10 segundos
+        Minimum: 10 seconds
         
-        Ejemplo: `[p]refreshtime 120`
+        Example: `[p]refreshtime 120`
         """
         if seconds < 10:
             await ctx.send(_("❌ El tiempo debe ser al menos 10 segundos."))
@@ -1251,9 +1251,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def toggle_debug(self, ctx: commands.Context, state: bool) -> None:
         """
-        Activa o desactiva el modo debug.
+        Enables or disables debug mode.
         
-        Ejemplo: `[p]gameservermonitordebug true`
+        Example: `[p]gameservermonitordebug true`
         """
         self.query_service.debug = state
         status = _("activado") if state else _("desactivado")
@@ -1274,15 +1274,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         domain: typing.Optional[str] = None,
     ) -> None:
         """
-        Añade un servidor para monitorear su estado.
+        Adds a server to monitor its status.
 
-        **Uso general:**
-        `[p]addserver <ip[:puerto]> <juego> [#canal] [dominio]`
+        **General usage:**
+        `[p]addserver <ip[:port]> <game> [#channel] [domain]`
 
-        **Uso DayZ (puertos separados):**
-        `[p]addserver <ip> dayz <game_port> <query_port> [#canal] [dominio]`
+        **DayZ usage (separate ports):**
+        `[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]`
 
-        **Juegos soportados:** cs2, css, gmod, rust, minecraft, dayz
+        **Supported games:** cs2, css, gmod, rust, minecraft, dayz
         """
         channel = channel or ctx.channel
         game_type = GameType.from_string(game)
@@ -1407,11 +1407,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def remove_server(self, ctx: commands.Context, server_key: str) -> None:
         """
-        Elimina el monitoreo de un servidor.
+        Removes a server from monitoring.
         
-        Pasa exactamente la clave listada (ej. `ip:puerto`).
+        Pass exactly the listed key (e.g. `ip:port`).
         
-        Ejemplo: `[p]removeserver 192.168.1.1:27015`
+        Example: `[p]removeserver 192.168.1.1:27015`
         """
         if ":" not in server_key:
             await ctx.send(_("❌ Formato: `ip:puerto`"))
@@ -1426,7 +1426,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     @commands.command(name="forzarstatus")
     async def force_status(self, ctx: commands.Context) -> None:
-        """Fuerza una actualización de estado en el canal actual."""
+        """Forces a status update in the current channel."""
         servers = await self.config.guild(ctx.guild).servers()
         updated = False
         
@@ -1448,7 +1448,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     @commands.command(name="gsmversion")
     async def gsm_version(self, ctx: commands.Context) -> None:
-        """Muestra la versión actual del cog GameServerMonitor."""
+        """Shows the current GameServerMonitor cog version."""
         await ctx.send(_("🎮 **GameServerMonitor** v{version} by {author}").format(
             version=self.__version__, 
             author=self.__author__
@@ -1456,7 +1456,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     @commands.command(name="listaserver")
     async def list_servers(self, ctx: commands.Context) -> None:
-        """Lista todos los servidores monitoreados."""
+        """Lists all monitored servers."""
         servers = await self.config.guild(ctx.guild).servers()
         
         if not servers:
@@ -1473,21 +1473,21 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             game_name = game_type.display_name if game_type else data.get("game", "N/A").upper()
             
             channel = self.bot.get_channel(data.get("channel_id"))
-            channel_mention = channel.mention if channel else "Desconocido"
+            channel_mention = channel.mention if channel else _("Unknown")
             
-            value = f"**Juego:** {game_name}\n**Canal:** {channel_mention}"
+            value = f"**{_('Game')}:** {game_name}\n**{_('Channel')}:** {channel_mention}"
             
             if data.get("game", "").lower() == "dayz":
-                value += f"\n**Puertos:** game:{data.get('game_port')} | query:{data.get('query_port')}"
+                value += f"\n**{_('Ports')}:** game:{data.get('game_port')} | query:{data.get('query_port')}"
             
             if data.get("domain"):
-                value += f"\n**Dominio:** {data.get('domain')}"
+                value += f"\n**{_('Domain')}:** {data.get('domain')}"
             
             # Estadísticas básicas
             uptime = 0
             if data.get("total_queries", 0) > 0:
                 uptime = (data.get("successful_queries", 0) / data.get("total_queries", 1)) * 100
-            value += f"\n**Uptime:** {uptime:.1f}%"
+            value += f"\n**{_('Uptime')}:** {uptime:.1f}%"
             
             embed.add_field(name=f"📡 {server_key}", value=value, inline=False)
         
@@ -1495,7 +1495,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     @commands.hybrid_command(name="serverstats")
     @app_commands.describe(
-        server="Servidor a consultar (IP:puerto o selecciona de la lista)"
+        server="Server to query (IP:port or select from the list)"
     )
     @app_commands.autocomplete(server=_server_autocomplete)
     async def server_stats(
@@ -1504,11 +1504,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         server: str
     ) -> None:
         """
-        Muestra estadísticas detalladas de un servidor.
+        Shows detailed server statistics.
         
-        Puedes usar la IP real, IP pública, o server_id.
+        You can use the real IP, public IP, or server_id.
         
-        **Ejemplo:** `[p]serverstats 192.168.1.1:27015`
+        **Example:** `[p]serverstats 192.168.1.1:27015`
         """
         # Determinar si es server_id o IP:puerto
         resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
@@ -1544,8 +1544,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     @commands.hybrid_command(name="gsmhistory")
     @app_commands.describe(
-        server="Servidor a consultar (IP:puerto o selecciona de la lista)",
-        hours="Horas de historial a mostrar (por defecto: 24, máximo: 168)"
+        server="Server to query (IP:port or select from the list)",
+        hours="Hours of history to show (default: 24, max: 168)"
     )
     @app_commands.autocomplete(server=_server_autocomplete)
     async def gsm_history(
@@ -1555,11 +1555,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         hours: typing.Optional[int] = 24
     ) -> None:
         """
-        Muestra el historial de jugadores de un servidor con gráfico ASCII.
+        Shows the player history of a server with an ASCII graph.
         
-        **Ejemplos:**
-        `[p]gsmhistory 192.168.1.1:27015` - Últimas 24 horas
-        `[p]gsmhistory 192.168.1.1:27015 12` - Últimas 12 horas
+        **Examples:**
+        `[p]gsmhistory 192.168.1.1:27015` - Last 24 hours
+        `[p]gsmhistory 192.168.1.1:27015 12` - Last 12 hours
         """
         # Determinar si es server_id o IP:puerto
         resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
@@ -1595,7 +1595,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     @commands.hybrid_command(name="gsmplayers")
     @app_commands.describe(
-        server="Servidor a consultar (IP:puerto o selecciona de la lista)"
+        server="Server to query (IP:port or select from the list)"
     )
     @app_commands.autocomplete(server=_server_autocomplete)
     async def gsm_players(
@@ -1604,11 +1604,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         server: str
     ) -> None:
         """
-        Muestra la lista de jugadores conectados a un servidor.
+        Shows the list of players connected to a server.
         
-        Muestra nombre, puntuación y tiempo conectado.
+        Displays name, score and connection time.
         
-        **Ejemplo:** `[p]gsmplayers 192.168.1.1:27015`
+        **Example:** `[p]gsmplayers 192.168.1.1:27015`
         """
         # Determinar si es server_id o IP:puerto
         resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
