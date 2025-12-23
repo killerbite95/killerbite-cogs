@@ -348,3 +348,488 @@ msgstr "Advertencia"
 
 msgid "Info"
 msgstr "Información"
+# ============================================================================
+# Command Docstrings - Admin Commands
+# ============================================================================
+
+#, docstring
+msgid "Base support ticket settings"
+msgstr "Configuración base de tickets de soporte"
+
+#, docstring
+msgid "Ticket Setup Guide"
+msgstr "Guía de Configuración de Tickets"
+
+#, docstring
+msgid ""
+"Suspend the ticket system\n"
+"If a suspension message is set, any user that tries to open a ticket will receive this message"
+msgstr ""
+"Suspender el sistema de tickets\n"
+"Si se establece un mensaje de suspensión, cualquier usuario que intente abrir un ticket recibirá este mensaje"
+
+#, docstring
+msgid "Add a support ticket panel"
+msgstr "Añadir un panel de tickets de soporte"
+
+#, docstring
+msgid "Set the category ID for a ticket panel"
+msgstr "Establecer el ID de categoría para un panel de tickets"
+
+#, docstring
+msgid "Set the channel ID where a ticket panel is located"
+msgstr "Establecer el ID del canal donde se encuentra un panel de tickets"
+
+#, docstring
+msgid ""
+"Set the message ID of a ticket panel\n"
+"Run this command in the same channel as the ticket panel message"
+msgstr ""
+"Establecer el ID del mensaje de un panel de tickets\n"
+"Ejecuta este comando en el mismo canal que el mensaje del panel"
+
+#, docstring
+msgid "Set the button text for a support ticket panel"
+msgstr "Establecer el texto del botón para un panel de tickets"
+
+#, docstring
+msgid "Set the button color for a support ticket panel"
+msgstr "Establecer el color del botón para un panel de tickets"
+
+#, docstring
+msgid "Set the button emoji for a support ticket panel"
+msgstr "Establecer el emoji del botón para un panel de tickets"
+
+#, docstring
+msgid ""
+"Toggle a panel on/off\n\n"
+"Disabled panels will still show the button but it will be disabled"
+msgstr ""
+"Activar/desactivar un panel\n\n"
+"Los paneles desactivados seguirán mostrando el botón pero estará deshabilitado"
+
+#, docstring
+msgid ""
+"Set the default ticket channel name for a panel\n\n"
+"You can include the following in the name\n"
+"`{num}` - Ticket number\n"
+"`{user}` - user's name\n"
+"`{displayname}` - user's display name\n"
+"`{id}` - user's ID\n"
+"`{shortdate}` - mm-dd\n"
+"`{longdate}` - mm-dd-yyyy\n"
+"`{time}` - hh-mm AM/PM according to bot host system time\n\n"
+"You can set this to {default} to use default \"Ticket-Username"
+msgstr ""
+"Establecer el nombre predeterminado del canal de ticket para un panel\n\n"
+"Puedes incluir lo siguiente en el nombre\n"
+"`{num}` - Número de ticket\n"
+"`{user}` - nombre del usuario\n"
+"`{displayname}` - nombre para mostrar del usuario\n"
+"`{id}` - ID del usuario\n"
+"`{shortdate}` - mm-dd\n"
+"`{longdate}` - mm-dd-yyyy\n"
+"`{time}` - hh-mm AM/PM según la hora del sistema del bot\n\n"
+"Puedes establecerlo a {default} para usar el predeterminado \"Ticket-NombreUsuario"
+
+#, docstring
+msgid "Toggle whether a certain panel uses threads or channels"
+msgstr "Alternar si un panel usa hilos o canales"
+
+#, docstring
+msgid "Throw a modal when the close button is clicked to enter a reason"
+msgstr "Mostrar un modal cuando se hace clic en cerrar para introducir un motivo"
+
+#, docstring
+msgid "Set the logging channel for each panel's tickets"
+msgstr "Establecer el canal de registro para los tickets de cada panel"
+
+#, docstring
+msgid "Set a title for a ticket panel's modal"
+msgstr "Establecer un título para el modal de un panel de tickets"
+
+#, docstring
+msgid ""
+"Add a field to the modal for users to fill in before a ticket is opened\n\n"
+"**Fields:**\n"
+"- label (required): The name of the field\n"
+"- style: long (multi-line) or short (single-line)\n"
+"- placeholder: The placeholder text\n"
+"- default: The default value\n"
+"- min_length: The minimum length of the field\n"
+"- max_length: The maximum length of the field\n"
+"- required: Whether the field is required\n\n"
+"**Note:** Modals can only have up to 5 fields."
+msgstr ""
+"Añadir un campo al modal para que los usuarios completen antes de abrir un ticket\n\n"
+"**Campos:**\n"
+"- label (requerido): El nombre del campo\n"
+"- style: long (multi-línea) o short (una línea)\n"
+"- placeholder: El texto de marcador de posición\n"
+"- default: El valor predeterminado\n"
+"- min_length: La longitud mínima del campo\n"
+"- max_length: La longitud máxima del campo\n"
+"- required: Si el campo es obligatorio\n\n"
+"**Nota:** Los modales solo pueden tener hasta 5 campos."
+
+#, docstring
+msgid "View and manage modals for a ticket panel"
+msgstr "Ver y gestionar modales de un panel de tickets"
+
+#, docstring
+msgid "Add a message for when a ticket is opened"
+msgstr "Añadir un mensaje para cuando se abre un ticket"
+
+#, docstring
+msgid "View existing messages for a panel"
+msgstr "Ver los mensajes existentes de un panel"
+
+#, docstring
+msgid "View all ticket panels"
+msgstr "Ver todos los paneles de tickets"
+
+#, docstring
+msgid "View all ticket settings"
+msgstr "Ver todas las configuraciones de tickets"
+
+#, docstring
+msgid "Set max tickets a user can have open at once (0 is no limit)"
+msgstr "Establecer máximo de tickets que un usuario puede tener abiertos a la vez (0 = sin límite)"
+
+#, docstring
+msgid ""
+"Add support roles to respond to tickets\n\n"
+"To remove a role, run the command with the role again"
+msgstr ""
+"Añadir roles de soporte para responder tickets\n\n"
+"Para eliminar un rol, ejecuta el comando con el mismo rol de nuevo"
+
+#, docstring
+msgid ""
+"Assign a support role to a specific ticket panel\n\n"
+"The role will gain access to that panel's tickets only"
+msgstr ""
+"Asignar un rol de soporte a un panel de tickets específico\n\n"
+"El rol tendrá acceso solo a los tickets de ese panel"
+
+#, docstring
+msgid "Set the max tickets a staff member can claim"
+msgstr "Establecer el máximo de tickets que un miembro del staff puede reclamar"
+
+#, docstring
+msgid "Set a role that can be assigned tickets (also receives notifications)"
+msgstr "Establecer un rol que puede ser asignado a tickets (también recibe notificaciones)"
+
+#, docstring
+msgid ""
+"Set an alternate channel that tickets will be opened under for a specific panel\n\n"
+"Run the command on its own without a channel arg to disable"
+msgstr ""
+"Establecer un canal alternativo donde se abrirán los tickets para un panel específico\n\n"
+"Ejecuta el comando sin argumento de canal para desactivar"
+
+#, docstring
+msgid "Set priority for a panel, highest priority panels are checked first for max ticket limit"
+msgstr "Establecer prioridad para un panel, los paneles de mayor prioridad se verifican primero para el límite de tickets"
+
+#, docstring
+msgid "Set the row for a panel's button (0-4)"
+msgstr "Establecer la fila para el botón de un panel (0-4)"
+
+#, docstring
+msgid "Set hours before ticket is considered as having no response"
+msgstr "Establecer horas antes de que un ticket se considere sin respuesta"
+
+#, docstring
+msgid "List currently opened tickets"
+msgstr "Listar tickets actualmente abiertos"
+
+#, docstring
+msgid "Toggle whether ticket owners and staff are mentioned when a ticket is opened"
+msgstr "Alternar si los propietarios y staff son mencionados cuando se abre un ticket"
+
+#, docstring
+msgid "Cleanup closed ticket channels that still exist"
+msgstr "Limpiar canales de tickets cerrados que aún existen"
+
+#, docstring
+msgid "Repair views for open tickets"
+msgstr "Reparar vistas de tickets abiertos"
+
+#, docstring
+msgid "Get a message link from a message ID"
+msgstr "Obtener un enlace de mensaje desde un ID de mensaje"
+
+#, docstring
+msgid "Toggle DMs on ticket open"
+msgstr "Alternar DMs al abrir un ticket"
+
+#, docstring
+msgid "Toggle automatically closing thread tickets"
+msgstr "Alternar cierre automático de tickets de hilos"
+
+#, docstring
+msgid "Toggle whether users can rename their own tickets"
+msgstr "Alternar si los usuarios pueden renombrar sus propios tickets"
+
+#, docstring
+msgid "Toggle whether users can close their own tickets"
+msgstr "Alternar si los usuarios pueden cerrar sus propios tickets"
+
+#, docstring
+msgid "(Toggle all self-manage options: close, rename) for users"
+msgstr "(Alternar todas las opciones de auto-gestión: cerrar, renombrar) para usuarios"
+
+#, docstring
+msgid "Toggle whether support is auto-added to tickets on open"
+msgstr "Alternar si el soporte es añadido automáticamente a los tickets al abrirse"
+
+#, docstring
+msgid "Toggle ticket transcripts on or off"
+msgstr "Activar o desactivar transcripciones de tickets"
+
+#, docstring
+msgid "Toggle whether transcripts are interactive or static (HTML)"
+msgstr "Alternar si las transcripciones son interactivas o estáticas (HTML)"
+
+#, docstring
+msgid "Edit/Update an existing ticket panel message"
+msgstr "Editar/Actualizar un mensaje existente del panel de tickets"
+
+#, docstring
+msgid ""
+"Create an embed for ticket panels\n\n"
+"Valid color names are:\n"
+"- red, blue, green, yellow, orange, purple, pink, black, white, random"
+msgstr ""
+"Crear un embed para paneles de tickets\n\n"
+"Nombres de colores válidos:\n"
+"- red, blue, green, yellow, orange, purple, pink, black, white, random"
+
+#, docstring
+msgid "Open a ticket for another user"
+msgstr "Abrir un ticket para otro usuario"
+
+#, docstring
+msgid "Ticket cooldown settings"
+msgstr "Configuración de cooldown de tickets"
+
+#, docstring
+msgid "Set ticket cooldown"
+msgstr "Establecer cooldown de tickets"
+
+#, docstring
+msgid "View ticket cooldown settings"
+msgstr "Ver configuración de cooldown de tickets"
+
+#, docstring
+msgid "Set ticket rate limit"
+msgstr "Establecer límite de velocidad de tickets"
+
+#, docstring
+msgid "Requirements to open tickets based on account/server age"
+msgstr "Requisitos para abrir tickets basados en antigüedad de cuenta/servidor"
+
+#, docstring
+msgid "Set minimum account age to open tickets"
+msgstr "Establecer antigüedad mínima de cuenta para abrir tickets"
+
+#, docstring
+msgid "Set minimum time in server to open tickets"
+msgstr "Establecer tiempo mínimo en servidor para abrir tickets"
+
+#, docstring
+msgid "Manage ticket blacklist"
+msgstr "Gestionar lista negra de tickets"
+
+#, docstring
+msgid "Add a user to the blacklist"
+msgstr "Añadir un usuario a la lista negra"
+
+#, docstring
+msgid "Remove a user from the blacklist"
+msgstr "Eliminar un usuario de la lista negra"
+
+#, docstring
+msgid "List blacklisted users"
+msgstr "Listar usuarios en lista negra"
+
+#, docstring
+msgid "Smart auto-close settings"
+msgstr "Configuración de auto-cierre inteligente"
+
+#, docstring
+msgid "Set hours before auto-close when awaiting user response"
+msgstr "Establecer horas antes del auto-cierre cuando se espera respuesta del usuario"
+
+#, docstring
+msgid "Set hours before auto-close when awaiting staff response"
+msgstr "Establecer horas antes del auto-cierre cuando se espera respuesta del staff"
+
+#, docstring
+msgid ""
+"Set hours before auto-close to send warning\n\n"
+"Set to 0 to disable warnings"
+msgstr ""
+"Establecer horas antes del auto-cierre para enviar aviso\n\n"
+"Establecer a 0 para desactivar avisos"
+
+#, docstring
+msgid "Set the window where closed tickets can be reopened (in hours)"
+msgstr "Establecer la ventana donde los tickets cerrados pueden reabrirse (en horas)"
+
+#, docstring
+msgid "View auto-close settings"
+msgstr "Ver configuración de auto-cierre"
+
+#, docstring
+msgid "Ticket claim settings"
+msgstr "Configuración de reclamación de tickets"
+
+#, docstring
+msgid "Set max tickets a staff member can claim"
+msgstr "Establecer máximo de tickets que un miembro del staff puede reclamar"
+
+#, docstring
+msgid "View claim settings and currently claimed tickets"
+msgstr "Ver configuración de reclamación y tickets actualmente reclamados"
+
+#, docstring
+msgid "Escalation settings"
+msgstr "Configuración de escalación"
+
+#, docstring
+msgid "Set the channel for escalation notifications"
+msgstr "Establecer el canal para notificaciones de escalación"
+
+#, docstring
+msgid "Set the role to ping for escalations"
+msgstr "Establecer el rol a mencionar para escalaciones"
+
+#, docstring
+msgid "Set minutes before a ticket is escalated for no response"
+msgstr "Establecer minutos antes de que un ticket sea escalado por falta de respuesta"
+
+#, docstring
+msgid "View escalation settings"
+msgstr "Ver configuración de escalación"
+
+#, docstring
+msgid "Quick reply management"
+msgstr "Gestión de respuestas rápidas"
+
+#, docstring
+msgid "Add a quick reply"
+msgstr "Añadir una respuesta rápida"
+
+#, docstring
+msgid ""
+"Add a quick reply with advanced options\n\n"
+"Options for close_after: yes, no"
+msgstr ""
+"Añadir una respuesta rápida con opciones avanzadas\n\n"
+"Opciones para close_after: yes, no"
+
+#, docstring
+msgid "Remove a quick reply"
+msgstr "Eliminar una respuesta rápida"
+
+#, docstring
+msgid "List all quick replies"
+msgstr "Listar todas las respuestas rápidas"
+
+#, docstring
+msgid "Set the audit log channel for ticket actions"
+msgstr "Establecer el canal de registro de auditoría para acciones de tickets"
+
+#, docstring
+msgid "Export ticket configuration"
+msgstr "Exportar configuración de tickets"
+
+#, docstring
+msgid "Import ticket configuration from a JSON file"
+msgstr "Importar configuración de tickets desde un archivo JSON"
+
+#, docstring
+msgid ""
+"Run pre-flight checks on panel configuration\n\n"
+"This will verify permissions, channels, roles, and other settings"
+msgstr ""
+"Ejecutar verificaciones previas en la configuración del panel\n\n"
+"Esto verificará permisos, canales, roles y otras configuraciones"
+
+#, docstring
+msgid "Interactive embed builder for ticket panels"
+msgstr "Constructor interactivo de embeds para paneles de tickets"
+
+#, docstring
+msgid "View ticket overview with advanced filters"
+msgstr "Ver resumen de tickets con filtros avanzados"
+
+#, docstring
+msgid "View ticket statistics"
+msgstr "Ver estadísticas de tickets"
+
+#, docstring
+msgid "Transcript settings"
+msgstr "Configuración de transcripciones"
+
+#, docstring
+msgid "Set how long to keep transcripts (in days)"
+msgstr "Establecer cuánto tiempo mantener las transcripciones (en días)"
+
+#, docstring
+msgid "Set transcript formats (html, txt, json)"
+msgstr "Establecer formatos de transcripción (html, txt, json)"
+
+#, docstring
+msgid "View transcript settings"
+msgstr "Ver configuración de transcripciones"
+
+# ============================================================================
+# Command Docstrings - Base Commands
+# ============================================================================
+
+#, docstring
+msgid "Close your ticket"
+msgstr "Cerrar tu ticket"
+
+#, docstring
+msgid "Rename your ticket channel"
+msgstr "Renombrar tu canal de ticket"
+
+#, docstring
+msgid "Add a user to your ticket"
+msgstr "Añadir un usuario a tu ticket"
+
+#, docstring
+msgid "Remove a user from your ticket"
+msgstr "Eliminar un usuario de tu ticket"
+
+#, docstring
+msgid "Save a transcript of the ticket"
+msgstr "Guardar una transcripción del ticket"
+
+#, docstring
+msgid "Claim a ticket"
+msgstr "Reclamar un ticket"
+
+#, docstring
+msgid "Release a claimed ticket"
+msgstr "Liberar un ticket reclamado"
+
+#, docstring
+msgid "Transfer a ticket to another staff member"
+msgstr "Transferir un ticket a otro miembro del staff"
+
+#, docstring
+msgid "Add a note to the ticket"
+msgstr "Añadir una nota al ticket"
+
+#, docstring
+msgid "View notes for the ticket"
+msgstr "Ver notas del ticket"
+
+#, docstring
+msgid "Use a quick reply"
+msgstr "Usar una respuesta rápida"
