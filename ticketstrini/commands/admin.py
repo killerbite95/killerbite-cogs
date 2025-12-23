@@ -1443,6 +1443,76 @@ class AdminCommands(MixinMeta):
             await prune_invalid_tickets(ctx.guild, conf, self.config, ctx)
 
     @tickets.command()
+    async def repairviews(self, ctx: commands.Context):
+        """
+        Repair ticket views for all open tickets
+        
+        This will update the Close/Claim buttons for tickets that were
+        created before the v4.0.0 update.
+        """
+        from ..common.views import CloseView
+        
+        async with ctx.typing():
+            conf = await self.config.guild(ctx.guild).all()
+            repaired = 0
+            errors = 0
+            
+            for uid, tickets in conf.get("opened", {}).items():
+                for channel_id, ticket_info in tickets.items():
+                    channel = ctx.guild.get_channel_or_thread(int(channel_id))
+                    if not channel:
+                        continue
+                    
+                    # Get or fetch the first message with the Close button
+                    message_id = ticket_info.get("message_id")
+                    if message_id:
+                        try:
+                            msg = await channel.fetch_message(message_id)
+                        except discord.NotFound:
+                            message_id = None
+                    
+                    # If no message_id, try to find the first bot message with a button
+                    if not message_id:
+                        try:
+                            async for msg in channel.history(limit=5, oldest_first=True):
+                                if msg.author == self.bot.user and msg.components:
+                                    message_id = msg.id
+                                    # Save the message_id for future use
+                                    async with self.config.guild(ctx.guild).opened() as opened:
+                                        if uid in opened and channel_id in opened[uid]:
+                                            opened[uid][channel_id]["message_id"] = message_id
+                                    break
+                        except Exception:
+                            pass
+                    
+                    if not message_id:
+                        errors += 1
+                        continue
+                    
+                    try:
+                        msg = await channel.fetch_message(message_id)
+                        claimed_by = ticket_info.get("claimed_by")
+                        view = CloseView(
+                            self.bot,
+                            self.config,
+                            int(uid),
+                            channel,
+                            claimed_by=claimed_by,
+                        )
+                        await msg.edit(view=view)
+                        self.bot.add_view(view, message_id=message_id)
+                        repaired += 1
+                    except Exception as e:
+                        log.warning(f"Failed to repair view for ticket {channel_id}: {e}")
+                        errors += 1
+            
+            await ctx.send(
+                _("✅ Repaired **{}** ticket views.\n⚠️ **{}** tickets could not be repaired.").format(
+                    repaired, errors
+                )
+            )
+
+    @tickets.command()
     async def getlink(self, ctx: commands.Context, message: discord.Message):
         """Refetch the transcript link for a ticket"""
         notrans = _("This message does not have a transcript attached!")

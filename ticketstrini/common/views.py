@@ -182,7 +182,8 @@ class CloseView(View):
         self.channel = channel
         self.claimed_by = claimed_by
 
-        self.closeticket.custom_id = f"close_{channel.id}"
+        # Keep original custom_id format for backwards compatibility
+        self.closeticket.custom_id = str(channel.id)
         self.claimticket.custom_id = f"claim_{channel.id}"
         
         # Update claim button appearance based on status
