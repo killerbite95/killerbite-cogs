@@ -1872,9 +1872,9 @@ class AdminCommands(MixinMeta):
     # Blacklist Avanzado
     # ============================================================================
 
-    @tickets.group(name="blacklist")
+    @tickets.group(name="tblacklist", aliases=["tbl"])
     async def blacklist_cmd(self, ctx: commands.Context):
-        """Manage the ticket blacklist"""
+        """Manage the ticket blacklist (advanced)"""
         pass
 
     @blacklist_cmd.command(name="add")

@@ -63,8 +63,8 @@ Staff can add private notes to tickets:
 ### Advanced Blacklist
 Time-based bans with reasons:
 ```
-[p]tickets blacklist add @user 7d Spamming tickets
-[p]tickets blacklist add @user permanent Permanent ban
+[p]tickets tblacklist add @user 7d Spamming tickets
+[p]tickets tblacklist add @user permanent Permanent ban
 ```
 
 ### Escalation System
@@ -512,9 +512,10 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 
 | Command | Description |
 |---------|-------------|
-| `[p]tickets blacklist add <@user> [duration] [reason]` | Add to blacklist |
-| `[p]tickets blacklist remove <@user>` | Remove from blacklist |
-| `[p]tickets blacklist list` | View blacklist |
+| `[p]tickets blacklist <user_or_role>` | Simple add/remove toggle |
+| `[p]tickets tblacklist add <@user> [duration] [reason]` | Add with duration/reason |
+| `[p]tickets tblacklist remove <@user>` | Remove from blacklist |
+| `[p]tickets tblacklist list` | View blacklist |
 
 ### Auto-Close Commands
 
