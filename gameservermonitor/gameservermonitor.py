@@ -106,6 +106,21 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Migrar servidores sin server_id
         await self._migrate_server_ids()
+        
+        # Resetear contadores de queries para evitar números gigantes
+        await self._reset_query_counters()
+    
+    async def _reset_query_counters(self) -> None:
+        """
+        Resetea los contadores de queries de todos los servidores.
+        Se ejecuta en cada carga del cog para evitar acumulación infinita.
+        """
+        for guild in self.bot.guilds:
+            async with self.config.guild(guild).servers() as servers:
+                for server_key, server_data in servers.items():
+                    server_data["total_queries"] = 0
+                    server_data["successful_queries"] = 0
+        logger.info("Contadores de queries reseteados")
     
     def cog_unload(self) -> None:
         """Limpieza al descargar el cog."""
