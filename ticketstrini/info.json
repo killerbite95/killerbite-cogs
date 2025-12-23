@@ -8,7 +8,11 @@
   "hidden": false,
   "install_msg": "Tickets-Trini v4.0.3 instalado!\n\nEscribe `[p]ticketst setuphelp` para comenzar.\n\nNovedades v4.0:\n• Sistema de claim/unclaim para staff\n• Auto-close inteligente (diferencia usuario vs staff)\n• Sistema de escalación automática\n• Quick replies (respuestas rápidas)\n• Blacklist avanzado con duración\n• Notas internas por ticket\n• Estadísticas y KPIs\n• Overview mejorado con filtros y paginación\n• Audit logging\n• Export/Import de configuración\n• Embed wizard interactivo\n• Preflight checks",
   "min_bot_version": "3.5.0",
-  "min_python_version": [3, 10, 0],
+  "min_python_version": [
+    3,
+    10,
+    0
+  ],
   "permissions": [
     "read_messages",
     "send_messages",

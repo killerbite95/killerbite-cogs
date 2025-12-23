@@ -10,7 +10,7 @@ Features:
 - Staff notifications and author DMs
 - Dashboard integration
 """
-import discord
+import discord # pyright: ignore[reportMissingImports]
 from redbot.core import commands, Config, checks, app_commands
 from redbot.core.bot import Red
 from typing import Optional, Union
