@@ -27,7 +27,7 @@ from .common.utils import (
     escalate_ticket,
 )
 from .common.views import CloseView, LogView, PanelView, StaffActionsView
-from .i18n import _
+from .i18n import _, set_contextual_locales_from_guild
 
 # ----------------- Agregamos la integración del Dashboard -----------------
 from .dashboard_integration import DashboardIntegration, dashboard_page
@@ -40,7 +40,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     Sistema de tickets de soporte multi-panel con botones (Trini Edition)
     """
     __author__ = "[Killerbite95](https://github.com/killerbite95/killerbite-cogs)"
-    __version__ = "4.0.0"
+    __version__ = "4.0.2"
 
     def format_help_for_context(self, ctx):
         helpcmd = super().format_help_for_context(ctx)
@@ -270,6 +270,9 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
             if not guild:
                 continue
             
+            # Set locale for translations in non-command context (task)
+            await set_contextual_locales_from_guild(self.bot, guild)
+            
             # Check both legacy inactive and new auto_close settings
             inactive = gconf.get("inactive", 0)
             auto_close_user_hours = gconf.get("auto_close_user_hours", 0)
@@ -422,6 +425,9 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
             guild = self.bot.get_guild(gid)
             if not guild:
                 continue
+            
+            # Set locale for translations in non-command context (task)
+            await set_contextual_locales_from_guild(self.bot, guild)
             
             escalation_minutes = gconf.get("escalation_minutes", 0)
             escalation_channel_id = gconf.get("escalation_channel", 0)

@@ -11,7 +11,7 @@ from discord.ui import Button, Modal, Select, TextInput, View
 from discord.ui.item import Item
 from redbot.core import Config, commands
 from redbot.core.bot import Red
-from ..i18n import _
+from ..i18n import _, set_contextual_locales_from_guild
 from redbot.core.utils.chat_formatting import box, humanize_list, pagify
 from redbot.core.utils.mod import is_admin_or_superior
 
@@ -257,6 +257,10 @@ class CloseView(View):
         """Handle claim button click"""
         if not interaction.guild or not interaction.channel:
             return
+        
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+        
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return
@@ -339,6 +343,10 @@ class CloseView(View):
         """Handle close button click"""
         if not interaction.guild or not interaction.channel:
             return
+        
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+        
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return
@@ -452,6 +460,9 @@ class SupportButton(Button):
         user = self.mock_user or guild.get_member(interaction.user.id)
         if not isinstance(interaction.channel, discord.TextChannel) or not guild:
             return
+        
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(interaction.client, guild)
 
         channel: discord.TextChannel = interaction.channel
         roles = [r.id for r in user.roles]
@@ -935,6 +946,9 @@ class LogView(View):
 
     async def _join_callback(self, interaction: Interaction):
         """Handle join ticket button click"""
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return
@@ -1031,6 +1045,9 @@ class StaffActionsView(View):
     
     @discord.ui.button(label="Claim", style=ButtonStyle.green, emoji="🙋", row=0)
     async def claim_btn(self, interaction: Interaction, button: Button):
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+        
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return
@@ -1065,6 +1082,9 @@ class StaffActionsView(View):
     
     @discord.ui.button(label="Unclaim", style=ButtonStyle.grey, emoji="🚫", row=0, disabled=True)
     async def unclaim_btn(self, interaction: Interaction, button: Button):
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+        
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return
@@ -1092,6 +1112,9 @@ class StaffActionsView(View):
     
     @discord.ui.button(label="Close", style=ButtonStyle.danger, emoji="🔒", row=0)
     async def close_btn(self, interaction: Interaction, button: Button):
+        # Set locale for translations in non-command context
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+        
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return

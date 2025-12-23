@@ -15,7 +15,7 @@ import discord
 from discord.utils import escape_markdown
 from redbot.core import Config, commands
 from redbot.core.bot import Red
-from ..i18n import _
+from ..i18n import _, set_contextual_locales_from_guild
 from redbot.core.utils.chat_formatting import humanize_list, pagify, text_to_file
 from redbot.core.utils.mod import is_admin_or_superior
 
@@ -1004,6 +1004,9 @@ async def close_ticket(
     closedby: str,
     config: Config,
 ) -> None:
+    # Set locale for translations in non-command context
+    await set_contextual_locales_from_guild(bot, guild)
+    
     opened = conf["opened"]
     if not opened:
         return
