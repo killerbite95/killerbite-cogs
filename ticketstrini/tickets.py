@@ -8,7 +8,7 @@ import discord
 from discord.ext import tasks
 from redbot.core import Config, commands
 from redbot.core.bot import Red
-from redbot.core.i18n import Translator, cog_i18n
+from redbot.core.i18n import cog_i18n
 
 from .abc import CompositeMetaClass
 from .commands import TicketCommands
@@ -27,12 +27,12 @@ from .common.utils import (
     escalate_ticket,
 )
 from .common.views import CloseView, LogView, PanelView, StaffActionsView
+from .i18n import _
 
 # ----------------- Agregamos la integración del Dashboard -----------------
 from .dashboard_integration import DashboardIntegration, dashboard_page
 
 log = logging.getLogger("red.killerbite95.ticketstrini")
-_ = Translator("Tickets", __file__)
 
 @cog_i18n(_)
 class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog, metaclass=CompositeMetaClass):

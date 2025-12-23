@@ -6,15 +6,13 @@ from io import StringIO
 import discord
 import numpy as np
 from redbot.core import commands
-from redbot.core.i18n import Translator
-import pathlib
+from ..i18n import _
 from redbot.core.utils.chat_formatting import pagify
 
 from ..abc import MixinMeta
 from ..common.utils import update_active_overview
 from ..common.views import CloseView, LogView
 
-_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 log = logging.getLogger("red.vrt.tickets.functions")
 
 

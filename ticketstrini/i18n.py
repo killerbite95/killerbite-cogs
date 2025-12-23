@@ -1,0 +1,7 @@
+"""Centralized i18n module for TicketsTrini"""
+from redbot.core.i18n import Translator
+
+# Single Translator instance for all modules
+# The path __file__ here points to ticketstrini/i18n.py
+# So translations will be loaded from ticketstrini/locales/
+_ = Translator("Tickets", __file__)

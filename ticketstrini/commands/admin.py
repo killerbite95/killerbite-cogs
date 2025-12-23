@@ -8,8 +8,8 @@ from typing import Optional, Union
 import discord
 from discord import Embed
 from redbot.core import commands
-from redbot.core.i18n import Translator
 from redbot.core.utils.chat_formatting import box, pagify
+from ..i18n import _
 
 from ..abc import MixinMeta
 from ..common.constants import MODAL_SCHEMA, TICKET_PANEL_SCHEMA, QUICK_REPLY_SCHEMA, TICKET_STATUSES
@@ -36,10 +36,8 @@ from ..common.views import (
     OverviewView,
     QuickReplyView,
 )
-import pathlib
 
 log = logging.getLogger("red.vrt.admincommands")
-_ = Translator("Tickets", pathlib.Path(__file__).parent.parent)
 
 
 class AdminCommands(MixinMeta):
