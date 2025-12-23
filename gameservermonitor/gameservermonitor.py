@@ -615,6 +615,96 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         return {"embed": embed}
     
+    async def _build_map_payload(
+        self,
+        guild: discord.Guild,
+        server_key: str
+    ) -> Dict[str, Any]:
+        """
+        Construye el payload para mostrar el mapa actual del servidor.
+        
+        Args:
+            guild: Guild de Discord
+            server_key: Clave del servidor
+            
+        Returns:
+            Dict con 'embed', 'content' o 'error'
+        """
+        servers = await self.config.guild(guild).servers()
+        
+        if server_key not in servers:
+            return {"error": _("Server not found.")}
+        
+        server_data = ServerData.from_dict(server_key, servers[server_key])
+        
+        if not server_data.game:
+            return {"error": _("Invalid game data for this server.")}
+        
+        # Obtener estado actual
+        query_kwargs = {}
+        if server_data.game == GameType.DAYZ:
+            query_kwargs["query_port"] = server_data.query_port
+            port = server_data.game_port or server_data.port
+        else:
+            port = server_data.port
+        
+        query_result = await self.query_service.query_server(
+            host=server_data.host,
+            port=port,
+            game=server_data.game,
+            use_cache=False
+        )
+        
+        if not query_result.success:
+            server_name = server_data.domain or server_key
+            return {"error": _("**{server_name}** is offline or not responding.").format(server_name=server_name)}
+        
+        game_name = server_data.game.display_name if server_data.game else _("Unknown")
+        
+        # Para Minecraft, map_name contiene la versión
+        if server_data.game == GameType.MINECRAFT:
+            map_label = _("Version")
+        else:
+            map_label = _("Current Map")
+        
+        # Crear embed
+        embed = discord.Embed(
+            title=f"🗺️ {map_label} - {query_result.hostname[:50]}",
+            color=query_result.status.color
+        )
+        
+        if server_data.game and server_data.game.thumbnail_url:
+            embed.set_thumbnail(url=server_data.game.thumbnail_url)
+        
+        embed.add_field(
+            name=f"🎮 {_('Game')}",
+            value=game_name,
+            inline=True
+        )
+        
+        embed.add_field(
+            name=f"🗺️ {map_label}",
+            value=query_result.map_name or "N/A",
+            inline=True
+        )
+        
+        embed.add_field(
+            name=f"👥 {_('Players')}",
+            value=query_result.player_display,
+            inline=True
+        )
+        
+        if query_result.latency_ms:
+            embed.add_field(
+                name=f"📶 {_('Ping')}",
+                value=f"{query_result.latency_ms:.0f}ms",
+                inline=True
+            )
+        
+        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
+        
+        return {"embed": embed}
+    
     # ==================== Autocomplete ====================
     
     async def _server_autocomplete(
@@ -1637,6 +1727,55 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # Usar payload builder
         async with ctx.typing():
             payload = await self._build_players_payload(ctx.guild, resolved_key)
+        
+        if "error" in payload:
+            await ctx.send(f"❌ {payload['error']}", ephemeral=True)
+            return
+        
+        # Determinar si borrar después (solo para prefijo)
+        interaction_config = await self.config.guild(ctx.guild).interaction_features()
+        delete_after = None
+        
+        if ctx.interaction is None:  # Es comando de prefijo
+            delete_seconds = interaction_config.get("delete_after_prefix_seconds")
+            if delete_seconds:
+                delete_after = delete_seconds
+        
+        await ctx.send(
+            embed=payload.get("embed"),
+            ephemeral=ctx.interaction is not None,
+            delete_after=delete_after
+        )
+    
+    @commands.hybrid_command(name="gsmmap")
+    @app_commands.describe(
+        server="Server to query (IP:port or select from the list)"
+    )
+    @app_commands.autocomplete(server=_server_autocomplete)
+    async def gsm_map(
+        self, 
+        ctx: commands.Context, 
+        server: str
+    ) -> None:
+        """
+        Shows the current map of a server.
+        
+        For Minecraft servers, shows the version instead.
+        
+        **Example:** `[p]gsmmap 192.168.1.1:27015`
+        """
+        # Determinar si es server_id o IP:puerto
+        resolved_key = await self._resolve_server_key_by_id(ctx.guild, server)
+        if not resolved_key:
+            resolved_key = await self._resolve_server_key(ctx.guild, server)
+        
+        if not resolved_key:
+            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
+            return
+        
+        # Usar payload builder
+        async with ctx.typing():
+            payload = await self._build_map_payload(ctx.guild, resolved_key)
         
         if "error" in payload:
             await ctx.send(f"❌ {payload['error']}", ephemeral=True)

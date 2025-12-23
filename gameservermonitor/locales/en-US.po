@@ -370,6 +370,9 @@ msgstr "Shows the player history of a server with an ASCII graph.\n\n**Examples:
 msgid "Shows the list of players connected to a server.\n\nDisplays name, score and connection time.\n\n**Example:** `[p]gsmplayers 192.168.1.1:27015`"
 msgstr "Shows the list of players connected to a server.\n\nDisplays name, score and connection time.\n\n**Example:** `[p]gsmplayers 192.168.1.1:27015`"
 
+msgid "Shows the current map of a server.\n\nFor Minecraft servers, shows the version instead.\n\n**Example:** `[p]gsmmap 192.168.1.1:27015`"
+msgstr "Shows the current map of a server.\n\nFor Minecraft servers, shows the version instead.\n\n**Example:** `[p]gsmmap 192.168.1.1:27015`"
+
 #: gameservermonitor.py (slash command descriptions)
 msgid "Server to query (IP:port or select from the list)"
 msgstr "Server to query (IP:port or select from the list)"
