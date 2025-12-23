@@ -182,23 +182,43 @@ class CloseView(View):
         self.channel = channel
         self.claimed_by = claimed_by
 
-        # Keep original custom_id format for backwards compatibility
-        self.closeticket.custom_id = str(channel.id)
-        self.claimticket.custom_id = f"claim_{channel.id}"
-        
-        # Update claim button appearance based on status
-        self._update_claim_button()
+        # Create buttons dynamically for i18n support
+        self._create_buttons()
 
-    def _update_claim_button(self):
-        """Update claim button appearance based on claimed status"""
+    def _create_buttons(self):
+        """Create buttons with proper labels"""
+        # Clear existing items
+        self.clear_items()
+        
+        # Claim button
         if self.claimed_by:
-            self.claimticket.label = "Claimed"
-            self.claimticket.style = ButtonStyle.red
-            self.claimticket.emoji = "✅"
+            claim_btn = Button(
+                label=_("Claimed"),
+                style=ButtonStyle.red,
+                emoji="✅",
+                custom_id=f"claim_{self.channel.id}",
+                row=0,
+            )
         else:
-            self.claimticket.label = "Claim"
-            self.claimticket.style = ButtonStyle.green
-            self.claimticket.emoji = "🙋"
+            claim_btn = Button(
+                label=_("Claim"),
+                style=ButtonStyle.green,
+                emoji="🙋",
+                custom_id=f"claim_{self.channel.id}",
+                row=0,
+            )
+        claim_btn.callback = self._claim_callback
+        self.add_item(claim_btn)
+        
+        # Close button
+        close_btn = Button(
+            label=_("Close"),
+            style=ButtonStyle.danger,
+            custom_id=str(self.channel.id),
+            row=0,
+        )
+        close_btn.callback = self._close_callback
+        self.add_item(close_btn)
 
     async def _is_support_staff(self, user: discord.Member, conf: dict) -> bool:
         """Check if user is support staff"""
@@ -234,8 +254,8 @@ class CloseView(View):
         )
         return await super().on_error(interaction, error, item)
 
-    @discord.ui.button(label="Claim", style=ButtonStyle.green, emoji="🙋", row=0)
-    async def claimticket(self, interaction: Interaction, button: Button):
+    async def _claim_callback(self, interaction: Interaction):
+        """Handle claim button click"""
         if not interaction.guild or not interaction.channel:
             return
         user = interaction.guild.get_member(interaction.user.id)
@@ -269,7 +289,7 @@ class CloseView(View):
         if current_claimer:
             # Already claimed - show who
             claimer = interaction.guild.get_member(current_claimer)
-            claimer_name = claimer.display_name if claimer else "Unknown"
+            claimer_name = claimer.display_name if claimer else _("Unknown")
             
             if current_claimer == user.id:
                 # User is the claimer - unclaim
@@ -282,10 +302,10 @@ class CloseView(View):
                 )
                 if success:
                     self.claimed_by = None
-                    self._update_claim_button()
+                    self._create_buttons()
                     await interaction.response.edit_message(view=self)
                     await interaction.followup.send(
-                        _("✅ You have released this ticket."),
+                        _("You have released this ticket."),
                         ephemeral=True,
                     )
                 else:
@@ -293,7 +313,7 @@ class CloseView(View):
             else:
                 # Someone else claimed it
                 await interaction.response.send_message(
-                    _("🔒 This ticket is already claimed by **{}**.").format(claimer_name),
+                    _("This ticket is already claimed by **{}**.").format(claimer_name),
                     ephemeral=True,
                 )
         else:
@@ -307,17 +327,17 @@ class CloseView(View):
             )
             if success:
                 self.claimed_by = user.id
-                self._update_claim_button()
+                self._create_buttons()
                 await interaction.response.edit_message(view=self)
                 await interaction.followup.send(
-                    _("✅ You have claimed this ticket!"),
+                    _("You have claimed this ticket!"),
                     ephemeral=True,
                 )
             else:
                 await interaction.response.send_message(message, ephemeral=True)
 
-    @discord.ui.button(label="Close", style=ButtonStyle.danger, row=0)
-    async def closeticket(self, interaction: Interaction, button: Button):
+    async def _close_callback(self, interaction: Interaction):
+        """Handle close button click"""
         if not interaction.guild or not interaction.channel:
             return
         user = interaction.guild.get_member(interaction.user.id)
@@ -903,12 +923,19 @@ class LogView(View):
         self.guild = guild
         self.channel = channel
         self.max_claims = max_claims
-
         self.added = set()
-        self.join_ticket.custom_id = str(channel.id)
+        
+        # Create button dynamically for i18n
+        join_btn = Button(
+            label=_("Join Ticket"),
+            style=ButtonStyle.green,
+            custom_id=str(channel.id),
+        )
+        join_btn.callback = self._join_callback
+        self.add_item(join_btn)
 
-    @discord.ui.button(label="Join Ticket", style=ButtonStyle.green)
-    async def join_ticket(self, interaction: Interaction, button: Button):
+    async def _join_callback(self, interaction: Interaction):
+        """Handle join ticket button click"""
         user = interaction.guild.get_member(interaction.user.id)
         if not user:
             return

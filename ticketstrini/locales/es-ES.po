@@ -41,3 +41,294 @@ msgstr "(Cierre automático) Ticket abierto sin respuesta durante "
 msgid "User left guild(Auto-Close)"
 msgstr "Usuario abandonó gremio (Auto-Cerrar)"
 
+# ============================================================================
+# v4.0.0 - New translations for CloseView buttons and messages
+# ============================================================================
+
+#: common/views.py - CloseView buttons
+msgid "Claim"
+msgstr "Reclamar"
+
+msgid "Claimed"
+msgstr "Reclamado"
+
+msgid "Close"
+msgstr "Cerrar"
+
+#: common/views.py - CloseView messages
+msgid "Only support staff can claim tickets."
+msgstr "Solo el personal de soporte puede reclamar tickets."
+
+msgid "This ticket no longer exists."
+msgstr "Este ticket ya no existe."
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "You have released this ticket."
+msgstr "Has liberado este ticket."
+
+msgid "This ticket is already claimed by **{}**."
+msgstr "Este ticket ya está reclamado por **{}**."
+
+msgid "You have claimed this ticket!"
+msgstr "¡Has reclamado este ticket!"
+
+msgid "This ticket has already been closed! Please delete it manually."
+msgstr "¡Este ticket ya ha sido cerrado! Por favor, elimínalo manualmente."
+
+msgid "You do not have permissions to close this ticket"
+msgstr "No tienes permisos para cerrar este ticket"
+
+msgid "Something went wrong, please try again."
+msgstr "Algo salió mal, por favor inténtalo de nuevo."
+
+msgid "Closing..."
+msgstr "Cerrando..."
+
+#: common/views.py - LogView messages
+msgid "You have already been added to the ticket **{}**!"
+msgstr "¡Ya has sido añadido al ticket **{}**!"
+
+msgid "The maximum amount of staff have claimed this ticket!"
+msgstr "¡El número máximo de personal ha reclamado este ticket!"
+
+msgid "You already have access to the ticket **{}**!"
+msgstr "¡Ya tienes acceso al ticket **{}**!"
+
+msgid "{} was added to the ticket"
+msgstr "{} fue añadido al ticket"
+
+msgid "You have been added to the ticket **{}**"
+msgstr "Has sido añadido al ticket **{}**"
+
+msgid "Join Ticket"
+msgstr "Unirse al Ticket"
+
+#: common/views.py - CloseReasonModal
+msgid "Reason for closing"
+msgstr "Motivo del cierre"
+
+msgid "Enter a reason for closing this ticket"
+msgstr "Introduce un motivo para cerrar este ticket"
+
+#: common/utils.py - Claim system messages
+msgid "This is not a ticket channel."
+msgstr "Este no es un canal de ticket."
+
+msgid "This ticket is already claimed by {}."
+msgstr "Este ticket ya está reclamado por {}."
+
+msgid "You have reached your maximum claim limit of {} tickets."
+msgstr "Has alcanzado tu límite máximo de {} tickets reclamados."
+
+msgid "Ticket claimed successfully!"
+msgstr "¡Ticket reclamado correctamente!"
+
+msgid "This ticket is not claimed."
+msgstr "Este ticket no está reclamado."
+
+msgid "You can only unclaim tickets you have claimed."
+msgstr "Solo puedes liberar tickets que hayas reclamado."
+
+msgid "Ticket unclaimed successfully."
+msgstr "Ticket liberado correctamente."
+
+msgid "You cannot transfer to yourself."
+msgstr "No puedes transferir a ti mismo."
+
+msgid "Target user is not support staff."
+msgstr "El usuario destino no es personal de soporte."
+
+msgid "Ticket transferred successfully."
+msgstr "Ticket transferido correctamente."
+
+#: commands/admin.py - repairviews command
+msgid "Repaired **{}** ticket views.\n⚠️ **{}** tickets could not be repaired."
+msgstr "Reparadas **{}** vistas de tickets.\n⚠️ **{}** tickets no pudieron ser reparados."
+
+#: commands/admin.py - Blacklist messages
+msgid "Invalid duration format. Use: 1h, 2d, 1w, 30d, or permanent"
+msgstr "Formato de duración inválido. Usa: 1h, 2d, 1w, 30d, o permanent"
+
+msgid "Panel not found"
+msgstr "Panel no encontrado"
+
+#: commands/admin.py - Stats messages
+msgid "No statistics available yet."
+msgstr "Aún no hay estadísticas disponibles."
+
+msgid "Ticket Statistics"
+msgstr "Estadísticas de Tickets"
+
+msgid "Total Tickets"
+msgstr "Total de Tickets"
+
+msgid "Open Tickets"
+msgstr "Tickets Abiertos"
+
+msgid "Closed Tickets"
+msgstr "Tickets Cerrados"
+
+msgid "Average Claim Time"
+msgstr "Tiempo Promedio de Reclamación"
+
+msgid "Average Close Time"
+msgstr "Tiempo Promedio de Cierre"
+
+#: commands/admin.py - Quick Reply messages
+msgid "Quick reply '{}' created successfully!"
+msgstr "¡Respuesta rápida '{}' creada correctamente!"
+
+msgid "Quick reply '{}' not found."
+msgstr "Respuesta rápida '{}' no encontrada."
+
+msgid "Quick reply '{}' deleted."
+msgstr "Respuesta rápida '{}' eliminada."
+
+msgid "No quick replies configured."
+msgstr "No hay respuestas rápidas configuradas."
+
+msgid "Available Quick Replies"
+msgstr "Respuestas Rápidas Disponibles"
+
+#: commands/admin.py - Escalation messages
+msgid "Escalation channel set to {}"
+msgstr "Canal de escalación establecido en {}"
+
+msgid "Escalation role set to {}"
+msgstr "Rol de escalación establecido en {}"
+
+msgid "Escalation time set to {} minutes"
+msgstr "Tiempo de escalación establecido en {} minutos"
+
+#: commands/admin.py - Auto-close messages
+msgid "Auto-close (user inactivity) set to {} hours"
+msgstr "Auto-cierre (inactividad del usuario) establecido en {} horas"
+
+msgid "Auto-close (staff inactivity) set to {} hours"
+msgstr "Auto-cierre (inactividad del personal) establecido en {} horas"
+
+msgid "Warning time set to {} hours before auto-close"
+msgstr "Tiempo de aviso establecido en {} horas antes del auto-cierre"
+
+msgid "Reopen window set to {} hours"
+msgstr "Ventana de reapertura establecida en {} horas"
+
+#: commands/admin.py - Note messages
+msgid "Note added to ticket."
+msgstr "Nota añadida al ticket."
+
+msgid "No notes for this ticket."
+msgstr "No hay notas para este ticket."
+
+msgid "Ticket Notes"
+msgstr "Notas del Ticket"
+
+#: commands/admin.py - Preflight messages
+msgid "✅ Panel Check Passed"
+msgstr "✅ Verificación del Panel Aprobada"
+
+msgid "No issues found with panel '{}'"
+msgstr "No se encontraron problemas con el panel '{}'"
+
+msgid "⚠️ Panel Issues Found"
+msgstr "⚠️ Problemas Encontrados en el Panel"
+
+msgid "✅ All Panels OK"
+msgstr "✅ Todos los Paneles OK"
+
+msgid "No issues found with any panels"
+msgstr "No se encontraron problemas en ningún panel"
+
+msgid "⚠️ Issues Found"
+msgstr "⚠️ Problemas Encontrados"
+
+#: commands/admin.py - Audit messages
+msgid "Audit channel set to {}"
+msgstr "Canal de auditoría establecido en {}"
+
+msgid "Audit logging disabled"
+msgstr "Registro de auditoría desactivado"
+
+#: commands/base.py - User commands
+msgid "You have an open ticket"
+msgstr "Tienes un ticket abierto"
+
+msgid "You already have an open ticket in this panel."
+msgstr "Ya tienes un ticket abierto en este panel."
+
+msgid "Your ticket: {}"
+msgstr "Tu ticket: {}"
+
+#: Overview messages
+msgid "Active Tickets Overview"
+msgstr "Resumen de Tickets Activos"
+
+msgid "No active tickets"
+msgstr "No hay tickets activos"
+
+msgid "Page {} of {}"
+msgstr "Página {} de {}"
+
+msgid "Filter: {}"
+msgstr "Filtro: {}"
+
+msgid "All"
+msgstr "Todos"
+
+msgid "Open"
+msgstr "Abiertos"
+
+msgid "Claimed"
+msgstr "Reclamados"
+
+msgid "Unclaimed"
+msgstr "Sin Reclamar"
+
+#: Transcript messages  
+msgid "Transcript"
+msgstr "Transcripción"
+
+msgid "Ticket closed by {}"
+msgstr "Ticket cerrado por {}"
+
+msgid "Reason: {}"
+msgstr "Motivo: {}"
+
+#: General
+msgid "minutes"
+msgstr "minutos"
+
+msgid "hours"
+msgstr "horas"
+
+msgid "days"
+msgstr "días"
+
+msgid "Enabled"
+msgstr "Activado"
+
+msgid "Disabled"
+msgstr "Desactivado"
+
+msgid "Yes"
+msgstr "Sí"
+
+msgid "No"
+msgstr "No"
+
+msgid "None"
+msgstr "Ninguno"
+
+msgid "Success"
+msgstr "Éxito"
+
+msgid "Error"
+msgstr "Error"
+
+msgid "Warning"
+msgstr "Advertencia"
+
+msgid "Info"
+msgstr "Información"
