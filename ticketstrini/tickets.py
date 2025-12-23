@@ -40,7 +40,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     Sistema de tickets de soporte multi-panel con botones (Trini Edition)
     """
     __author__ = "[Killerbite95](https://github.com/killerbite95/killerbite-cogs)"
-    __version__ = "4.0.2"
+    __version__ = "4.0.3"
 
     def format_help_for_context(self, ctx):
         helpcmd = super().format_help_for_context(ctx)
