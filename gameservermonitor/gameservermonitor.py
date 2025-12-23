@@ -363,9 +363,23 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         game_name = server_data.game.display_name if server_data.game else "Unknown"
         
+        # Obtener IP para mostrar y conectar
+        public_ip = await self.config.guild(guild).public_ip()
+        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        
+        # Obtener nombre para mostrar con fallback
+        display_name = query_result.hostname
+        if not display_name or display_name == "Unknown Server":
+            if public_ip:
+                display_name = f"{public_ip}:{port}"
+            elif server_data.domain:
+                display_name = server_data.domain
+            else:
+                display_name = game_name
+        
         # Crear embed
         embed = discord.Embed(
-            title=_("Players - {hostname}").format(hostname=query_result.hostname[:50]),
+            title=_("Players - {hostname}").format(hostname=display_name[:50]),
             description=f"**{_('Game')}:** {game_name}\n"
                        f"**{_('Map')}:** {query_result.map_name}\n"
                        f"**{_('Players')}:** {query_result.players}/{query_result.max_players}",
@@ -374,6 +388,16 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         if server_data.game and server_data.game.thumbnail_url:
             embed.set_thumbnail(url=server_data.game.thumbnail_url)
+        
+        # Botón de conexión (no para Minecraft)
+        if server_data.game != GameType.MINECRAFT:
+            connect_template = await self.config.guild(guild).connect_url_template()
+            connect_url = connect_template.format(ip=ip_to_show)
+            embed.add_field(
+                name=f"🔗 {_('Connect')}", 
+                value=f"[{_('Connect')}]({connect_url})", 
+                inline=False
+            )
         
         if query_result.player_list:
             # Dividir jugadores en chunks para no exceder 1024 caracteres por field
@@ -481,6 +505,22 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             **query_kwargs
         )
         
+        # Obtener IP para mostrar y conectar
+        public_ip = await self.config.guild(guild).public_ip()
+        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        
+        # Obtener nombre para mostrar con fallback
+        display_name = query_result.hostname
+        if not display_name or display_name == "Unknown Server":
+            if public_ip:
+                display_name = f"{public_ip}:{port}"
+            elif server_data.domain:
+                display_name = server_data.domain
+            elif server_data.game:
+                display_name = server_data.game.display_name
+            else:
+                display_name = server_key
+        
         # Crear estadísticas
         stats = ServerStats(
             server_key=server_key,
@@ -493,12 +533,22 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             last_offline=server_data.last_offline,
             current_players=query_result.players,
             max_players=query_result.max_players,
-            hostname=query_result.hostname,
+            hostname=display_name,
             map_name=query_result.map_name
         )
         
         timezone = await self.config.guild(guild).timezone()
         embed = stats.to_embed(timezone)
+        
+        # Botón de conexión (no para Minecraft)
+        if server_data.game != GameType.MINECRAFT:
+            connect_template = await self.config.guild(guild).connect_url_template()
+            connect_url = connect_template.format(ip=ip_to_show)
+            embed.add_field(
+                name=f"🔗 {_('Connect')}", 
+                value=f"[{_('Connect')}]({connect_url})", 
+                inline=False
+            )
         
         return {"embed": embed}
     
@@ -560,13 +610,17 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Usar hostname si está disponible, sino IP pública, dominio o nombre del juego
         display_name = query_result.hostname if query_result.success else None
-        if not display_name:
+        if not display_name or display_name == "Unknown Server":
             # Intentar con IP pública configurada
             public_ip = await self.config.guild(guild).public_ip()
             if public_ip:
                 display_name = f"{public_ip}:{port}"
             else:
                 display_name = server_data.domain or game_name
+        
+        # Obtener IP para conectar
+        public_ip = await self.config.guild(guild).public_ip()
+        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
         
         # Generar gráfico
         graph = history.generate_ascii_graph(hours=hours, width=24)
@@ -610,6 +664,16 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             value=graph,
             inline=False
         )
+        
+        # Botón de conexión (no para Minecraft)
+        if server_data.game != GameType.MINECRAFT:
+            connect_template = await self.config.guild(guild).connect_url_template()
+            connect_url = connect_template.format(ip=ip_to_show)
+            embed.add_field(
+                name=f"🔗 {_('Connect')}", 
+                value=f"[{_('Connect')}]({connect_url})", 
+                inline=False
+            )
         
         embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
         
@@ -661,6 +725,20 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         game_name = server_data.game.display_name if server_data.game else _("Unknown")
         
+        # Obtener IP para mostrar y conectar
+        public_ip = await self.config.guild(guild).public_ip()
+        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        
+        # Obtener nombre para mostrar con fallback
+        display_name = query_result.hostname
+        if not display_name or display_name == "Unknown Server":
+            if public_ip:
+                display_name = f"{public_ip}:{port}"
+            elif server_data.domain:
+                display_name = server_data.domain
+            else:
+                display_name = game_name
+        
         # Para Minecraft, map_name contiene la versión
         if server_data.game == GameType.MINECRAFT:
             map_label = _("Version")
@@ -669,7 +747,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Crear embed
         embed = discord.Embed(
-            title=f"🗺️ {map_label} - {query_result.hostname[:50]}",
+            title=f"🗺️ {map_label} - {display_name[:50]}",
             color=query_result.status.color
         )
         
@@ -699,6 +777,16 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 name=f"📶 {_('Ping')}",
                 value=f"{query_result.latency_ms:.0f}ms",
                 inline=True
+            )
+        
+        # Botón de conexión (no para Minecraft)
+        if server_data.game != GameType.MINECRAFT:
+            connect_template = await self.config.guild(guild).connect_url_template()
+            connect_url = connect_template.format(ip=ip_to_show)
+            embed.add_field(
+                name=f"🔗 {_('Connect')}", 
+                value=f"[{_('Connect')}]({connect_url})", 
+                inline=False
             )
         
         embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
