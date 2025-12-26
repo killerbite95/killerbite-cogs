@@ -301,13 +301,105 @@ class StatusSelectView(ui.View):
                 emoji=info.get("emoji", "")
             ))
         
-        # Note: No callback assigned - handled by handle_suggestion_interaction
         self.select = ui.Select(
             placeholder="Selecciona un estado...",
             options=options,
             custom_id=f"suggestion:select_status:{suggestion_id}"
         )
+        self.select.callback = self.on_select
         self.add_item(self.select)
+    
+    async def on_select(self, interaction: discord.Interaction):
+        """Handle status selection from dropdown."""
+        logger.info(f"StatusSelectView.on_select called for suggestion #{self.suggestion_id}")
+        
+        # Check staff permission
+        if not await _check_staff_permission_standalone(self.cog, interaction):
+            return
+        
+        selected_value = self.select.values[0]
+        new_status = SuggestionStatus(selected_value)
+        
+        suggestion = await self.cog.storage.get_suggestion(interaction.guild, self.suggestion_id)
+        if not suggestion:
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+            return
+        
+        old_status = suggestion.status
+        
+        # Check if trying to set the same status
+        if old_status == new_status:
+            status_info = STATUS_CONFIG.get(new_status, {})
+            await interaction.response.send_message(
+                f"ℹ️ La sugerencia ya tiene el estado: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+                ephemeral=True
+            )
+            return
+        
+        # Show modal for reason
+        modal = StatusChangeModal(new_status)
+        await interaction.response.send_modal(modal)
+        
+        if await modal.wait():
+            logger.info(f"Modal timed out for suggestion #{self.suggestion_id}")
+            return
+        
+        # Update status
+        logger.info(f"Updating status for suggestion #{self.suggestion_id} to {new_status.value}")
+        suggestion = await self.cog.storage.update_status(
+            interaction.guild,
+            self.suggestion_id,
+            new_status,
+            interaction.user.id,
+            modal.value
+        )
+        
+        if not suggestion:
+            await modal.interaction.response.send_message("❌ Error al actualizar.", ephemeral=True)
+            return
+        
+        # Update the original suggestion message embed
+        logger.info(f"Updating embed for suggestion #{self.suggestion_id}")
+        try:
+            channel_id = await self.cog.config.guild(interaction.guild).suggestion_channel()
+            if channel_id:
+                channel = interaction.guild.get_channel(channel_id)
+                if channel and suggestion.message_id:
+                    try:
+                        original_message = await channel.fetch_message(suggestion.message_id)
+                        
+                        author = interaction.guild.get_member(suggestion.author_id)
+                        embed = create_suggestion_embed(suggestion, author)
+                        
+                        user_view = SuggestionView(self.cog, self.suggestion_id)
+                        user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
+                        if suggestion.status != SuggestionStatus.PENDING:
+                            user_view.edit_button.disabled = True
+                        
+                        staff_view = StaffActionsView(self.cog, self.suggestion_id)
+                        for item in staff_view.children:
+                            user_view.add_item(item)
+                        
+                        await original_message.edit(embed=embed, view=user_view)
+                        logger.info(f"Successfully updated embed for suggestion #{self.suggestion_id}")
+                    except discord.NotFound:
+                        logger.warning(f"Original message not found for suggestion #{self.suggestion_id}")
+                    except discord.Forbidden:
+                        logger.warning(f"No permission to edit message for suggestion #{self.suggestion_id}")
+        except Exception as e:
+            logger.error(f"Error updating suggestion message: {e}", exc_info=True)
+        
+        # Handle thread archiving
+        await self.cog._handle_thread_archive(interaction.guild, suggestion)
+        
+        # Notify author
+        await self.cog._notify_author(interaction.guild, suggestion, old_status, interaction.user, modal.value)
+        
+        status_info = STATUS_CONFIG.get(new_status, {})
+        await modal.interaction.response.send_message(
+            f"✅ Estado cambiado a: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+            ephemeral=True
+        )
 
 
 # ==================== PAGINATION VIEW ====================
@@ -578,101 +670,7 @@ async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: d
                 else:
                     logger.warning(f"Cannot send status menu - interaction already done")
         
-        elif action == "select_status":
-            # Handle the dropdown selection
-            logger.info(f"Handling select_status for suggestion #{suggestion_id}")
-            
-            # Check staff permission first
-            if not await _check_staff_permission_standalone(cog, interaction):
-                return True
-            
-            # Get selected value from interaction data
-            selected_values = interaction.data.get("values", [])
-            if not selected_values:
-                await interaction.response.send_message("❌ No se seleccionó ningún estado.", ephemeral=True)
-                return True
-            
-            selected_value = selected_values[0]
-            new_status = SuggestionStatus(selected_value)
-            
-            suggestion = await cog.storage.get_suggestion(interaction.guild, suggestion_id)
-            if not suggestion:
-                await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
-                return True
-            
-            old_status = suggestion.status
-            
-            # Check if trying to set the same status
-            if old_status == new_status:
-                status_info = STATUS_CONFIG.get(new_status, {})
-                await interaction.response.send_message(
-                    f"ℹ️ La sugerencia ya tiene el estado: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
-                    ephemeral=True
-                )
-                return True
-            
-            # Show modal for reason
-            modal = StatusChangeModal(new_status)
-            await interaction.response.send_modal(modal)
-            
-            if await modal.wait():
-                return True
-            
-            # Update status
-            suggestion = await cog.storage.update_status(
-                interaction.guild,
-                suggestion_id,
-                new_status,
-                interaction.user.id,
-                modal.value
-            )
-            
-            if suggestion:
-                # Update the original suggestion message embed
-                logger.info(f"Updating embed for suggestion #{suggestion_id}")
-                try:
-                    channel_id = await cog.config.guild(interaction.guild).suggestion_channel()
-                    if channel_id:
-                        channel = interaction.guild.get_channel(channel_id)
-                        if channel and suggestion.message_id:
-                            try:
-                                original_message = await channel.fetch_message(suggestion.message_id)
-                                
-                                author = interaction.guild.get_member(suggestion.author_id)
-                                embed = create_suggestion_embed(suggestion, author)
-                                
-                                user_view = SuggestionView(cog, suggestion_id)
-                                user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
-                                
-                                if suggestion.status != SuggestionStatus.PENDING:
-                                    user_view.edit_button.disabled = True
-                                
-                                staff_view = StaffActionsView(cog, suggestion_id)
-                                for item in staff_view.children:
-                                    user_view.add_item(item)
-                                
-                                await original_message.edit(embed=embed, view=user_view)
-                                logger.info(f"Successfully updated embed for suggestion #{suggestion_id}")
-                            except discord.NotFound:
-                                logger.warning(f"Original message not found for suggestion #{suggestion_id}")
-                            except discord.Forbidden:
-                                logger.warning(f"No permission to edit message for suggestion #{suggestion_id}")
-                except Exception as e:
-                    logger.error(f"Error updating suggestion message: {e}", exc_info=True)
-                
-                # Handle thread archiving
-                await cog._handle_thread_archive(interaction.guild, suggestion)
-                
-                # Notify author
-                await cog._notify_author(interaction.guild, suggestion, old_status, interaction.user, modal.value)
-                
-                status_info = STATUS_CONFIG.get(new_status, {})
-                await modal.interaction.response.send_message(
-                    f"✅ Estado cambiado a: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
-                    ephemeral=True
-                )
-            else:
-                await modal.interaction.response.send_message("❌ Error al actualizar.", ephemeral=True)
+        # Note: select_status is handled by StatusSelectView.on_select callback
         
         return True  # Interaction handled
         
