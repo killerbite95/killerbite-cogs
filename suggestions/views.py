@@ -439,12 +439,12 @@ class StatusSelectView(ui.View):
                 emoji=info.get("emoji", "")
             ))
         
+        # Note: No callback assigned - handled by handle_suggestion_interaction
         self.select = ui.Select(
             placeholder="Selecciona un estado...",
             options=options,
             custom_id=f"suggestion:select_status:{suggestion_id}"
         )
-        self.select.callback = self.select_callback
         self.add_item(self.select)
     
     async def _check_staff_permission(self, interaction: discord.Interaction) -> bool:
@@ -693,6 +693,8 @@ async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: d
         return False
     
     custom_id = interaction.data.get("custom_id", "")
+    logger.debug(f"Received interaction with custom_id: {custom_id}")
+    
     if not custom_id.startswith("suggestion:"):
         return False
     
@@ -705,6 +707,8 @@ async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: d
         suggestion_id = int(parts[2])
     except ValueError:
         return False
+    
+    logger.info(f"Processing suggestion interaction: action={action}, suggestion_id={suggestion_id}")
     
     # Check if interaction was already responded to
     if interaction.response.is_done():
