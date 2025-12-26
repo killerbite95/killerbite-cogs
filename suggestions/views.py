@@ -103,6 +103,7 @@ class SuggestionView(ui.View):
         
         # Create buttons manually to guarantee order
         # Row 0: Upvote, Downvote, Ver votos, Editar
+        # Note: No callbacks assigned - all handled by handle_suggestion_interaction
         self.upvote_button = ui.Button(
             label="0",
             emoji="👍",
@@ -110,7 +111,6 @@ class SuggestionView(ui.View):
             custom_id=f"suggestion:upvote:{suggestion_id}",
             row=0
         )
-        self.upvote_button.callback = self._upvote_callback
         self.add_item(self.upvote_button)
         
         self.downvote_button = ui.Button(
@@ -120,7 +120,6 @@ class SuggestionView(ui.View):
             custom_id=f"suggestion:downvote:{suggestion_id}",
             row=0
         )
-        self.downvote_button.callback = self._downvote_callback
         self.add_item(self.downvote_button)
         
         self.votes_button = ui.Button(
@@ -130,7 +129,6 @@ class SuggestionView(ui.View):
             custom_id=f"suggestion:votes:{suggestion_id}",
             row=0
         )
-        self.votes_button.callback = self._votes_callback
         self.add_item(self.votes_button)
         
         self.edit_button = ui.Button(
@@ -140,7 +138,6 @@ class SuggestionView(ui.View):
             custom_id=f"suggestion:edit:{suggestion_id}",
             row=0
         )
-        self.edit_button.callback = self._edit_callback
         self.add_item(self.edit_button)
     
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
@@ -148,10 +145,6 @@ class SuggestionView(ui.View):
         if not interaction.guild:
             return False
         return True
-    
-    async def _upvote_callback(self, interaction: discord.Interaction):
-        """Handle upvote."""
-        await self._handle_vote(interaction, "up")
     
     async def _downvote_callback(self, interaction: discord.Interaction):
         """Handle downvote."""
@@ -261,6 +254,7 @@ class StaffActionsView(ui.View):
         self.suggestion_id = suggestion_id
         
         # Create buttons manually to guarantee order (row 1)
+        # Note: No callbacks assigned - all handled by handle_suggestion_interaction
         self.approve_button = ui.Button(
             label="Aprobar",
             emoji="✅",
@@ -268,7 +262,6 @@ class StaffActionsView(ui.View):
             custom_id=f"suggestion:approve:{suggestion_id}",
             row=1
         )
-        self.approve_button.callback = self._approve_callback
         self.add_item(self.approve_button)
         
         self.deny_button = ui.Button(
@@ -278,7 +271,6 @@ class StaffActionsView(ui.View):
             custom_id=f"suggestion:deny:{suggestion_id}",
             row=1
         )
-        self.deny_button.callback = self._deny_callback
         self.add_item(self.deny_button)
         
         self.status_button = ui.Button(
@@ -288,7 +280,6 @@ class StaffActionsView(ui.View):
             custom_id=f"suggestion:status:{suggestion_id}",
             row=1
         )
-        self.status_button.callback = self._status_callback
         self.add_item(self.status_button)
     
     async def _check_staff_permission(self, interaction: discord.Interaction) -> bool:
