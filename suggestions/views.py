@@ -493,6 +493,8 @@ class StatusSelectView(ui.View):
     
     async def select_callback(self, interaction: discord.Interaction):
         """Handle status selection."""
+        logger.info(f"select_callback called! suggestion_id={self.suggestion_id}, user={interaction.user.id}")
+        
         # Check permissions first
         if not await self._check_staff_permission(interaction):
             return
