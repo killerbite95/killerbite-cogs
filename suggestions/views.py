@@ -311,14 +311,10 @@ class StatusSelectView(ui.View):
     
     async def on_select(self, interaction: discord.Interaction):
         """Handle status selection from dropdown."""
-        # Direct print to ensure we see this even if logger fails
-        print(f"[DEBUG] StatusSelectView.on_select called! suggestion_id={self.suggestion_id}")
-        logger.info(f"StatusSelectView.on_select called for suggestion #{self.suggestion_id}")
-        logger.info(f"Selected values: {self.select.values}")
+        logger.debug(f"StatusSelectView.on_select called for suggestion #{self.suggestion_id}")
         
         # Check staff permission
         if not await _check_staff_permission_standalone(self.cog, interaction):
-            logger.info("Staff permission check failed")
             return
         
         selected_value = self.select.values[0]
@@ -345,12 +341,9 @@ class StatusSelectView(ui.View):
         await interaction.response.send_modal(modal)
         
         if await modal.wait():
-            logger.info(f"Modal timed out for suggestion #{self.suggestion_id}")
             return
         
         # Update status
-        print(f"[DEBUG] About to update status for #{self.suggestion_id}")
-        logger.info(f"Updating status for suggestion #{self.suggestion_id} to {new_status.value}")
         suggestion = await self.cog.storage.update_status(
             interaction.guild,
             self.suggestion_id,
@@ -363,27 +356,17 @@ class StatusSelectView(ui.View):
             await modal.interaction.response.send_message("❌ Error al actualizar.", ephemeral=True)
             return
         
-        print(f"[DEBUG] Status updated, now updating embed for #{self.suggestion_id}")
         # Update the original suggestion message embed
-        logger.info(f"Updating embed for suggestion #{self.suggestion_id}")
         try:
             channel_id = await self.cog.config.guild(interaction.guild).suggestion_channel()
-            print(f"[DEBUG] Channel ID: {channel_id}")
-            logger.info(f"Channel ID from config: {channel_id}")
             if channel_id:
                 channel = interaction.guild.get_channel(channel_id)
-                print(f"[DEBUG] Channel: {channel}, message_id: {suggestion.message_id}")
-                logger.info(f"Channel object: {channel}, message_id: {suggestion.message_id}")
                 if channel and suggestion.message_id:
                     try:
                         original_message = await channel.fetch_message(suggestion.message_id)
-                        print(f"[DEBUG] Fetched message: {original_message.id}")
-                        logger.info(f"Fetched original message: {original_message.id}")
                         
                         author = interaction.guild.get_member(suggestion.author_id)
                         embed = create_suggestion_embed(suggestion, author)
-                        print(f"[DEBUG] Created embed, color: {embed.color}")
-                        logger.info(f"Created embed with color: {embed.color}")
                         
                         user_view = SuggestionView(self.cog, self.suggestion_id)
                         user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
@@ -394,28 +377,19 @@ class StatusSelectView(ui.View):
                         for item in staff_view.children:
                             user_view.add_item(item)
                         
-                        print(f"[DEBUG] About to edit message {original_message.id}")
-                        logger.info(f"About to edit message {original_message.id}")
                         await original_message.edit(embed=embed, view=user_view)
-                        print(f"[DEBUG] SUCCESS! Embed updated for #{self.suggestion_id}")
-                        logger.info(f"Successfully updated embed for suggestion #{self.suggestion_id}")
+                        logger.info(f"Updated embed for suggestion #{self.suggestion_id}")
                     except discord.NotFound:
-                        print(f"[DEBUG] ERROR: Message not found")
                         logger.warning(f"Original message not found for suggestion #{self.suggestion_id}")
                     except discord.Forbidden:
-                        print(f"[DEBUG] ERROR: No permission")
                         logger.warning(f"No permission to edit message for suggestion #{self.suggestion_id}")
                     except Exception as inner_e:
-                        print(f"[DEBUG] ERROR editing: {inner_e}")
                         logger.error(f"Error editing message: {inner_e}", exc_info=True)
                 else:
-                    print(f"[DEBUG] Channel or message_id missing")
-                    logger.warning(f"Channel or message_id missing: channel={channel}, message_id={suggestion.message_id}")
+                    logger.warning(f"Channel or message_id missing for suggestion #{self.suggestion_id}")
             else:
-                print(f"[DEBUG] No suggestion channel configured")
                 logger.warning(f"No suggestion channel configured for guild {interaction.guild.id}")
         except Exception as e:
-            print(f"[DEBUG] EXCEPTION: {e}")
             logger.error(f"Error updating suggestion message: {e}", exc_info=True)
         
         # Handle thread archiving
