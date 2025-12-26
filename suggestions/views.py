@@ -534,14 +534,18 @@ class StatusSelectView(ui.View):
         
         if suggestion:
             # Update the original suggestion message embed
+            logger.info(f"Updating embed for suggestion #{self.suggestion_id}, message_id={suggestion.message_id}")
             try:
                 # Get the suggestion channel
                 channel_id = await self.cog.config.guild(interaction.guild).suggestion_channel()
+                logger.info(f"Channel ID from config: {channel_id}")
                 if channel_id:
                     channel = interaction.guild.get_channel(channel_id)
+                    logger.info(f"Channel found: {channel}")
                     if channel and suggestion.message_id:
                         try:
                             original_message = await channel.fetch_message(suggestion.message_id)
+                            logger.info(f"Original message found: {original_message.id}")
                             
                             # Create updated embed
                             author = interaction.guild.get_member(suggestion.author_id)
@@ -561,12 +565,17 @@ class StatusSelectView(ui.View):
                                 user_view.add_item(item)
                             
                             await original_message.edit(embed=embed, view=user_view)
+                            logger.info(f"Successfully updated message for suggestion #{self.suggestion_id}")
                         except discord.NotFound:
                             logger.warning(f"Original message not found for suggestion #{self.suggestion_id}")
                         except discord.Forbidden:
                             logger.warning(f"No permission to edit message for suggestion #{self.suggestion_id}")
+                    else:
+                        logger.warning(f"Channel or message_id missing: channel={channel}, message_id={suggestion.message_id}")
+                else:
+                    logger.warning(f"No suggestion channel configured for guild {interaction.guild.id}")
             except Exception as e:
-                logger.error(f"Error updating suggestion message: {e}")
+                logger.error(f"Error updating suggestion message: {e}", exc_info=True)
             
             # Handle thread archiving
             await self.cog._handle_thread_archive(interaction.guild, suggestion)
