@@ -401,6 +401,11 @@ class StaffActionsView(ui.View):
         if suggestion.status != SuggestionStatus.PENDING:
             user_view.edit_button.disabled = True
         
+        # Add staff buttons
+        staff_view = StaffActionsView(self.cog, self.suggestion_id)
+        for item in staff_view.children:
+            user_view.add_item(item)
+        
         await interaction.message.edit(embed=embed, view=user_view)
         
         # Handle thread archiving
@@ -519,6 +524,44 @@ class StatusSelectView(ui.View):
         )
         
         if suggestion:
+            # Update the original suggestion message embed
+            try:
+                # Get the suggestion channel
+                channel_id = await self.cog.config.guild(interaction.guild).suggestion_channel()
+                if channel_id:
+                    channel = interaction.guild.get_channel(channel_id)
+                    if channel and suggestion.message_id:
+                        try:
+                            original_message = await channel.fetch_message(suggestion.message_id)
+                            
+                            # Create updated embed
+                            author = interaction.guild.get_member(suggestion.author_id)
+                            embed = create_suggestion_embed(suggestion, author)
+                            
+                            # Create new view with updated state
+                            user_view = SuggestionView(self.cog, self.suggestion_id)
+                            user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
+                            
+                            # Disable edit button if not pending
+                            if suggestion.status != SuggestionStatus.PENDING:
+                                user_view.edit_button.disabled = True
+                            
+                            # Add staff buttons
+                            staff_view = StaffActionsView(self.cog, self.suggestion_id)
+                            for item in staff_view.children:
+                                user_view.add_item(item)
+                            
+                            await original_message.edit(embed=embed, view=user_view)
+                        except discord.NotFound:
+                            logger.warning(f"Original message not found for suggestion #{self.suggestion_id}")
+                        except discord.Forbidden:
+                            logger.warning(f"No permission to edit message for suggestion #{self.suggestion_id}")
+            except Exception as e:
+                logger.error(f"Error updating suggestion message: {e}")
+            
+            # Handle thread archiving
+            await self.cog._handle_thread_archive(interaction.guild, suggestion)
+            
             # Notify author
             await self.cog._notify_author(interaction.guild, suggestion, old_status, interaction.user, modal.value)
             
