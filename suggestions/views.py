@@ -649,6 +649,13 @@ async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: d
         return False
     
     action = parts[1]
+    
+    # select_status is handled by StatusSelectView.on_select callback
+    # Return False to let Discord.py handle it via the View
+    if action == "select_status":
+        logger.debug(f"Ignoring select_status - handled by View callback")
+        return False
+    
     try:
         suggestion_id = int(parts[2])
     except ValueError:
