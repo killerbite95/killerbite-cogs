@@ -366,14 +366,18 @@ class StatusSelectView(ui.View):
         logger.info(f"Updating embed for suggestion #{self.suggestion_id}")
         try:
             channel_id = await self.cog.config.guild(interaction.guild).suggestion_channel()
+            logger.info(f"Channel ID from config: {channel_id}")
             if channel_id:
                 channel = interaction.guild.get_channel(channel_id)
+                logger.info(f"Channel object: {channel}, message_id: {suggestion.message_id}")
                 if channel and suggestion.message_id:
                     try:
                         original_message = await channel.fetch_message(suggestion.message_id)
+                        logger.info(f"Fetched original message: {original_message.id}")
                         
                         author = interaction.guild.get_member(suggestion.author_id)
                         embed = create_suggestion_embed(suggestion, author)
+                        logger.info(f"Created embed with color: {embed.color}")
                         
                         user_view = SuggestionView(self.cog, self.suggestion_id)
                         user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
@@ -384,12 +388,19 @@ class StatusSelectView(ui.View):
                         for item in staff_view.children:
                             user_view.add_item(item)
                         
+                        logger.info(f"About to edit message {original_message.id}")
                         await original_message.edit(embed=embed, view=user_view)
                         logger.info(f"Successfully updated embed for suggestion #{self.suggestion_id}")
                     except discord.NotFound:
                         logger.warning(f"Original message not found for suggestion #{self.suggestion_id}")
                     except discord.Forbidden:
                         logger.warning(f"No permission to edit message for suggestion #{self.suggestion_id}")
+                    except Exception as inner_e:
+                        logger.error(f"Error editing message: {inner_e}", exc_info=True)
+                else:
+                    logger.warning(f"Channel or message_id missing: channel={channel}, message_id={suggestion.message_id}")
+            else:
+                logger.warning(f"No suggestion channel configured for guild {interaction.guild.id}")
         except Exception as e:
             logger.error(f"Error updating suggestion message: {e}", exc_info=True)
         
