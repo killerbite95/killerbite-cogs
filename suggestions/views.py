@@ -520,8 +520,15 @@ class StatusSelectView(ui.View):
         modal = StatusChangeModal(new_status)
         await interaction.response.send_modal(modal)
         
-        if await modal.wait():
+        logger.info(f"Waiting for modal response for suggestion #{self.suggestion_id}")
+        timed_out = await modal.wait()
+        logger.info(f"Modal wait returned: timed_out={timed_out}")
+        
+        if timed_out:
+            logger.info(f"Modal timed out for suggestion #{self.suggestion_id}")
             return
+        
+        logger.info(f"Modal submitted, updating status to {new_status.value}")
         
         # Update status
         suggestion = await self.cog.storage.update_status(
@@ -531,6 +538,8 @@ class StatusSelectView(ui.View):
             interaction.user.id,
             modal.value
         )
+        
+        logger.info(f"update_status returned: {suggestion is not None}")
         
         if suggestion:
             # Update the original suggestion message embed
