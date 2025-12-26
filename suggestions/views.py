@@ -507,6 +507,15 @@ class StatusSelectView(ui.View):
         
         old_status = suggestion.status
         
+        # Check if trying to set the same status
+        if old_status == new_status:
+            status_info = STATUS_CONFIG.get(new_status, {})
+            await interaction.response.send_message(
+                f"ℹ️ La sugerencia ya tiene el estado: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+                ephemeral=True
+            )
+            return
+        
         # Show modal for reason
         modal = StatusChangeModal(new_status)
         await interaction.response.send_modal(modal)
