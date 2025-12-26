@@ -311,10 +311,14 @@ class StatusSelectView(ui.View):
     
     async def on_select(self, interaction: discord.Interaction):
         """Handle status selection from dropdown."""
+        # Direct print to ensure we see this even if logger fails
+        print(f"[DEBUG] StatusSelectView.on_select called! suggestion_id={self.suggestion_id}")
         logger.info(f"StatusSelectView.on_select called for suggestion #{self.suggestion_id}")
+        logger.info(f"Selected values: {self.select.values}")
         
         # Check staff permission
         if not await _check_staff_permission_standalone(self.cog, interaction):
+            logger.info("Staff permission check failed")
             return
         
         selected_value = self.select.values[0]
