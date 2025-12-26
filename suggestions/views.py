@@ -675,6 +675,125 @@ async def cleanup_persistent_views(bot: "Red", cog: "SimpleSuggestions"):
     logger.info("Persistent views cleaned up")
 
 
+async def _check_staff_permission_standalone(cog: "SimpleSuggestions", interaction: discord.Interaction) -> bool:
+    """Check if user has staff permissions without using a View."""
+    if not interaction.guild:
+        if not interaction.response.is_done():
+            await interaction.response.send_message(
+                "❌ Este comando solo puede usarse en un servidor.",
+                ephemeral=True
+            )
+        return False
+    
+    member = interaction.guild.get_member(interaction.user.id)
+    if not member:
+        try:
+            member = await interaction.guild.fetch_member(interaction.user.id)
+        except Exception:
+            if not interaction.response.is_done():
+                await interaction.response.send_message(
+                    "❌ No se pudo verificar tu membresía en el servidor.",
+                    ephemeral=True
+                )
+            return False
+    
+    # Check for admin or manage_guild permission
+    if member.guild_permissions.administrator or member.guild_permissions.manage_guild:
+        return True
+    
+    # Check for configured staff role
+    staff_role_id = await cog.config.guild(interaction.guild).staff_role()
+    if staff_role_id:
+        member_role_ids = [r.id for r in member.roles]
+        if staff_role_id in member_role_ids:
+            return True
+    
+    if not interaction.response.is_done():
+        await interaction.response.send_message(
+            "❌ No tienes permisos para realizar esta acción.\n"
+            "Necesitas ser **Administrador**, tener permiso de **Gestionar servidor**, "
+            "o tener el rol de staff configurado.",
+            ephemeral=True
+        )
+    return False
+
+
+async def _handle_status_change(cog: "SimpleSuggestions", interaction: discord.Interaction, suggestion_id: int, new_status: SuggestionStatus):
+    """Handle status change with modal for reason."""
+    suggestion = await cog.storage.get_suggestion(interaction.guild, suggestion_id)
+    if not suggestion:
+        if not interaction.response.is_done():
+            await interaction.response.send_message("❌ Sugerencia no encontrada.", ephemeral=True)
+        return
+    
+    old_status = suggestion.status
+    
+    # Show modal for reason
+    modal = StatusChangeModal(new_status)
+    if not interaction.response.is_done():
+        await interaction.response.send_modal(modal)
+    else:
+        logger.warning(f"Cannot show modal - interaction already done")
+        return
+    
+    if await modal.wait():
+        return
+    
+    # Update status
+    suggestion = await cog.storage.update_status(
+        interaction.guild,
+        suggestion_id,
+        new_status,
+        interaction.user.id,
+        modal.value
+    )
+    
+    if not suggestion:
+        await modal.interaction.response.send_message("❌ Error al actualizar.", ephemeral=True)
+        return
+    
+    # Update message embed
+    try:
+        channel_id = await cog.config.guild(interaction.guild).suggestion_channel()
+        if channel_id:
+            channel = interaction.guild.get_channel(channel_id)
+            if channel and suggestion.message_id:
+                try:
+                    original_message = await channel.fetch_message(suggestion.message_id)
+                    author = interaction.guild.get_member(suggestion.author_id)
+                    embed = create_suggestion_embed(suggestion, author)
+                    
+                    user_view = SuggestionView(cog, suggestion_id)
+                    user_view.update_vote_counts(suggestion.upvotes, suggestion.downvotes)
+                    if suggestion.status != SuggestionStatus.PENDING:
+                        user_view.edit_button.disabled = True
+                    
+                    staff_view = StaffActionsView(cog, suggestion_id)
+                    for item in staff_view.children:
+                        user_view.add_item(item)
+                    
+                    await original_message.edit(embed=embed, view=user_view)
+                    logger.info(f"Updated embed for suggestion #{suggestion_id}")
+                except discord.NotFound:
+                    logger.warning(f"Original message not found for suggestion #{suggestion_id}")
+                except discord.Forbidden:
+                    logger.warning(f"No permission to edit message for suggestion #{suggestion_id}")
+    except Exception as e:
+        logger.error(f"Error updating suggestion message: {e}", exc_info=True)
+    
+    # Handle thread archiving
+    await cog._handle_thread_archive(interaction.guild, suggestion)
+    
+    # Notify author
+    await cog._notify_author(interaction.guild, suggestion, old_status, interaction.user, modal.value)
+    
+    status_info = STATUS_CONFIG.get(new_status, {})
+    await modal.interaction.response.send_message(
+        f"✅ Estado cambiado a: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+        ephemeral=True
+    )
+
+
 async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: discord.Interaction):
     """
     Handle suggestion button interactions.
@@ -715,37 +834,41 @@ async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: d
             elif action == "downvote":
                 await view._handle_vote(interaction, "down")
             elif action == "votes":
-                await view.votes_button.callback(interaction)
+                await view._votes_callback(interaction)
             elif action == "edit":
-                await view.edit_button.callback(interaction)
+                await view._edit_callback(interaction)
         
         elif action in ["approve", "deny", "status"]:
-            view = StaffActionsView(cog, suggestion_id)
-            
             # Check staff permission first
-            if not await view._check_staff_permission(interaction):
+            if not await _check_staff_permission_standalone(cog, interaction):
                 return True  # Handled, but denied
             
+            logger.info(f"Staff permission OK for {action}, is_done={interaction.response.is_done()}")
+            
             if action == "approve":
-                await view._change_status(interaction, SuggestionStatus.APPROVED)
+                await _handle_status_change(cog, interaction, suggestion_id, SuggestionStatus.APPROVED)
             elif action == "deny":
-                await view._change_status(interaction, SuggestionStatus.DENIED)
+                await _handle_status_change(cog, interaction, suggestion_id, SuggestionStatus.DENIED)
             elif action == "status":
-                # Permission already checked, show the status select menu
+                # Show the status select menu
+                logger.info(f"Showing status select menu for suggestion #{suggestion_id}")
                 status_view = StatusSelectView(cog, suggestion_id)
-                await interaction.response.send_message(
-                    "Selecciona el nuevo estado:",
-                    view=status_view,
-                    ephemeral=True
-                )
+                if not interaction.response.is_done():
+                    await interaction.response.send_message(
+                        "Selecciona el nuevo estado:",
+                        view=status_view,
+                        ephemeral=True
+                    )
+                    logger.info(f"Status select menu sent successfully")
+                else:
+                    logger.warning(f"Cannot send status menu - interaction already done")
         
         elif action == "select_status":
             # Handle the dropdown selection
             logger.info(f"Handling select_status for suggestion #{suggestion_id}")
-            status_view = StatusSelectView(cog, suggestion_id)
             
             # Check staff permission first
-            if not await status_view._check_staff_permission(interaction):
+            if not await _check_staff_permission_standalone(cog, interaction):
                 return True
             
             # Get selected value from interaction data
