@@ -349,76 +349,85 @@ class DashboardIntegration:
         name="settings",
         description="Ver configuración de paneles y ajustes por servidor",
         methods=("GET",),
-        is_owner=True,
     )
     async def dashboard_settings(self, **kwargs) -> typing.Dict[str, typing.Any]:
-        all_guilds = await self.config.all_guilds()
+        try:
+            all_guilds = await self.config.all_guilds()
+        except Exception:
+            return {
+                "status": 0,
+                "web_content": {
+                    "source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar la configuración.</p></div>',
+                },
+            }
         guilds_data = []
 
         for gid, data in all_guilds.items():
-            panels = data.get("panels", {})
-            if not panels:
-                continue
-            guild = self.bot.get_guild(gid)
-            guild_name = guild.name if guild else f"ID: {gid}"
+            try:
+                panels = data.get("panels", {})
+                if not panels:
+                    continue
+                guild = self.bot.get_guild(gid)
+                guild_name = guild.name if guild else f"ID: {gid}"
 
-            support_roles = data.get("support_roles", [])
-            role_names = []
-            if guild:
-                for rid in support_roles:
-                    role = guild.get_role(rid)
-                    role_names.append(role.name if role else f"ID: {rid}")
+                support_roles = data.get("support_roles", [])
+                role_names = []
+                if guild:
+                    for rid in support_roles:
+                        role = guild.get_role(rid)
+                        role_names.append(role.name if role else f"ID: {rid}")
 
-            panels_list = []
-            for pname, pdata in panels.items():
-                cat_id = pdata.get("category_id", 0)
-                cat_name = ""
-                if guild and cat_id:
-                    cat = guild.get_channel(cat_id)
-                    cat_name = cat.name if cat else f"ID: {cat_id}"
+                panels_list = []
+                for pname, pdata in panels.items():
+                    cat_id = pdata.get("category_id", 0)
+                    cat_name = ""
+                    if guild and cat_id:
+                        cat = guild.get_channel(cat_id)
+                        cat_name = cat.name if cat else f"ID: {cat_id}"
 
-                log_ch = pdata.get("log_channel", 0)
-                log_name = ""
-                if guild and log_ch:
-                    lch = guild.get_channel(log_ch)
-                    log_name = f"#{lch.name}" if lch else f"ID: {log_ch}"
+                    log_ch = pdata.get("log_channel", 0)
+                    log_name = ""
+                    if guild and log_ch:
+                        lch = guild.get_channel(log_ch)
+                        log_name = f"#{lch.name}" if lch else f"ID: {log_ch}"
 
-                panels_list.append({
-                    "name": pname,
-                    "disabled": pdata.get("disabled", False),
-                    "threads": pdata.get("threads", False),
-                    "button_text": pdata.get("button_text", "Open a Ticket"),
-                    "button_color": pdata.get("button_color", "blue"),
-                    "category": cat_name,
-                    "log_channel": log_name,
-                    "max_claims": pdata.get("max_claims", 0),
-                    "ticket_num": pdata.get("ticket_num", 1),
-                    "has_modal": bool(pdata.get("modal", {})),
-                    "cooldown": pdata.get("cooldown", 0),
-                    "schedule": pdata.get("schedule"),
+                    panels_list.append({
+                        "name": str(pname),
+                        "disabled": bool(pdata.get("disabled", False)),
+                        "threads": bool(pdata.get("threads", False)),
+                        "button_text": str(pdata.get("button_text", "Open a Ticket")),
+                        "button_color": str(pdata.get("button_color", "blue")),
+                        "category": str(cat_name),
+                        "log_channel": str(log_name),
+                        "max_claims": int(pdata.get("max_claims", 0) or 0),
+                        "ticket_num": int(pdata.get("ticket_num", 1) or 1),
+                        "has_modal": bool(pdata.get("modal", {})),
+                        "cooldown": int(pdata.get("cooldown", 0) or 0),
+                    })
+
+                settings_info = {
+                    "max_tickets": int(data.get("max_tickets", 1) or 1),
+                    "dm": bool(data.get("dm", False)),
+                    "transcript": bool(data.get("transcript", False)),
+                    "user_can_close": bool(data.get("user_can_close", True)),
+                    "user_can_rename": bool(data.get("user_can_rename", False)),
+                    "auto_close_user": int(data.get("auto_close_user_hours", 0) or 0),
+                    "auto_close_staff": int(data.get("auto_close_staff_hours", 0) or 0),
+                    "escalation_minutes": int(data.get("escalation_minutes", 0) or 0),
+                    "ticket_cooldown": int(data.get("ticket_cooldown", 0) or 0),
+                    "global_rate_limit": int(data.get("global_rate_limit", 0) or 0),
+                }
+
+                guilds_data.append({
+                    "name": guild_name,
+                    "id": gid,
+                    "panels": panels_list,
+                    "panel_count": len(panels_list),
+                    "support_roles": role_names,
+                    "settings": settings_info,
                 })
-
-            settings_info = {
-                "max_tickets": data.get("max_tickets", 1),
-                "dm": data.get("dm", False),
-                "transcript": data.get("transcript", False),
-                "user_can_close": data.get("user_can_close", True),
-                "user_can_rename": data.get("user_can_rename", False),
-                "auto_close_user": data.get("auto_close_user_hours", 0),
-                "auto_close_staff": data.get("auto_close_staff_hours", 0),
-                "escalation_minutes": data.get("escalation_minutes", 0),
-                "ticket_cooldown": data.get("ticket_cooldown", 0),
-                "global_rate_limit": data.get("global_rate_limit", 0),
-            }
-
-            guilds_data.append({
-                "name": guild_name,
-                "id": gid,
-                "panels": panels_list,
-                "panel_count": len(panels_list),
-                "support_roles": role_names,
-                "settings": settings_info,
-            })
+            except Exception:
+                continue
 
         source = """
 <div class="trini-tp-settings">
