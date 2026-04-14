@@ -5,170 +5,203 @@ By Killerbite95
 """
 
 import typing
-from typing import Callable, Any, Tuple, Dict
-import logging
+import html as html_mod
 
 from redbot.core import commands
 from redbot.core.bot import Red
 
-logger = logging.getLogger("red.killerbite95.gameservermonitor.dashboard")
 
-
-def dashboard_page(
-    name: str = None,
-    description: str = None,
-    methods: Tuple[str, ...] = ("GET",),
-    is_owner: bool = False,
-    **kwargs
-) -> Callable:
-    """
-    Decorador para marcar métodos como páginas del dashboard.
-    
-    Args:
-        name: Nombre de la página (usado en la URL)
-        description: Descripción de la página
-        methods: Métodos HTTP permitidos (GET, POST, etc.)
-        is_owner: Si True, solo el owner del bot puede acceder
-        **kwargs: Argumentos adicionales para el dashboard
-        
-    Returns:
-        Decorador que marca el método como página del dashboard
-        
-    Example:
-        @dashboard_page(name="servers", description="Lista de servidores")
-        async def rpc_servers(self, guild_id: int, **kwargs):
-            ...
-    """
-    def decorator(func: Callable) -> Callable:
-        func.__dashboard_decorator_params__ = (
-            (name,),
-            {
-                "description": description,
-                "methods": methods,
-                "is_owner": is_owner,
-                **kwargs
-            }
-        )
+def dashboard_page(*args, **kwargs):
+    def decorator(func: typing.Callable):
+        func.__dashboard_decorator_params__ = (args, kwargs)
         return func
     return decorator
 
 
 class DashboardIntegration:
-    """
-    Clase base para integración con Red-Dashboard.
-    
-    Los cogs que heredan de esta clase pueden usar el decorador @dashboard_page
-    para crear páginas en el panel web del dashboard.
-    
-    Attributes:
-        bot: Instancia del bot de Red
-    """
-    
     bot: Red
+    config: typing.Any
+    query_service: typing.Any
 
     @commands.Cog.listener()
     async def on_dashboard_cog_add(self, dashboard_cog: commands.Cog) -> None:
-        """
-        Listener que se dispara cuando el Dashboard se carga.
-        Registra este cog como third party en el dashboard.
-        
-        Args:
-            dashboard_cog: La instancia del cog Dashboard
-        """
+        dashboard_cog.rpc.third_parties_handler.add_third_party(self)
+
+    @dashboard_page(
+        name="servers",
+        description="Estado de servidores de juegos",
+        methods=("GET",),
+        is_owner=True,
+    )
+    async def rpc_servers_page(self, **kwargs) -> typing.Dict[str, typing.Any]:
         try:
-            if hasattr(dashboard_cog, 'rpc') and hasattr(dashboard_cog.rpc, 'third_parties_handler'):
-                dashboard_cog.rpc.third_parties_handler.add_third_party(self)
-                logger.info("GameServerMonitor registrado en el Dashboard correctamente.")
-            else:
-                logger.warning("Dashboard cog no tiene la estructura esperada para third parties.")
-        except Exception as e:
-            logger.error(f"Error al registrar en el Dashboard: {e!r}")
-    
-    @staticmethod
-    def create_html_table(
-        headers: typing.List[str],
-        rows: typing.List[typing.List[str]],
-        table_class: str = "table table-bordered table-striped table-hover"
-    ) -> str:
-        """
-        Crea una tabla HTML con Bootstrap.
-        
-        Args:
-            headers: Lista de encabezados
-            rows: Lista de filas (cada fila es una lista de celdas)
-            table_class: Clases CSS para la tabla
-            
-        Returns:
-            String HTML de la tabla
-        """
-        html = f'<table class="{table_class}">\n<thead class="table-dark">\n<tr>\n'
-        
-        for header in headers:
-            html += f'<th scope="col">{header}</th>\n'
-        
-        html += '</tr>\n</thead>\n<tbody>\n'
-        
-        for row in rows:
-            html += '<tr>\n'
-            for cell in row:
-                html += f'<td>{cell}</td>\n'
-            html += '</tr>\n'
-        
-        html += '</tbody>\n</table>'
-        return html
-    
-    @staticmethod
-    def create_notification(
-        message: str,
-        category: str = "info"
-    ) -> Dict[str, Any]:
-        """
-        Crea una notificación para el dashboard.
-        
-        Args:
-            message: Mensaje a mostrar
-            category: Categoría (info, success, warning, error)
-            
-        Returns:
-            Dict con la estructura de notificación
-        """
-        return {"message": message, "category": category}
-    
-    @staticmethod
-    def success_response(
-        notifications: typing.List[Dict[str, str]] = None,
-        redirect_url: str = None,
-        web_content: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
-        """
-        Crea una respuesta de éxito para el dashboard.
-        
-        Args:
-            notifications: Lista de notificaciones a mostrar
-            redirect_url: URL a la que redirigir
-            web_content: Contenido web a mostrar
-            
-        Returns:
-            Dict con la respuesta formateada
-        """
-        response = {"status": 0}
-        if notifications:
-            response["notifications"] = notifications
-        if redirect_url:
-            response["redirect_url"] = redirect_url
-        if web_content:
-            response["web_content"] = web_content
-        return response
-    
-    @staticmethod
-    def error_response(error_message: str) -> Dict[str, Any]:
-        """
-        Crea una respuesta de error para el dashboard.
-        
-        Args:
-            error_message: Mensaje de error
-            
-        Returns:
-            Dict con la respuesta de error
-        """
-        return {"status": 1, "error": error_message}
+            all_guilds = await self.config.all_guilds()
+        except Exception:
+            return {"status": 0, "web_content": {"source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar datos.</p></div>'}}
+
+        guilds_data = []
+        for gid, data in all_guilds.items():
+            try:
+                servers_raw = data.get("servers", {})
+                if not servers_raw:
+                    continue
+                guild = self.bot.get_guild(gid)
+                guild_name = guild.name if guild else f"ID: {gid}"
+                tz = data.get("timezone", "UTC")
+                refresh = data.get("refresh_time", 60)
+                public_ip = data.get("public_ip")
+
+                servers_list = []
+                online_count = 0
+                total_players = 0
+
+                for key, sdata in servers_raw.items():
+                    if not isinstance(sdata, dict):
+                        continue
+                    game = str(sdata.get("game", "unknown"))
+                    name = html_mod.escape(str(sdata.get("name", key)))
+                    domain = html_mod.escape(str(sdata.get("domain", ""))) if sdata.get("domain") else ""
+
+                    # Display IP
+                    display_ip = key
+                    if public_ip and ":" in key:
+                        ip_part, port_part = key.split(":", 1)
+                        if ip_part.startswith(("10.", "192.168.", "172.")):
+                            display_ip = f"{public_ip}:{port_part}"
+
+                    last_status = str(sdata.get("last_status", "unknown")).lower()
+                    is_online = last_status in ("online", "maintenance")
+                    if is_online:
+                        online_count += 1
+
+                    players = int(sdata.get("current_players", 0) or 0)
+                    max_players = int(sdata.get("max_players", 0) or 0)
+                    total_players += players
+
+                    map_name = html_mod.escape(str(sdata.get("current_map", "-") or "-"))
+
+                    total_q = int(sdata.get("total_queries", 0) or 0)
+                    success_q = int(sdata.get("successful_queries", 0) or 0)
+                    success_pct = round(success_q / total_q * 100) if total_q > 0 else 0
+
+                    status_class = "success" if is_online else "danger"
+                    status_icon = "check-circle" if is_online else "times-circle"
+                    if last_status == "maintenance":
+                        status_class = "warning"
+                        status_icon = "lock"
+
+                    servers_list.append({
+                        "key": html_mod.escape(key),
+                        "display_ip": html_mod.escape(display_ip),
+                        "name": name,
+                        "domain": domain,
+                        "game": html_mod.escape(game.upper()),
+                        "status": last_status,
+                        "status_class": status_class,
+                        "status_icon": status_icon,
+                        "players": players,
+                        "max_players": max_players,
+                        "map": map_name,
+                        "success_pct": success_pct,
+                    })
+
+                guilds_data.append({
+                    "name": html_mod.escape(guild_name),
+                    "id": gid,
+                    "timezone": html_mod.escape(tz),
+                    "refresh": refresh,
+                    "total": len(servers_list),
+                    "online": online_count,
+                    "total_players": total_players,
+                    "servers": servers_list,
+                })
+            except Exception:
+                continue
+
+        guilds_data.sort(key=lambda g: g["name"].lower())
+
+        source = """
+<div class="trini-tp-settings">
+  <h3 class="trini-tp-title"><i class="fa fa-gamepad"></i> Monitor de Servidores</h3>
+  <p class="trini-tp-subtitle">Estado en tiempo real de los servidores de juegos</p>
+
+  {% if guilds|length == 0 %}
+    <div class="trini-tp-empty">
+      <i class="fa fa-gamepad fa-3x"></i>
+      <p>No hay servidores configurados.</p>
+    </div>
+  {% else %}
+    {% for guild in guilds %}
+    <div class="trini-tp-guild-section">
+      <div class="trini-tp-guild-header">
+        <h4>{{ guild.name }}</h4>
+        <span class="badge bg-gradient-success">{{ guild.online }}/{{ guild.total }} online</span>
+        <span class="badge bg-gradient-info ms-1">{{ guild.total_players }} jugadores</span>
+        <span class="badge bg-gradient-secondary ms-1">{{ guild.timezone }} &bull; {{ guild.refresh }}s</span>
+      </div>
+
+      <div class="table-responsive mt-3">
+        <table class="table trini-table trini-tp-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Servidor</th>
+              <th>Juego</th>
+              <th>IP</th>
+              <th>Mapa</th>
+              <th>Jugadores</th>
+              <th>Salud</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in guild.servers %}
+            <tr>
+              <td>
+                <i class="fa fa-{{ s.status_icon }} text-{{ s.status_class }}"></i>
+              </td>
+              <td>
+                <strong>{{ s.name }}</strong>
+                {% if s.domain %}<br><small class="text-muted">{{ s.domain }}</small>{% endif %}
+              </td>
+              <td><span class="badge bg-gradient-dark">{{ s.game }}</span></td>
+              <td><code>{{ s.display_ip }}</code></td>
+              <td>{{ s.map }}</td>
+              <td>
+                {% if s.max_players > 0 %}
+                  <div class="d-flex align-items-center">
+                    <span class="me-2">{{ s.players }}/{{ s.max_players }}</span>
+                    <div class="progress" style="width:60px;height:6px">
+                      {% set pct = (s.players / s.max_players * 100)|int if s.max_players > 0 else 0 %}
+                      <div class="progress-bar bg-gradient-{{ 'success' if pct < 70 else ('warning' if pct < 90 else 'danger') }}" style="width:{{ pct }}%"></div>
+                    </div>
+                  </div>
+                {% else %}
+                  {{ s.players }}
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <span class="me-2 text-xs">{{ s.success_pct }}%</span>
+                  <div class="progress" style="width:50px;height:6px">
+                    <div class="progress-bar bg-gradient-{{ 'success' if s.success_pct >= 80 else ('warning' if s.success_pct >= 50 else 'danger') }}" style="width:{{ s.success_pct }}%"></div>
+                  </div>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+"""
+
+        return {
+            "status": 0,
+            "web_content": {
+                "source": source,
+                "guilds": guilds_data,
+            },
+        }

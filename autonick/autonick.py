@@ -3,6 +3,7 @@ import time
 import re
 from typing import List
 from redbot.core import commands, Config, checks
+from .dashboard_integration import DashboardIntegration
 
 DEFAULT_FORBIDDEN_NAMES = [
     # Palabrotas y ofensas
@@ -14,7 +15,7 @@ DEFAULT_FORBIDDEN_NAMES = [
     "xi jinping"
 ]
 
-class AutoNick(commands.Cog):
+class AutoNick(DashboardIntegration, commands.Cog):
     """
     Cog que permite a los usuarios establecer su apodo mediante el envío de un mensaje en un canal configurado.
     Se valida el contenido del nombre para evitar palabrotas y nombres prohibidos (incluyendo dictadores y famosos).

@@ -1,9 +1,9 @@
 """
 Dashboard integration for SimpleSuggestions.
-Provides web interface for managing suggestions.
+Provides web interface for viewing and managing suggestions.
 """
 import typing
-import discord
+import html as html_mod
 from redbot.core import commands
 from redbot.core.bot import Red
 
@@ -11,10 +11,6 @@ from .storage import SuggestionStatus, STATUS_CONFIG
 
 
 def dashboard_page(*args, **kwargs):
-    """
-    Decorador para marcar métodos como páginas del dashboard.
-    Al aplicarlo, se almacenan los parámetros en __dashboard_decorator_params__.
-    """
     def decorator(func: typing.Callable):
         func.__dashboard_decorator_params__ = (args, kwargs)
         return func
@@ -28,298 +24,256 @@ class DashboardIntegration:
 
     @commands.Cog.listener()
     async def on_dashboard_cog_add(self, dashboard_cog: commands.Cog) -> None:
-        """
-        Listener que se dispara cuando se carga el Dashboard.
-        Se registra este cog como tercer party.
-        """
         dashboard_cog.rpc.third_parties_handler.add_third_party(self)
-    
-    @dashboard_page(name="suggestions", description="Ver y gestionar sugerencias", methods=("GET", "POST"))
-    async def rpc_suggestions_page(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
-        """
-        Página principal del dashboard para ver sugerencias.
-        Soporta filtrado por estado, autor y búsqueda.
-        """
-        guild = self.bot.get_guild(guild_id)
-        if guild is None:
-            return {"status": 1, "error": "Guild no encontrada."}
-        
-        # Get query parameters
-        request = kwargs.get("request")
-        page = int(kwargs.get("page", 1))
-        per_page = 20
-        status_filter = kwargs.get("status", "all")
-        search = kwargs.get("search", "")
-        
-        # Get suggestions
-        filter_status = None
-        if status_filter and status_filter != "all":
-            try:
-                filter_status = SuggestionStatus(status_filter)
-            except ValueError:
-                pass
-        
-        all_suggestions = await self.storage.get_all_suggestions(guild, status_filter=filter_status)
-        
-        # Apply search filter
-        if search:
-            search_lower = search.lower()
-            all_suggestions = [
-                s for s in all_suggestions 
-                if search_lower in s.content.lower() or search_lower in str(s.suggestion_id)
-            ]
-        
-        # Pagination
-        total = len(all_suggestions)
-        total_pages = max(1, (total + per_page - 1) // per_page)
-        page = max(1, min(page, total_pages))
-        start = (page - 1) * per_page
-        suggestions = all_suggestions[start:start + per_page]
-        
-        # Build HTML
-        html_content = """
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-        <style>
-            .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-            .status-pending { background: #3498db; color: white; }
-            .status-approved { background: #2ecc71; color: white; }
-            .status-denied { background: #e74c3c; color: white; }
-            .status-in_review { background: #f39c12; color: white; }
-            .status-planned { background: #9b59b6; color: white; }
-            .status-in_progress { background: #e67e22; color: white; }
-            .status-implemented { background: #27ae60; color: white; }
-            .status-duplicate { background: #95a5a6; color: white; }
-            .status-wont_do { background: #7f8c8d; color: white; }
-            .vote-up { color: #2ecc71; }
-            .vote-down { color: #e74c3c; }
-        </style>
-        <div class="container-fluid mt-4">
-            <h2 class="mb-4">📋 Sugerencias</h2>
-            
-            <!-- Filters -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <select class="form-select" id="statusFilter" onchange="filterSuggestions()">
-                        <option value="all">Todos los estados</option>
-        """
-        
-        for status in SuggestionStatus:
-            info = STATUS_CONFIG.get(status, {})
-            selected = "selected" if status_filter == status.value else ""
-            html_content += f'<option value="{status.value}" {selected}>{info.get("emoji", "")} {info.get("label", status.value)}</option>'
-        
-        html_content += f"""
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <input type="text" class="form-control" id="searchInput" placeholder="Buscar..." value="{search}">
-                </div>
-                <div class="col-md-4">
-                    <button class="btn btn-primary" onclick="filterSuggestions()">🔍 Buscar</button>
-                </div>
-            </div>
-            
-            <!-- Stats -->
-            <div class="row mb-4">
-                <div class="col">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">📊 Estadísticas</h5>
-                            <p class="card-text">Total: <strong>{total}</strong> sugerencias</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Table -->
-            <table class="table table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Contenido</th>
-                        <th>Autor</th>
-                        <th>Votos</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-        """
-        
-        for s in suggestions:
-            author = self.bot.get_user(s.author_id)
-            author_name = author.display_name if author else f"ID: {s.author_id}"
-            status_info = STATUS_CONFIG.get(s.status, {})
-            status_class = f"status-{s.status.value}"
-            content_preview = s.content[:100] + ("..." if len(s.content) > 100 else "")
-            
-            html_content += f"""
-                <tr>
-                    <td><strong>#{s.suggestion_id}</strong></td>
-                    <td>{content_preview}</td>
-                    <td>{author_name}</td>
-                    <td>
-                        <span class="vote-up">👍 {s.upvotes}</span> | 
-                        <span class="vote-down">👎 {s.downvotes}</span>
-                    </td>
-                    <td><span class="status-badge {status_class}">{status_info.get("emoji", "")} {status_info.get("label", s.status.value)}</span></td>
-                    <td>
-                        <a href="?page_name=manage_suggestion&suggestion_id={s.suggestion_id}" class="btn btn-sm btn-primary">Gestionar</a>
-                    </td>
-                </tr>
-            """
-        
-        # Pagination
-        html_content += """
-                </tbody>
-            </table>
-            
-            <!-- Pagination -->
-            <nav>
-                <ul class="pagination justify-content-center">
-        """
-        
-        for p in range(1, total_pages + 1):
-            active = "active" if p == page else ""
-            html_content += f'<li class="page-item {active}"><a class="page-link" href="?page={p}&status={status_filter}&search={search}">{p}</a></li>'
-        
-        html_content += """
-                </ul>
-            </nav>
-        </div>
-        
-        <script>
-        function filterSuggestions() {
-            const status = document.getElementById('statusFilter').value;
-            const search = document.getElementById('searchInput').value;
-            window.location.href = `?status=${status}&search=${encodeURIComponent(search)}`;
-        }
-        </script>
-        """
-        
-        return {"status": 0, "web_content": {"source": html_content}}
-    
-    @dashboard_page(name="manage_suggestion", description="Gestionar una sugerencia", methods=("GET", "POST"))
-    async def rpc_manage_suggestion(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
-        """
-        Página para gestionar una sugerencia individual.
-        """
-        guild = self.bot.get_guild(guild_id)
-        if guild is None:
-            return {"status": 1, "error": "Guild no encontrada."}
-        
-        suggestion_id = int(kwargs.get("suggestion_id", 0))
-        if not suggestion_id:
-            return {"status": 1, "error": "ID de sugerencia no proporcionado."}
-        
-        suggestion = await self.storage.get_suggestion(guild, suggestion_id)
-        if not suggestion:
-            return {"status": 1, "error": "Sugerencia no encontrada."}
-        
-        # Handle form submission
-        if kwargs.get("method") == "POST":
-            new_status = kwargs.get("new_status")
-            reason = kwargs.get("reason", "")
-            
-            if new_status:
-                try:
-                    status_enum = SuggestionStatus(new_status)
-                    user = kwargs.get("user")
-                    user_id = user.id if user else 0
-                    
-                    old_status = suggestion.status
-                    await self.storage.update_status(guild, suggestion_id, status_enum, user_id, reason or None)
-                    
-                    return {
-                        "status": 0,
-                        "notifications": [{"message": f"Estado actualizado a {status_enum.value}", "category": "success"}],
-                        "redirect_url": kwargs.get("request_url")
-                    }
-                except ValueError:
-                    return {"status": 1, "error": "Estado inválido."}
-        
-        # Build page
-        author = self.bot.get_user(suggestion.author_id)
-        author_name = author.display_name if author else f"ID: {suggestion.author_id}"
-        status_info = STATUS_CONFIG.get(suggestion.status, {})
-        
-        html_content = f"""
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-        <div class="container mt-4">
-            <a href="?page_name=suggestions" class="btn btn-secondary mb-3">← Volver</a>
-            
-            <div class="card">
-                <div class="card-header">
-                    <h4>Sugerencia #{suggestion.suggestion_id}</h4>
-                </div>
-                <div class="card-body">
-                    <p><strong>Autor:</strong> {author_name}</p>
-                    <p><strong>Estado:</strong> {status_info.get("emoji", "")} {status_info.get("label", suggestion.status.value)}</p>
-                    <p><strong>Votos:</strong> 👍 {suggestion.upvotes} | 👎 {suggestion.downvotes}</p>
-                    <hr>
-                    <p><strong>Contenido:</strong></p>
-                    <div class="bg-light p-3 rounded">{suggestion.content}</div>
-                    {f'<p class="mt-3"><strong>Motivo anterior:</strong> {suggestion.reason}</p>' if suggestion.reason else ''}
-                </div>
-            </div>
-            
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5>Cambiar Estado</h5>
-                </div>
-                <div class="card-body">
-                    <form method="POST">
-                        <div class="mb-3">
-                            <label class="form-label">Nuevo Estado</label>
-                            <select name="new_status" class="form-select" required>
-        """
-        
-        for status in SuggestionStatus:
-            info = STATUS_CONFIG.get(status, {})
-            selected = "selected" if status == suggestion.status else ""
-            html_content += f'<option value="{status.value}" {selected}>{info.get("emoji", "")} {info.get("label", status.value)}</option>'
-        
-        html_content += """
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Motivo (opcional)</label>
-                            <textarea name="reason" class="form-control" rows="3"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Actualizar</button>
-                    </form>
-                </div>
-            </div>
-            
-            <!-- History -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h5>📜 Historial de Cambios</h5>
-                </div>
-                <div class="card-body">
-        """
-        
-        if suggestion.history:
-            html_content += '<ul class="list-group">'
-            for entry in reversed(suggestion.history[-10:]):
-                changer = self.bot.get_user(entry.get("changed_by", 0))
-                changer_name = changer.display_name if changer else "Desconocido"
-                html_content += f"""
-                    <li class="list-group-item">
-                        <strong>{entry.get("old_status")} → {entry.get("new_status")}</strong>
-                        por {changer_name}
-                        {f'<br><small class="text-muted">{entry.get("reason")}</small>' if entry.get("reason") else ''}
-                    </li>
-                """
-            html_content += '</ul>'
-        else:
-            html_content += '<p class="text-muted">No hay cambios registrados.</p>'
-        
-        html_content += """
-                </div>
-            </div>
-        </div>
-        """
-        
-        return {"status": 0, "web_content": {"source": html_content}}
 
+    @dashboard_page(
+        name="suggestions",
+        description="Ver y gestionar sugerencias",
+        methods=("GET", "POST"),
+        is_owner=True,
+    )
+    async def rpc_suggestions_page(self, **kwargs) -> typing.Dict[str, typing.Any]:
+        method = kwargs.get("method", "GET")
+        notifications = []
+
+        # POST — change status
+        if method == "POST":
+            form = kwargs.get("data", {}).get("form", {})
+            action = form.get("action", [""])[0] if isinstance(form.get("action"), list) else str(form.get("action", ""))
+            guild_id_str = form.get("guild_id", ["0"])[0] if isinstance(form.get("guild_id"), list) else str(form.get("guild_id", "0"))
+            try:
+                guild = self.bot.get_guild(int(guild_id_str))
+            except (ValueError, TypeError):
+                guild = None
+
+            if action == "update_status" and guild:
+                sid_str = form.get("suggestion_id", ["0"])[0] if isinstance(form.get("suggestion_id"), list) else "0"
+                new_status_str = form.get("new_status", [""])[0] if isinstance(form.get("new_status"), list) else ""
+                reason = form.get("reason", [""])[0] if isinstance(form.get("reason"), list) else ""
+                try:
+                    sid = int(sid_str)
+                    status_enum = SuggestionStatus(new_status_str)
+                    await self.storage.update_status(guild, sid, status_enum, 0, reason or None)
+                    notifications.append({"message": f"Sugerencia #{sid} actualizada a {STATUS_CONFIG.get(status_enum, {}).get('label', new_status_str)}.", "category": "success"})
+                except Exception as e:
+                    notifications.append({"message": f"Error: {e}", "category": "danger"})
+
+        # GET — load all guilds with suggestions
+        try:
+            all_guilds = await self.config.all_guilds()
+        except Exception:
+            return {"status": 0, "web_content": {"source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar datos.</p></div>'}}
+
+        guilds_data = []
+        for gid, data in all_guilds.items():
+            try:
+                suggestions_raw = data.get("suggestions", {})
+                if not suggestions_raw:
+                    continue
+                guild = self.bot.get_guild(gid)
+                guild_name = guild.name if guild else f"ID: {gid}"
+
+                # Count by status
+                status_counts = {}
+                for st in SuggestionStatus:
+                    status_counts[st.value] = 0
+
+                suggestions_list = []
+                for sid, sdata in suggestions_raw.items():
+                    if not isinstance(sdata, dict):
+                        continue
+                    if sdata.get("deleted", False):
+                        continue
+                    status_val = str(sdata.get("status", "pending"))
+                    if status_val in status_counts:
+                        status_counts[status_val] += 1
+
+                    author_id = int(sdata.get("author_id", 0) or 0)
+                    author_name = f"ID: {author_id}"
+                    if guild:
+                        member = guild.get_member(author_id)
+                        if member:
+                            author_name = str(member.display_name)
+                        else:
+                            user = self.bot.get_user(author_id)
+                            if user:
+                                author_name = str(user.display_name)
+
+                    content = str(sdata.get("content", ""))
+                    preview = content[:120] + ("..." if len(content) > 120 else "")
+
+                    up = len(sdata.get("voters_up", []))
+                    down = len(sdata.get("voters_down", []))
+
+                    status_info = STATUS_CONFIG.get(SuggestionStatus(status_val), {})
+
+                    suggestions_list.append({
+                        "id": int(sid),
+                        "content": html_mod.escape(preview),
+                        "author": html_mod.escape(author_name),
+                        "upvotes": up,
+                        "downvotes": down,
+                        "score": up - down,
+                        "status": status_val,
+                        "status_label": str(status_info.get("label", status_val)),
+                        "status_emoji": str(status_info.get("emoji", "")),
+                        "reason": html_mod.escape(str(sdata.get("reason", "") or "")),
+                        "created_at": str(sdata.get("created_at", ""))[:10],
+                    })
+
+                suggestions_list.sort(key=lambda s: s["id"], reverse=True)
+
+                ch_id = data.get("suggestion_channel")
+                ch_name = ""
+                if guild and ch_id:
+                    ch = guild.get_channel(ch_id)
+                    ch_name = f"#{ch.name}" if ch else ""
+
+                guilds_data.append({
+                    "name": guild_name,
+                    "id": gid,
+                    "editable": guild is not None,
+                    "channel": ch_name,
+                    "total": len(suggestions_list),
+                    "status_counts": status_counts,
+                    "suggestions": suggestions_list[:50],
+                })
+            except Exception:
+                continue
+
+        guilds_data.sort(key=lambda g: (not g["editable"], g["name"].lower()))
+
+        # Build status options for template
+        statuses = []
+        for st in SuggestionStatus:
+            info = STATUS_CONFIG.get(st, {})
+            statuses.append({
+                "value": st.value,
+                "label": str(info.get("label", st.value)),
+                "emoji": str(info.get("emoji", "")),
+            })
+
+        source = """
+<div class="trini-tp-settings">
+  <h3 class="trini-tp-title"><i class="fa fa-lightbulb-o"></i> Sugerencias</h3>
+  <p class="trini-tp-subtitle">{{ guilds|length }} servidor{{ "es" if guilds|length != 1 else "" }} con sugerencias</p>
+
+  {% if guilds|length == 0 %}
+    <div class="trini-tp-empty">
+      <i class="fa fa-lightbulb-o fa-3x"></i>
+      <p>No hay sugerencias registradas.</p>
+    </div>
+  {% else %}
+    {% for guild in guilds %}
+    <div class="trini-tp-guild-section">
+      <div class="trini-tp-guild-header">
+        <h4>{{ guild.name }}</h4>
+        <span class="badge bg-gradient-primary">{{ guild.total }} sugerencia{{ "s" if guild.total != 1 else "" }}</span>
+        {% if guild.channel %}<span class="badge bg-gradient-info ms-1">{{ guild.channel }}</span>{% endif %}
+      </div>
+
+      <div class="row mt-3 mb-3">
+        {% for st in statuses %}
+          {% set count = guild.status_counts[st.value] %}
+          {% if count > 0 %}
+          <div class="col-auto mb-1">
+            <span class="badge bg-gradient-secondary">{{ st.emoji }} {{ st.label }}: {{ count }}</span>
+          </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% if guild.suggestions|length > 0 %}
+      <div class="table-responsive">
+        <table class="table trini-table trini-tp-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Contenido</th>
+              <th>Autor</th>
+              <th>Votos</th>
+              <th>Estado</th>
+              <th>Fecha</th>
+              {% if guild.editable %}<th>Acciones</th>{% endif %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in guild.suggestions %}
+            <tr>
+              <td><strong>{{ s.id }}</strong></td>
+              <td title="{{ s.content }}">{{ s.content }}</td>
+              <td>{{ s.author }}</td>
+              <td>
+                <span class="text-success">+{{ s.upvotes }}</span> /
+                <span class="text-danger">-{{ s.downvotes }}</span>
+                <small class="text-muted">({{ s.score }})</small>
+              </td>
+              <td><span class="badge bg-gradient-secondary">{{ s.status_emoji }} {{ s.status_label }}</span></td>
+              <td><small>{{ s.created_at }}</small></td>
+              {% if guild.editable %}
+              <td>
+                <a href="javascript:void(0)" onclick="toggleStatus('{{ guild.id }}','{{ s.id }}')" class="text-info text-xs font-weight-bold" title="Cambiar estado"><i class="fa fa-pencil"></i></a>
+              </td>
+              {% endif %}
+            </tr>
+            {% if guild.editable %}
+            <tr id="status_{{ guild.id }}_{{ s.id }}" style="display:none">
+              <td colspan="8" style="background:rgba(94,114,228,0.04)">
+                <form method="POST" class="row align-items-end py-2 px-1">
+                  <input type="hidden" name="action" value="update_status">
+                  <input type="hidden" name="guild_id" value="{{ guild.id }}">
+                  <input type="hidden" name="suggestion_id" value="{{ s.id }}">
+                  <div class="col-lg-3 col-md-4 col-6 mb-2">
+                    <label class="form-label text-xs mb-1">Nuevo estado</label>
+                    <select class="form-select form-select-sm" name="new_status">
+                      {% for st in statuses %}
+                      <option value="{{ st.value }}" {{ "selected" if st.value == s.status }}>{{ st.emoji }} {{ st.label }}</option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                  <div class="col-lg-5 col-md-4 col-6 mb-2">
+                    <label class="form-label text-xs mb-1">Razón (opcional)</label>
+                    <input type="text" class="form-control form-control-sm" name="reason" placeholder="Motivo del cambio..." maxlength="500">
+                  </div>
+                  <div class="col-lg-2 col-12 mb-2">
+                    <button type="submit" class="btn btn-xs bg-gradient-info mb-0 w-100">
+                      <i class="fa fa-save me-1"></i> Guardar
+                    </button>
+                  </div>
+                </form>
+              </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if guild.total > 50 %}
+      <p class="text-xs text-muted">Mostrando las últimas 50 sugerencias de {{ guild.total }}.</p>
+      {% endif %}
+      {% else %}
+      <p class="text-sm opacity-6">No hay sugerencias activas.</p>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% endif %}
+</div>
+<script>
+function toggleStatus(g, s) {
+  var r = document.getElementById('status_' + g + '_' + s);
+  if (r) r.style.display = r.style.display === 'none' ? 'table-row' : 'none';
+}
+</script>
+"""
+
+        result = {
+            "status": 0,
+            "web_content": {
+                "source": source,
+                "guilds": guilds_data,
+                "statuses": statuses,
+            },
+        }
+        if notifications:
+            result["notifications"] = notifications
+        return result

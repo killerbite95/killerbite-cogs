@@ -7,8 +7,9 @@ import datetime
 
 # Importar la función bank_prune desde redbot.core.bank
 from redbot.core.bank import bank_prune
+from .dashboard_integration import DashboardIntegration
 
-class PruneBans(commands.Cog):
+class PruneBans(DashboardIntegration, commands.Cog):
     """Cog para manejar la eliminación de créditos de usuarios baneados y hacer seguimiento de los baneos."""
     __author__ = "Killerbite95"  # Aquí se declara el autor
 
