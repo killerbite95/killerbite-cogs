@@ -344,24 +344,110 @@ class DashboardIntegration:
             },
         }
 
-    # ── Settings page: Panels and config per guild ──────────────────
+
+    # ── Settings page: Configurable panels and guild settings ───────
     @dashboard_page(
         name="settings",
-        description="Ver configuración de paneles y ajustes por servidor",
-        methods=("GET",),
+        description="Ver y editar configuración de paneles y ajustes por servidor",
+        methods=("GET", "POST"),
+        is_owner=True,
     )
     async def dashboard_settings(self, **kwargs) -> typing.Dict[str, typing.Any]:
+        method = kwargs.get("method", "GET")
+        notifications = []
+
+        def _fv(form, key, default=""):
+            v = form.get(key, [default])
+            return v[0] if isinstance(v, list) else str(v)
+
+        # ── Handle POST ─────────────────────────────────────────────
+        if method == "POST":
+            form = kwargs.get("data", {}).get("form", {})
+            action = _fv(form, "action")
+            try:
+                guild_id = int(_fv(form, "guild_id", "0"))
+                guild = self.bot.get_guild(guild_id)
+            except (ValueError, TypeError):
+                guild = None
+
+            if not guild:
+                notifications.append({"message": "Servidor no encontrado.", "category": "danger"})
+
+            elif action == "update_guild":
+                try:
+                    async with self.config.guild(guild).all() as gdata:
+                        for key in [
+                            "dm", "transcript", "detailed_transcript",
+                            "user_can_close", "user_can_rename", "user_can_manage",
+                            "auto_add", "thread_close",
+                        ]:
+                            gdata[key] = f"field_{key}" in form
+                        for key, mn, mx, dv in [
+                            ("max_tickets", 1, 50, 1),
+                            ("inactive", 0, 720, 0),
+                            ("ticket_cooldown", 0, 86400, 0),
+                            ("global_rate_limit", 0, 1000, 0),
+                            ("min_account_age", 0, 365, 0),
+                            ("min_server_age", 0, 365, 0),
+                            ("auto_close_user_hours", 0, 720, 0),
+                            ("auto_close_staff_hours", 0, 720, 0),
+                            ("max_claims_per_staff", 0, 100, 0),
+                            ("escalation_minutes", 0, 10080, 0),
+                        ]:
+                            try:
+                                val = int(_fv(form, f"field_{key}", str(dv)))
+                                gdata[key] = max(mn, min(mx, val))
+                            except (ValueError, TypeError):
+                                pass
+                    notifications.append({"message": f"Configuración de {guild.name} guardada.", "category": "success"})
+                except Exception as e:
+                    notifications.append({"message": f"Error al guardar: {e}", "category": "danger"})
+
+            elif action == "toggle_panel":
+                panel_name = _fv(form, "panel_name")
+                try:
+                    async with self.config.guild(guild).panels() as panels:
+                        if panel_name in panels:
+                            panels[panel_name]["disabled"] = not panels[panel_name].get("disabled", False)
+                            state = "desactivado" if panels[panel_name]["disabled"] else "activado"
+                            notifications.append({"message": f"Panel '{panel_name}' {state}.", "category": "success"})
+                except Exception as e:
+                    notifications.append({"message": f"Error: {e}", "category": "danger"})
+
+            elif action == "update_panel":
+                panel_name = _fv(form, "panel_name")
+                try:
+                    async with self.config.guild(guild).panels() as panels:
+                        if panel_name in panels:
+                            btn_text = _fv(form, "field_button_text")
+                            if btn_text:
+                                panels[panel_name]["button_text"] = btn_text[:80]
+                            btn_color = _fv(form, "field_button_color", "blue")
+                            if btn_color in ("blue", "green", "red", "grey"):
+                                panels[panel_name]["button_color"] = btn_color
+                            try:
+                                mc = int(_fv(form, "field_max_claims", "0"))
+                                panels[panel_name]["max_claims"] = max(0, min(100, mc))
+                            except (ValueError, TypeError):
+                                pass
+                            panels[panel_name]["close_reason"] = "field_close_reason" in form
+                            panels[panel_name]["threads"] = "field_threads" in form
+                            notifications.append({"message": f"Panel '{panel_name}' actualizado.", "category": "success"})
+                except Exception as e:
+                    notifications.append({"message": f"Error: {e}", "category": "danger"})
+
+        # ── Load all guilds ─────────────────────────────────────────
         try:
             all_guilds = await self.config.all_guilds()
         except Exception:
             return {
                 "status": 0,
                 "web_content": {
-                    "source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar la configuración.</p></div>',
+                    "source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar configuración.</p></div>',
                 },
             }
-        guilds_data = []
 
+        guilds_data = []
         for gid, data in all_guilds.items():
             try:
                 panels = data.get("panels", {})
@@ -369,22 +455,35 @@ class DashboardIntegration:
                     continue
                 guild = self.bot.get_guild(gid)
                 guild_name = guild.name if guild else f"ID: {gid}"
+                editable = guild is not None
 
-                support_roles = data.get("support_roles", [])
+                # Parse support_roles — handle [[id, bool], ...] format
+                support_roles_raw = data.get("support_roles", [])
                 role_names = []
-                if guild:
-                    for rid in support_roles:
+                for role_entry in support_roles_raw:
+                    if isinstance(role_entry, (list, tuple)):
+                        rid = role_entry[0] if role_entry else 0
+                    else:
+                        rid = role_entry
+                    try:
+                        rid = int(rid)
+                    except (ValueError, TypeError):
+                        continue
+                    if guild:
                         role = guild.get_role(rid)
                         role_names.append(role.name if role else f"ID: {rid}")
+                    else:
+                        role_names.append(f"ID: {rid}")
 
                 panels_list = []
                 for pname, pdata in panels.items():
+                    if not isinstance(pdata, dict):
+                        continue
                     cat_id = pdata.get("category_id", 0)
                     cat_name = ""
                     if guild and cat_id:
                         cat = guild.get_channel(cat_id)
                         cat_name = cat.name if cat else f"ID: {cat_id}"
-
                     log_ch = pdata.get("log_channel", 0)
                     log_name = ""
                     if guild and log_ch:
@@ -397,30 +496,40 @@ class DashboardIntegration:
                         "threads": bool(pdata.get("threads", False)),
                         "button_text": str(pdata.get("button_text", "Open a Ticket")),
                         "button_color": str(pdata.get("button_color", "blue")),
+                        "button_emoji": str(pdata.get("button_emoji", "") or ""),
                         "category": str(cat_name),
                         "log_channel": str(log_name),
                         "max_claims": int(pdata.get("max_claims", 0) or 0),
                         "ticket_num": int(pdata.get("ticket_num", 1) or 1),
                         "has_modal": bool(pdata.get("modal", {})),
-                        "cooldown": int(pdata.get("cooldown", 0) or 0),
+                        "close_reason": bool(pdata.get("close_reason", True)),
                     })
 
                 settings_info = {
                     "max_tickets": int(data.get("max_tickets", 1) or 1),
                     "dm": bool(data.get("dm", False)),
                     "transcript": bool(data.get("transcript", False)),
+                    "detailed_transcript": bool(data.get("detailed_transcript", False)),
                     "user_can_close": bool(data.get("user_can_close", True)),
                     "user_can_rename": bool(data.get("user_can_rename", False)),
+                    "user_can_manage": bool(data.get("user_can_manage", False)),
+                    "auto_add": bool(data.get("auto_add", False)),
+                    "thread_close": bool(data.get("thread_close", True)),
+                    "inactive": int(data.get("inactive", 0) or 0),
                     "auto_close_user": int(data.get("auto_close_user_hours", 0) or 0),
                     "auto_close_staff": int(data.get("auto_close_staff_hours", 0) or 0),
                     "escalation_minutes": int(data.get("escalation_minutes", 0) or 0),
                     "ticket_cooldown": int(data.get("ticket_cooldown", 0) or 0),
                     "global_rate_limit": int(data.get("global_rate_limit", 0) or 0),
+                    "min_account_age": int(data.get("min_account_age", 0) or 0),
+                    "min_server_age": int(data.get("min_server_age", 0) or 0),
+                    "max_claims_per_staff": int(data.get("max_claims_per_staff", 0) or 0),
                 }
 
                 guilds_data.append({
                     "name": guild_name,
                     "id": gid,
+                    "editable": editable,
                     "panels": panels_list,
                     "panel_count": len(panels_list),
                     "support_roles": role_names,
@@ -429,9 +538,12 @@ class DashboardIntegration:
             except Exception:
                 continue
 
+        guilds_data.sort(key=lambda g: (not g["editable"], g["name"].lower()))
+
         source = """
 <div class="trini-tp-settings">
   <h3 class="trini-tp-title"><i class="fa fa-cog"></i> Configuración de TicketsTrini</h3>
+  <p class="trini-tp-subtitle">{{ guilds|length }} servidor{{ "es" if guilds|length != 1 else "" }} con paneles configurados</p>
 
   {% if guilds|length == 0 %}
     <div class="trini-tp-empty">
@@ -446,48 +558,139 @@ class DashboardIntegration:
         <span class="badge bg-gradient-primary">{{ guild.panel_count }} panel{{ "es" if guild.panel_count != 1 else "" }}</span>
       </div>
 
-      <!-- Settings summary -->
-      <div class="trini-tp-settings-grid">
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Max tickets/usuario</span>
-          <span class="trini-tp-setting-value">{{ guild.settings.max_tickets }}</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">DM al cerrar</span>
-          <span class="trini-tp-setting-value">{{ "Sí" if guild.settings.dm else "No" }}</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Transcripts</span>
-          <span class="trini-tp-setting-value">{{ "Sí" if guild.settings.transcript else "No" }}</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Auto-close (usuario)</span>
-          <span class="trini-tp-setting-value">{{ guild.settings.auto_close_user }}h</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Auto-close (staff)</span>
-          <span class="trini-tp-setting-value">{{ guild.settings.auto_close_staff }}h</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Escalación</span>
-          <span class="trini-tp-setting-value">{{ guild.settings.escalation_minutes }}min</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Cooldown</span>
-          <span class="trini-tp-setting-value">{{ guild.settings.ticket_cooldown }}s</span>
-        </div>
-        <div class="trini-tp-setting-item">
-          <span class="trini-tp-setting-label">Rate limit</span>
-          <span class="trini-tp-setting-value">{{ guild.settings.global_rate_limit }}/h</span>
-        </div>
-      </div>
+      {% if guild.editable %}
+      {# ═══ FORM: Editable guild settings ═══ #}
+      <form method="POST" class="mt-3">
+        <input type="hidden" name="action" value="update_guild">
+        <input type="hidden" name="guild_id" value="{{ guild.id }}">
 
-      {% if guild.support_roles %}
-      <p class="mt-3"><strong>Roles de soporte:</strong> {{ guild.support_roles|join(", ") }}</p>
+        <h6 class="text-uppercase text-xs font-weight-bolder opacity-6 mb-3">
+          <i class="fa fa-toggle-on me-1"></i> Ajustes Generales
+        </h6>
+        <div class="row">
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_dm" id="dm_{{ guild.id }}" {% if guild.settings.dm %}checked{% endif %}>
+              <label class="form-check-label" for="dm_{{ guild.id }}">DM al cerrar</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_transcript" id="tr_{{ guild.id }}" {% if guild.settings.transcript %}checked{% endif %}>
+              <label class="form-check-label" for="tr_{{ guild.id }}">Transcripts</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_detailed_transcript" id="dt_{{ guild.id }}" {% if guild.settings.detailed_transcript %}checked{% endif %}>
+              <label class="form-check-label" for="dt_{{ guild.id }}">Transcript HTML</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_user_can_close" id="ucc_{{ guild.id }}" {% if guild.settings.user_can_close %}checked{% endif %}>
+              <label class="form-check-label" for="ucc_{{ guild.id }}">User puede cerrar</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_user_can_rename" id="ucr_{{ guild.id }}" {% if guild.settings.user_can_rename %}checked{% endif %}>
+              <label class="form-check-label" for="ucr_{{ guild.id }}">User puede renombrar</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_user_can_manage" id="ucm_{{ guild.id }}" {% if guild.settings.user_can_manage %}checked{% endif %}>
+              <label class="form-check-label" for="ucm_{{ guild.id }}">User puede gestionar</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_auto_add" id="aa_{{ guild.id }}" {% if guild.settings.auto_add %}checked{% endif %}>
+              <label class="form-check-label" for="aa_{{ guild.id }}">Auto-add roles</label>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" name="field_thread_close" id="tc_{{ guild.id }}" {% if guild.settings.thread_close %}checked{% endif %}>
+              <label class="form-check-label" for="tc_{{ guild.id }}">Cerrar threads</label>
+            </div>
+          </div>
+        </div>
+
+        <h6 class="text-uppercase text-xs font-weight-bolder opacity-6 mt-3 mb-3">
+          <i class="fa fa-sliders me-1"></i> Valores
+        </h6>
+        <div class="row">
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Max tickets/usuario</label>
+            <input type="number" class="form-control form-control-sm" name="field_max_tickets" value="{{ guild.settings.max_tickets }}" min="1" max="50">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Inactividad (horas)</label>
+            <input type="number" class="form-control form-control-sm" name="field_inactive" value="{{ guild.settings.inactive }}" min="0" max="720">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Cooldown (segundos)</label>
+            <input type="number" class="form-control form-control-sm" name="field_ticket_cooldown" value="{{ guild.settings.ticket_cooldown }}" min="0" max="86400">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Rate limit (/hora)</label>
+            <input type="number" class="form-control form-control-sm" name="field_global_rate_limit" value="{{ guild.settings.global_rate_limit }}" min="0" max="1000">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Edad cuenta (días)</label>
+            <input type="number" class="form-control form-control-sm" name="field_min_account_age" value="{{ guild.settings.min_account_age }}" min="0" max="365">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Edad server (días)</label>
+            <input type="number" class="form-control form-control-sm" name="field_min_server_age" value="{{ guild.settings.min_server_age }}" min="0" max="365">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Auto-close user (h)</label>
+            <input type="number" class="form-control form-control-sm" name="field_auto_close_user_hours" value="{{ guild.settings.auto_close_user }}" min="0" max="720">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Auto-close staff (h)</label>
+            <input type="number" class="form-control form-control-sm" name="field_auto_close_staff_hours" value="{{ guild.settings.auto_close_staff }}" min="0" max="720">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Max claims/staff</label>
+            <input type="number" class="form-control form-control-sm" name="field_max_claims_per_staff" value="{{ guild.settings.max_claims_per_staff }}" min="0" max="100">
+          </div>
+          <div class="col-lg-3 col-md-4 col-6 mb-3">
+            <label class="form-label text-xs mb-1">Escalación (min)</label>
+            <input type="number" class="form-control form-control-sm" name="field_escalation_minutes" value="{{ guild.settings.escalation_minutes }}" min="0" max="10080">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-sm bg-gradient-success mb-0">
+          <i class="fa fa-save me-1"></i> Guardar Cambios
+        </button>
+      </form>
+
+      {% else %}
+      {# ═══ Read-only settings ═══ #}
+      <div class="trini-tp-settings-grid">
+        <div class="trini-tp-setting-item"><span class="trini-tp-setting-label">Max tickets</span><span class="trini-tp-setting-value">{{ guild.settings.max_tickets }}</span></div>
+        <div class="trini-tp-setting-item"><span class="trini-tp-setting-label">DM al cerrar</span><span class="trini-tp-setting-value">{{ "Sí" if guild.settings.dm else "No" }}</span></div>
+        <div class="trini-tp-setting-item"><span class="trini-tp-setting-label">Transcripts</span><span class="trini-tp-setting-value">{{ "Sí" if guild.settings.transcript else "No" }}</span></div>
+        <div class="trini-tp-setting-item"><span class="trini-tp-setting-label">Inactividad</span><span class="trini-tp-setting-value">{{ guild.settings.inactive }}h</span></div>
+      </div>
       {% endif %}
 
-      <!-- Panels table -->
-      <div class="table-responsive mt-3">
+      {% if guild.support_roles %}
+      <div class="mt-3">
+        <span class="text-uppercase text-xs font-weight-bolder opacity-6"><i class="fa fa-shield me-1"></i> Roles de soporte:</span>
+        {{ guild.support_roles|join(", ") }}
+      </div>
+      {% endif %}
+
+      {# ═══ PANELS TABLE ═══ #}
+      <h6 class="text-uppercase text-xs font-weight-bolder opacity-6 mt-4 mb-2">
+        <i class="fa fa-th-large me-1"></i> Paneles
+      </h6>
+      <div class="table-responsive">
         <table class="table trini-table trini-tp-table">
           <thead>
             <tr>
@@ -499,7 +702,7 @@ class DashboardIntegration:
               <th>Log</th>
               <th>Claims</th>
               <th>#</th>
-              <th>Modal</th>
+              {% if guild.editable %}<th>Editar</th>{% endif %}
             </tr>
           </thead>
           <tbody>
@@ -507,20 +710,76 @@ class DashboardIntegration:
             <tr>
               <td><strong>{{ p.name }}</strong></td>
               <td>
-                {% if p.disabled %}
-                  <span class="badge bg-gradient-danger">Desactivado</span>
+                {% if guild.editable %}
+                <form method="POST" style="display:inline;margin:0">
+                  <input type="hidden" name="action" value="toggle_panel">
+                  <input type="hidden" name="guild_id" value="{{ guild.id }}">
+                  <input type="hidden" name="panel_name" value="{{ p.name }}">
+                  <button type="submit" class="btn btn-xs mb-0 {{ 'bg-gradient-danger' if p.disabled else 'bg-gradient-success' }}">
+                    {{ "Off" if p.disabled else "On" }}
+                  </button>
+                </form>
                 {% else %}
-                  <span class="badge bg-gradient-success">Activo</span>
+                <span class="badge {{ 'bg-gradient-danger' if p.disabled else 'bg-gradient-success' }}">{{ "Off" if p.disabled else "On" }}</span>
                 {% endif %}
               </td>
               <td>{{ "Thread" if p.threads else "Canal" }}</td>
-              <td><code>{{ p.button_text }}</code> <span class="badge" style="background: {{ p.button_color }};">{{ p.button_color }}</span></td>
+              <td>{% if p.button_emoji %}{{ p.button_emoji }} {% endif %}<code>{{ p.button_text }}</code> <span class="badge" style="background:{{ p.button_color }}">{{ p.button_color }}</span></td>
               <td>{{ p.category if p.category else "—" }}</td>
               <td>{{ p.log_channel if p.log_channel else "—" }}</td>
               <td>{{ p.max_claims if p.max_claims > 0 else "∞" }}</td>
               <td>{{ p.ticket_num }}</td>
-              <td>{{ "Sí" if p.has_modal else "No" }}</td>
+              {% if guild.editable %}
+              <td>
+                <a href="javascript:void(0)" onclick="toggleEdit('{{ guild.id }}','{{ loop.index }}')" class="text-info text-xs font-weight-bold"><i class="fa fa-pencil"></i></a>
+              </td>
+              {% endif %}
             </tr>
+            {% if guild.editable %}
+            <tr id="edit_{{ guild.id }}_{{ loop.index }}" style="display:none">
+              <td colspan="10" style="background:rgba(94,114,228,0.04)">
+                <form method="POST" class="row align-items-end py-2 px-1">
+                  <input type="hidden" name="action" value="update_panel">
+                  <input type="hidden" name="guild_id" value="{{ guild.id }}">
+                  <input type="hidden" name="panel_name" value="{{ p.name }}">
+                  <div class="col-lg-3 col-md-4 col-6 mb-2">
+                    <label class="form-label text-xs mb-1">Texto botón</label>
+                    <input type="text" class="form-control form-control-sm" name="field_button_text" value="{{ p.button_text }}" maxlength="80">
+                  </div>
+                  <div class="col-lg-2 col-md-3 col-6 mb-2">
+                    <label class="form-label text-xs mb-1">Color</label>
+                    <select class="form-select form-select-sm" name="field_button_color">
+                      <option value="blue" {{ "selected" if p.button_color == "blue" }}>Azul</option>
+                      <option value="green" {{ "selected" if p.button_color == "green" }}>Verde</option>
+                      <option value="red" {{ "selected" if p.button_color == "red" }}>Rojo</option>
+                      <option value="grey" {{ "selected" if p.button_color == "grey" }}>Gris</option>
+                    </select>
+                  </div>
+                  <div class="col-lg-2 col-md-2 col-4 mb-2">
+                    <label class="form-label text-xs mb-1">Max Claims</label>
+                    <input type="number" class="form-control form-control-sm" name="field_max_claims" value="{{ p.max_claims }}" min="0" max="100">
+                  </div>
+                  <div class="col-lg-2 col-4 mb-2">
+                    <div class="form-check form-switch mt-4">
+                      <input class="form-check-input" type="checkbox" name="field_close_reason" {% if p.close_reason %}checked{% endif %}>
+                      <label class="form-check-label text-xs">Razón cierre</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-1 col-4 mb-2">
+                    <div class="form-check form-switch mt-4">
+                      <input class="form-check-input" type="checkbox" name="field_threads" {% if p.threads %}checked{% endif %}>
+                      <label class="form-check-label text-xs">Threads</label>
+                    </div>
+                  </div>
+                  <div class="col-lg-2 col-12 mb-2">
+                    <button type="submit" class="btn btn-xs bg-gradient-info mb-0 w-100 mt-2">
+                      <i class="fa fa-save me-1"></i> Guardar
+                    </button>
+                  </div>
+                </form>
+              </td>
+            </tr>
+            {% endif %}
             {% endfor %}
           </tbody>
         </table>
@@ -529,11 +788,21 @@ class DashboardIntegration:
     {% endfor %}
   {% endif %}
 </div>
+<script>
+function toggleEdit(g, i) {
+  var r = document.getElementById('edit_' + g + '_' + i);
+  if (r) r.style.display = r.style.display === 'none' ? 'table-row' : 'none';
+}
+</script>
 """
-        return {
+
+        result = {
             "status": 0,
             "web_content": {
                 "source": source,
                 "guilds": guilds_data,
             },
         }
+        if notifications:
+            result["notifications"] = notifications
+        return result
