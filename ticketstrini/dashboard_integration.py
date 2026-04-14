@@ -436,6 +436,88 @@ class DashboardIntegration:
                 except Exception as e:
                     notifications.append({"message": f"Error: {e}", "category": "danger"})
 
+            elif action == "create_panel":
+                raw_name = _fv(form, "panel_name").strip().lower()
+                panel_name = raw_name.replace(" ", "_")
+                if not panel_name or not panel_name.replace("_", "").isalnum():
+                    notifications.append({"message": "Nombre inválido. Usa solo letras, números y guiones bajos.", "category": "danger"})
+                elif len(panel_name) > 40:
+                    notifications.append({"message": "El nombre del panel no puede superar 40 caracteres.", "category": "danger"})
+                else:
+                    try:
+                        async with self.config.guild(guild).panels() as panels:
+                            if panel_name in panels:
+                                notifications.append({"message": f"Ya existe un panel con el nombre '{panel_name}'.", "category": "warning"})
+                            else:
+                                btn_text = _fv(form, "field_button_text", "Abrir Ticket")[:80] or "Abrir Ticket"
+                                btn_color = _fv(form, "field_button_color", "blue")
+                                if btn_color not in ("blue", "green", "red", "grey"):
+                                    btn_color = "blue"
+                                try:
+                                    cat_id = int(_fv(form, "field_category_id", "0"))
+                                except (ValueError, TypeError):
+                                    cat_id = 0
+                                try:
+                                    log_id = int(_fv(form, "field_log_channel", "0"))
+                                except (ValueError, TypeError):
+                                    log_id = 0
+                                try:
+                                    mc = int(_fv(form, "field_max_claims", "0"))
+                                    mc = max(0, min(100, mc))
+                                except (ValueError, TypeError):
+                                    mc = 0
+                                new_panel = {
+                                    "category_id": cat_id,
+                                    "channel_id": 0,
+                                    "message_id": 0,
+                                    "disabled": False,
+                                    "alt_channel": 0,
+                                    "required_roles": [],
+                                    "close_reason": "field_close_reason" in form,
+                                    "button_text": btn_text,
+                                    "button_color": btn_color,
+                                    "button_emoji": None,
+                                    "priority": len(panels) + 1,
+                                    "row": None,
+                                    "ticket_messages": [],
+                                    "ticket_name": None,
+                                    "log_channel": log_id,
+                                    "modal": {},
+                                    "modal_title": "",
+                                    "threads": "field_threads" in form,
+                                    "roles": [],
+                                    "max_claims": mc,
+                                    "ticket_num": 1,
+                                    "cooldown": 0,
+                                    "rate_limit": 0,
+                                    "max_open": 0,
+                                    "schedule": None,
+                                    "welcome_sections": None,
+                                    "fallback_mode": "none",
+                                }
+                                panels[panel_name] = new_panel
+                                notifications.append({
+                                    "message": f"Panel '{panel_name}' creado exitosamente. Usa [p]tickets panel post {panel_name} en Discord para publicarlo.",
+                                    "category": "success",
+                                })
+                    except Exception as e:
+                        notifications.append({"message": f"Error al crear panel: {e}", "category": "danger"})
+
+            elif action == "delete_panel":
+                panel_name = _fv(form, "panel_name")
+                if not panel_name:
+                    notifications.append({"message": "Panel no encontrado.", "category": "danger"})
+                else:
+                    try:
+                        async with self.config.guild(guild).panels() as panels:
+                            if panel_name in panels:
+                                del panels[panel_name]
+                                notifications.append({"message": f"Panel '{panel_name}' eliminado.", "category": "success"})
+                            else:
+                                notifications.append({"message": f"Panel '{panel_name}' no existe.", "category": "warning"})
+                    except Exception as e:
+                        notifications.append({"message": f"Error: {e}", "category": "danger"})
+
         # ── Load all guilds ─────────────────────────────────────────
         try:
             all_guilds = await self.config.all_guilds()
@@ -448,11 +530,11 @@ class DashboardIntegration:
             }
 
         guilds_data = []
+        seen_gids = set()
         for gid, data in all_guilds.items():
             try:
+                seen_gids.add(gid)
                 panels = data.get("panels", {})
-                if not panels:
-                    continue
                 guild = self.bot.get_guild(gid)
                 guild_name = guild.name if guild else f"ID: {gid}"
                 editable = guild is not None
@@ -505,6 +587,15 @@ class DashboardIntegration:
                         "close_reason": bool(pdata.get("close_reason", True)),
                     })
 
+                # Collect categories and text channels for dropdowns
+                categories = []
+                text_channels = []
+                if guild:
+                    for cat in guild.categories:
+                        categories.append({"id": cat.id, "name": cat.name})
+                    for ch in guild.text_channels:
+                        text_channels.append({"id": ch.id, "name": f"#{ch.name}"})
+
                 settings_info = {
                     "max_tickets": int(data.get("max_tickets", 1) or 1),
                     "dm": bool(data.get("dm", False)),
@@ -534,21 +625,49 @@ class DashboardIntegration:
                     "panel_count": len(panels_list),
                     "support_roles": role_names,
                     "settings": settings_info,
+                    "categories": categories,
+                    "text_channels": text_channels,
                 })
             except Exception:
                 continue
+
+        # Also show bot guilds not yet in config (so panels can be created)
+        for guild in self.bot.guilds:
+            if guild.id not in seen_gids:
+                categories = [{"id": c.id, "name": c.name} for c in guild.categories]
+                text_channels = [{"id": c.id, "name": f"#{c.name}"} for c in guild.text_channels]
+                guilds_data.append({
+                    "name": guild.name,
+                    "id": guild.id,
+                    "editable": True,
+                    "panels": [],
+                    "panel_count": 0,
+                    "support_roles": [],
+                    "settings": {
+                        "max_tickets": 1, "dm": False, "transcript": False,
+                        "detailed_transcript": False, "user_can_close": True,
+                        "user_can_rename": False, "user_can_manage": False,
+                        "auto_add": False, "thread_close": True, "inactive": 0,
+                        "auto_close_user": 0, "auto_close_staff": 0,
+                        "escalation_minutes": 0, "ticket_cooldown": 0,
+                        "global_rate_limit": 0, "min_account_age": 0,
+                        "min_server_age": 0, "max_claims_per_staff": 0,
+                    },
+                    "categories": categories,
+                    "text_channels": text_channels,
+                })
 
         guilds_data.sort(key=lambda g: (not g["editable"], g["name"].lower()))
 
         source = """
 <div class="trini-tp-settings">
   <h3 class="trini-tp-title"><i class="fa fa-cog"></i> Configuración de TicketsTrini</h3>
-  <p class="trini-tp-subtitle">{{ guilds|length }} servidor{{ "es" if guilds|length != 1 else "" }} con paneles configurados</p>
+  <p class="trini-tp-subtitle">{{ guilds|length }} servidor{{ "es" if guilds|length != 1 else "" }} disponible{{ "s" if guilds|length != 1 else "" }}</p>
 
   {% if guilds|length == 0 %}
     <div class="trini-tp-empty">
       <i class="fa fa-cog fa-3x"></i>
-      <p>No hay servidores con paneles configurados.</p>
+      <p>No hay servidores disponibles.</p>
     </div>
   {% else %}
     {% for guild in guilds %}
@@ -687,6 +806,7 @@ class DashboardIntegration:
       {% endif %}
 
       {# ═══ PANELS TABLE ═══ #}
+      {% if guild.panels|length > 0 %}
       <h6 class="text-uppercase text-xs font-weight-bolder opacity-6 mt-4 mb-2">
         <i class="fa fa-th-large me-1"></i> Paneles
       </h6>
@@ -702,7 +822,7 @@ class DashboardIntegration:
               <th>Log</th>
               <th>Claims</th>
               <th>#</th>
-              {% if guild.editable %}<th>Editar</th>{% endif %}
+              {% if guild.editable %}<th>Acciones</th>{% endif %}
             </tr>
           </thead>
           <tbody>
@@ -731,7 +851,8 @@ class DashboardIntegration:
               <td>{{ p.ticket_num }}</td>
               {% if guild.editable %}
               <td>
-                <a href="javascript:void(0)" onclick="toggleEdit('{{ guild.id }}','{{ loop.index }}')" class="text-info text-xs font-weight-bold"><i class="fa fa-pencil"></i></a>
+                <a href="javascript:void(0)" onclick="toggleEdit('{{ guild.id }}','{{ loop.index }}')" class="text-info text-xs font-weight-bold me-2" title="Editar"><i class="fa fa-pencil"></i></a>
+                <a href="javascript:void(0)" onclick="confirmDelete('{{ guild.id }}','{{ p.name }}')" class="text-danger text-xs font-weight-bold" title="Eliminar"><i class="fa fa-trash"></i></a>
               </td>
               {% endif %}
             </tr>
@@ -784,6 +905,87 @@ class DashboardIntegration:
           </tbody>
         </table>
       </div>
+      {% elif not guild.editable %}
+      <p class="text-sm opacity-6 mt-3">No hay paneles configurados.</p>
+      {% endif %}
+
+      {# ═══ CREATE NEW PANEL ═══ #}
+      {% if guild.editable %}
+      <div class="mt-4">
+        <a href="javascript:void(0)" onclick="toggleCreate('{{ guild.id }}')" class="btn btn-sm bg-gradient-primary mb-0">
+          <i class="fa fa-plus me-1"></i> Crear Nuevo Panel
+        </a>
+      </div>
+      <div id="create_{{ guild.id }}" style="display:none" class="mt-3 p-3" style="border-radius:0.5rem;background:rgba(94,114,228,0.04)">
+        <h6 class="text-uppercase text-xs font-weight-bolder opacity-6 mb-3">
+          <i class="fa fa-plus-circle me-1"></i> Nuevo Panel
+        </h6>
+        <form method="POST">
+          <input type="hidden" name="action" value="create_panel">
+          <input type="hidden" name="guild_id" value="{{ guild.id }}">
+          <div class="row">
+            <div class="col-lg-3 col-md-4 col-6 mb-3">
+              <label class="form-label text-xs mb-1">Nombre del panel <span class="text-danger">*</span></label>
+              <input type="text" class="form-control form-control-sm" name="panel_name" placeholder="ej: soporte" required maxlength="40" pattern="[a-zA-Z0-9_ ]+">
+              <small class="text-muted text-xxs">Solo letras, números y guiones bajos</small>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-3">
+              <label class="form-label text-xs mb-1">Texto del botón</label>
+              <input type="text" class="form-control form-control-sm" name="field_button_text" value="Abrir Ticket" maxlength="80">
+            </div>
+            <div class="col-lg-2 col-md-4 col-6 mb-3">
+              <label class="form-label text-xs mb-1">Color</label>
+              <select class="form-select form-select-sm" name="field_button_color">
+                <option value="blue" selected>Azul</option>
+                <option value="green">Verde</option>
+                <option value="red">Rojo</option>
+                <option value="grey">Gris</option>
+              </select>
+            </div>
+            <div class="col-lg-4 col-md-6 col-6 mb-3">
+              <label class="form-label text-xs mb-1">Categoría (donde abrir tickets)</label>
+              <select class="form-select form-select-sm" name="field_category_id">
+                <option value="0">— Sin asignar —</option>
+                {% for cat in guild.categories %}
+                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-lg-3 col-md-4 col-6 mb-3">
+              <label class="form-label text-xs mb-1">Canal de log</label>
+              <select class="form-select form-select-sm" name="field_log_channel">
+                <option value="0">— Ninguno —</option>
+                {% for ch in guild.text_channels %}
+                <option value="{{ ch.id }}">{{ ch.name }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-lg-2 col-md-3 col-4 mb-3">
+              <label class="form-label text-xs mb-1">Max Claims</label>
+              <input type="number" class="form-control form-control-sm" name="field_max_claims" value="0" min="0" max="100">
+              <small class="text-muted text-xxs">0 = ilimitado</small>
+            </div>
+            <div class="col-lg-2 col-4 mb-3">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" name="field_threads">
+                <label class="form-check-label text-xs">Usar threads</label>
+              </div>
+            </div>
+            <div class="col-lg-2 col-4 mb-3">
+              <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" name="field_close_reason" checked>
+                <label class="form-check-label text-xs">Razón cierre</label>
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-sm bg-gradient-success mb-0">
+            <i class="fa fa-plus me-1"></i> Crear Panel
+          </button>
+          <a href="javascript:void(0)" onclick="toggleCreate('{{ guild.id }}')" class="btn btn-sm btn-outline-secondary mb-0 ms-2">Cancelar</a>
+        </form>
+      </div>
+      {% endif %}
+
     </div>
     {% endfor %}
   {% endif %}
@@ -792,6 +994,21 @@ class DashboardIntegration:
 function toggleEdit(g, i) {
   var r = document.getElementById('edit_' + g + '_' + i);
   if (r) r.style.display = r.style.display === 'none' ? 'table-row' : 'none';
+}
+function toggleCreate(g) {
+  var r = document.getElementById('create_' + g);
+  if (r) r.style.display = r.style.display === 'none' ? 'block' : 'none';
+}
+function confirmDelete(gid, pname) {
+  if (confirm('¿Estás seguro de eliminar el panel "' + pname + '"? Esta acción no se puede deshacer.')) {
+    var f = document.createElement('form');
+    f.method = 'POST';
+    f.innerHTML = '<input type="hidden" name="action" value="delete_panel">' +
+      '<input type="hidden" name="guild_id" value="' + gid + '">' +
+      '<input type="hidden" name="panel_name" value="' + pname + '">';
+    document.body.appendChild(f);
+    f.submit();
+  }
 }
 </script>
 """
