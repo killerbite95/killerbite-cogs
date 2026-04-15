@@ -20,14 +20,97 @@ def register_routes(app: web.Application):
     app.router.add_get(f"{PREFIX}/docs", handle_swagger_ui)
 
 
+# ---------------------------------------------------------------------------
+# Path → Cog tag mapping
+# Evaluated in order — first match wins.
+# ---------------------------------------------------------------------------
+_PATH_TAG_RULES: list[tuple[str, str]] = [
+    # System
+    (r"^/api/v2/health$",               "Core"),
+    (r"^/api/v2/info$",                 "Core"),
+    (r"^/api/v2/guilds$",               "Core"),
+    (r"^/api/v2/guilds/\{[^}]+\}$",     "Core"),
+    (r"^/api/v2/webhooks",              "Webhooks"),
+    # Members & roles
+    (r"/bans",                          "Moderation"),
+    (r"/kick$",                         "Moderation"),
+    (r"/timeout",                       "Moderation"),
+    (r"/members/\{[^}]+\}/roles",       "Roles"),
+    (r"/members",                       "Members"),
+    (r"/guilds/\{[^}]+\}/roles",        "Roles"),
+    # Channels & messaging
+    (r"/channels/\{[^}]+\}/sticky",     "Sticky"),
+    (r"/channels/\{[^}]+\}/messages",   "Messaging"),
+    (r"/channels",                      "Channels"),
+    (r"/stickies$",                     "Sticky"),
+    # Economy
+    (r"/economy",                       "Economy"),
+    # Advanced moderation
+    (r"/warnings",                      "Warnings"),
+    (r"/cases",                         "Modlog"),
+    (r"/security",                      "Security"),
+    (r"/modlog",                        "ExtendedModLog"),
+    # Cog-specific
+    (r"/tickets",                       "Tickets"),
+    (r"/suggestions",                   "Suggestions"),
+    (r"/game-servers",                  "GameServerMonitor"),
+    (r"/giveaways",                     "Giveaways"),
+    (r"/tags",                          "Tags"),
+    (r"/rolesbuttons",                  "RolesButtons"),
+    (r"/rolesyncer",                    "RoleSyncer"),
+    (r"/welcome",                       "Welcome"),
+    (r"/voicelogs",                     "VoiceLogs"),
+    (r"/autonick",                      "AutoNick"),
+    (r"/voice/massmove",                "Mover"),
+]
+
+# Root-level tag definitions — controls display order + descriptions in Swagger UI
+_TAG_DEFINITIONS: list[dict] = [
+    {"name": "Core",             "description": "Health check, bot info, guild listing"},
+    {"name": "Members",          "description": "Guild member lookup and nickname management"},
+    {"name": "Roles",            "description": "Role assignment and bulk role management"},
+    {"name": "Channels",         "description": "Channel listing"},
+    {"name": "Messaging",        "description": "Send messages and embeds, add reactions"},
+    {"name": "Moderation",       "description": "Kick, ban, unban, timeout"},
+    {"name": "Webhooks",         "description": "Outgoing webhooks on Discord events"},
+    {"name": "Economy",          "description": "Red bank balance, leaderboard, ExtendedEconomy costs — *cog optional*"},
+    {"name": "Warnings",         "description": "User warnings via Red Mod cog"},
+    {"name": "Modlog",           "description": "Modlog cases (ban, kick, warn…)"},
+    {"name": "Security",         "description": "Security cog — quarantine, modules, whitelist — *requiere cog*"},
+    {"name": "ExtendedModLog",   "description": "ExtendedModLog event settings — *requiere cog*"},
+    {"name": "Tickets",          "description": "TicketsTrini — open/close/message tickets — *requiere cog*"},
+    {"name": "Suggestions",      "description": "SimpleSuggestions cog — *requiere cog*"},
+    {"name": "GameServerMonitor","description": "Game server status — *requiere cog*"},
+    {"name": "Giveaways",        "description": "Create, end and reroll giveaways — *requiere cog*"},
+    {"name": "Tags",             "description": "TagScript tags — CRUD + invoke with variables — *requiere cog*"},
+    {"name": "RolesButtons",     "description": "Role-button panels — *requiere cog*"},
+    {"name": "RoleSyncer",       "description": "One-way / two-way role sync rules — *requiere cog*"},
+    {"name": "Welcome",          "description": "Join/leave/ban/unban messages and DM whispers — *requiere cog*"},
+    {"name": "Sticky",           "description": "Sticky messages pinned to channels — *requiere cog*"},
+    {"name": "VoiceLogs",        "description": "Voice channel session history — *requiere cog*"},
+    {"name": "AutoNick",         "description": "Self-service nickname channel + forbidden word list — *requiere cog*"},
+    {"name": "Mover",            "description": "Mass-move members between voice channels — *requiere cog*"},
+]
+
+# x-tagGroups for Redoc (ignored by SwaggerUI but harmless)
+_TAG_GROUPS: list[dict] = [
+    {"name": "🤖 Sistema",            "tags": ["Core", "Webhooks"]},
+    {"name": "👥 Miembros & Roles",   "tags": ["Members", "Roles", "Moderation"]},
+    {"name": "💬 Canales",            "tags": ["Channels", "Messaging"]},
+    {"name": "💰 Economía",           "tags": ["Economy"]},
+    {"name": "🔨 Moderación avanzada","tags": ["Warnings", "Modlog", "Security", "ExtendedModLog"]},
+    {"name": "🎫 Cogs — Gestión",     "tags": ["Tickets", "Suggestions", "GameServerMonitor"]},
+    {"name": "🎉 Comunidad",          "tags": ["Giveaways", "Tags", "RolesButtons", "RoleSyncer"]},
+    {"name": "⚙️ Configuración",      "tags": ["Welcome", "Sticky", "VoiceLogs", "AutoNick", "Mover"]},
+]
+
+
 def _path_to_tag(path: str) -> str:
-    """Extract a tag name from a route path."""
-    parts = path.replace(f"{PREFIX}/", "").split("/")
-    parts = [p for p in parts if not p.startswith("{")]
-    if not parts:
-        return "Core"
-    tag = parts[0]
-    return tag.replace("-", " ").title()
+    """Map a route path to the appropriate cog/section tag."""
+    for pattern, tag in _PATH_TAG_RULES:
+        if re.search(pattern, path):
+            return tag
+    return "Core"
 
 
 def generate_openapi_spec(app: web.Application) -> dict:
@@ -38,22 +121,25 @@ def generate_openapi_spec(app: web.Application) -> dict:
             "title": "APIv2 — Red-DiscordBot REST API",
             "version": "2.0.0",
             "description": (
-                "REST API embedded in Red-DiscordBot.\n\n"
-                "Authenticate with `Authorization: Bearer <API_KEY>`.\n\n"
-                "Rate limited per key (default 200 req/min)."
+                "REST API embebida en Red-DiscordBot.\n\n"
+                "Autentícate con `Authorization: Bearer <API_KEY>`.\n\n"
+                "Rate limit por key: 200 req/min por defecto.\n\n"
+                "Los endpoints marcados con *requiere cog* devuelven `503` si el cog no está cargado."
             ),
         },
-        "servers": [{"url": "/", "description": "Current server"}],
+        "servers": [{"url": "/", "description": "Bot actual"}],
         "components": {
             "securitySchemes": {
                 "bearerAuth": {
                     "type": "http",
                     "scheme": "bearer",
-                    "description": "API key created with [p]apiv2 key create",
+                    "description": "API key creada con [p]apiv2 key create",
                 }
             }
         },
         "security": [{"bearerAuth": []}],
+        "tags": _TAG_DEFINITIONS,
+        "x-tagGroups": _TAG_GROUPS,
         "paths": {},
     }
 
@@ -72,7 +158,6 @@ def generate_openapi_spec(app: web.Application) -> dict:
 
             handler = route.handler
             doc = (handler.__doc__ or "").strip()
-            # Extract summary from docstring: text after "—" or first line
             summary_line = doc.split("—")[-1].strip() if "—" in doc else doc.split("\n")[0]
 
             tag = _path_to_tag(path)
@@ -82,8 +167,12 @@ def generate_openapi_spec(app: web.Application) -> dict:
                 "tags": [tag],
                 "responses": {
                     "200": {"description": "Success"},
-                    "401": {"description": "Unauthorized"},
+                    "201": {"description": "Created"},
+                    "400": {"description": "Bad request"},
+                    "401": {"description": "Unauthorized — invalid or missing API key"},
+                    "404": {"description": "Not found"},
                     "429": {"description": "Rate limited"},
+                    "503": {"description": "Cog not loaded"},
                 },
             }
 
@@ -100,6 +189,7 @@ def generate_openapi_spec(app: web.Application) -> dict:
                         "in": "path",
                         "required": True,
                         "schema": {"type": "string"},
+                        "description": p.replace("_", " "),
                     }
                     for p in params
                 ]
@@ -130,17 +220,104 @@ def generate_openapi_spec(app: web.Application) -> dict:
 
 
 SWAGGER_HTML = """<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>APIv2 — Swagger UI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>APIv2 — Red-DiscordBot</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
     <style>
-        body { margin: 0; padding: 0; background: #fafafa; }
-        .swagger-ui .topbar { display: none; }
+        :root {
+            --brand: #5865F2;   /* Discord blurple */
+            --brand-dark: #404EED;
+        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #0f0f13; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+
+        /* Top bar */
+        #topbar {
+            background: linear-gradient(90deg, #1a1a2e 0%, #16213e 100%);
+            border-bottom: 2px solid var(--brand);
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            height: 56px;
+        }
+        #topbar .logo { font-size: 20px; font-weight: 700; color: #fff; letter-spacing: -0.5px; }
+        #topbar .logo span { color: var(--brand); }
+        #topbar .badge {
+            background: var(--brand);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 99px;
+            letter-spacing: 0.5px;
+        }
+        #topbar .links { margin-left: auto; display: flex; gap: 12px; }
+        #topbar a { color: #9aa5b4; text-decoration: none; font-size: 13px; }
+        #topbar a:hover { color: #fff; }
+
+        /* Swagger UI overrides */
+        .swagger-ui .topbar { display: none !important; }
+        .swagger-ui { background: #0f0f13 !important; }
+
+        .swagger-ui .info { margin: 28px 0 12px; }
+        .swagger-ui .info .title { color: #e2e8f0 !important; font-size: 28px !important; }
+        .swagger-ui .info .description p, .swagger-ui .info p { color: #94a3b8 !important; }
+        .swagger-ui .info code { background: #1e293b; color: #7dd3fc; padding: 1px 5px; border-radius: 4px; }
+
+        .swagger-ui .scheme-container { background: #1a1a2e !important; box-shadow: none !important; border-bottom: 1px solid #2d2d44; }
+
+        /* Tag headings */
+        .swagger-ui .opblock-tag {
+            border-bottom: 1px solid #2d2d44 !important;
+            color: #e2e8f0 !important;
+            font-size: 16px !important;
+        }
+        .swagger-ui .opblock-tag:hover { background: #1a1a2e !important; }
+        .swagger-ui .opblock-tag-section.is-open .opblock-tag { border-bottom-color: var(--brand) !important; }
+
+        /* Tag descriptions */
+        .swagger-ui .opblock-tag small { color: #64748b !important; font-weight: 400; font-size: 13px; }
+
+        /* Operation blocks */
+        .swagger-ui .opblock { border-radius: 8px !important; margin: 6px 0 !important; border: 1px solid #2d2d44 !important; }
+        .swagger-ui .opblock .opblock-summary { border-radius: 6px; }
+        .swagger-ui .opblock.opblock-get    { background: #0d1f38 !important; border-color: #1d4ed8 !important; }
+        .swagger-ui .opblock.opblock-post   { background: #0d2414 !important; border-color: #15803d !important; }
+        .swagger-ui .opblock.opblock-put    { background: #271d08 !important; border-color: #b45309 !important; }
+        .swagger-ui .opblock.opblock-patch  { background: #1f1436 !important; border-color: #7c3aed !important; }
+        .swagger-ui .opblock.opblock-delete { background: #2d0f0f !important; border-color: #b91c1c !important; }
+
+        .swagger-ui .opblock-body pre.microlight { background: #0f172a !important; color: #94a3b8 !important; }
+
+        /* Buttons */
+        .swagger-ui .btn.execute { background: var(--brand) !important; border-color: var(--brand-dark) !important; border-radius: 6px; }
+        .swagger-ui .btn.execute:hover { background: var(--brand-dark) !important; }
+        .swagger-ui .btn.cancel { border-radius: 6px; }
+
+        /* Auth */
+        .swagger-ui .auth-wrapper .authorize { border-color: var(--brand) !important; color: var(--brand) !important; border-radius: 6px; }
+
+        /* Misc */
+        .swagger-ui select, .swagger-ui input[type=text], .swagger-ui textarea {
+            background: #1e293b !important; color: #e2e8f0 !important; border-color: #334155 !important; border-radius: 6px;
+        }
+        .swagger-ui .model-box { background: #1e293b !important; }
+        .swagger-ui table thead tr td, .swagger-ui table thead tr th { color: #94a3b8 !important; border-color: #2d2d44 !important; }
     </style>
 </head>
 <body>
+    <div id="topbar">
+        <div class="logo">API<span>v2</span></div>
+        <div class="badge">Red-DiscordBot</div>
+        <div class="links">
+            <a href="/api/v2/openapi.json" target="_blank">openapi.json</a>
+            <a href="/api/v2/health" target="_blank">/health</a>
+        </div>
+    </div>
     <div id="swagger-ui"></div>
     <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
     <script>
@@ -148,11 +325,19 @@ SWAGGER_HTML = """<!DOCTYPE html>
             url: '/api/v2/openapi.json',
             dom_id: '#swagger-ui',
             deepLinking: true,
+            tryItOutEnabled: true,
+            displayRequestDuration: true,
+            defaultModelsExpandDepth: -1,
+            tagsSorter: 'alpha',
+            operationsSorter: 'alpha',
+            persistAuthorization: true,
+            filter: true,
             presets: [
                 SwaggerUIBundle.presets.apis,
-                SwaggerUIBundle.SwaggerUIStandalonePreset
+                SwaggerUIBundle.SwaggerUIStandalonePreset,
             ],
             layout: "BaseLayout",
+            syntaxHighlight: { activate: true, theme: "agate" },
         });
     </script>
 </body>
