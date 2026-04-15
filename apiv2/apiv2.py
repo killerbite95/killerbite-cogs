@@ -154,7 +154,7 @@ class APIv2(commands.Cog):
             except Exception:
                 continue
             meta_list = getattr(method, API_ROUTE_ATTR, None)
-            if not meta_list:
+            if not isinstance(meta_list, list) or not meta_list:
                 continue
             for meta in meta_list:
                 routes.append({
