@@ -326,10 +326,10 @@ Códigos usados: `400 bad_request`, `401 unauthorized`, `403 forbidden`, `404 no
 - [ ] Respuestas de error estándar en todos los endpoints
 - [ ] `/api/v2/info` con lista de endpoints disponibles (auto-generada)
 
-### Fase 5 — Futuro indefinido
-- [ ] Webhooks salientes (bot llama a URL externa en eventos)
-- [ ] Decorador `@api_route` para que cogs externos registren rutas propias
-- [ ] Documentación OpenAPI/Swagger auto-generada
+### Fase 5 — Webhooks, extensibilidad y documentación
+- [x] Webhooks salientes (bot llama a URL externa en eventos: member_join/remove/ban/unban, message)
+- [x] Decorador `@api_route` para que cogs externos registren rutas propias (auto-discovery + hot reload)
+- [x] Documentación OpenAPI/Swagger auto-generada (`/api/v2/docs`, `/api/v2/openapi.json`)
 
 ---
 

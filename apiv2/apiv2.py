@@ -14,7 +14,9 @@ from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
 
 from .auth import KeyManager, RateLimiter
-from .server import create_app, APP_START_TIME_KEY
+from .decorator import API_ROUTE_ATTR
+from .server import create_app, APP_BOT_KEY, APP_START_TIME_KEY, json_error
+from .webhooks import WebhookManager, SUPPORTED_EVENTS
 from .routes.core import register_routes as register_core_routes
 from .routes.members import register_routes as register_member_routes
 from .routes.moderation import register_routes as register_moderation_routes
@@ -22,6 +24,8 @@ from .routes.messaging import register_routes as register_messaging_routes
 from .routes.tickets import register_routes as register_ticket_routes
 from .routes.suggestions import register_routes as register_suggestion_routes
 from .routes.servers import register_routes as register_server_routes
+from .routes.webhooks import register_routes as register_webhook_routes
+from .routes.docs import register_routes as register_docs_routes
 
 logger = logging.getLogger("red.killerbite95.apiv2")
 
@@ -38,7 +42,7 @@ class APIv2(commands.Cog):
     """
 
     __author__ = "Killerbite95"
-    __version__ = "1.0.0"
+    __version__ = "2.0.0"
 
     def __init__(self, bot: Red):
         self.bot = bot
@@ -47,22 +51,28 @@ class APIv2(commands.Cog):
             host=DEFAULT_HOST,
             port=DEFAULT_PORT,
             api_keys={},
+            webhooks={},
         )
 
         self.key_manager = KeyManager(self.config)
         self.rate_limiter = RateLimiter(default_max=200, window_seconds=60)
+        self.webhook_manager = WebhookManager(self.config)
 
         self._app: web.Application | None = None
         self._runner: web.AppRunner | None = None
         self._site: web.TCPSite | None = None
+        self._external_routes: dict[str, list[dict]] = {}
 
     async def cog_load(self):
         await self.key_manager.load_cache()
         await self._load_key_rate_limits()
+        await self.webhook_manager.initialize()
+        self._scan_all_cogs()
         await self._start_server()
 
     async def cog_unload(self):
         await self._stop_server()
+        await self.webhook_manager.close()
 
     async def _load_key_rate_limits(self):
         """Sync per-key rate limits from config to the RateLimiter."""
@@ -78,7 +88,7 @@ class APIv2(commands.Cog):
         host = await self.config.host()
         port = await self.config.port()
 
-        self._app = create_app(self.bot, self.key_manager, self.rate_limiter)
+        self._app = create_app(self.bot, self.key_manager, self.rate_limiter, self.webhook_manager)
         register_core_routes(self._app)
         register_member_routes(self._app)
         register_moderation_routes(self._app)
@@ -86,6 +96,21 @@ class APIv2(commands.Cog):
         register_ticket_routes(self._app)
         register_suggestion_routes(self._app)
         register_server_routes(self._app)
+        register_webhook_routes(self._app)
+
+        # Register external cog routes (@api_route)
+        for cog_name, routes in self._external_routes.items():
+            for route_info in routes:
+                handler = self._make_external_handler(cog_name, route_info["method_name"])
+                handler.__doc__ = route_info["meta"].get("summary") or ""
+                self._app.router.add_route(
+                    route_info["http_method"],
+                    route_info["path"],
+                    handler,
+                )
+
+        # Docs routes last so they can see all registered routes
+        register_docs_routes(self._app)
 
         self._runner = web.AppRunner(self._app)
         await self._runner.setup()
@@ -112,6 +137,151 @@ class APIv2(commands.Cog):
 
     def _is_running(self) -> bool:
         return self._site is not None
+
+    # ==================== EXTERNAL ROUTE DISCOVERY ====================
+
+    def _scan_cog_routes(self, cog: commands.Cog) -> list[dict]:
+        """Scan a cog for @api_route decorated methods."""
+        routes = []
+        cog_name = type(cog).__name__
+        for attr_name in dir(cog):
+            try:
+                method = getattr(cog, attr_name)
+            except Exception:
+                continue
+            meta_list = getattr(method, API_ROUTE_ATTR, None)
+            if not meta_list:
+                continue
+            for meta in meta_list:
+                routes.append({
+                    "cog_name": cog_name,
+                    "method_name": attr_name,
+                    "http_method": meta["method"],
+                    "path": meta["path"],
+                    "meta": meta,
+                })
+        return routes
+
+    def _scan_all_cogs(self):
+        """Scan all loaded cogs for @api_route decorated methods."""
+        self._external_routes.clear()
+        for cog_name, cog in self.bot.cogs.items():
+            if cog is self:
+                continue
+            routes = self._scan_cog_routes(cog)
+            if routes:
+                self._external_routes[cog_name] = routes
+                logger.info(f"Discovered {len(routes)} API route(s) in {cog_name}")
+
+    def _make_external_handler(self, cog_name: str, method_name: str):
+        """Create a handler that dispatches to a cog method at request time."""
+        async def handler(request: web.Request) -> web.Response:
+            bot = request.app[APP_BOT_KEY]
+            cog = bot.get_cog(cog_name)
+            if cog is None:
+                return json_error(503, "cog_unavailable", f"Cog {cog_name} is not loaded")
+            func = getattr(cog, method_name, None)
+            if func is None:
+                return json_error(503, "cog_unavailable", f"Handler not available on {cog_name}")
+            return await func(request)
+
+        return handler
+
+    # ==================== COG LISTENERS ====================
+
+    @commands.Cog.listener()
+    async def on_cog_add(self, cog: commands.Cog):
+        """Detect external cogs with @api_route and restart server if needed."""
+        if cog is self:
+            return
+        routes = self._scan_cog_routes(cog)
+        if routes:
+            cog_name = type(cog).__name__
+            self._external_routes[cog_name] = routes
+            logger.info(f"Cog {cog_name} has {len(routes)} API routes, restarting server...")
+            await self._stop_server()
+            await self._start_server()
+
+    @commands.Cog.listener()
+    async def on_cog_remove(self, cog: commands.Cog):
+        """Remove routes from unloaded cogs and restart server if needed."""
+        if cog is self:
+            return
+        cog_name = type(cog).__name__
+        if cog_name in self._external_routes:
+            del self._external_routes[cog_name]
+            logger.info(f"Cog {cog_name} unloaded, removing its API routes...")
+            await self._stop_server()
+            await self._start_server()
+
+    # ==================== WEBHOOK EVENT LISTENERS ====================
+
+    @commands.Cog.listener()
+    async def on_member_join(self, member: discord.Member):
+        await self.webhook_manager.dispatch("member_join", {
+            "guild_id": str(member.guild.id),
+            "guild_name": member.guild.name,
+            "user": {
+                "id": str(member.id),
+                "username": member.name,
+                "display_name": member.display_name,
+                "avatar_url": str(member.display_avatar.url),
+                "bot": member.bot,
+            },
+            "joined_at": member.joined_at.isoformat() if member.joined_at else None,
+        }, guild_id=member.guild.id)
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member: discord.Member):
+        await self.webhook_manager.dispatch("member_remove", {
+            "guild_id": str(member.guild.id),
+            "guild_name": member.guild.name,
+            "user": {
+                "id": str(member.id),
+                "username": member.name,
+                "display_name": member.display_name,
+            },
+        }, guild_id=member.guild.id)
+
+    @commands.Cog.listener()
+    async def on_member_ban(self, guild: discord.Guild, user: discord.User):
+        await self.webhook_manager.dispatch("member_ban", {
+            "guild_id": str(guild.id),
+            "guild_name": guild.name,
+            "user": {
+                "id": str(user.id),
+                "username": user.name,
+            },
+        }, guild_id=guild.id)
+
+    @commands.Cog.listener()
+    async def on_member_unban(self, guild: discord.Guild, user: discord.User):
+        await self.webhook_manager.dispatch("member_unban", {
+            "guild_id": str(guild.id),
+            "guild_name": guild.name,
+            "user": {
+                "id": str(user.id),
+                "username": user.name,
+            },
+        }, guild_id=guild.id)
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if message.author.bot or not message.guild:
+            return
+        await self.webhook_manager.dispatch("message", {
+            "guild_id": str(message.guild.id),
+            "channel_id": str(message.channel.id),
+            "channel_name": getattr(message.channel, "name", str(message.channel.id)),
+            "message_id": str(message.id),
+            "author": {
+                "id": str(message.author.id),
+                "username": message.author.name,
+                "display_name": message.author.display_name,
+            },
+            "content": message.content[:2000],
+            "created_at": message.created_at.isoformat(),
+        }, guild_id=message.guild.id)
 
     # ==================== COMMANDS ====================
 
@@ -281,6 +451,109 @@ class APIv2(commands.Cog):
             await ctx.send(f"✅ Key `{name}` rate limit reset to global default (200/min).")
         else:
             await ctx.send(f"✅ Key `{name}` rate limit set to **{limit}** requests/min.")
+
+    # ---- Webhooks ----
+
+    @apiv2_group.group(name="webhook")
+    async def webhook_group(self, ctx: commands.Context):
+        """Manage outgoing webhooks."""
+
+    @webhook_group.command(name="create")
+    async def cmd_webhook_create(self, ctx: commands.Context, name: str, url: str, *events: str):
+        """Create an outgoing webhook.
+
+        Events: member_join, member_remove, member_ban, member_unban, message
+        """
+        if not url.startswith(("https://", "http://")):
+            await ctx.send("❌ URL must start with `http://` or `https://`.")
+            return
+
+        if not events:
+            await ctx.send(
+                "❌ Specify at least one event.\n"
+                f"Supported: {', '.join(sorted(SUPPORTED_EVENTS))}"
+            )
+            return
+
+        invalid = set(events) - SUPPORTED_EVENTS
+        if invalid:
+            await ctx.send(
+                f"❌ Invalid events: {', '.join(sorted(invalid))}\n"
+                f"Supported: {', '.join(sorted(SUPPORTED_EVENTS))}"
+            )
+            return
+
+        secret = await self.webhook_manager.create(name, url, list(events))
+        if secret is None:
+            await ctx.send(f"❌ Webhook `{name}` already exists.")
+            return
+
+        try:
+            embed = discord.Embed(
+                title="🔗 Webhook Created",
+                description=(
+                    f"**Name:** `{name}`\n"
+                    f"**URL:** `{url}`\n"
+                    f"**Events:** {', '.join(events)}\n"
+                    f"**Secret:** ||`{secret}`||\n\n"
+                    "Use the secret to verify HMAC-SHA256 signatures.\n"
+                    "Header: `X-APIv2-Signature: sha256=<hex>`"
+                ),
+                color=discord.Color.green(),
+            )
+            await ctx.author.send(embed=embed)
+            await ctx.send(f"✅ Webhook `{name}` created. Signing secret sent to your DMs.")
+        except discord.Forbidden:
+            await ctx.send(
+                f"✅ Webhook `{name}` created.\n"
+                f"Secret: ||`{secret}`||\n"
+                "⚠️ Save the secret and delete this message!"
+            )
+
+    @webhook_group.command(name="delete")
+    async def cmd_webhook_delete(self, ctx: commands.Context, name: str):
+        """Delete an outgoing webhook."""
+        success = await self.webhook_manager.delete(name)
+        if success:
+            await ctx.send(f"✅ Webhook `{name}` deleted.")
+        else:
+            await ctx.send(f"❌ Webhook `{name}` not found.")
+
+    @webhook_group.command(name="list")
+    async def cmd_webhook_list(self, ctx: commands.Context):
+        """List all outgoing webhooks."""
+        webhooks = await self.webhook_manager.list_webhooks()
+        if not webhooks:
+            await ctx.send("No webhooks configured. Create one with `[p]apiv2 webhook create`.")
+            return
+
+        lines = []
+        for wh in webhooks:
+            status = "🟢" if wh["active"] else "🔴"
+            evts = ", ".join(wh["events"])
+            guild = f" (guild: {wh['guild_id']})" if wh.get("guild_id") else ""
+            lines.append(f"{status} **{wh['name']}** → `{wh['url']}`\n   Events: {evts}{guild}")
+
+        embed = discord.Embed(
+            title="Outgoing Webhooks",
+            description="\n".join(lines),
+            color=discord.Color.blue(),
+        )
+        await ctx.send(embed=embed)
+
+    @webhook_group.command(name="test")
+    async def cmd_webhook_test(self, ctx: commands.Context, name: str):
+        """Send a test ping to a webhook."""
+        result = await self.webhook_manager.test(name)
+        if result is None:
+            await ctx.send(f"❌ Webhook `{name}` not found.")
+        elif isinstance(result, int):
+            if result < 400:
+                await ctx.send(f"✅ Test ping to `{name}` — response: **{result}**")
+            else:
+                await ctx.send(f"⚠️ Test ping to `{name}` — error response: **{result}**")
+        else:
+            await ctx.send(f"❌ Test ping to `{name}` failed: {result}")
 
     # ---- Settings ----
 

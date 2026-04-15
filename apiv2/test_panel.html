@@ -432,6 +432,32 @@
         </div>
     </div>
 
+    <!-- Webhooks -->
+    <div class="section">
+        <div class="section-title">Webhooks</div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/webhooks')">
+                <span class="method m-GET">GET</span> /webhooks</button>
+            <button class="btn" onclick="fire('POST','/api/v2/webhooks',JSON.stringify({name:'test',url:'https://example.com/hook',events:['member_join']},null,2))">
+                <span class="method m-POST">POST</span> /webhooks (crear)</button>
+            <button class="btn" onclick="fire('POST','/api/v2/webhooks/test/test')">
+                <span class="method m-POST">POST</span> /webhooks/{name}/test</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/webhooks/test')">
+                <span class="method m-DELETE">DELETE</span> /webhooks/{name}</button>
+        </div>
+    </div>
+
+    <!-- Docs -->
+    <div class="section">
+        <div class="section-title">Documentación</div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/openapi.json')">
+                <span class="method m-GET">GET</span> /openapi.json</button>
+            <button class="btn" onclick="window.open($('inp_base').value.replace(/\/+$/,'')+'/api/v2/docs','_blank')">
+                <span class="method m-GET">GET</span> /docs (Swagger UI)</button>
+        </div>
+    </div>
+
     <!-- Custom -->
     <div class="custom">
         <div class="section-title">Petición personalizada</div>

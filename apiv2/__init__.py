@@ -8,9 +8,10 @@ By Killerbite95
 from redbot.core.bot import Red
 
 from .apiv2 import APIv2
+from .decorator import api_route
 
-__all__ = ["APIv2", "setup"]
-__version__ = "1.0.0"
+__all__ = ["APIv2", "api_route", "setup"]
+__version__ = "2.0.0"
 __author__ = "Killerbite95"
 
 

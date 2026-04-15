@@ -20,6 +20,7 @@ APP_BOT_KEY = "bot"
 APP_KEY_MANAGER_KEY = "key_manager"
 APP_RATE_LIMITER_KEY = "rate_limiter"
 APP_START_TIME_KEY = "start_time"
+APP_WEBHOOK_MANAGER_KEY = "webhook_manager"
 
 
 def json_error(status: int, error: str, message: str) -> web.Response:
@@ -36,8 +37,8 @@ async def auth_middleware(request: web.Request, handler):
     
     Exempt paths (like /health) skip auth.
     """
-    # Allow health check without auth
-    if request.path == "/api/v2/health":
+    # Allow public endpoints without auth
+    if request.path in ("/api/v2/health", "/api/v2/docs", "/api/v2/openapi.json"):
         return await handler(request)
 
     auth_header = request.headers.get("Authorization", "")
@@ -143,7 +144,7 @@ async def error_middleware(request: web.Request, handler):
         return json_error(500, "internal_error", "An internal error occurred")
 
 
-def create_app(bot: "Red", key_manager: KeyManager, rate_limiter: RateLimiter) -> web.Application:
+def create_app(bot: "Red", key_manager: KeyManager, rate_limiter: RateLimiter, webhook_manager=None) -> web.Application:
     """Create the aiohttp application with all middlewares."""
     app = web.Application(
         middlewares=[
@@ -157,4 +158,5 @@ def create_app(bot: "Red", key_manager: KeyManager, rate_limiter: RateLimiter) -
     app[APP_KEY_MANAGER_KEY] = key_manager
     app[APP_RATE_LIMITER_KEY] = rate_limiter
     app[APP_START_TIME_KEY] = time.monotonic()
+    app[APP_WEBHOOK_MANAGER_KEY] = webhook_manager
     return app
