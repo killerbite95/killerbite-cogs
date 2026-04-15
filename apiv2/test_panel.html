@@ -432,6 +432,38 @@
         </div>
     </div>
 
+    <!-- Economy -->
+    <div class="section">
+        <div class="section-title">Economía (Bank)</div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/currency')">
+                <span class="method m-GET">GET</span> /economy/currency</button>
+            <button class="btn" onclick="fire('PATCH','/api/v2/guilds/'+g()+'/economy/currency',JSON.stringify({name:'Coins',default_balance:100}))">
+                <span class="method m-PATCH">PATCH</span> currency config</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/balance/'+u())">
+                <span class="method m-GET">GET</span> balance/{uid}</button>
+            <button class="btn" onclick="fire('PATCH','/api/v2/guilds/'+g()+'/economy/balance/'+u(),JSON.stringify({balance:500}))">
+                <span class="method m-PATCH">PATCH</span> set balance</button>
+            <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/economy/transfer',JSON.stringify({from_user_id:u(),to_user_id:'0',amount:100}))">
+                <span class="method m-POST">POST</span> transfer</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/leaderboard?limit=10')">
+                <span class="method m-GET">GET</span> leaderboard</button>
+        </div>
+    </div>
+
+    <!-- Economy ExtendedEconomy -->
+    <div class="section">
+        <div class="section-title">ExtendedEconomy <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/costs')">
+                <span class="method m-GET">GET</span> /costs</button>
+            <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/economy/costs',JSON.stringify({command:'ping',cost:10,level:'all',prompt:'silent',modifier:'static',value:0}))">
+                <span class="method m-POST">POST</span> create cost</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/log-channels')">
+                <span class="method m-GET">GET</span> /log-channels</button>
+        </div>
+    </div>
+
     <!-- Webhooks -->
     <div class="section">
         <div class="section-title">Webhooks</div>

@@ -333,7 +333,7 @@ Códigos usados: `400 bad_request`, `401 unauthorized`, `403 forbidden`, `404 no
 
 ---
 
-### Fase 6 — Economía (Red Bank + ExtendedEconomy)
+### Fase 6 — Economía (Red Bank + ExtendedEconomy) ✅
 
 **Red bank (built-in `redbot.core.bank`)** — accesible sin cog adicional:
 
