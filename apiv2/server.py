@@ -110,6 +110,24 @@ async def logging_middleware(request: web.Request, handler):
 
 
 @web.middleware
+async def cors_middleware(request: web.Request, handler):
+    """Handle CORS preflight and add headers to every response."""
+    if request.method == "OPTIONS":
+        resp = web.Response(status=204)
+    else:
+        try:
+            resp = await handler(request)
+        except web.HTTPException as exc:
+            resp = exc
+
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+    resp.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type"
+    resp.headers["Access-Control-Max-Age"] = "86400"
+    return resp
+
+
+@web.middleware
 async def error_middleware(request: web.Request, handler):
     """Catch unhandled exceptions and return JSON errors."""
     try:
@@ -129,6 +147,7 @@ def create_app(bot: "Red", key_manager: KeyManager, rate_limiter: RateLimiter) -
     """Create the aiohttp application with all middlewares."""
     app = web.Application(
         middlewares=[
+            cors_middleware,
             error_middleware,
             logging_middleware,
             auth_middleware,
