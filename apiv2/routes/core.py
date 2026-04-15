@@ -44,20 +44,32 @@ async def handle_health(request: web.Request) -> web.Response:
 
 
 async def handle_info(request: web.Request) -> web.Response:
-    """GET /api/v2/info — Bot metadata and loaded cogs."""
+    """GET /api/v2/info — Bot metadata, loaded cogs, and available endpoints."""
     bot: "Red" = request.app[APP_BOT_KEY]
 
     cogs_loaded = sorted(bot.cogs.keys())
+
+    # Auto-generate endpoint list from registered routes
+    endpoints = []
+    for resource in request.app.router.resources():
+        info = resource.get_info()
+        path = info.get("formatter") or info.get("path") or str(resource)
+        for route in resource:
+            endpoints.append({
+                "method": route.method,
+                "path": path,
+            })
+    # Sort by path then method
+    endpoints.sort(key=lambda e: (e["path"], e["method"]))
 
     return web.json_response({
         "bot_id": str(bot.user.id) if bot.user else None,
         "name": bot.user.name if bot.user else "unknown",
         "discriminator": bot.user.discriminator if bot.user else None,
         "avatar_url": str(bot.user.display_avatar.url) if bot.user else None,
-        "red_version": None,  # Populated below
-        "python_version": None,  # Populated below
         "cogs_loaded": cogs_loaded,
         "guild_count": len(bot.guilds),
+        "endpoints": endpoints,
     })
 
 

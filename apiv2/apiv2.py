@@ -50,7 +50,7 @@ class APIv2(commands.Cog):
         )
 
         self.key_manager = KeyManager(self.config)
-        self.rate_limiter = RateLimiter(max_requests=200, window_seconds=60)
+        self.rate_limiter = RateLimiter(default_max=200, window_seconds=60)
 
         self._app: web.Application | None = None
         self._runner: web.AppRunner | None = None
@@ -58,10 +58,18 @@ class APIv2(commands.Cog):
 
     async def cog_load(self):
         await self.key_manager.load_cache()
+        await self._load_key_rate_limits()
         await self._start_server()
 
     async def cog_unload(self):
         await self._stop_server()
+
+    async def _load_key_rate_limits(self):
+        """Sync per-key rate limits from config to the RateLimiter."""
+        keys = await self.key_manager.list_keys()
+        for k in keys:
+            if k.get("rate_limit") is not None:
+                self.rate_limiter.set_key_limit(k["name"], k["rate_limit"])
 
     # ==================== SERVER LIFECYCLE ====================
 
@@ -224,7 +232,8 @@ class APIv2(commands.Cog):
             status = "🟢" if k["active"] else "🔴"
             created = k["created_at"][:10] if k["created_at"] else "?"
             last = k["last_used"][:16].replace("T", " ") if k.get("last_used") else "never"
-            lines.append(f"{status} **{k['name']}** — created: {created} — last used: {last}")
+            rl = f" — rate: {k['rate_limit']}/min" if k.get("rate_limit") else ""
+            lines.append(f"{status} **{k['name']}** — created: {created} — last used: {last}{rl}")
 
         embed = discord.Embed(
             title="API Keys",
@@ -251,6 +260,27 @@ class APIv2(commands.Cog):
             await ctx.send(f"✅ Token for `{name}` sent to your DMs.")
         except discord.Forbidden:
             await ctx.send("❌ I can't send you a DM. Please enable DMs from server members.")
+
+    @key_group.command(name="ratelimit")
+    async def cmd_key_ratelimit(self, ctx: commands.Context, name: str, limit: int = None):
+        """Set a custom rate limit for a key (requests/min).
+
+        Use 0 or omit to reset to the global default (200/min).
+        """
+        if limit is not None and limit <= 0:
+            limit = None
+
+        success = await self.key_manager.set_rate_limit(name, limit)
+        if not success:
+            await ctx.send(f"❌ Key `{name}` not found.")
+            return
+
+        self.rate_limiter.set_key_limit(name, limit)
+
+        if limit is None:
+            await ctx.send(f"✅ Key `{name}` rate limit reset to global default (200/min).")
+        else:
+            await ctx.send(f"✅ Key `{name}` rate limit set to **{limit}** requests/min.")
 
     # ---- Settings ----
 

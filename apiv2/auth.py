@@ -14,18 +14,32 @@ logger = logging.getLogger("red.killerbite95.apiv2.auth")
 
 
 class RateLimiter:
-    """In-memory sliding window rate limiter."""
+    """In-memory sliding window rate limiter with per-key limits."""
 
-    def __init__(self, max_requests: int = 200, window_seconds: int = 60):
-        self.max_requests = max_requests
+    def __init__(self, default_max: int = 200, window_seconds: int = 60):
+        self.default_max = default_max
         self.window = window_seconds
         # key_name -> list of timestamps
         self._hits: dict[str, list[float]] = {}
+        # key_name -> custom max requests (None = use default)
+        self._limits: dict[str, int] = {}
+
+    def set_key_limit(self, key_name: str, max_requests: int | None):
+        """Set a custom rate limit for a key. None resets to default."""
+        if max_requests is None:
+            self._limits.pop(key_name, None)
+        else:
+            self._limits[key_name] = max_requests
+
+    def get_key_limit(self, key_name: str) -> int:
+        """Get the effective rate limit for a key."""
+        return self._limits.get(key_name, self.default_max)
 
     def is_allowed(self, key_name: str) -> tuple[bool, int]:
         """Check if a request is allowed. Returns (allowed, remaining)."""
         now = time.monotonic()
         cutoff = now - self.window
+        max_req = self.get_key_limit(key_name)
 
         hits = self._hits.get(key_name, [])
         # Prune old entries
@@ -33,8 +47,8 @@ class RateLimiter:
         hits.append(now)
         self._hits[key_name] = hits
 
-        remaining = max(0, self.max_requests - len(hits))
-        return len(hits) <= self.max_requests, remaining
+        remaining = max(0, max_req - len(hits))
+        return len(hits) <= max_req, remaining
 
     def get_retry_after(self, key_name: str) -> float:
         """Seconds until the oldest request in the window expires."""
@@ -72,6 +86,7 @@ class KeyManager:
             "active": True,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "last_used": None,
+            "rate_limit": None,  # None = use global default
         }
         await self.config.api_keys.set(keys)
         await self.load_cache()
@@ -111,6 +126,15 @@ class KeyManager:
             return None
         return data["token"]
 
+    async def set_rate_limit(self, name: str, limit: int | None) -> bool:
+        """Set a custom rate limit for a key. None resets to default."""
+        keys = await self.config.api_keys()
+        if name not in keys:
+            return False
+        keys[name]["rate_limit"] = limit
+        await self.config.api_keys.set(keys)
+        return True
+
     async def list_keys(self) -> list[dict]:
         """List all keys with metadata (no tokens)."""
         keys = await self.config.api_keys()
@@ -121,6 +145,7 @@ class KeyManager:
                 "active": data["active"],
                 "created_at": data["created_at"],
                 "last_used": data.get("last_used"),
+                "rate_limit": data.get("rate_limit"),
             })
         return result
 
