@@ -438,6 +438,11 @@ class DashboardIntegration:
                                 panels[panel_name]["max_claims"] = max(0, min(100, mc))
                             except (ValueError, TypeError):
                                 pass
+                            try:
+                                log_id = int(_fv(form, "field_log_channel", "0"))
+                                panels[panel_name]["log_channel"] = log_id
+                            except (ValueError, TypeError):
+                                pass
                             panels[panel_name]["close_reason"] = "field_close_reason" in form
                             panels[panel_name]["threads"] = "field_threads" in form
                             notifications.append({"message": f"Panel '{panel_name}' actualizado.", "category": "success"})
@@ -589,6 +594,7 @@ class DashboardIntegration:
                         "button_emoji": str(pdata.get("button_emoji", "") or ""),
                         "category": str(cat_name),
                         "log_channel": str(log_name),
+                        "log_channel_id": int(log_ch or 0),
                         "max_claims": int(pdata.get("max_claims", 0) or 0),
                         "ticket_num": int(pdata.get("ticket_num", 1) or 1),
                         "has_modal": bool(pdata.get("modal", {})),
@@ -885,6 +891,15 @@ class DashboardIntegration:
                       <option value="green" {{ "selected" if p.button_color == "green" }}>Verde</option>
                       <option value="red" {{ "selected" if p.button_color == "red" }}>Rojo</option>
                       <option value="grey" {{ "selected" if p.button_color == "grey" }}>Gris</option>
+                    </select>
+                  </div>
+                  <div class="col-lg-3 col-md-4 col-6 mb-2">
+                    <label class="form-label text-xs mb-1">Canal de logs</label>
+                    <select class="form-select form-select-sm" name="field_log_channel">
+                      <option value="0">— Ninguno —</option>
+                      {% for ch in guild.text_channels %}
+                      <option value="{{ ch.id }}" {{ "selected" if ch.id == p.log_channel_id }}>{{ ch.name }}</option>
+                      {% endfor %}
                     </select>
                   </div>
                   <div class="col-lg-2 col-md-2 col-4 mb-2">
