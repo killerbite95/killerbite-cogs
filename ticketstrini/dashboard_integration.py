@@ -688,6 +688,7 @@ class DashboardIntegration:
       {% if guild.editable %}
       {# ═══ FORM: Editable guild settings ═══ #}
       <form method="POST" class="mt-3">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <input type="hidden" name="action" value="update_guild">
         <input type="hidden" name="guild_id" value="{{ guild.id }}">
 
@@ -840,6 +841,7 @@ class DashboardIntegration:
               <td>
                 {% if guild.editable %}
                 <form method="POST" style="display:inline;margin:0">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="action" value="toggle_panel">
                   <input type="hidden" name="guild_id" value="{{ guild.id }}">
                   <input type="hidden" name="panel_name" value="{{ p.name }}">
@@ -868,6 +870,7 @@ class DashboardIntegration:
             <tr id="edit_{{ guild.id }}_{{ loop.index }}" style="display:none">
               <td colspan="10" style="background:rgba(94,114,228,0.04)">
                 <form method="POST" class="row align-items-end py-2 px-1">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                   <input type="hidden" name="action" value="update_panel">
                   <input type="hidden" name="guild_id" value="{{ guild.id }}">
                   <input type="hidden" name="panel_name" value="{{ p.name }}">
@@ -929,6 +932,7 @@ class DashboardIntegration:
           <i class="fa fa-plus-circle me-1"></i> Nuevo Panel
         </h6>
         <form method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
           <input type="hidden" name="action" value="create_panel">
           <input type="hidden" name="guild_id" value="{{ guild.id }}">
           <div class="row">
@@ -1011,7 +1015,8 @@ function confirmDelete(gid, pname) {
   if (confirm('¿Estás seguro de eliminar el panel "' + pname + '"? Esta acción no se puede deshacer.')) {
     var f = document.createElement('form');
     f.method = 'POST';
-    f.innerHTML = '<input type="hidden" name="action" value="delete_panel">' +
+    f.innerHTML = '<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">' +
+      '<input type="hidden" name="action" value="delete_panel">' +
       '<input type="hidden" name="guild_id" value="' + gid + '">' +
       '<input type="hidden" name="panel_name" value="' + pname + '">';
     document.body.appendChild(f);
