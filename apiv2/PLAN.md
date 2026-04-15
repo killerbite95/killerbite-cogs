@@ -333,6 +333,336 @@ Códigos usados: `400 bad_request`, `401 unauthorized`, `403 forbidden`, `404 no
 
 ---
 
+### Fase 6 — Economía (Red Bank + ExtendedEconomy)
+
+**Red bank (built-in `redbot.core.bank`)** — accesible sin cog adicional:
+
+```
+GET  /api/v2/guilds/{guild_id}/economy/currency
+→ { "name": "Coins", "default_balance": 100, "max_balance": 999999 }
+
+PATCH /api/v2/guilds/{guild_id}/economy/currency
+Body: { "name": "Monedas", "default_balance": 200 }
+
+GET  /api/v2/guilds/{guild_id}/economy/balance/{user_id}
+→ { "user_id": "...", "balance": 1500, "currency": "Coins" }
+
+PATCH /api/v2/guilds/{guild_id}/economy/balance/{user_id}
+Body: { "balance": 5000, "reason": "Admin adjustment" }
+→ Set balance to exact value
+
+POST /api/v2/guilds/{guild_id}/economy/transfer
+Body: { "from_user_id": "...", "to_user_id": "...", "amount": 100 }
+→ Transfer credits between users
+
+GET  /api/v2/guilds/{guild_id}/economy/leaderboard?limit=10&offset=0
+→ [{ "rank": 1, "user_id": "...", "balance": 9999 }, ...]
+
+POST /api/v2/guilds/{guild_id}/economy/prune
+Body: { "confirm": true }
+→ Remove bank accounts for users no longer in guild
+```
+
+**ExtendedEconomy** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/economy/costs
+→ Lista de CommandCost configurados
+
+POST /api/v2/guilds/{guild_id}/economy/costs
+Body: { "command": "ping", "cost": 10, "level": "all",
+        "prompt": "silent", "modifier": "static" }
+
+PATCH /api/v2/guilds/{guild_id}/economy/costs/{command}
+Body: { "cost": 20, "modifier": "exponential", "value": 2.0 }
+
+DELETE /api/v2/guilds/{guild_id}/economy/costs/{command}
+
+GET  /api/v2/guilds/{guild_id}/economy/log-channels
+→ { "transfer_credits": "...", "set_balance": "...", ... }
+
+PATCH /api/v2/guilds/{guild_id}/economy/log-channels
+Body: { "transfer_credits": "channel_id", "set_balance": null }
+```
+
+---
+
+### Fase 7 — Moderación avanzada (Warnings + Security + ExtendedModLog)
+
+**Red Mod — Warnings** (built-in `redbot.core.modlog` + `Mod` cog):
+
+```
+GET  /api/v2/guilds/{guild_id}/warnings/{user_id}
+→ Lista de avisos con { id, reason, moderator_id, created_at, weight }
+
+POST /api/v2/guilds/{guild_id}/warnings/{user_id}
+Body: { "reason": "Spam", "moderator_id": "...", "weight": 1 }
+→ Añadir aviso (como hacen [p]warn)
+
+DELETE /api/v2/guilds/{guild_id}/warnings/{user_id}/{warning_id}
+→ Eliminar un aviso concreto
+
+DELETE /api/v2/guilds/{guild_id}/warnings/{user_id}
+Body: { "confirm": true }
+→ Limpiar todos los avisos del usuario
+
+GET  /api/v2/guilds/{guild_id}/cases?type=ban&limit=20&offset=0
+→ Lista de modlog cases (ban, kick, warn, mute, etc.)
+
+GET  /api/v2/guilds/{guild_id}/cases/{case_number}
+→ { "case_number", "action_type", "user_id", "moderator_id",
+    "reason", "created_at", "amended_by", "amended_reason" }
+```
+
+**Security** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/security/settings
+→ { "quarantine_role", "modlog_channel", "modlog_ping_role" }
+
+PATCH /api/v2/guilds/{guild_id}/security/settings
+Body: { "quarantine_role": "role_id", "modlog_channel": "channel_id" }
+
+GET  /api/v2/guilds/{guild_id}/security/modules
+→ [{ "name": "anti_nuke", "enabled": true, "config": {...} }, ...]
+
+PATCH /api/v2/guilds/{guild_id}/security/modules/{module}
+Body: { "enabled": true, "config": { ... } }
+
+GET  /api/v2/guilds/{guild_id}/security/quarantined
+→ Lista de miembros en cuarentena con sus roles previos
+
+POST /api/v2/guilds/{guild_id}/security/quarantine/{user_id}
+Body: { "reason": "Sospechoso" }
+→ Pone al usuario en cuarentena (quita roles, asigna quarantine_role)
+
+DELETE /api/v2/guilds/{guild_id}/security/quarantine/{user_id}
+→ Deshacer cuarentena (restaura roles anteriores)
+
+GET  /api/v2/guilds/{guild_id}/security/whitelist/{object_type}/{object_id}
+→ { "whitelist": { "anti_spam": true, "anti_links": false, ... } }
+
+PATCH /api/v2/guilds/{guild_id}/security/whitelist/{object_type}/{object_id}
+Body: { "anti_spam": true }
+```
+
+**ExtendedModLog** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/modlog/settings
+→ Los 21 event configs: { event: { enabled, channel, colour, emoji, embed } }
+
+PATCH /api/v2/guilds/{guild_id}/modlog/settings
+Body: { "message_delete": { "enabled": true, "channel": "id", "bots": false } }
+→ Update de uno o varios eventos de golpe
+
+GET  /api/v2/guilds/{guild_id}/modlog/ignored-channels
+→ ["channel_id_1", ...]
+
+POST /api/v2/guilds/{guild_id}/modlog/ignored-channels
+Body: { "channel_id": "..." }
+
+DELETE /api/v2/guilds/{guild_id}/modlog/ignored-channels/{channel_id}
+```
+
+Eventos soportados (21): `message_edit`, `message_delete`, `user_change`, `role_change`, `role_create`, `role_delete`, `voice_change`, `user_join`, `user_left`, `channel_change`, `channel_create`, `channel_delete`, `thread_change`, `thread_create`, `thread_delete`, `guild_change`, `emoji_change`, `stickers_change`, `commands_used`, `invite_created`, `invite_deleted`
+
+---
+
+### Fase 8 — Contenido e interacción (Giveaways, Tags, RolesButtons, RoleSyncer)
+
+**Giveaways** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/giveaways?ended=false&limit=20&offset=0
+→ [{ "message_id", "channel_id", "prize", "endtime", "entrant_count",
+     "winners": 1, "ended": false, "requirements": {...} }, ...]
+
+GET  /api/v2/guilds/{guild_id}/giveaways/{message_id}
+→ Detalle + lista completa de entrants
+
+POST /api/v2/guilds/{guild_id}/giveaways
+Body: { "channel_id": "...", "prize": "Nitro", "duration_seconds": 86400,
+        "winners": 1, "required_roles": [], "blacklist_roles": [],
+        "cost": null, "min_join_days": null }
+→ Crea un giveaway nuevo en el canal indicado
+
+POST /api/v2/guilds/{guild_id}/giveaways/{message_id}/end
+→ Fuerza finalización inmediata y sortea ganador
+
+POST /api/v2/guilds/{guild_id}/giveaways/{message_id}/reroll
+Body: { "winners": 1 }
+→ Re-sortea ganador de un giveaway finalizado
+
+DELETE /api/v2/guilds/{guild_id}/giveaways/{message_id}
+→ Cancela y elimina el giveaway
+```
+
+**Tags** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/tags?limit=50&offset=0&search=
+→ [{ "name", "uses", "author_id", "created_at", "aliases": [] }, ...]
+
+GET  /api/v2/guilds/{guild_id}/tags/{name}
+→ { "name", "tagscript", "uses", "author_id", "created_at", "aliases" }
+
+POST /api/v2/guilds/{guild_id}/tags
+Body: { "name": "hola", "tagscript": "¡Hola {user}!", "aliases": [] }
+
+PUT  /api/v2/guilds/{guild_id}/tags/{name}
+Body: { "tagscript": "Nuevo contenido", "aliases": ["saludo"] }
+
+DELETE /api/v2/guilds/{guild_id}/tags/{name}
+
+POST /api/v2/guilds/{guild_id}/tags/{name}/invoke
+Body: { "channel_id": "...", "user_id": "..." }
+→ Ejecuta el tag en un canal como si lo invocase ese usuario
+```
+
+**RolesButtons** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/rolesbuttons
+→ [{ "channel_id", "message_id", "mode", "buttons": [{ "id", "emoji", "role_id" }] }]
+
+GET  /api/v2/guilds/{guild_id}/rolesbuttons/{channel_id}/{message_id}
+→ Detalle de un mensaje: modo + lista de botones
+
+POST /api/v2/guilds/{guild_id}/rolesbuttons/{channel_id}/{message_id}
+Body: { "emoji": "🎮", "role_id": "..." }
+→ Añade un botón al mensaje
+
+DELETE /api/v2/guilds/{guild_id}/rolesbuttons/{channel_id}/{message_id}/{button_id}
+→ Elimina un botón
+
+PATCH /api/v2/guilds/{guild_id}/rolesbuttons/{channel_id}/{message_id}/mode
+Body: { "mode": "single" }
+→ Cambia el modo de asignación (single/multi)
+```
+
+**RoleSyncer** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/rolesyncer
+→ { "onesync": [[role1, role2], ...], "twosync": [[role1, role2], ...] }
+
+POST /api/v2/guilds/{guild_id}/rolesyncer/onesync
+Body: { "role1_id": "...", "role2_id": "..." }
+→ Añade regla: si role1 → role2
+
+POST /api/v2/guilds/{guild_id}/rolesyncer/twosync
+Body: { "role1_id": "...", "role2_id": "..." }
+→ Añade regla bidireccional
+
+DELETE /api/v2/guilds/{guild_id}/rolesyncer/onesync/{index}
+DELETE /api/v2/guilds/{guild_id}/rolesyncer/twosync/{index}
+```
+
+---
+
+### Fase 9 — Configuración y utilidades (Welcome, Sticky, VoiceLogs, AutoNick, Mover)
+
+**Welcome** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/welcome
+→ Config completa: { "enabled", "channel", events: { join, leave, ban, unban } }
+
+PATCH /api/v2/guilds/{guild_id}/welcome
+Body: { "enabled": true, "channel": "id" }
+
+GET  /api/v2/guilds/{guild_id}/welcome/{event}/messages
+→ Evento = join|leave|ban|unban: lista de plantillas
+
+POST /api/v2/guilds/{guild_id}/welcome/{event}/messages
+Body: { "content": "Bienvenido {mention} al servidor!" }
+
+DELETE /api/v2/guilds/{guild_id}/welcome/{event}/messages/{index}
+
+GET  /api/v2/guilds/{guild_id}/welcome/join/whisper
+→ { "state": "dm", "message": "..." }
+
+PATCH /api/v2/guilds/{guild_id}/welcome/join/whisper
+Body: { "state": "dm", "message": "Bienvenido al servidor, {name}!" }
+```
+
+**Sticky** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/stickies
+→ Lista de canales con sticky activo
+
+GET  /api/v2/guilds/{guild_id}/channels/{channel_id}/sticky
+→ { "content": "...", "header_enabled": true, "last_message_id": "..." }
+
+PUT  /api/v2/guilds/{guild_id}/channels/{channel_id}/sticky
+Body: { "content": "Mensaje permanente del canal", "header_enabled": true }
+
+DELETE /api/v2/guilds/{guild_id}/channels/{channel_id}/sticky
+
+PATCH /api/v2/guilds/{guild_id}/channels/{channel_id}/sticky
+Body: { "header_enabled": false }
+```
+
+**VoiceLogs** *(requiere cog cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/voicelogs/settings
+→ { "enabled": true }
+
+PATCH /api/v2/guilds/{guild_id}/voicelogs/settings
+Body: { "enabled": false }
+
+GET  /api/v2/guilds/{guild_id}/voicelogs/users/{user_id}
+→ [{ "channel_id", "channel_name", "joined_at", "left_at", "duration_s" }, ...]
+Últimas 25 sesiones de voz del usuario
+
+GET  /api/v2/guilds/{guild_id}/voicelogs/channels/{channel_id}
+→ Actividad reciente en ese canal de voz (últimas entradas/salidas)
+```
+
+**AutoNick** *(requiere cog Killerbite95 cargado)*:
+
+```
+GET  /api/v2/guilds/{guild_id}/autonick/settings
+→ { "channel": "channel_id", "cooldown": 60 }
+
+PATCH /api/v2/guilds/{guild_id}/autonick/settings
+Body: { "channel": "channel_id", "cooldown": 30 }
+
+GET  /api/v2/autonick/forbidden-names
+→ Lista global de palabras prohibidas
+
+POST /api/v2/autonick/forbidden-names
+Body: { "word": "ejemplo" }
+
+DELETE /api/v2/autonick/forbidden-names/{word}
+```
+
+**Mover** *(requiere cog cargado)*:
+
+```
+POST /api/v2/guilds/{guild_id}/voice/massmove
+Body: { "target_channel_id": "...", "source_channel_id": "..." }
+→ Mueve todos los miembros de source a target
+  source_channel_id es opcional: si no se envía, mueve desde todos los canales de voz
+```
+
+---
+
+## Resumen de integraciones por fase
+
+| Fase | Cogs | Endpoints nuevos |
+|---|---|---|
+| 6 | Red bank + ExtendedEconomy | 11 |
+| 7 | Warnings/Modlog + Security + ExtendedModLog | 19 |
+| 8 | Giveaways + Tags + RolesButtons + RoleSyncer | 20 |
+| 9 | Welcome + Sticky + VoiceLogs + AutoNick + Mover | 17 |
+| **Total** | **+10 cogs** | **+67 endpoints** |
+
+---
+
 ## Configuración nginx (producción)
 
 ```nginx
