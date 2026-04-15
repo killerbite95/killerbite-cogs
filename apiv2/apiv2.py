@@ -29,6 +29,7 @@ from .routes.docs import register_routes as register_docs_routes
 from .routes.economy import register_routes as register_economy_routes
 from .routes.warnings_modlog import register_routes as register_warnings_modlog_routes
 from .routes.community import register_routes as register_community_routes
+from .routes.utilities import register_routes as register_utilities_routes
 
 logger = logging.getLogger("red.killerbite95.apiv2")
 
@@ -103,6 +104,7 @@ class APIv2(commands.Cog):
         register_economy_routes(self._app)
         register_warnings_modlog_routes(self._app)
         register_community_routes(self._app)
+        register_utilities_routes(self._app)
 
         # Register external cog routes (@api_route)
         for cog_name, routes in self._external_routes.items():

@@ -561,7 +561,7 @@ DELETE /api/v2/guilds/{guild_id}/rolesyncer/twosync/{index}
 
 ---
 
-### Fase 9 — Configuración y utilidades (Welcome, Sticky, VoiceLogs, AutoNick, Mover)
+### Fase 9 — Configuración y utilidades (Welcome, Sticky, VoiceLogs, AutoNick, Mover) ✅
 
 **Welcome** *(requiere cog cargado)*:
 

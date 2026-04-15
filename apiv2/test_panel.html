@@ -610,6 +610,94 @@
         </div>
     </div>
 
+    <!-- Welcome -->
+    <div class="section">
+        <div class="section-title">Welcome <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/welcome')">
+                <span class="method m-GET">GET</span> /welcome (config)</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/welcome',JSON.stringify({enabled:true,channel:null}))">
+                <span class="method m-PATCH">PATCH</span> /welcome</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/welcome/join/messages')">
+                <span class="method m-GET">GET</span> /welcome/join/messages</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/welcome/join/messages',JSON.stringify({content:'Welcome {member.mention}!'}))">
+                <span class="method m-POST">POST</span> /welcome/join/messages</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/guilds/'+g()+'/welcome/join/messages/0')">
+                <span class="method m-DELETE">DELETE</span> /welcome/join/messages/0</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/welcome/join/whisper')">
+                <span class="method m-GET">GET</span> /welcome/join/whisper</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/welcome/join/whisper',JSON.stringify({state:'dm',message:'Bienvenido {member.name}!'}))">
+                <span class="method m-PATCH">PATCH</span> /welcome/join/whisper</button>
+        </div>
+    </div>
+
+    <!-- Sticky -->
+    <div class="section">
+        <div class="section-title">Sticky <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/stickies')">
+                <span class="method m-GET">GET</span> /stickies</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/channels/'+c()+'/sticky')">
+                <span class="method m-GET">GET</span> /channels/{id}/sticky</button>
+            <button class="btn"
+                onclick="fire('PUT','/api/v2/guilds/'+g()+'/channels/'+c()+'/sticky',JSON.stringify({content:'📌 Mensaje fijo del canal',header_enabled:true}))">
+                <span class="method m-PUT">PUT</span> /channels/{id}/sticky</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/guilds/'+g()+'/channels/'+c()+'/sticky')">
+                <span class="method m-DELETE">DELETE</span> /channels/{id}/sticky</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/channels/'+c()+'/sticky',JSON.stringify({header_enabled:false}))">
+                <span class="method m-PATCH">PATCH</span> /channels/{id}/sticky (header)</button>
+        </div>
+    </div>
+
+    <!-- VoiceLogs -->
+    <div class="section">
+        <div class="section-title">VoiceLogs <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/voicelogs/settings')">
+                <span class="method m-GET">GET</span> /voicelogs/settings</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/voicelogs/settings',JSON.stringify({enabled:true}))">
+                <span class="method m-PATCH">PATCH</span> /voicelogs/settings</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/voicelogs/users/'+u())">
+                <span class="method m-GET">GET</span> /voicelogs/users/{id}</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/voicelogs/channels/'+c())">
+                <span class="method m-GET">GET</span> /voicelogs/channels/{id}</button>
+        </div>
+    </div>
+
+    <!-- AutoNick -->
+    <div class="section">
+        <div class="section-title">AutoNick <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/autonick/settings')">
+                <span class="method m-GET">GET</span> /autonick/settings</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/autonick/settings',JSON.stringify({cooldown:30}))">
+                <span class="method m-PATCH">PATCH</span> /autonick/settings</button>
+            <button class="btn" onclick="fire('GET','/api/v2/autonick/forbidden-names')">
+                <span class="method m-GET">GET</span> /autonick/forbidden-names</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/autonick/forbidden-names',JSON.stringify({word:'ejemplo'}))">
+                <span class="method m-POST">POST</span> /autonick/forbidden-names</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/autonick/forbidden-names/ejemplo')">
+                <span class="method m-DELETE">DELETE</span> /autonick/forbidden-names/{word}</button>
+        </div>
+    </div>
+
+    <!-- Mover -->
+    <div class="section">
+        <div class="section-title">Mover <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/voice/massmove',JSON.stringify({target_channel_id:'CHANNEL_ID'}))">
+                <span class="method m-POST">POST</span> /voice/massmove</button>
+        </div>
+    </div>
+
     <!-- Webhooks -->
     <div class="section">
         <div class="section-title">Webhooks</div>
