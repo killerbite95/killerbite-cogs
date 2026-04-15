@@ -590,7 +590,22 @@ async def handle_tag_invoke(request: web.Request) -> web.Response:
     if channel is None:
         return json_error("not_found", f"Channel {channel_id} not found", 404)
 
-    # Build minimal seed variables (TSE)
+    # Optional: arbitrary string variables to inject into TagScript
+    # e.g. {"args": "spanish", "language": "es", "player": "PlayerX"}
+    # In TagScript: {args} → "spanish", {language} → "es", {player} → "PlayerX"
+    extra_vars: dict = body.get("variables", {}) or {}
+    if not isinstance(extra_vars, dict):
+        return json_error("bad_request", "variables must be a JSON object", 400)
+    if any(not isinstance(v, str) for v in extra_vars.values()):
+        return json_error("bad_request", "All values in variables must be strings", 400)
+
+    # Convenience shorthand: "args" top-level key → variables["args"]
+    if "args" in body and "args" not in extra_vars:
+        args_val = body["args"]
+        if isinstance(args_val, str):
+            extra_vars["args"] = args_val
+
+    # Build seed variables (TSE)
     try:
         import TagScriptEngine as tse
         seed = {
@@ -606,6 +621,10 @@ async def handle_tag_invoke(request: web.Request) -> web.Response:
             elif (user := bot.get_user(int(user_id))):
                 seed["author"] = tse.UserAdapter(user)
                 seed["user"] = tse.UserAdapter(user)
+        # Inject caller-supplied string variables — these override nothing critical
+        for var_key, var_val in extra_vars.items():
+            if var_key not in seed:  # never overwrite discord adapters
+                seed[var_key] = tse.StringAdapter(var_val)
     except Exception:
         seed = {}
 
@@ -618,7 +637,7 @@ async def handle_tag_invoke(request: web.Request) -> web.Response:
     tag.uses += 1
     await tag.update_config()
 
-    return web.json_response({"invoked": name, "uses": tag.uses})
+    return web.json_response({"invoked": name, "uses": tag.uses, "variables": list(extra_vars.keys())})
 
 
 # ═══════════════════════════════════════════════════════════════
