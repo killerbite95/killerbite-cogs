@@ -10,32 +10,9 @@ from typing import Any, Dict
 
 import discord
 from aiohttp import web
-from redbot.core import Config
 
-from ..auth import require_auth
-from ..decorator import api_route
 
 log = logging.getLogger("red.killerbite95.apiv2.utilities")
-
-# ---------------------------------------------------------------------------
-# Config helpers (read-only — each cog owns its own Config instance)
-# ---------------------------------------------------------------------------
-
-def _welcome_config() -> Config:
-    return Config.get_conf(None, identifier=86345009, cog_name="Welcome")
-
-
-def _sticky_config() -> Config:
-    return Config.get_conf(None, identifier=0x6AFE8000, cog_name="Sticky")
-
-
-def _voicelogs_config() -> Config:
-    return Config.get_conf(None, identifier=2708181003, cog_name="VoiceLogs")
-
-
-def _autonick_config() -> Config:
-    return Config.get_conf(None, identifier=123456789012345678, cog_name="AutoNick")
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -54,9 +31,7 @@ def _guild_or_404(request: web.Request) -> discord.Guild | None:
 VALID_EVENTS = {"join", "leave", "ban", "unban"}
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/welcome", tags=["Welcome"], summary="Get Welcome config")
 async def get_welcome(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -69,9 +44,7 @@ async def get_welcome(request: web.Request) -> web.Response:
     return web.json_response(cfg)
 
 
-@api_route("PATCH", "/api/v2/guilds/{guild_id}/welcome", tags=["Welcome"], summary="Update Welcome settings")
 async def patch_welcome(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -93,10 +66,7 @@ async def patch_welcome(request: web.Request) -> web.Response:
     return web.json_response({"updated": list(updates.keys())})
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/welcome/{event}/messages",
-           tags=["Welcome"], summary="List event messages")
 async def get_welcome_messages(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -113,10 +83,7 @@ async def get_welcome_messages(request: web.Request) -> web.Response:
     return web.json_response({"event": event, "messages": messages})
 
 
-@api_route("POST", "/api/v2/guilds/{guild_id}/welcome/{event}/messages",
-           tags=["Welcome"], summary="Add event message")
 async def post_welcome_message(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -141,10 +108,7 @@ async def post_welcome_message(request: web.Request) -> web.Response:
     return web.json_response({"event": event, "index": index, "content": content}, status=201)
 
 
-@api_route("DELETE", "/api/v2/guilds/{guild_id}/welcome/{event}/messages/{index}",
-           tags=["Welcome"], summary="Delete event message by index")
 async def delete_welcome_message(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -170,10 +134,7 @@ async def delete_welcome_message(request: web.Request) -> web.Response:
     return web.json_response({"deleted": True})
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/welcome/join/whisper",
-           tags=["Welcome"], summary="Get join whisper config")
 async def get_welcome_whisper(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -186,10 +147,7 @@ async def get_welcome_whisper(request: web.Request) -> web.Response:
     return web.json_response(whisper)
 
 
-@api_route("PATCH", "/api/v2/guilds/{guild_id}/welcome/join/whisper",
-           tags=["Welcome"], summary="Update join whisper config")
 async def patch_welcome_whisper(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -214,9 +172,7 @@ async def patch_welcome_whisper(request: web.Request) -> web.Response:
 # STICKY
 # ===========================================================================
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/stickies", tags=["Sticky"], summary="List all sticky channels")
 async def list_stickies(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -248,10 +204,7 @@ async def list_stickies(request: web.Request) -> web.Response:
     return web.json_response(result)
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/channels/{channel_id}/sticky",
-           tags=["Sticky"], summary="Get channel sticky")
 async def get_sticky(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -277,10 +230,7 @@ async def get_sticky(request: web.Request) -> web.Response:
     })
 
 
-@api_route("PUT", "/api/v2/guilds/{guild_id}/channels/{channel_id}/sticky",
-           tags=["Sticky"], summary="Set channel sticky")
 async def put_sticky(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -333,10 +283,7 @@ async def put_sticky(request: web.Request) -> web.Response:
     }, status=201)
 
 
-@api_route("DELETE", "/api/v2/guilds/{guild_id}/channels/{channel_id}/sticky",
-           tags=["Sticky"], summary="Remove channel sticky")
 async def delete_sticky(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -371,10 +318,7 @@ async def delete_sticky(request: web.Request) -> web.Response:
     return web.json_response({"deleted": True})
 
 
-@api_route("PATCH", "/api/v2/guilds/{guild_id}/channels/{channel_id}/sticky",
-           tags=["Sticky"], summary="Update sticky settings (header)")
 async def patch_sticky(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -413,10 +357,7 @@ def _entry_to_dict(entry: dict) -> dict:
     }
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/voicelogs/settings",
-           tags=["VoiceLogs"], summary="Get VoiceLogs settings")
 async def get_voicelogs_settings(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -429,10 +370,7 @@ async def get_voicelogs_settings(request: web.Request) -> web.Response:
     return web.json_response({"enabled": toggle})
 
 
-@api_route("PATCH", "/api/v2/guilds/{guild_id}/voicelogs/settings",
-           tags=["VoiceLogs"], summary="Update VoiceLogs settings")
 async def patch_voicelogs_settings(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -449,10 +387,7 @@ async def patch_voicelogs_settings(request: web.Request) -> web.Response:
     return web.json_response({"enabled": bool(data["enabled"])})
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/voicelogs/users/{user_id}",
-           tags=["VoiceLogs"], summary="Get user voice history (last 25 sessions)")
 async def get_voicelogs_user(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -473,10 +408,7 @@ async def get_voicelogs_user(request: web.Request) -> web.Response:
     return web.json_response([_entry_to_dict(e) for e in sorted_entries])
 
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/voicelogs/channels/{channel_id}",
-           tags=["VoiceLogs"], summary="Get recent voice activity in a channel")
 async def get_voicelogs_channel(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -508,10 +440,7 @@ async def get_voicelogs_channel(request: web.Request) -> web.Response:
 # AUTONICK
 # ===========================================================================
 
-@api_route("GET", "/api/v2/guilds/{guild_id}/autonick/settings",
-           tags=["AutoNick"], summary="Get AutoNick guild settings")
 async def get_autonick_settings(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -528,10 +457,7 @@ async def get_autonick_settings(request: web.Request) -> web.Response:
     })
 
 
-@api_route("PATCH", "/api/v2/guilds/{guild_id}/autonick/settings",
-           tags=["AutoNick"], summary="Update AutoNick guild settings")
 async def patch_autonick_settings(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
@@ -553,10 +479,7 @@ async def patch_autonick_settings(request: web.Request) -> web.Response:
     return web.json_response({"updated": list(updates.keys())})
 
 
-@api_route("GET", "/api/v2/autonick/forbidden-names",
-           tags=["AutoNick"], summary="List global forbidden names")
 async def get_autonick_forbidden(request: web.Request) -> web.Response:
-    await require_auth(request)
 
     cog = request.app["bot"].get_cog("AutoNick")
     if cog is None:
@@ -566,10 +489,7 @@ async def get_autonick_forbidden(request: web.Request) -> web.Response:
     return web.json_response({"forbidden_names": names})
 
 
-@api_route("POST", "/api/v2/autonick/forbidden-names",
-           tags=["AutoNick"], summary="Add a forbidden name")
 async def post_autonick_forbidden(request: web.Request) -> web.Response:
-    await require_auth(request)
 
     cog = request.app["bot"].get_cog("AutoNick")
     if cog is None:
@@ -588,10 +508,7 @@ async def post_autonick_forbidden(request: web.Request) -> web.Response:
     return web.json_response({"word": word}, status=201)
 
 
-@api_route("DELETE", "/api/v2/autonick/forbidden-names/{word}",
-           tags=["AutoNick"], summary="Remove a forbidden name")
 async def delete_autonick_forbidden(request: web.Request) -> web.Response:
-    await require_auth(request)
 
     cog = request.app["bot"].get_cog("AutoNick")
     if cog is None:
@@ -611,10 +528,7 @@ async def delete_autonick_forbidden(request: web.Request) -> web.Response:
 # MOVER
 # ===========================================================================
 
-@api_route("POST", "/api/v2/guilds/{guild_id}/voice/massmove",
-           tags=["Mover"], summary="Mass-move members between voice channels")
 async def post_massmove(request: web.Request) -> web.Response:
-    await require_auth(request)
     guild = _guild_or_404(request)
     if guild is None:
         raise web.HTTPNotFound(reason="Guild not found")
