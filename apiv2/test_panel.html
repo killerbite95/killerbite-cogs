@@ -544,14 +544,12 @@
             <button class="btn"
                 onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways',JSON.stringify({channel_id:ch(),prize:'Nitro',duration_seconds:3600,winners:1}))">
                 <span class="method m-POST">POST</span> create giveaway</button>
-            <button class="btn"
-                onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID/end')">
+            <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID/end')">
                 <span class="method m-POST">POST</span> end giveaway</button>
             <button class="btn"
                 onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID/reroll',JSON.stringify({winners:1}))">
                 <span class="method m-POST">POST</span> reroll giveaway</button>
-            <button class="btn"
-                onclick="fire('DELETE','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID')">
+            <button class="btn" onclick="fire('DELETE','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID')">
                 <span class="method m-DELETE">DELETE</span> delete giveaway</button>
         </div>
     </div>
@@ -703,13 +701,13 @@
         <div class="section-title">Webhooks</div>
         <div class="endpoints">
             <button class="btn" onclick="fire('GET','/api/v2/webhooks')">
-            <button class="btn"
-                onclick="fire('POST','/api/v2/webhooks',JSON.stringify({name:'test',url:'https://example.com/hook',events:['member_join']},null,2))">
-                <span class="method m-POST">POST</span> /webhooks (crear)</button>
-            <button class="btn" onclick="fire('POST','/api/v2/webhooks/test/test')">
-                <span class="method m-POST">POST</span> /webhooks/{name}/test</button>
-            <button class="btn" onclick="fire('DELETE','/api/v2/webhooks/test')">
-                <span class="method m-DELETE">DELETE</span> /webhooks/{name}</button>
+                <button class="btn"
+                    onclick="fire('POST','/api/v2/webhooks',JSON.stringify({name:'test',url:'https://example.com/hook',events:['member_join']},null,2))">
+                    <span class="method m-POST">POST</span> /webhooks (crear)</button>
+                <button class="btn" onclick="fire('POST','/api/v2/webhooks/test/test')">
+                    <span class="method m-POST">POST</span> /webhooks/{name}/test</button>
+                <button class="btn" onclick="fire('DELETE','/api/v2/webhooks/test')">
+                    <span class="method m-DELETE">DELETE</span> /webhooks/{name}</button>
         </div>
     </div>
 
