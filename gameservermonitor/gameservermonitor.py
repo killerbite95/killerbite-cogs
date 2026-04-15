@@ -13,7 +13,9 @@ from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator, cog_i18n
+import contextlib
 import datetime
+import ipaddress
 import pytz
 import logging
 import typing
@@ -51,8 +53,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     def __init__(self, bot: Red) -> None:
         self.bot: Red = bot
         self.config: Config = Config.get_conf(
-            self, 
-            identifier=1234567890, 
+            self,
+            identifier=1735836547,  # unique identifier for GameServerMonitor
             force_registration=True
         )
         
@@ -115,15 +117,21 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     
     async def _reset_query_counters(self) -> None:
         """
-        Resetea los contadores de queries de todos los servidores.
-        Se ejecuta en cada carga del cog para evitar acumulación infinita.
+        Limita los contadores de queries a un máximo de 100 000
+        para evitar números desproporcionados, sin perder la
+        proporción de uptime.
         """
+        cap = 100_000
         for guild in self.bot.guilds:
             async with self.config.guild(guild).servers() as servers:
                 for server_key, server_data in servers.items():
-                    server_data["total_queries"] = 0
-                    server_data["successful_queries"] = 0
-        logger.info("Contadores de queries reseteados")
+                    total = server_data.get("total_queries", 0)
+                    success = server_data.get("successful_queries", 0)
+                    if total > cap:
+                        ratio = success / total if total else 0
+                        server_data["total_queries"] = cap
+                        server_data["successful_queries"] = int(cap * ratio)
+        logger.info("Contadores de queries verificados (cap=%d)", cap)
     
     def cog_unload(self) -> None:
         """Limpieza al descargar el cog."""
@@ -157,6 +165,21 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         pass
     
     # ==================== Utilidades ====================
+    
+    @staticmethod
+    def _is_private_ip(ip: str) -> bool:
+        """Comprueba si una IP pertenece a un rango privado (RFC 1918)."""
+        return (
+            ip.startswith("10.")
+            or ip.startswith("192.168.")
+            or ip.startswith("172.16.")
+            or ip.startswith("172.17.")
+            or ip.startswith("172.18.")
+            or ip.startswith("172.19.")
+            or ip.startswith("172.2")
+            or ip.startswith("172.30.")
+            or ip.startswith("172.31.")
+        )
     
     def _valid_port(self, port: int) -> bool:
         """Valida que un puerto esté en el rango válido."""
@@ -247,17 +270,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 if ":" in server_key:
                     server_ip, server_port = server_key.split(":", 1)
                     # Si el puerto coincide y la IP del servidor es privada
-                    if server_port == search_port and (
-                        server_ip.startswith("10.") or
-                        server_ip.startswith("192.168.") or
-                        server_ip.startswith("172.16.") or
-                        server_ip.startswith("172.17.") or
-                        server_ip.startswith("172.18.") or
-                        server_ip.startswith("172.19.") or
-                        server_ip.startswith("172.2") or
-                        server_ip.startswith("172.30.") or
-                        server_ip.startswith("172.31.")
-                    ):
+                    if server_port == search_port and self._is_private_ip(server_ip):
                         return server_key
         
         return None
@@ -827,32 +840,32 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             game_type = GameType.from_string(server_data.get("game", ""))
             game_name = game_type.display_name if game_type else "Unknown"
             
-            # Obtener nombre para mostrar (hostname > IP pública > dominio > juego)
-            # Intentar obtener hostname de caché
-            server_obj = ServerData.from_dict(server_key, server_data)
-            port = server_obj.port
+            # Prioridad: last_hostname persistido > caché > IP pública > dominio > juego
+            display_id = server_data.get("last_hostname")
             
-            # Intentar obtener hostname desde caché
-            display_id = None
-            cache_key = f"{server_obj.game.value if server_obj.game else 'unknown'}:{server_obj.host}:{port}"
-            if hasattr(self, 'query_service') and hasattr(self.query_service, '_cache'):
-                cached = self.query_service._cache.get(server_obj.host, port, server_obj.game)
-                if cached and cached.hostname:
-                    display_id = cached.hostname[:40]
-            
-            # Si no hay hostname en caché, usar IP pública o dominio
+            # Fallback a caché en memoria
             if not display_id:
+                server_obj = ServerData.from_dict(server_key, server_data)
+                if server_obj.game:
+                    cached = self.query_service._cache.get(
+                        server_obj.host, server_obj.port, server_obj.game
+                    )
+                    if cached and cached.hostname:
+                        display_id = cached.hostname
+            
+            # Fallback a IP pública / dominio
+            if not display_id or display_id == "Unknown Server":
+                server_obj = ServerData.from_dict(server_key, server_data)
                 if public_ip:
-                    display_id = f"{public_ip}:{port}"
+                    display_id = f"{public_ip}:{server_obj.port}"
                 elif server_obj.domain:
                     display_id = server_obj.domain
                 else:
-                    display_id = game_name
+                    display_id = server_key
             
-            # Crear nombre amigable para mostrar
-            display_name = f"{display_id} ({game_name})"
+            # Nombre amigable: "Hostname (Juego)"
+            display_name = f"{display_id[:60]} ({game_name})"
             
-            # Filtrar por texto actual (buscar en display_name y game_name)
             if current_lower in display_name.lower() or current_lower in game_name.lower():
                 server_id = server_data.get("server_id", server_key)
                 choices.append(
@@ -879,17 +892,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         public_ip = await self.config.guild(guild).public_ip()
         
         # Solo reemplazar si hay IP pública configurada y la original es privada
-        if public_ip and (
-            original_ip.startswith("10.") or
-            original_ip.startswith("192.168.") or
-            original_ip.startswith("172.16.") or
-            original_ip.startswith("172.17.") or
-            original_ip.startswith("172.18.") or
-            original_ip.startswith("172.19.") or
-            original_ip.startswith("172.2") or
-            original_ip.startswith("172.30.") or
-            original_ip.startswith("172.31.")
-        ):
+        if public_ip and self._is_private_ip(original_ip):
             return public_ip
         return original_ip
     
@@ -1326,6 +1329,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             # Guardar datos actualizados (incluyendo server_id si fue generado)
             server_dict_to_save = server_data.to_dict()
             server_dict_to_save["server_id"] = server_id
+            # Persistir hostname para autocomplete
+            if query_result.success and query_result.hostname:
+                server_dict_to_save["last_hostname"] = query_result.hostname
+            elif "last_hostname" in server_dict:
+                server_dict_to_save["last_hostname"] = server_dict["last_hostname"]
             servers[server_key] = server_dict_to_save
     
     # ==================== Tareas ====================
@@ -1605,16 +1613,31 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         Removes a server from monitoring.
         
-        Pass exactly the listed key (e.g. `ip:port`).
+        Accepts `ip:port` or the short server_id.
         
         Example: `[p]removeserver 192.168.1.1:27015`
         """
-        if ":" not in server_key:
-            await ctx.send(_("❌ Formato: `ip:puerto`"))
+        # Intentar resolver server_id -> server_key real
+        resolved = await self._resolve_server_key_by_id(ctx.guild, server_key)
+        if resolved:
+            server_key = resolved
+        elif ":" not in server_key:
+            await ctx.send(_("❌ Formato: `ip:puerto` o `server_id`"))
             return
         
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_key in servers:
+                # Intentar eliminar el mensaje embed del canal
+                msg_id = servers[server_key].get("message_id")
+                ch_id = servers[server_key].get("channel_id")
+                if msg_id and ch_id:
+                    channel = self.bot.get_channel(ch_id)
+                    if channel:
+                        try:
+                            msg = await channel.fetch_message(msg_id)
+                            await msg.delete()
+                        except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                            pass
                 del servers[server_key]
                 await ctx.send(_("✅ Servidor **{}** eliminado del monitoreo.").format(server_key))
             else:
@@ -1634,7 +1657,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     host, port = server_key.split(":")
                     self.query_service._cache.invalidate(host, int(port), game)
                 
-                await self.update_server_status(ctx.guild, server_key, first_time=True)
+                await self.update_server_status(ctx.guild, server_key, first_time=False)
                 updated = True
         
         if updated:

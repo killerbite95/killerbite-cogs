@@ -1,5 +1,5 @@
-# GameServerMonitor v2.2.0 - Quick Reference Guide
-# GameServerMonitor v2.2.0 - Guía de Referencia Rápida
+# GameServerMonitor v2.3.0 - Quick Reference Guide
+# GameServerMonitor v2.3.0 - Guía de Referencia Rápida
 
 ---
 
