@@ -27,6 +27,15 @@ class DashboardIntegration:
     async def on_dashboard_cog_add(self, dashboard_cog: commands.Cog) -> None:
         dashboard_cog.rpc.third_parties_handler.add_third_party(self)
 
+    async def cog_load(self) -> None:
+        # If Dashboard is already loaded, register immediately
+        dashboard_cog = self.bot.get_cog("Dashboard")
+        if dashboard_cog and hasattr(dashboard_cog, "rpc"):
+            try:
+                dashboard_cog.rpc.third_parties_handler.add_third_party(self)
+            except Exception:
+                pass
+
     @dashboard_page(
         name="servers",
         description="Estado de servidores de juegos",

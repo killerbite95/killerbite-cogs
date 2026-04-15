@@ -26,6 +26,14 @@ class DashboardIntegration:
     async def on_dashboard_cog_add(self, dashboard_cog: commands.Cog) -> None:
         dashboard_cog.rpc.third_parties_handler.add_third_party(self)
 
+    async def cog_load(self) -> None:
+        dashboard_cog = self.bot.get_cog("Dashboard")
+        if dashboard_cog and hasattr(dashboard_cog, "rpc"):
+            try:
+                dashboard_cog.rpc.third_parties_handler.add_third_party(self)
+            except Exception:
+                pass
+
     @dashboard_page(
         name="suggestions",
         description="Ver y gestionar sugerencias",
@@ -85,6 +93,11 @@ class DashboardIntegration:
                     if sdata.get("deleted", False):
                         continue
                     status_val = str(sdata.get("status", "pending"))
+                    # Validate status value against enum
+                    try:
+                        SuggestionStatus(status_val)
+                    except ValueError:
+                        status_val = "pending"
                     if status_val in status_counts:
                         status_counts[status_val] += 1
 
@@ -105,7 +118,10 @@ class DashboardIntegration:
                     up = len(sdata.get("voters_up", []))
                     down = len(sdata.get("voters_down", []))
 
-                    status_info = STATUS_CONFIG.get(SuggestionStatus(status_val), {})
+                    try:
+                        status_info = STATUS_CONFIG.get(SuggestionStatus(status_val), {})
+                    except ValueError:
+                        status_info = {"label": status_val, "emoji": "❓"}
 
                     suggestions_list.append({
                         "id": int(sid),
@@ -138,7 +154,9 @@ class DashboardIntegration:
                     "status_counts": status_counts,
                     "suggestions": suggestions_list[:50],
                 })
-            except Exception:
+            except Exception as exc:
+                import logging
+                logging.getLogger("red.killerbite95.suggestions.dashboard").error(f"Error processing guild {gid}: {exc!r}")
                 continue
 
         guilds_data.sort(key=lambda g: (not g["editable"], g["name"].lower()))

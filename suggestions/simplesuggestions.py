@@ -96,6 +96,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     
     async def cog_load(self):
         """Called when cog is loaded."""
+        await super().cog_load()
         await setup_persistent_views(self.bot, self)
         logger.info(f"SimpleSuggestions v{self.__version__} loaded")
     
