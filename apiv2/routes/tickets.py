@@ -208,7 +208,12 @@ async def handle_ticket_close(request: web.Request) -> web.Response:
     conf = await cog.config.guild(guild).all()
 
     try:
-        from ticketstrini.common.utils import close_ticket
+        import sys
+        cog_pkg = type(cog).__module__.rsplit('.', 1)[0]
+        utils_module = sys.modules.get(f"{cog_pkg}.common.utils")
+        close_ticket = getattr(utils_module, "close_ticket", None)
+        if not close_ticket:
+            return json_error(500, "internal_error", "Cannot resolve close_ticket from cog")
         await close_ticket(
             bot=bot,
             member=member,

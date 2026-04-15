@@ -105,7 +105,11 @@ async def handle_server_detail(request: web.Request) -> web.Response:
 
     # Try live query for current status
     try:
-        from gameservermonitor.models import GameType, ServerData
+        import sys
+        cog_pkg = type(cog).__module__.rsplit('.', 1)[0]
+        models_module = sys.modules.get(f"{cog_pkg}.models")
+        GameType = getattr(models_module, "GameType")
+        ServerData = getattr(models_module, "ServerData")
 
         server_data = ServerData.from_dict(server_key, servers[server_key])
         parts = server_key.rsplit(":", 1)

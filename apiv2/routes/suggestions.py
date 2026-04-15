@@ -88,14 +88,17 @@ async def handle_suggestions_list(request: web.Request) -> web.Response:
     except ValueError:
         return json_error(400, "bad_request", "limit and offset must be integers")
 
-    # Import SuggestionStatus from the cog's storage
-    from suggestions.storage import SuggestionStatus
+    # Get SuggestionStatus from the cog's storage module
+    import sys
+    storage_module = sys.modules.get(type(cog.storage).__module__)
+    SuggestionStatus = getattr(storage_module, "SuggestionStatus", None) if storage_module else None
 
     filter_status = None
     if status_filter:
         if status_filter not in VALID_STATUSES:
             return json_error(422, "validation_error", f"Invalid status. Valid: {', '.join(sorted(VALID_STATUSES))}")
-        filter_status = SuggestionStatus(status_filter)
+        if SuggestionStatus:
+            filter_status = SuggestionStatus(status_filter)
 
     suggestions = await cog.storage.get_all_suggestions(guild, status_filter=filter_status)
     total = len(suggestions)
@@ -162,7 +165,11 @@ async def handle_suggestion_update(request: web.Request) -> web.Response:
     if not isinstance(changed_by, int):
         return json_error(422, "validation_error", "changed_by must be a user ID integer")
 
-    from suggestions.storage import SuggestionStatus
+    import sys
+    storage_module = sys.modules.get(type(cog.storage).__module__)
+    SuggestionStatus = getattr(storage_module, "SuggestionStatus", None)
+    if not SuggestionStatus:
+        return json_error(500, "internal_error", "Cannot resolve SuggestionStatus from cog")
     new_status = SuggestionStatus(new_status_str)
 
     updated = await cog.storage.update_status(
@@ -173,7 +180,12 @@ async def handle_suggestion_update(request: web.Request) -> web.Response:
 
     # Also update the Discord embed if possible
     try:
-        from suggestions.embeds import create_suggestion_embed
+        # Get create_suggestion_embed from the cog's embeds module
+        cog_pkg = type(cog).__module__.rsplit('.', 1)[0]
+        embeds_module = sys.modules.get(f"{cog_pkg}.embeds")
+        create_suggestion_embed = getattr(embeds_module, "create_suggestion_embed", None)
+        if not create_suggestion_embed:
+            raise ImportError("embeds module not found")
 
         channel_id = await cog.config.guild(guild).suggestion_channel()
         if channel_id:
