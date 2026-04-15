@@ -387,7 +387,7 @@ Body: { "transfer_credits": "channel_id", "set_balance": null }
 
 ---
 
-### Fase 7 — Moderación avanzada (Warnings + Security + ExtendedModLog)
+### Fase 7 — Moderación avanzada (Warnings + Security + ExtendedModLog) ✅
 
 **Red Mod — Warnings** (built-in `redbot.core.modlog` + `Mod` cog):
 

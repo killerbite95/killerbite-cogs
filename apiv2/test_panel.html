@@ -438,13 +438,16 @@
         <div class="endpoints">
             <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/currency')">
                 <span class="method m-GET">GET</span> /economy/currency</button>
-            <button class="btn" onclick="fire('PATCH','/api/v2/guilds/'+g()+'/economy/currency',JSON.stringify({name:'Coins',default_balance:100}))">
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/economy/currency',JSON.stringify({name:'Coins',default_balance:100}))">
                 <span class="method m-PATCH">PATCH</span> currency config</button>
             <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/balance/'+u())">
                 <span class="method m-GET">GET</span> balance/{uid}</button>
-            <button class="btn" onclick="fire('PATCH','/api/v2/guilds/'+g()+'/economy/balance/'+u(),JSON.stringify({balance:500}))">
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/economy/balance/'+u(),JSON.stringify({balance:500}))">
                 <span class="method m-PATCH">PATCH</span> set balance</button>
-            <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/economy/transfer',JSON.stringify({from_user_id:u(),to_user_id:'0',amount:100}))">
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/economy/transfer',JSON.stringify({from_user_id:u(),to_user_id:'0',amount:100}))">
                 <span class="method m-POST">POST</span> transfer</button>
             <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/leaderboard?limit=10')">
                 <span class="method m-GET">GET</span> leaderboard</button>
@@ -457,10 +460,76 @@
         <div class="endpoints">
             <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/costs')">
                 <span class="method m-GET">GET</span> /costs</button>
-            <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/economy/costs',JSON.stringify({command:'ping',cost:10,level:'all',prompt:'silent',modifier:'static',value:0}))">
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/economy/costs',JSON.stringify({command:'ping',cost:10,level:'all',prompt:'silent',modifier:'static',value:0}))">
                 <span class="method m-POST">POST</span> create cost</button>
             <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/economy/log-channels')">
                 <span class="method m-GET">GET</span> /log-channels</button>
+        </div>
+    </div>
+
+    <!-- Warnings & Modlog Cases -->
+    <div class="section">
+        <div class="section-title">Warnings (Red Mod)</div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/warnings/'+u())">
+                <span class="method m-GET">GET</span> /warnings/{uid}</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/warnings/'+u(),JSON.stringify({reason:'Spam',weight:1}))">
+                <span class="method m-POST">POST</span> add warning</button>
+            <button class="btn"
+                onclick="fire('DELETE','/api/v2/guilds/'+g()+'/warnings/'+u(),JSON.stringify({confirm:true}))">
+                <span class="method m-DELETE">DELETE</span> clear all warnings</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/cases?limit=20')">
+                <span class="method m-GET">GET</span> /cases</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/cases/1')">
+                <span class="method m-GET">GET</span> /cases/1</button>
+        </div>
+    </div>
+
+    <!-- Security -->
+    <div class="section">
+        <div class="section-title">Security <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/security/settings')">
+                <span class="method m-GET">GET</span> /security/settings</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/security/settings',JSON.stringify({modlog_channel:null}))">
+                <span class="method m-PATCH">PATCH</span> security settings</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/security/modules')">
+                <span class="method m-GET">GET</span> /security/modules</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/security/modules/auto_mod',JSON.stringify({enabled:true}))">
+                <span class="method m-PATCH">PATCH</span> module auto_mod</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/security/quarantined')">
+                <span class="method m-GET">GET</span> /security/quarantined</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/security/quarantine/'+u(),JSON.stringify({reason:'Sospechoso'}))">
+                <span class="method m-POST">POST</span> quarantine user</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/guilds/'+g()+'/security/quarantine/'+u())">
+                <span class="method m-DELETE">DELETE</span> unquarantine user</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/security/whitelist/member/'+u())">
+                <span class="method m-GET">GET</span> whitelist member</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/security/whitelist/member/'+u(),JSON.stringify({auto_mod_spam:true}))">
+                <span class="method m-PATCH">PATCH</span> whitelist member</button>
+        </div>
+    </div>
+
+    <!-- ExtendedModLog -->
+    <div class="section">
+        <div class="section-title">ExtendedModLog <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/modlog/settings')">
+                <span class="method m-GET">GET</span> /modlog/settings</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/modlog/settings',JSON.stringify({message_delete:{enabled:true,bots:false}}))">
+                <span class="method m-PATCH">PATCH</span> update event</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/modlog/ignored-channels')">
+                <span class="method m-GET">GET</span> /modlog/ignored-channels</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/modlog/ignored-channels',JSON.stringify({channel_id:ch()}))">
+                <span class="method m-POST">POST</span> add ignored channel</button>
         </div>
     </div>
 
@@ -470,7 +539,8 @@
         <div class="endpoints">
             <button class="btn" onclick="fire('GET','/api/v2/webhooks')">
                 <span class="method m-GET">GET</span> /webhooks</button>
-            <button class="btn" onclick="fire('POST','/api/v2/webhooks',JSON.stringify({name:'test',url:'https://example.com/hook',events:['member_join']},null,2))">
+            <button class="btn"
+                onclick="fire('POST','/api/v2/webhooks',JSON.stringify({name:'test',url:'https://example.com/hook',events:['member_join']},null,2))">
                 <span class="method m-POST">POST</span> /webhooks (crear)</button>
             <button class="btn" onclick="fire('POST','/api/v2/webhooks/test/test')">
                 <span class="method m-POST">POST</span> /webhooks/{name}/test</button>
