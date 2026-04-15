@@ -533,12 +533,88 @@
         </div>
     </div>
 
+    <!-- Giveaways -->
+    <div class="section">
+        <div class="section-title">Giveaways <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/giveaways')">
+                <span class="method m-GET">GET</span> /giveaways</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/giveaways?ended=true')">
+                <span class="method m-GET">GET</span> /giveaways?ended=true</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways',JSON.stringify({channel_id:ch(),prize:'Nitro',duration_seconds:3600,winners:1}))">
+                <span class="method m-POST">POST</span> create giveaway</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID/end')">
+                <span class="method m-POST">POST</span> end giveaway</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID/reroll',JSON.stringify({winners:1}))">
+                <span class="method m-POST">POST</span> reroll giveaway</button>
+            <button class="btn"
+                onclick="fire('DELETE','/api/v2/guilds/'+g()+'/giveaways/MESSAGE_ID')">
+                <span class="method m-DELETE">DELETE</span> delete giveaway</button>
+        </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="section">
+        <div class="section-title">Tags <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/tags')">
+                <span class="method m-GET">GET</span> /tags</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/tags',JSON.stringify({name:'hola',tagscript:'¡Hola {user}!',aliases:[]}))">
+                <span class="method m-POST">POST</span> create tag</button>
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/tags/hola')">
+                <span class="method m-GET">GET</span> /tags/hola</button>
+            <button class="btn"
+                onclick="fire('PUT','/api/v2/guilds/'+g()+'/tags/hola',JSON.stringify({tagscript:'¡Hola actualizado!'}))">
+                <span class="method m-PUT">PUT</span> update tag</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/guilds/'+g()+'/tags/hola')">
+                <span class="method m-DELETE">DELETE</span> delete tag</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/tags/hola/invoke',JSON.stringify({channel_id:ch(),user_id:u()}))">
+                <span class="method m-POST">POST</span> invoke tag</button>
+        </div>
+    </div>
+
+    <!-- RolesButtons -->
+    <div class="section">
+        <div class="section-title">RolesButtons <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/rolesbuttons')">
+                <span class="method m-GET">GET</span> /rolesbuttons</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/rolesbuttons/'+ch()+'/MESSAGE_ID',JSON.stringify({role_id:r(),emoji:'🎮'}))">
+                <span class="method m-POST">POST</span> add button</button>
+            <button class="btn"
+                onclick="fire('PATCH','/api/v2/guilds/'+g()+'/rolesbuttons/'+ch()+'/MESSAGE_ID/mode',JSON.stringify({mode:'add_or_remove'}))">
+                <span class="method m-PATCH">PATCH</span> set mode</button>
+        </div>
+    </div>
+
+    <!-- RoleSyncer -->
+    <div class="section">
+        <div class="section-title">RoleSyncer <small style="color:var(--muted)">(requiere cog)</small></div>
+        <div class="endpoints">
+            <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/rolesyncer')">
+                <span class="method m-GET">GET</span> /rolesyncer</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/rolesyncer/onesync',JSON.stringify({role1_id:r(),role2_id:'0'}))">
+                <span class="method m-POST">POST</span> add onesync</button>
+            <button class="btn"
+                onclick="fire('POST','/api/v2/guilds/'+g()+'/rolesyncer/twosync',JSON.stringify({role1_id:r(),role2_id:'0'}))">
+                <span class="method m-POST">POST</span> add twosync</button>
+            <button class="btn" onclick="fire('DELETE','/api/v2/guilds/'+g()+'/rolesyncer/onesync/0')">
+                <span class="method m-DELETE">DELETE</span> del onesync[0]</button>
+        </div>
+    </div>
+
     <!-- Webhooks -->
     <div class="section">
         <div class="section-title">Webhooks</div>
         <div class="endpoints">
             <button class="btn" onclick="fire('GET','/api/v2/webhooks')">
-                <span class="method m-GET">GET</span> /webhooks</button>
             <button class="btn"
                 onclick="fire('POST','/api/v2/webhooks',JSON.stringify({name:'test',url:'https://example.com/hook',events:['member_join']},null,2))">
                 <span class="method m-POST">POST</span> /webhooks (crear)</button>

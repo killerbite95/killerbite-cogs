@@ -469,7 +469,7 @@ Eventos soportados (21): `message_edit`, `message_delete`, `user_change`, `role_
 
 ---
 
-### Fase 8 — Contenido e interacción (Giveaways, Tags, RolesButtons, RoleSyncer)
+### Fase 8 — Contenido e interacción (Giveaways, Tags, RolesButtons, RoleSyncer) ✅
 
 **Giveaways** *(requiere cog cargado)*:
 
