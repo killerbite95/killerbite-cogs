@@ -92,6 +92,10 @@
         <label>Role ID</label>
         <input id="inp_role" type="text" placeholder="111222333">
     </div>
+    <div>
+        <label>Channel ID</label>
+        <input id="inp_channel" type="text" placeholder="444555666">
+    </div>
 </div>
 
 <!-- System -->
@@ -161,6 +165,58 @@
     </div>
 </div>
 
+<!-- Channels & Messages -->
+<div class="section">
+    <div class="section-title">Canales y Mensajes</div>
+    <div class="endpoints">
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/channels')">
+            <span class="method m-GET">GET</span> /channels</button>
+        <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/channels/'+ch()+'/messages', JSON.stringify({content:'Hello from APIv2!'}))">
+            <span class="method m-POST">POST</span> send message</button>
+        <button class="btn" onclick="fire('POST','/api/v2/guilds/'+g()+'/channels/'+ch()+'/messages', JSON.stringify({embed:{title:'API Embed',description:'Sent from test panel',color:3447003}}))">
+            <span class="method m-POST">POST</span> send embed</button>
+    </div>
+</div>
+
+<!-- Tickets -->
+<div class="section">
+    <div class="section-title">TicketsTrini <small style="color:var(--muted)">(requiere cog)</small></div>
+    <div class="endpoints">
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/tickets')">
+            <span class="method m-GET">GET</span> /tickets</button>
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/tickets?status=open')">
+            <span class="method m-GET">GET</span> tickets (open)</button>
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/tickets/panels')">
+            <span class="method m-GET">GET</span> /panels</button>
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/tickets/'+ch())">
+            <span class="method m-GET">GET</span> ticket detail</button>
+    </div>
+</div>
+
+<!-- Suggestions -->
+<div class="section">
+    <div class="section-title">Suggestions <small style="color:var(--muted)">(requiere cog)</small></div>
+    <div class="endpoints">
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/suggestions')">
+            <span class="method m-GET">GET</span> /suggestions</button>
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/suggestions?status=pending')">
+            <span class="method m-GET">GET</span> pending</button>
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/suggestions/1')">
+            <span class="method m-GET">GET</span> suggestion #1</button>
+        <button class="btn" onclick="fire('PATCH','/api/v2/guilds/'+g()+'/suggestions/1', JSON.stringify({status:'approved',reason:'Test',changed_by:0}))">
+            <span class="method m-PATCH">PATCH</span> approve #1</button>
+    </div>
+</div>
+
+<!-- Game Servers -->
+<div class="section">
+    <div class="section-title">Game Servers <small style="color:var(--muted)">(requiere cog)</small></div>
+    <div class="endpoints">
+        <button class="btn" onclick="fire('GET','/api/v2/guilds/'+g()+'/game-servers')">
+            <span class="method m-GET">GET</span> /game-servers</button>
+    </div>
+</div>
+
 <!-- Custom -->
 <div class="custom">
     <div class="section-title">Petición personalizada</div>
@@ -190,6 +246,7 @@ const $ = id => document.getElementById(id);
 const g = () => $('inp_guild').value || '0';
 const u = () => $('inp_user').value || '0';
 const r = () => $('inp_role').value || '0';
+const ch = () => $('inp_channel').value || '0';
 
 async function fire(method, path, body) {
     const base = $('inp_base').value.replace(/\/+$/, '');
@@ -254,7 +311,7 @@ function fireCustom() {
 }
 
 // Persist config in localStorage
-['inp_base','inp_token','inp_guild','inp_user','inp_role'].forEach(id => {
+['inp_base','inp_token','inp_guild','inp_user','inp_role','inp_channel'].forEach(id => {
     const saved = localStorage.getItem('apiv2_' + id);
     if (saved) $(id).value = saved;
     $(id).addEventListener('input', () => localStorage.setItem('apiv2_' + id, $(id).value));
