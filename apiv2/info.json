@@ -1,0 +1,31 @@
+{
+    "author": [
+        "Killerbite95"
+    ],
+    "install_msg": "APIv2 v1.0.0 installed!\n\nCreate your first API key: `[p]apiv2 key create mykey`\nCheck server status: `[p]apiv2 status`",
+    "name": "APIv2",
+    "short": "REST API server embedded in the bot for external integrations",
+    "description": "Embeds an aiohttp REST API server inside the bot process, providing authenticated HTTP endpoints to control the bot from external services (websites, scripts, automations). Supports API key auth, rate limiting, and auto-discovery of loaded cogs.",
+    "end_user_data_statement": "This cog stores API key hashes and access logs. No personal Discord user data is collected through the API.",
+    "hidden": false,
+    "disabled": false,
+    "min_bot_version": "3.5.0",
+    "min_python_version": [
+        3,
+        9,
+        0
+    ],
+    "requirements": [],
+    "tags": [
+        "api",
+        "rest",
+        "http",
+        "server",
+        "integration",
+        "automation",
+        "webhooks",
+        "external"
+    ],
+    "type": "COG",
+    "permissions": []
+}
