@@ -16,6 +16,8 @@ from redbot.core.bot import Red
 from .auth import KeyManager, RateLimiter
 from .server import create_app, APP_START_TIME_KEY
 from .routes.core import register_routes as register_core_routes
+from .routes.members import register_routes as register_member_routes
+from .routes.moderation import register_routes as register_moderation_routes
 
 logger = logging.getLogger("red.killerbite95.apiv2")
 
@@ -66,6 +68,8 @@ class APIv2(commands.Cog):
 
         self._app = create_app(self.bot, self.key_manager, self.rate_limiter)
         register_core_routes(self._app)
+        register_member_routes(self._app)
+        register_moderation_routes(self._app)
 
         self._runner = web.AppRunner(self._app)
         await self._runner.setup()
