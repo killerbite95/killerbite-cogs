@@ -207,6 +207,8 @@ async def handle_button_callback(
     )
     
     if on_cooldown:
+        if interaction.response.is_done():
+            return
         await interaction.response.send_message(
             _("Please wait **{seconds:.1f}s** before using this button again.").format(seconds=remaining),
             ephemeral=True
@@ -214,7 +216,13 @@ async def handle_button_callback(
         return
     
     # Defer la respuesta (ephemeral y thinking)
-    await interaction.response.defer(ephemeral=True, thinking=True)
+    # Guard against duplicate handling (view callback + on_interaction listener)
+    if interaction.response.is_done():
+        return
+    try:
+        await interaction.response.defer(ephemeral=True, thinking=True)
+    except discord.HTTPException:
+        return  # Already acknowledged by another handler
     
     try:
         # Obtener el cog
