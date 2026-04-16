@@ -15,16 +15,18 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | Cog | Description |
 |-----|-------------|
 | **adv_check** | Advanced user verification system |
+| **apiv2** | REST API server embedded in the bot for external integrations |
 | **autonick** | Automatically manages user nicknames |
 | **autoprune** | Automatic ban pruning system |
 | **blackjack** | Blackjack card game for Discord |
 | **colacoins** | Virtual currency system with leaderboards |
 | **day_counter_cog** | Counts days since/until events |
-| **gameservermonitor** | Monitors game servers (CS2, Minecraft, DayZ, etc.) with live embeds |
+| **gameservermonitor** | Monitors game servers (CS2, Minecraft, DayZ, Valheim, ARK, TF2, L4D2, 7DTD, Palworld, etc.) with live embeds, slash commands, and interactive buttons |
 | **listroles** | Lists server roles and their members |
 | **maptrack** | Tracks map changes in game servers |
 | **suggestions** | Complete suggestion system with buttons, voting, and staff management |
 | **ticketstrini** | Multi-panel support ticket system with buttons (Trini Edition) |
+| **trickortreat** | Trick or Treat candy game with shop, streaks, events, and more |
 
 ## Support
 
