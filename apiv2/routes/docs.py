@@ -61,8 +61,7 @@ _PATH_TAG_RULES: list[tuple[str, str]] = [
     (r"/welcome",                       "Welcome"),
     (r"/voicelogs",                     "VoiceLogs"),
     (r"/autonick",                      "AutoNick"),
-    (r"/voice/massmove",                "Mover"),
-]
+    (r"/voice/massmove",                "Mover"),    (r"/colacoins",                     "ColaCoins"),]
 
 # Root-level tag definitions — controls display order + descriptions in Swagger UI
 _TAG_DEFINITIONS: list[dict] = [
@@ -90,6 +89,7 @@ _TAG_DEFINITIONS: list[dict] = [
     {"name": "VoiceLogs",        "description": "Voice channel session history — *requiere cog*"},
     {"name": "AutoNick",         "description": "Self-service nickname channel + forbidden word list — *requiere cog*"},
     {"name": "Mover",            "description": "Mass-move members between voice channels — *requiere cog*"},
+    {"name": "ColaCoins",        "description": "ColaCoins custom currency — give, remove, balance, leaderboard — *requiere cog*"},
 ]
 
 # x-tagGroups for Redoc (ignored by SwaggerUI but harmless)
@@ -97,7 +97,7 @@ _TAG_GROUPS: list[dict] = [
     {"name": "🤖 Sistema",            "tags": ["Core", "Webhooks"]},
     {"name": "👥 Miembros & Roles",   "tags": ["Members", "Roles", "Moderation"]},
     {"name": "💬 Canales",            "tags": ["Channels", "Messaging"]},
-    {"name": "💰 Economía",           "tags": ["Economy"]},
+    {"name": "💰 Economía",           "tags": ["Economy", "ColaCoins"]},
     {"name": "🔨 Moderación avanzada","tags": ["Warnings", "Modlog", "Security", "ExtendedModLog"]},
     {"name": "🎫 Cogs — Gestión",     "tags": ["Tickets", "Suggestions", "GameServerMonitor"]},
     {"name": "🎉 Comunidad",          "tags": ["Giveaways", "Tags", "RolesButtons", "RoleSyncer"]},
