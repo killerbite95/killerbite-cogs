@@ -1738,9 +1738,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        # Usar payload builder
-        async with ctx.typing():
-            payload = await self._build_stats_payload(ctx.guild, resolved_key)
+        # Defer ephemeral para slash, typing para prefijo
+        if ctx.interaction:
+            await ctx.defer(ephemeral=True)
+        else:
+            await ctx.typing()
+        
+        payload = await self._build_stats_payload(ctx.guild, resolved_key)
         
         if "error" in payload:
             await ctx.send(f"❌ {payload['error']}", ephemeral=True)
@@ -1757,7 +1761,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         await ctx.send(
             embed=payload.get("embed"),
-            ephemeral=ctx.interaction is not None,  # Ephemeral solo en slash
+            ephemeral=ctx.interaction is not None,
             delete_after=delete_after
         )
     
@@ -1789,9 +1793,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        # Usar payload builder
-        async with ctx.typing():
-            payload = await self._build_history_payload(ctx.guild, resolved_key, hours or 24)
+        # Defer ephemeral para slash, typing para prefijo
+        if ctx.interaction:
+            await ctx.defer(ephemeral=True)
+        else:
+            await ctx.typing()
+        
+        payload = await self._build_history_payload(ctx.guild, resolved_key, hours or 24)
         
         if "error" in payload:
             await ctx.send(f"❌ {payload['error']}", ephemeral=True)
@@ -1838,9 +1846,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        # Usar payload builder
-        async with ctx.typing():
-            payload = await self._build_players_payload(ctx.guild, resolved_key)
+        # Defer ephemeral para slash, typing para prefijo
+        if ctx.interaction:
+            await ctx.defer(ephemeral=True)
+        else:
+            await ctx.typing()
+        
+        payload = await self._build_players_payload(ctx.guild, resolved_key)
         
         if "error" in payload:
             await ctx.send(f"❌ {payload['error']}", ephemeral=True)
@@ -1887,9 +1899,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
             return
         
-        # Usar payload builder
-        async with ctx.typing():
-            payload = await self._build_map_payload(ctx.guild, resolved_key)
+        # Defer ephemeral para slash, typing para prefijo
+        if ctx.interaction:
+            await ctx.defer(ephemeral=True)
+        else:
+            await ctx.typing()
+        
+        payload = await self._build_map_payload(ctx.guild, resolved_key)
         
         if "error" in payload:
             await ctx.send(f"❌ {payload['error']}", ephemeral=True)
