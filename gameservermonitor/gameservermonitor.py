@@ -393,11 +393,14 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             else:
                 display_name = game_name
         
+        # Para Minecraft map_name contiene la versión
+        map_or_version_label = _('Version') if server_data.game == GameType.MINECRAFT else _('Map')
+        
         # Crear embed
         embed = discord.Embed(
             title=_("Players - {hostname}").format(hostname=display_name[:50]),
             description=f"**{_('Game')}:** {game_name}\n"
-                       f"**{_('Map')}:** {query_result.map_name}\n"
+                       f"**{map_or_version_label}:** {query_result.map_name}\n"
                        f"**{_('Players')}:** {query_result.players}/{query_result.max_players}",
             color=query_result.status.color
         )
@@ -1486,7 +1489,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         **DayZ usage (separate ports):**
         `[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]`
 
-        **Supported games:** cs2, css, gmod, rust, minecraft, dayz
+        **Supported games:** cs2, css, gmod, rust, minecraft, dayz, valheim, ark, tf2, l4d2, 7dtd, palworld
         """
         channel = channel or ctx.channel
         game_type = GameType.from_string(game)

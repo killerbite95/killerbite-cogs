@@ -64,6 +64,12 @@ class GameType(Enum):
     RUST = "rust"
     MINECRAFT = "minecraft"
     DAYZ = "dayz"
+    VALHEIM = "valheim"
+    ARK = "ark"
+    TF2 = "tf2"
+    L4D2 = "l4d2"
+    SEVENDTD = "7dtd"
+    PALWORLD = "palworld"
     
     @property
     def display_name(self) -> str:
@@ -74,7 +80,13 @@ class GameType(Enum):
             GameType.GMOD: _("Garry's Mod"),
             GameType.RUST: _("Rust"),
             GameType.MINECRAFT: _("Minecraft"),
-            GameType.DAYZ: _("DayZ")
+            GameType.DAYZ: _("DayZ"),
+            GameType.VALHEIM: _("Valheim"),
+            GameType.ARK: _("ARK: Survival Evolved"),
+            GameType.TF2: _("Team Fortress 2"),
+            GameType.L4D2: _("Left 4 Dead 2"),
+            GameType.SEVENDTD: _("7 Days to Die"),
+            GameType.PALWORLD: _("Palworld"),
         }
         return names.get(self, self.value.upper())
     
@@ -87,7 +99,13 @@ class GameType(Enum):
             GameType.GMOD: 27015,
             GameType.RUST: 28015,
             GameType.MINECRAFT: 25565,
-            GameType.DAYZ: 2302
+            GameType.DAYZ: 2302,
+            GameType.VALHEIM: 2457,
+            GameType.ARK: 7777,
+            GameType.TF2: 27015,
+            GameType.L4D2: 27015,
+            GameType.SEVENDTD: 26900,
+            GameType.PALWORLD: 8211,
         }
         return ports.get(self, 27015)
     
@@ -106,8 +124,14 @@ class GameType(Enum):
             GameType.CSS: "https://cdn.cloudflare.steamstatic.com/steam/apps/240/header.jpg",
             GameType.GMOD: "https://cdn.cloudflare.steamstatic.com/steam/apps/4000/header.jpg",
             GameType.RUST: "https://cdn.cloudflare.steamstatic.com/steam/apps/252490/header.jpg",
-            GameType.MINECRAFT: "https://www.minecraft.net/content/dam/games/minecraft/key-art/Games_Subnav_Minecraft-702x304.jpg",
-            GameType.DAYZ: "https://cdn.cloudflare.steamstatic.com/steam/apps/221100/header.jpg"
+            GameType.MINECRAFT: "https://cdn.cloudflare.steamstatic.com/steam/apps/10/header.jpg",
+            GameType.DAYZ: "https://cdn.cloudflare.steamstatic.com/steam/apps/221100/header.jpg",
+            GameType.VALHEIM: "https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg",
+            GameType.ARK: "https://cdn.cloudflare.steamstatic.com/steam/apps/346110/header.jpg",
+            GameType.TF2: "https://cdn.cloudflare.steamstatic.com/steam/apps/440/header.jpg",
+            GameType.L4D2: "https://cdn.cloudflare.steamstatic.com/steam/apps/550/header.jpg",
+            GameType.SEVENDTD: "https://cdn.cloudflare.steamstatic.com/steam/apps/251570/header.jpg",
+            GameType.PALWORLD: "https://cdn.cloudflare.steamstatic.com/steam/apps/1623730/header.jpg",
         }
         return thumbnails.get(self)
     

@@ -31,12 +31,25 @@ def extract_numeric_version(version_str: str) -> str:
     return version_str
 
 
+def strip_section_codes(text: str) -> str:
+    """Elimina códigos de color/formato de Minecraft (§x)."""
+    result = []
+    i = 0
+    while i < len(text):
+        if text[i] == '§' and i + 1 < len(text):
+            i += 2  # Saltar §x
+        else:
+            result.append(text[i])
+            i += 1
+    return ''.join(result)
+
+
 def convert_motd(motd: Any) -> str:
-    """Convierte el MOTD de Minecraft a texto plano."""
+    """Convierte el MOTD de Minecraft a texto plano eliminando códigos de color."""
     if isinstance(motd, str):
-        text = motd.strip()
+        text = strip_section_codes(motd).strip()
     elif isinstance(motd, dict):
-        text = motd.get("text", "")
+        text = strip_section_codes(motd.get("text", ""))
         if "extra" in motd and isinstance(motd["extra"], list):
             for extra in motd["extra"]:
                 text += " " + convert_motd(extra)
@@ -82,7 +95,11 @@ class SourceQueryHandler(QueryHandler):
     
     @property
     def supported_games(self) -> List[GameType]:
-        return [GameType.CS2, GameType.CSS, GameType.GMOD, GameType.RUST]
+        return [
+            GameType.CS2, GameType.CSS, GameType.GMOD, GameType.RUST,
+            GameType.VALHEIM, GameType.ARK, GameType.TF2, GameType.L4D2,
+            GameType.SEVENDTD, GameType.PALWORLD,
+        ]
     
     async def query(self, host: str, port: int, **kwargs) -> QueryResult:
         """Realiza query usando Source Query Protocol."""
