@@ -3,17 +3,20 @@
         "aikaterna",
         "Killerbite95"
     ],
-    "description": "Trick or treating for your server. Originally by aikaterna, modified and personalized by Killerbite95.",
+    "description": "Trick or Treat v3 — A spooky candy game with shop, streaks, trick events, shields, rare items, guild events, and beautiful embeds! Originally by aikaterna, expanded by Killerbite95.",
     "end_user_data_statement": "This cog does not persistently store end user data. This cog does store discord IDs as needed for operation. This cog does store user stats for the cog such as their score. Users may remove their own content without making a data removal request. This cog does not support data requests, but will respect deletion requests.",
-    "install_msg": "Thanks for installing TrickOrTreatV2. Use `[p]help TrickOrTreatV2` to get started, specifically by toggling it on in your server and then setting active trick or treating channels.",
+    "install_msg": "Thanks for installing TrickOrTreatV2! Use `[p]help TrickOrTreatV2` to get started. Toggle it on with `[p]tottoggle`, set channels with `[p]totchannel add`, and check the shop with `[p]totshop`!",
     "min_bot_version": "3.5.0",
-    "short": "Trick or treat v2.",
+    "short": "Trick or Treat v3 — Candy game with shop, streaks, events & more!",
     "tags": [
         "trick or treat",
         "candy",
         "pick",
         "halloween",
-        "v2"
+        "v3",
+        "shop",
+        "streaks",
+        "events"
     ],
     "type": "COG"
 }
