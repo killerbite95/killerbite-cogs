@@ -54,7 +54,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         self.bot: Red = bot
         self.config: Config = Config.get_conf(
             self,
-            identifier=1735836547,  # unique identifier for GameServerMonitor
+            identifier=1234567890,
             force_registration=True
         )
         
