@@ -888,6 +888,185 @@ class TrickOrTreatV2(commands.Cog):
         await ctx.send(embed=em)
 
     # ════════════════════════════════════════════════════════════
+    #  GAME GUIDE
+    # ════════════════════════════════════════════════════════════
+
+    @commands.guild_only()
+    @commands.command()
+    @commands.bot_has_permissions(embed_links=True, add_reactions=True)
+    async def tothelp(self, ctx):
+        """📖 Guía completa del juego Trick or Treat."""
+        p = ctx.prefix
+        pages = []
+
+        # ── Page 1: Introduction ──
+        em1 = self._make_embed(
+            "📖 Guía — ¿Cómo jugar?",
+            (
+                "¡Bienvenido a **Trick or Treat**! 🎃\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "**¿Cómo empezar?**\n"
+                "Escribe **`trick or treat`** en un canal habilitado para ir de puerta en puerta "
+                "pidiendo caramelos. ¡Pero cuidado! No siempre te dan dulces...\n\n"
+                "**🎁 Treat (75%)** — Recibes caramelos y posibles bonus.\n"
+                "**👻 Trick (25%)** — Algo malo pasa: pierdes caramelos, te enfermas, o ambas cosas.\n\n"
+                "**Objetivo:** Comer la mayor cantidad de caramelos posible y subir en el ranking global.\n\n"
+                f"Usa `{p}cinventory` para ver tu inventario y `{p}cboard` para el ranking."
+            ),
+            HALLOWEEN_ORANGE,
+        )
+        em1.set_footer(text=f"🎃 Página 1/6 — Trick or Treat v{__version__}")
+        pages.append(em1)
+
+        # ── Page 2: Candy Types ──
+        em2 = self._make_embed(
+            "🍬 Guía — Tipos de Caramelos",
+            (
+                "Cada tipo de caramelo tiene un efecto especial al comerlo:\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "🍬 **Candies** — El caramelo principal. Comerlos aumenta tu contador de *eaten* (puntuación), "
+                "pero **también sube tu enfermedad** (+2 por candy).\n\n"
+                "🍫 **Chocolates** — Reduce enfermedad en **10** por unidad. ¡Medicina dulce!\n\n"
+                "🍭 **Lollipops** — Reduce enfermedad en **20** por unidad. Más efectivo.\n\n"
+                "🥠 **Cookies** — Pone tu enfermedad en un número **aleatorio** (0-100). ¡Una apuesta!\n\n"
+                "⭐ **Stars** — Resetea tu enfermedad a **0** instantáneamente. ¡Lo mejor!\n\n"
+                "✨ **Golden Candy** — *LEGENDARIO*. Vale **10×** en puntuación y **no da enfermedad**.\n\n"
+                "🌶️ **Ghost Pepper** — *ULTRA RARO*. Resetea enfermedad a **0** al comerlo."
+            ),
+            HALLOWEEN_PURPLE,
+        )
+        em2.add_field(
+            name="📝 Cómo comer",
+            value=f"`{p}eatcandy [cantidad] [tipo]`\nEjemplos: `{p}eatcandy 3 chocolate` · `{p}eatcandy star`",
+            inline=False,
+        )
+        em2.set_footer(text=f"🎃 Página 2/6 — Trick or Treat v{__version__}")
+        pages.append(em2)
+
+        # ── Page 3: Sickness System ──
+        em3 = self._make_embed(
+            "💊 Guía — Sistema de Enfermedad",
+            (
+                "La enfermedad sube cuando comes candies y afecta tus recompensas:\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "😊 **0-40** — Todo normal. Sin penalización.\n\n"
+                "😰 **41-80** — Empiezas a sentirte mal, pero no hay castigo aún.\n\n"
+                "🤮 **81-100** — ⚠️ **Recompensas a la mitad.** Si ibas a "
+                "ganar 20 candies, ganas 10.\n\n"
+                "💀 **>100** — ⚠️ **Recompensas divididas entre 4** + un **50% de probabilidad** "
+                "de que se te **caigan** candies al suelo al ir de puerta en puerta.\n\n"
+                "**¿Cómo curarse?**\n"
+                "🍫 Chocolates (-10) · 🍭 Lollipops (-20) · ⭐ Stars (reset) · 🌶️ Ghost Peppers (reset)\n"
+                "También se recupera un poco de forma pasiva al chatear en canales de ToT."
+            ),
+            HALLOWEEN_RED,
+        )
+        em3.add_field(
+            name="💡 Consejo",
+            value="No dejes subir la enfermedad por encima de 80. Compra curas en la tienda si no te salen de bonus.",
+            inline=False,
+        )
+        em3.set_footer(text=f"🎃 Página 3/6 — Trick or Treat v{__version__}")
+        pages.append(em3)
+
+        # ── Page 4: Shop & Shield ──
+        em4 = self._make_embed(
+            "🏪 Guía — Tienda y Escudo",
+            (
+                "Gasta tus candies en la tienda para comprar objetos útiles:\n"
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                f"Usa `{p}totshop` para ver la tienda y `{p}totbuy <item> [cantidad]` para comprar.\n\n"
+                "🍫 **Chocolate** — 15 🍬 · Reduce enfermedad\n"
+                "🍭 **Lollipop** — 30 🍬 · Reduce más enfermedad\n"
+                "🥠 **Cookie** — 25 🍬 · Enfermedad aleatoria\n"
+                "⭐ **Star** — 50 🍬 · Reset enfermedad\n"
+                "🛡️ **Shield** — 75 🍬 · Protección contra robo\n"
+                "✨ **Golden Candy** — 200 🍬 · 10× puntuación, sin enfermedad\n"
+            ),
+            HALLOWEEN_PURPLE,
+        )
+        em4.add_field(
+            name="🛡️ ¿Qué hace el Escudo?",
+            value=(
+                "El escudo protege tu bolsa de caramelos contra robos con `stealcandy`. "
+                "Dura varias horas (configurable por admins). Solo puedes tener **1 activo** a la vez."
+            ),
+            inline=False,
+        )
+        em4.set_footer(text=f"🎃 Página 4/6 — Trick or Treat v{__version__}")
+        pages.append(em4)
+
+        # ── Page 5: Streaks, Stealing & Rare Items ──
+        em5 = self._make_embed(
+            "🔥 Guía — Rachas, Robos e Ítems Raros",
+            (
+                "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+                "**🔥 Rachas Diarias (Streak)**\n"
+                "Juega `trick or treat` cada día consecutivo para acumular racha.\n"
+                "Cada día de racha añade un **×0.1** a tu multiplicador de recompensa.\n"
+                "Día 1: ×1.0 · Día 5: ×1.5 · Día 10: ×2.0 · Máximo: **×3.0**\n"
+                "¡Si fallas un día, la racha se resetea!\n\n"
+                "**🗡️ Robar Caramelos**\n"
+                f"Usa `{p}stealcandy [@usuario]` para intentar robar.\n"
+                "No siempre funciona — hay varias probabilidades de éxito o fracaso.\n"
+                "La víctima recibe una **notificación por DM** cuando le roban. 📩\n"
+                "Compra un **🛡️ Shield** para protegerte.\n\n"
+                "**💎 Ítems Raros**\n"
+                "Al hacer `trick or treat`, hay una pequeña probabilidad de obtener:\n"
+                "✨ **Golden Candy** (0.5%) — Vale ×10 al comerlo.\n"
+                "🌶️ **Ghost Pepper** (0.3%) — Resetea tu enfermedad.\n"
+            ),
+            HALLOWEEN_GOLD,
+        )
+        em5.set_footer(text=f"🎃 Página 5/6 — Trick or Treat v{__version__}")
+        pages.append(em5)
+
+        # ── Page 6: Commands Reference ──
+        em6 = self._make_embed(
+            "📋 Guía — Lista de Comandos",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            HALLOWEEN_ORANGE,
+        )
+        em6.add_field(
+            name="🎮 Jugador",
+            value=(
+                f"`trick or treat` — Ir de puerta en puerta\n"
+                f"`{p}eatcandy [n] [tipo]` — Comer caramelos\n"
+                f"`{p}cinventory` — Ver tu inventario\n"
+                f"`{p}totstats [@user]` — Estadísticas detalladas\n"
+                f"`{p}cboard` — Ranking global de eaten\n"
+                f"`{p}totshop` — Ver la tienda\n"
+                f"`{p}totbuy <item> [n]` — Comprar en la tienda\n"
+                f"`{p}buycandy <n>` — Comprar candies con moneda del bot\n"
+                f"`{p}pickup` — Recoger candy del suelo\n"
+                f"`{p}stealcandy [@user]` — Robar caramelos\n"
+                f"`{p}tothelp` — Esta guía"
+            ),
+            inline=False,
+        )
+        em6.add_field(
+            name="🔧 Admin / Mod",
+            value=(
+                f"`{p}tottoggle` — Activar/desactivar el juego\n"
+                f"`{p}totchannel add/remove` — Canales de juego\n"
+                f"`{p}totcooldown [s]` — Cooldown de trick or treat\n"
+                f"`{p}totpickupcooldown [s]` — Cooldown de pickup\n"
+                f"`{p}totstealcooldown [s]` — Cooldown de steal\n"
+                f"`{p}totshieldhours [h]` — Duración del escudo\n"
+                f"`{p}totbalance` — Candies en el pool\n"
+                f"`{p}totaddcandies <n>` — Añadir al pool\n"
+                f"`{p}totgivecandy @user tipo n` — Dar candy\n"
+                f"`{p}totremovecandy @user tipo n` — Quitar candy\n"
+                f"`{p}totevent start/status/stop` — Eventos de guild"
+            ),
+            inline=False,
+        )
+        em6.set_footer(text=f"🎃 Página 6/6 — Trick or Treat v{__version__}")
+        pages.append(em6)
+
+        await menu(ctx, pages, DEFAULT_CONTROLS)
+
+    # ════════════════════════════════════════════════════════════
     #  PERSONAL STATS
     # ════════════════════════════════════════════════════════════
 
