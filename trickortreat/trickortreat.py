@@ -13,8 +13,47 @@ from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
 logger = logging.getLogger("red.killerbite95.trickortreat")
 
-__version__ = "2.0.0"
+__version__ = "2.1.0"
 __author__ = ["aikaterna", "Killerbite95"]
+
+# Candy type mapping: aliases → canonical name
+CANDY_ALIASES = {
+    "candy": "candies", "candies": "candies", "\U0001f36c": "candies",
+    "chocolate": "chocolates", "chocolates": "chocolates", "\U0001f36b": "chocolates",
+    "lollipop": "lollipops", "lollipops": "lollipops", "\U0001f36d": "lollipops",
+    "cookie": "cookies", "cookies": "cookies", "\U0001f960": "cookies",
+    "star": "stars", "stars": "stars", "\u2b50": "stars",
+}
+CANDY_TYPES = ["candies", "chocolates", "lollipops", "cookies", "stars"]
+CANDY_EMOJIS = {
+    "candies": "\N{CANDY}",
+    "chocolates": "\N{CHOCOLATE BAR}",
+    "lollipops": "\N{LOLLIPOP}",
+    "cookies": "\N{FORTUNE COOKIE}",
+    "stars": "\N{WHITE MEDIUM STAR}",
+}
+# Bonus drop table: (min_roll, max_roll, quantity)
+# Evaluated in order; first match wins for each candy type
+BONUS_TABLE = {
+    "chocolates": [
+        (100, 100, 6), (95, 99, 5), (90, 94, 4),
+        (80, 89, 3), (75, 79, 2), (70, 74, 1),
+    ],
+    "lollipops": [
+        (100, 100, 4), (95, 99, 3), (85, 94, 2), (75, 84, 1),
+    ],
+    "cookies": [
+        (100, 100, 4), (97, 99, 3), (85, 96, 2), (75, 84, 1),
+    ],
+    "stars": [
+        (100, 100, 4), (97, 99, 3), (85, 96, 2), (75, 84, 1),
+    ],
+}
+
+
+def _resolve_candy_type(raw: str) -> str | None:
+    """Resolve a candy alias to its canonical name, or None."""
+    return CANDY_ALIASES.get(raw.lower())
 
 
 class TrickOrTreatV2(commands.Cog):
@@ -35,7 +74,7 @@ class TrickOrTreatV2(commands.Cog):
         self.bot = bot
         self.config = Config.get_conf(self, 9581437026, force_registration=True)
 
-        default_guild = {"cooldown": 180, "channel": [], "pick": 200, "toggle": False}
+        default_guild = {"cooldown": 180, "channel": [], "pick": 200, "toggle": False, "pickup_cooldown": 600, "steal_cooldown": 600}
         default_global = {"schema": "v1"}
         
 
@@ -56,6 +95,8 @@ class TrickOrTreatV2(commands.Cog):
         # Guild toggle cache to avoid Config I/O on every message
         self._toggle_cache: dict[int, bool] = {}
         self._channel_cache: dict[int, list[int]] = {}
+        self._pickup_cooldown: dict[int, float] = {}
+        self._steal_cooldown: dict[int, float] = {}
         self.replenish_candies.start()
 
     def cog_unload(self):
@@ -121,6 +162,8 @@ class TrickOrTreatV2(commands.Cog):
         pick = await self.config.guild(ctx.guild).pick()
         if not candy_type:
             candy_type = "candies"
+        else:
+            candy_type = _resolve_candy_type(candy_type) or candy_type
         if number < 0:
             return await ctx.send(
                 "That doesn't sound fun.",
@@ -131,18 +174,7 @@ class TrickOrTreatV2(commands.Cog):
                 "You pretend to eat a candy.",
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
-        if candy_type in ["candies", "candy", "\U0001f36c"]:
-            candy_type = "candies"
-        if candy_type in ["lollipops", "lollipop", "\U0001f36d"]:
-            candy_type = "lollipops"
-        if candy_type in ["stars", "star", "\U00002b50"]:
-            candy_type = "stars"
-        if candy_type in ["chocolate", "chocolates", "\U0001f36b"]:
-            candy_type = "chocolates"
-        if candy_type in ["cookie", "cookies", "\U0001f960"]:
-            candy_type = "cookies"
-        candy_list = ["candies", "chocolates", "lollipops", "cookies", "stars"]
-        if candy_type not in candy_list:
+        if candy_type not in CANDY_TYPES:
             return await ctx.send(
                 "That's not a candy type! Use the inventory command to see what you have.",
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
@@ -304,41 +336,33 @@ class TrickOrTreatV2(commands.Cog):
         """Añade una cantidad específica de caramelos de un tipo al inventario de un usuario."""
         if amount <= 0:
             return await ctx.send("La cantidad debe ser mayor que cero.")
-        candy_type = candy_type.lower()
-        valid_candy_types = ["candies", "chocolates", "lollipops", "cookies", "stars"]
-        candy_emojis = {
-            "candies": "\N{CANDY}",
-            "chocolates": "\N{CHOCOLATE BAR}",
-            "lollipops": "\N{LOLLIPOP}",
-            "cookies": "\N{FORTUNE COOKIE}",
-            "stars": "\N{WHITE MEDIUM STAR}"
-        }
-        # Mapear sinónimos y emojis
-        candy_aliases = {
-            "candy": "candies",
-            "candies": "candies",
-            "chocolate": "chocolates",
-            "chocolates": "chocolates",
-            "lollipop": "lollipops",
-            "lollipops": "lollipops",
-            "cookie": "cookies",
-            "cookies": "cookies",
-            "star": "stars",
-            "stars": "stars",
-            "\N{CANDY}": "candies",
-            "\N{CHOCOLATE BAR}": "chocolates",
-            "\N{LOLLIPOP}": "lollipops",
-            "\N{FORTUNE COOKIE}": "cookies",
-            "\N{WHITE MEDIUM STAR}": "stars"
-        }
-        candy_type = candy_aliases.get(candy_type, candy_type)
-        if candy_type not in valid_candy_types:
-            return await ctx.send("Tipo de caramelo inválido. Los tipos válidos son: candies, chocolates, lollipops, cookies, stars.")
+        resolved = _resolve_candy_type(candy_type)
+        if resolved is None:
+            return await ctx.send(f"Tipo de caramelo inválido. Los tipos válidos son: {', '.join(CANDY_TYPES)}.")
         userdata = await self.config.user(user).all()
-        userdata[candy_type] += amount
+        userdata[resolved] += amount
         await self.config.user(user).set(userdata)
-        emoji = candy_emojis.get(candy_type, '')
-        await ctx.send(f"Se han añadido {amount} {candy_type} {emoji} al inventario de {user.display_name}.")
+        emoji = CANDY_EMOJIS.get(resolved, '')
+        await ctx.send(f"Se han añadido {amount} {resolved} {emoji} al inventario de {user.display_name}.")
+
+    @commands.guild_only()
+    @checks.admin_or_permissions(administrator=True)
+    @commands.command()
+    async def totremovecandy(self, ctx, user: discord.Member, candy_type: str, amount: int):
+        """Quita una cantidad específica de caramelos de un tipo del inventario de un usuario."""
+        if amount <= 0:
+            return await ctx.send("La cantidad debe ser mayor que cero.")
+        resolved = _resolve_candy_type(candy_type)
+        if resolved is None:
+            return await ctx.send(f"Tipo de caramelo inválido. Los tipos válidos son: {', '.join(CANDY_TYPES)}.")
+        userdata = await self.config.user(user).all()
+        if userdata[resolved] < amount:
+            emoji = CANDY_EMOJIS.get(resolved, '')
+            return await ctx.send(f"{user.display_name} solo tiene {userdata[resolved]} {resolved} {emoji}. No se pueden quitar {amount}.")
+        userdata[resolved] -= amount
+        await self.config.user(user).set(userdata)
+        emoji = CANDY_EMOJIS.get(resolved, '')
+        await ctx.send(f"Se han quitado {amount} {resolved} {emoji} del inventario de {user.display_name}. Ahora tiene {userdata[resolved]} {resolved} {emoji}.")
 
     @commands.guild_only()
     @commands.command()
@@ -454,6 +478,7 @@ class TrickOrTreatV2(commands.Cog):
             em.description += f"\n{userdata['cookies']} \N{FORTUNE COOKIE}"
         if userdata["stars"]:
             em.description += f"\n{userdata['stars']} \N{WHITE MEDIUM STAR}"
+        em.description += f"\n\n\N{CANDY} **Eaten**: {humanize_number(userdata['eaten'])}"
         if sickness in range(41, 56):
             em.description += f"\n\n**Sickness is over 40/100**\n*You don't feel so good...*"
         elif sickness in range(56, 71):
@@ -496,10 +521,48 @@ class TrickOrTreatV2(commands.Cog):
             await ctx.send(f"Trick or treating cooldown time set to {cooldown_time}s.")
 
     @commands.guild_only()
-    @commands.cooldown(1, 600, discord.ext.commands.BucketType.user)
+    @checks.mod_or_permissions(administrator=True)
+    @commands.command()
+    async def totpickupcooldown(self, ctx, seconds: int = 0):
+        """Set the cooldown time for the pickup command (default: 600s)."""
+        if seconds < 0:
+            return await ctx.send("Nice try.")
+        if seconds == 0:
+            await self.config.guild(ctx.guild).pickup_cooldown.set(600)
+            return await ctx.send("Pickup cooldown reset to 10m (600s).")
+        val = max(30, seconds)
+        await self.config.guild(ctx.guild).pickup_cooldown.set(val)
+        await ctx.send(f"Pickup cooldown set to {val}s.")
+
+    @commands.guild_only()
+    @checks.mod_or_permissions(administrator=True)
+    @commands.command()
+    async def totstealcooldown(self, ctx, seconds: int = 0):
+        """Set the cooldown time for the stealcandy command (default: 600s)."""
+        if seconds < 0:
+            return await ctx.send("Nice try.")
+        if seconds == 0:
+            await self.config.guild(ctx.guild).steal_cooldown.set(600)
+            return await ctx.send("Steal cooldown reset to 10m (600s).")
+        val = max(30, seconds)
+        await self.config.guild(ctx.guild).steal_cooldown.set(val)
+        await ctx.send(f"Steal cooldown set to {val}s.")
+
+    @commands.guild_only()
     @commands.command()
     async def pickup(self, ctx):
         """Pick up some candy, if there is any."""
+        cooldown_secs = await self.config.guild(ctx.guild).pickup_cooldown()
+        bucket = self._pickup_cooldown
+        retry_after = bucket.get(ctx.author.id, 0)
+        now = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        if now < retry_after:
+            remaining = int(retry_after - now)
+            return await ctx.send(
+                f"You need to wait {remaining}s before picking up candy again.",
+                reference=ctx.message.to_reference(fail_if_not_exists=False),
+            )
+        bucket[ctx.author.id] = now + cooldown_secs
         candies = await self.config.user(ctx.author).candies()
         to_pick = await self.config.guild(ctx.guild).pick()
         if to_pick <= 0:
@@ -521,10 +584,20 @@ class TrickOrTreatV2(commands.Cog):
         await message.edit(content=f"You found {found} \N{CANDY}!")
 
     @commands.guild_only()
-    @commands.cooldown(1, 600, discord.ext.commands.BucketType.user)
     @commands.command()
     async def stealcandy(self, ctx, user: discord.Member = None):
         """Steal some candy."""
+        cooldown_secs = await self.config.guild(ctx.guild).steal_cooldown()
+        bucket = self._steal_cooldown
+        retry_after = bucket.get(ctx.author.id, 0)
+        now = datetime.datetime.now(datetime.timezone.utc).timestamp()
+        if now < retry_after:
+            remaining = int(retry_after - now)
+            return await ctx.send(
+                f"You need to wait {remaining}s before stealing again.",
+                reference=ctx.message.to_reference(fail_if_not_exists=False),
+            )
+        bucket[ctx.author.id] = now + cooldown_secs
         guild_users = [m.id for m in ctx.guild.members if not m.bot and m != ctx.author]
         candy_users = await self.config._all_from_scope(scope="USER")
         valid_user = list(set(guild_users) & set(candy_users))
@@ -799,70 +872,18 @@ class TrickOrTreatV2(commands.Cog):
             )
         await self.config.user(message.author).last_tot.set(str(now))
         candy = random.randint(1, 25)
-        lollipop = random.randint(0, 100)
-        star = random.randint(0, 100)
-        chocolates = random.randint(0, 100)
-        cookie = random.randint(0, 100)
         win_message = f"{message.author.mention}\nYou received:\n{candy}\N{CANDY}"
         await self.config.user(message.author).candies.set(userdata["candies"] + candy)
 
-        if chocolates == 100:
-            await self.config.user(message.author).chocolates.set(userdata["chocolates"] + 6)
-            win_message += "\n**BONUS**: 6 \N{CHOCOLATE BAR}"
-        elif 99 >= chocolates >= 95:
-            await self.config.user(message.author).chocolates.set(userdata["chocolates"] + 5)
-            win_message += "\n**BONUS**: 5 \N{CHOCOLATE BAR}"
-        elif 94 >= chocolates >= 90:
-            await self.config.user(message.author).chocolates.set(userdata["chocolates"] + 4)
-            win_message += "\n**BONUS**: 4 \N{CHOCOLATE BAR}"
-        elif 89 >= chocolates >= 80:
-            await self.config.user(message.author).chocolates.set(userdata["chocolates"] + 3)
-            win_message += "\n**BONUS**: 3 \N{CHOCOLATE BAR}"
-        elif 79 >= chocolates >= 75:
-            await self.config.user(message.author).chocolates.set(userdata["chocolates"] + 2)
-            win_message += "\n**BONUS**: 2 \N{CHOCOLATE BAR}"
-        elif 74 >= chocolates >= 70:
-            await self.config.user(message.author).chocolates.set(userdata["chocolates"] + 1)
-            win_message += "\n**BONUS**: 1 \N{CHOCOLATE BAR}"
-
-        if lollipop == 100:
-            await self.config.user(message.author).lollipops.set(userdata["lollipops"] + 4)
-            win_message += "\n**BONUS**: 4 \N{LOLLIPOP}"
-        elif 99 >= lollipop >= 95:
-            await self.config.user(message.author).lollipops.set(userdata["lollipops"] + 3)
-            win_message += "\n**BONUS**: 3 \N{LOLLIPOP}"
-        elif 94 >= lollipop >= 85:
-            await self.config.user(message.author).lollipops.set(userdata["lollipops"] + 2)
-            win_message += "\n**BONUS**: 2 \N{LOLLIPOP}"
-        elif 84 >= lollipop >= 75:
-            await self.config.user(message.author).lollipops.set(userdata["lollipops"] + 1)
-            win_message += "\n**BONUS**: 1 \N{LOLLIPOP}"
-
-        if cookie == 100:
-            await self.config.user(message.author).cookies.set(userdata["cookies"] + 4)
-            win_message += "\n**BONUS**: 4 \N{FORTUNE COOKIE}"
-        elif 99 >= cookie >= 97:
-            await self.config.user(message.author).cookies.set(userdata["cookies"] + 3)
-            win_message += "\n**BONUS**: 3 \N{FORTUNE COOKIE}"
-        elif 96 >= cookie >= 85:
-            await self.config.user(message.author).cookies.set(userdata["cookies"] + 2)
-            win_message += "\n**BONUS**: 2 \N{FORTUNE COOKIE}"
-        elif 84 >= cookie >= 75:
-            await self.config.user(message.author).cookies.set(userdata["cookies"] + 1)
-            win_message += "\n**BONUS**: 1 \N{FORTUNE COOKIE}"
-
-        if star == 100:
-            await self.config.user(message.author).stars.set(userdata["stars"] + 4)
-            win_message += "\n**BONUS**: 4 \N{WHITE MEDIUM STAR}"
-        elif 99 >= star >= 97:
-            await self.config.user(message.author).stars.set(userdata["stars"] + 3)
-            win_message += "\n**BONUS**: 3 \N{WHITE MEDIUM STAR}"
-        elif 96 >= star >= 85:
-            await self.config.user(message.author).stars.set(userdata["stars"] + 2)
-            win_message += "\n**BONUS**: 2 \N{WHITE MEDIUM STAR}"
-        elif 84 >= star >= 75:
-            await self.config.user(message.author).stars.set(userdata["stars"] + 1)
-            win_message += "\n**BONUS**: 1 \N{WHITE MEDIUM STAR}"
+        # Apply bonus drops from table
+        for bonus_type, tiers in BONUS_TABLE.items():
+            roll = random.randint(0, 100)
+            for min_r, max_r, qty in tiers:
+                if min_r <= roll <= max_r:
+                    current = userdata.get(bonus_type, 0)
+                    await getattr(self.config.user(message.author), bonus_type).set(current + qty)
+                    win_message += f"\n**BONUS**: {qty} {CANDY_EMOJIS[bonus_type]}"
+                    break
 
         walking_messages = [
             "*You hear footsteps...*",
