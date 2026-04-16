@@ -1,13 +1,17 @@
 import asyncio
 import datetime
+import logging
 from typing import Literal, Optional
 
 import discord
 import random
 import math
+from discord.ext import tasks
 from redbot.core import commands, checks, Config, bank
 from redbot.core.utils.chat_formatting import box, pagify, humanize_number
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
+
+logger = logging.getLogger("red.killerbite95.trickortreat")
 
 __version__ = "2.0.0"
 __author__ = ["aikaterna", "Killerbite95"]
@@ -49,12 +53,13 @@ class TrickOrTreatV2(commands.Cog):
         self.config.register_user(**default_user)
         self.config.register_guild(**default_guild)
         self.config.register_global(**default_global)
-        self.replenish_task = self.bot.loop.create_task(self.replenish_candies())
+        # Guild toggle cache to avoid Config I/O on every message
+        self._toggle_cache: dict[int, bool] = {}
+        self._channel_cache: dict[int, list[int]] = {}
+        self.replenish_candies.start()
 
-    
     def cog_unload(self):
-        if self.replenish_task:
-            self.replenish_task.cancel()
+        self.replenish_candies.cancel()
     async def cleanup(self):
         # Schema didn't exist before, so it will be initialized at v1.
         # This will also run once for new cog installs
@@ -71,19 +76,19 @@ class TrickOrTreatV2(commands.Cog):
                 del user["chocolate"]
         await self.config.schema.set("v2")
 
+    @tasks.loop(hours=3)
     async def replenish_candies(self):
-            await self.bot.wait_until_red_ready()
-            while True:
-                await asyncio.sleep(random.randint(7200, 14400))  # Espera entre 2 y 4 horas
-                for guild in self.bot.guilds:
-                    pick = await self.config.guild(guild).pick()
-                    added_candies = random.randint(50, 100)  # Cantidad de caramelos a añadir
-                    await self.config.guild(guild).pick.set(pick + added_candies)
-                    # Opcional: Notificar en un canal específico que se han añadido caramelos
-                    # Puedes descomentar las siguientes líneas si deseas enviar un mensaje al canal principal
-                    # channel = guild.system_channel or guild.text_channels[0]
-                    # if channel:
-                    #     await channel.send(f"¡Se han añadido {added_candies} 🍬 al servidor!")
+        for guild in self.bot.guilds:
+            try:
+                pick = await self.config.guild(guild).pick()
+                added_candies = random.randint(50, 100)
+                await self.config.guild(guild).pick.set(pick + added_candies)
+            except Exception:
+                logger.exception(f"Error replenishing candies for guild {guild.id}")
+
+    @replenish_candies.before_loop
+    async def before_replenish(self):
+        await self.bot.wait_until_red_ready()
 
 
     @commands.guild_only()
@@ -168,7 +173,7 @@ class TrickOrTreatV2(commands.Cog):
             "You earnestly consume",
         ]
         if candy_type in ["candies", "candy"]:
-            if (userdata["sickness"] + number * 2) in range(70, 95):
+            if 70 <= (userdata["sickness"] + number * 2) < 95:
                 await ctx.send(
                     "After all that candy, sugar doesn't sound so good.",
                     reference=ctx.message.to_reference(fail_if_not_exists=False),
@@ -176,7 +181,7 @@ class TrickOrTreatV2(commands.Cog):
                 yuck = random.randint(1, 10)
                 if yuck == 10:
                     await self.config.user(ctx.author).sickness.set(userdata["sickness"] + 25)
-                if yuck in range(1, 9):
+                else:
                     await self.config.user(ctx.author).sickness.set(userdata["sickness"] + (yuck * 2))
 
                 if userdata["candies"] > 3 + number:
@@ -346,9 +351,8 @@ class TrickOrTreatV2(commands.Cog):
                 "Not in this reality.",
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
-        candy_price = int(round(await bank.get_balance(ctx.author)) * 0.04) * pieces
-        if candy_price in range(0, 10):
-            candy_price = pieces * 10
+        per_piece = max(10, int(round(await bank.get_balance(ctx.author)) * 0.04))
+        candy_price = per_piece * pieces
         try:
             await bank.withdraw_credits(ctx.author, candy_price)
         except ValueError:
@@ -387,29 +391,25 @@ class TrickOrTreatV2(commands.Cog):
             name="Name",
         )
         scoreboard_msg = self._red(header)
-        for pos, account in enumerate(sorted_acc):
+        guild_member_ids = {m.id for m in ctx.guild.members}
+        rank = 0
+        for _pos, account in enumerate(sorted_acc):
             if account[1]["eaten"] == 0:
                 continue
-            try:
-                if account[0] in [member.id for member in ctx.guild.members]:
-                    user_obj = ctx.guild.get_member(account[0])
-                else:
-                    user_obj = await self.bot.fetch_user(account[0])
-            except AttributeError:
-                user_obj = await self.bot.fetch_user(account[0])
-
-            if user_obj.discriminator != "0":
-                if len(user_obj.name) > 28:
-                    user_name = f"{user_obj.name[:19]}...#{user_obj.discriminator}"
-                else:
-                    user_name = f"{user_obj.name}#{user_obj.discriminator}"
+            uid = account[0]
+            if uid in guild_member_ids:
+                user_obj = ctx.guild.get_member(uid)
             else:
-                if len(user_obj.name) > 28:
-                    user_name = f"{user_obj.name[:25]}..."
-                else:
-                    user_name = user_obj.name
+                user_obj = self.bot.get_user(uid)
+            if user_obj is None:
+                user_name = f"User {uid}"
+            elif len(user_obj.display_name) > 28:
+                user_name = f"{user_obj.display_name[:25]}..."
+            else:
+                user_name = user_obj.display_name
 
-            user_idx = pos + 1
+            rank += 1
+            user_idx = rank
             if user_obj == ctx.author:
                 user_highlight = self._yellow(f"<<{user_name}>>")
                 scoreboard_msg += (
@@ -502,8 +502,15 @@ class TrickOrTreatV2(commands.Cog):
         """Pick up some candy, if there is any."""
         candies = await self.config.user(ctx.author).candies()
         to_pick = await self.config.guild(ctx.guild).pick()
+        if to_pick <= 0:
+            message = await ctx.send(
+                "You start searching the area for candy...",
+                reference=ctx.message.to_reference(fail_if_not_exists=False),
+            )
+            await asyncio.sleep(3)
+            return await message.edit(content="There's no candy left on the ground!")
         chance = random.randint(1, 100)
-        found = round((chance / 100) * to_pick)
+        found = min(round((chance / 100) * to_pick), to_pick)
         await self.config.user(ctx.author).candies.set(candies + found)
         await self.config.guild(ctx.guild).pick.set(to_pick - found)
         message = await ctx.send(
@@ -518,7 +525,7 @@ class TrickOrTreatV2(commands.Cog):
     @commands.command()
     async def stealcandy(self, ctx, user: discord.Member = None):
         """Steal some candy."""
-        guild_users = [m.id for m in ctx.guild.members if m is not m.bot and not m == ctx.author]
+        guild_users = [m.id for m in ctx.guild.members if not m.bot and m != ctx.author]
         candy_users = await self.config._all_from_scope(scope="USER")
         valid_user = list(set(guild_users) & set(candy_users))
         if not valid_user:
@@ -526,30 +533,30 @@ class TrickOrTreatV2(commands.Cog):
                 "No one has any candy yet!",
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
-        if not user:
-            picked_user = self.bot.get_user(random.choice(valid_user))
-        elif user == ctx.author or user == user.bot:
-            picked_user = self.bot.get_user(random.choice(valid_user))
-        elif user != ctx.author or user != user.bot:
+        if user and user != ctx.author and not user.bot:
             picked_user = user
         else:
             picked_user = self.bot.get_user(random.choice(valid_user))
 
-        if picked_user.discriminator != "0":
-            picked_user_name = f"{picked_user.name}#{picked_user.discriminator}"
-        else:
-            picked_user_name = picked_user.name
+        if picked_user is None:
+            return await ctx.send(
+                "You couldn't find anyone to steal from.",
+                reference=ctx.message.to_reference(fail_if_not_exists=False),
+            )
+
+        picked_user_name = picked_user.display_name
 
         picked_candy_now = await self.config.user(picked_user).candies()
         if picked_candy_now == 0:
             chance = random.randint(1, 25)
             if chance in range(21, 25):
                 new_picked_user = self.bot.get_user(random.choice(valid_user))
-
-                if new_picked_user.discriminator != "0":
-                    new_picked_user_name = f"{new_picked_user.name}#{new_picked_user.discriminator}"
-                else:
-                    new_picked_user_name = new_picked_user.name
+                if new_picked_user is None:
+                    return await ctx.send(
+                        "You snuck around for a while but didn't find anything.",
+                        reference=ctx.message.to_reference(fail_if_not_exists=False),
+                    )
+                new_picked_user_name = new_picked_user.display_name
 
                 new_picked_candy_now = await self.config.user(new_picked_user).candies()
                 if chance in range(24, 25):
@@ -652,7 +659,7 @@ class TrickOrTreatV2(commands.Cog):
     @commands.group()
     async def totchannel(self, ctx):
         """Channel management for Trick or Treat."""
-        if ctx.invoked_subcommand is not None or isinstance(ctx.invoked_subcommand, commands.Group):
+        if ctx.invoked_subcommand is not None:
             return
         channel_list = await self.config.guild(ctx.guild).channel()
         channel_msg = "Trick or Treat Channels:\n"
@@ -677,6 +684,7 @@ class TrickOrTreatV2(commands.Cog):
         if channel.id not in channel_list:
             channel_list.append(channel.id)
             await self.config.guild(ctx.guild).channel.set(channel_list)
+            self._channel_cache[ctx.guild.id] = channel_list
             await ctx.send(f"{channel.mention} added to the valid Trick or Treat channels.{toggle_info}")
         else:
             await ctx.send(f"{channel.mention} is already in the list of Trick or Treat channels.{toggle_info}")
@@ -691,6 +699,7 @@ class TrickOrTreatV2(commands.Cog):
         else:
             return await ctx.send(f"{channel.mention} not in whitelist.")
         await self.config.guild(ctx.guild).channel.set(channel_list)
+        self._channel_cache[ctx.guild.id] = channel_list
         await ctx.send(f"{channel.mention} removed from the list of Trick or Treat channels.")
 
     @commands.guild_only()
@@ -706,6 +715,7 @@ class TrickOrTreatV2(commands.Cog):
             await self.config.guild(ctx.guild).channel.set(channel_list)
             msg += f"Trick or Treating channel added: {ctx.message.channel.mention}"
         await self.config.guild(ctx.guild).toggle.set(not toggle)
+        self._toggle_cache[ctx.guild.id] = not toggle
         await ctx.send(msg)
         
     @commands.guild_only()
@@ -734,33 +744,39 @@ class TrickOrTreatV2(commands.Cog):
             return
         if message.author.bot:
             return
+
+        guild = message.guild
+        # Fast toggle check using cache to avoid Config I/O on every message
+        if guild.id not in self._toggle_cache:
+            self._toggle_cache[guild.id] = await self.config.guild(guild).toggle()
+        if not self._toggle_cache[guild.id]:
+            return
+
+        if guild.id not in self._channel_cache:
+            self._channel_cache[guild.id] = await self.config.guild(guild).channel()
+        if message.channel.id not in self._channel_cache[guild.id]:
+            return
+
         if not await self.has_perm(message.author):
             return
 
+        # Passive sickness recovery and pool growth
         chance = random.randint(1, 12)
         if chance % 4 == 0:
             sickness_now = await self.config.user(message.author).sickness()
             sick_chance = random.randint(1, 12)
             if sick_chance % 3 == 0:
-                new_sickness = sickness_now - sick_chance
-                if new_sickness < 0:
-                    new_sickness = 0
+                new_sickness = max(0, sickness_now - sick_chance)
                 await self.config.user(message.author).sickness.set(new_sickness)
 
         pick_chance = random.randint(1, 12)
         if pick_chance % 4 == 0:
             random_candies = random.randint(1, 3)
-            guild_pool = await self.config.guild(message.guild).pick()
-            await self.config.guild(message.guild).pick.set(guild_pool + random_candies)
+            guild_pool = await self.config.guild(guild).pick()
+            await self.config.guild(guild).pick.set(guild_pool + random_candies)
 
-        content = (message.content).lower()
+        content = message.content.lower()
         if not content.startswith("trick or treat"):
-            return
-        toggle = await self.config.guild(message.guild).toggle()
-        if not toggle:
-            return
-        channel = await self.config.guild(message.guild).channel()
-        if message.channel.id not in channel:
             return
         userdata = await self.config.user(message.author).all()
 
