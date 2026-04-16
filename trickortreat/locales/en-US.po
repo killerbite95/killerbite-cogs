@@ -1,0 +1,820 @@
+# English translations for TrickOrTreat cog.
+# Copyright (C) 2024 Killerbite95
+# This file is distributed under the same license as the TrickOrTreat package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: TrickOrTreat 3.0.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-01-01 00:00+0000\n"
+"PO-Revision-Date: 2024-01-01 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language: en-US\n"
+"Language-Team: en-US\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+
+msgid "🎃 Trick or Treat v{version}"
+msgstr ""
+
+msgid "🎉 Guild Event Complete!"
+msgstr ""
+
+msgid ""
+"The event goal has been reached!\n"
+"\n"
+"🍬 All participants receive **{reward}** bonus candies!\n"
+"*Congratulations!* 🎃"
+msgstr ""
+
+msgid "That doesn't sound fun."
+msgstr ""
+
+msgid "You pretend to eat a candy."
+msgstr ""
+
+msgid "That's not a candy type! Use the inventory command to see what you have."
+msgstr ""
+
+msgid "You don't have that many {candy_type}."
+msgstr ""
+
+msgid "You contemplate the idea of eating {candy_type}."
+msgstr ""
+
+msgid "You leisurely enjoy"
+msgstr ""
+
+msgid "You take the time to savor"
+msgstr ""
+
+msgid "You eat"
+msgstr ""
+
+msgid "You scarf down"
+msgstr ""
+
+msgid "You sigh in contentment after eating"
+msgstr ""
+
+msgid "You gobble up"
+msgstr ""
+
+msgid "You make a meal of"
+msgstr ""
+
+msgid "You devour"
+msgstr ""
+
+msgid "You monstrously pig out on"
+msgstr ""
+
+msgid "You hastily chomp down on"
+msgstr ""
+
+msgid "You daintily partake of"
+msgstr ""
+
+msgid "You earnestly consume"
+msgstr ""
+
+msgid "✨ Golden Candy!"
+msgstr ""
+
+msgid ""
+"{eat_phrase} {number} golden {candy_word}!\n"
+"\n"
+"The golden shimmer fills you with warmth.\n"
+"**+{eaten_value}** eaten count! *(10× bonus!)*\n"
+"No sickness gained!"
+msgstr ""
+
+msgid "candy"
+msgstr ""
+
+msgid "candies"
+msgstr ""
+
+msgid "🌶️ Ghost Pepper!"
+msgstr ""
+
+msgid ""
+"{eat_phrase} {number} ghost {pepper_word}!\n"
+"\n"
+"🔥 **SPICY!** Your mouth is on fire!\n"
+"...but the heat burns away all your sickness!\n"
+"💊 Sickness reset to **0**!"
+msgstr ""
+
+msgid "pepper"
+msgstr ""
+
+msgid "peppers"
+msgstr ""
+
+msgid "After all that candy, sugar doesn't sound so good."
+msgstr ""
+
+msgid ""
+"You begin to think you don't need all this candy, maybe...\n"
+"*{lost_candy} candies are left behind*"
+msgstr ""
+
+msgid "You feel absolutely disgusted. At least you don't have any candies left."
+msgstr ""
+
+msgid ""
+"You toss your candies on the ground in disgust.\n"
+"*{lost_candy} candies are left behind*"
+msgstr ""
+
+msgid "{eat_phrase} {number} {pluralcandy}. (Total eaten: `{eaten_count}` 🍬)"
+msgstr ""
+
+msgid ""
+"{eat_phrase} {number} {pluralchoc}. You feel slightly better!\n"
+"*Sickness has gone down by {sickness_down}*"
+msgstr ""
+
+msgid ""
+"{eat_phrase} {number} {pluralpop}. You feel slightly better!\n"
+"*Sickness has gone down by {sickness_down}*"
+msgstr ""
+
+msgid ""
+"You feel worse!\n"
+"*Sickness has gone up by {amount}*"
+msgstr ""
+
+msgid ""
+"You feel better!\n"
+"*Sickness has gone down by {amount}*"
+msgstr ""
+
+msgid "{eat_phrase} {number} {pluralcookie}. {phrase}"
+msgstr ""
+
+msgid ""
+"{eat_phrase} {number} {pluralstar}. You feel great!\n"
+"*Sickness has been reset*"
+msgstr ""
+
+msgid "🎃 Guild Candy Pool"
+msgstr ""
+
+msgid "**{pick}** 🍬 on the ground"
+msgstr ""
+
+msgid "Amount must be greater than zero."
+msgstr ""
+
+msgid "Invalid candy type. Valid types are: {types}."
+msgstr ""
+
+msgid "Added {amount} {resolved} {emoji} to {name}'s inventory."
+msgstr ""
+
+msgid "{name} only has {current} {resolved} {emoji}. Cannot remove {amount}."
+msgstr ""
+
+msgid "Removed {amount} {resolved} {emoji} from {name}'s inventory. Now has {current} {resolved} {emoji}."
+msgstr ""
+
+msgid "Not in this reality."
+msgstr ""
+
+msgid "Not enough {credits_name} ({candy_price} required)."
+msgstr ""
+
+msgid "🍬 Candy Purchased!"
+msgstr ""
+
+msgid "Bought **{pieces}** candies for **{candy_price}** {credits_name}."
+msgstr ""
+
+msgid "🏪 Candy Shop"
+msgstr ""
+
+msgid ""
+"Spend your hard-earned candies on special treats!\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+msgstr ""
+
+msgid "Use `{prefix}totbuy <item> [amount]` to purchase!"
+msgstr ""
+
+msgid "🎃 Your candies: {candies} | Trick or Treat v{version}"
+msgstr ""
+
+msgid "Unknown item! Available: {items}"
+msgstr ""
+
+msgid "Nice try."
+msgstr ""
+
+msgid "🛡️ You already have an active shield! ({remaining} remaining)"
+msgstr ""
+
+msgid "Not enough candies! You need **{total_cost}** 🍬 but have **{user_candies}** 🍬."
+msgstr ""
+
+msgid "🛡️ Shield Activated!"
+msgstr ""
+
+msgid ""
+"A magical shield now protects your candy bag!\n"
+"\n"
+"⏱️ Duration: **{shield_hours} hours**\n"
+"🍬 Cost: **{total_cost}** candies"
+msgstr ""
+
+msgid "{emoji} Purchase Complete!"
+msgstr ""
+
+msgid ""
+"Bought **{amount}** {item_name} for **{total_cost}** 🍬\n"
+"Remaining candies: **{remaining}** 🍬"
+msgstr ""
+
+msgid "No one has any candy."
+msgstr ""
+
+msgid "Candies Eaten"
+msgstr ""
+
+msgid "Name"
+msgstr ""
+
+msgid "\N{CANDY} Global Leaderboard \N{CANDY}"
+msgstr ""
+
+msgid "🎃 Page {current}/{total} | Trick or Treat v{version}"
+msgstr ""
+
+msgid "🎃 {name}'s Candy Bag"
+msgstr ""
+
+msgid "🍬 Inventory"
+msgstr ""
+
+msgid ""
+"\n"
+"⚠️ *Rewards quartered! You might lose candy...*"
+msgstr ""
+
+msgid ""
+"\n"
+"⚠️ *Rewards halved! Eat chocolate to recover.*"
+msgstr ""
+
+msgid ""
+"\n"
+"😨 *You really don't feel so good...*"
+msgstr ""
+
+msgid ""
+"\n"
+"😰 *You don't feel so great...*"
+msgstr ""
+
+msgid "💊 Sickness"
+msgstr ""
+
+msgid "🛡️ **Shield:** ✅ Active ({remaining} left)"
+msgstr ""
+
+msgid "📋 Status"
+msgstr ""
+
+msgid "📊 Stats"
+msgstr ""
+
+msgid "🎃 Page {current}/{total} — Trick or Treat v{version}"
+msgstr ""
+
+msgid "📖 Guide — How to Play?"
+msgstr ""
+
+msgid ""
+"Welcome to **Trick or Treat**! 🎃\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"**How to start?**\n"
+"Type **`trick or treat`** in an enabled channel to go door-to-door asking for candy. But be careful! You don't always get treats...\n"
+"\n"
+"**🎁 Treat (75%)** — You receive candy and possible bonus drops.\n"
+"**👻 Trick (25%)** — Something bad happens: lose candy, get sick, or both.\n"
+"\n"
+"**Goal:** Eat as many candies as possible and climb the global leaderboard.\n"
+"\n"
+"Use `{p}cinventory` to see your inventory and `{p}cboard` for the leaderboard."
+msgstr ""
+
+msgid "🍬 Guide — Candy Types"
+msgstr ""
+
+msgid ""
+"Each candy type has a special effect when eaten:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"🍬 **Candies** — The main candy. Eating them increases your *eaten* score, but **also raises sickness** (+2 per candy).\n"
+"\n"
+"🍫 **Chocolates** — Reduces sickness by **10** per piece. Sweet medicine!\n"
+"\n"
+"🍭 **Lollipops** — Reduces sickness by **20** per piece. More effective.\n"
+"\n"
+"🥠 **Cookies** — Sets your sickness to a **random** number (0-100). A gamble!\n"
+"\n"
+"⭐ **Stars** — Resets your sickness to **0** instantly. The best!\n"
+"\n"
+"✨ **Golden Candy** — *LEGENDARY*. Worth **10×** in score and **no sickness**.\n"
+"\n"
+"🌶️ **Ghost Pepper** — *ULTRA RARE*. Resets sickness to **0** when eaten."
+msgstr ""
+
+msgid "📝 How to eat"
+msgstr ""
+
+msgid "💊 Guide — Sickness System"
+msgstr ""
+
+msgid ""
+"Sickness rises when you eat candies and affects your rewards:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"😊 **0-40** — Everything normal. No penalty.\n"
+"\n"
+"😰 **41-80** — You start feeling unwell, but no punishment yet.\n"
+"\n"
+"🤮 **81-100** — ⚠️ **Rewards halved.** If you were going to get 20 candies, you get 10.\n"
+"\n"
+"💀 **>100** — ⚠️ **Rewards quartered** + a **50% chance** of **dropping** candies on the ground when trick-or-treating.\n"
+"\n"
+"**How to cure?**\n"
+"🍫 Chocolates (-10) · 🍭 Lollipops (-20) · ⭐ Stars (reset) · 🌶️ Ghost Peppers (reset)\n"
+"You also recover a little passively by chatting in ToT channels."
+msgstr ""
+
+msgid "💡 Tip"
+msgstr ""
+
+msgid "Don't let sickness go above 80. Buy cures from the shop if you don't get them as bonus drops."
+msgstr ""
+
+msgid "🏪 Guide — Shop & Shield"
+msgstr ""
+
+msgid ""
+"Spend your candies at the shop to buy useful items:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"Use `{p}totshop` to browse and `{p}totbuy <item> [amount]` to purchase.\n"
+"\n"
+"🍫 **Chocolate** — 15 🍬 · Reduces sickness\n"
+"🍭 **Lollipop** — 30 🍬 · Reduces more sickness\n"
+"🥠 **Cookie** — 25 🍬 · Random sickness\n"
+"⭐ **Star** — 50 🍬 · Resets sickness\n"
+"🛡️ **Shield** — 75 🍬 · Theft protection\n"
+"✨ **Golden Candy** — 200 🍬 · 10× score, no sickness\n"
+msgstr ""
+
+msgid "🛡️ What does the Shield do?"
+msgstr ""
+
+msgid "The shield protects your candy bag from theft via `stealcandy`. It lasts several hours (configurable by admins). You can only have **1 active** at a time."
+msgstr ""
+
+msgid "🔥 Guide — Streaks, Stealing & Rare Items"
+msgstr ""
+
+msgid ""
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"**🔥 Daily Streaks**\n"
+"Play `trick or treat` every consecutive day to build your streak.\n"
+"Each streak day adds **×0.1** to your reward multiplier.\n"
+"Day 1: ×1.0 · Day 5: ×1.5 · Day 10: ×2.0 · Max: **×3.0**\n"
+"Miss a day and the streak resets!\n"
+"\n"
+"**🗡️ Stealing Candy**\n"
+"Use `{p}stealcandy [@user]` to attempt a theft.\n"
+"It doesn't always work — there are various success/failure chances.\n"
+"The victim receives a **DM notification** when stolen from. 📩\n"
+"Buy a **🛡️ Shield** to protect yourself.\n"
+"\n"
+"**💎 Rare Items**\n"
+"When doing `trick or treat`, there's a small chance of getting:\n"
+"✨ **Golden Candy** (0.5%) — Worth ×10 when eaten.\n"
+"🌶️ **Ghost Pepper** (0.3%) — Resets your sickness.\n"
+msgstr ""
+
+msgid "📋 Guide — Command List"
+msgstr ""
+
+msgid "🎮 Player"
+msgstr ""
+
+msgid ""
+"`trick or treat` — Go door to door\n"
+"`{p}eatcandy [n] [type]` — Eat candy\n"
+"`{p}cinventory` — View your inventory\n"
+"`{p}totstats [@user]` — Detailed statistics\n"
+"`{p}cboard` — Global eaten leaderboard\n"
+"`{p}totshop` — View the shop\n"
+"`{p}totbuy <item> [n]` — Buy from the shop\n"
+"`{p}buycandy <n>` — Buy candy with bot currency\n"
+"`{p}pickup` — Pick up candy from the ground\n"
+"`{p}stealcandy [@user]` — Steal candy\n"
+"`{p}tothelp` — This guide"
+msgstr ""
+
+msgid "🔧 Admin / Mod"
+msgstr ""
+
+msgid ""
+"`{p}tottoggle` — Toggle the game on/off\n"
+"`{p}totchannel add/remove` — Game channels\n"
+"`{p}totcooldown [s]` — Trick or treat cooldown\n"
+"`{p}totpickupcooldown [s]` — Pickup cooldown\n"
+"`{p}totstealcooldown [s]` — Steal cooldown\n"
+"`{p}totshieldhours [h]` — Shield duration\n"
+"`{p}totbalance` — Candies in the pool\n"
+"`{p}totaddcandies <n>` — Add to pool\n"
+"`{p}totgivecandy @user type n` — Give candy\n"
+"`{p}totremovecandy @user type n` — Remove candy\n"
+"`{p}totevent start/status/stop` — Guild events"
+msgstr ""
+
+msgid "📊 {name}'s Statistics"
+msgstr ""
+
+msgid "🍬 Candy Stats"
+msgstr ""
+
+msgid "🔥 Streaks"
+msgstr ""
+
+msgid "🎭 Trick or Treat"
+msgstr ""
+
+msgid "🗡️ Theft Record"
+msgstr ""
+
+msgid "💎 Rare Items"
+msgstr ""
+
+msgid "🛡️ Shield"
+msgstr ""
+
+msgid "✅ Active ({remaining} left)"
+msgstr ""
+
+msgid ""
+"This will clear ALL saved data for this cog and reset it to the defaults.\n"
+msgstr ""
+
+msgid "If you are absolutely sure you want to do this, use `{prefix}totclearall yes`."
+msgstr ""
+
+msgid "All data for this cog has been cleared."
+msgstr ""
+
+msgid "Trick or treating cooldown time reset to 5m."
+msgstr ""
+
+msgid "Trick or treating cooldown time set to the minimum of 30s."
+msgstr ""
+
+msgid "Trick or treating cooldown time set to {cooldown_time}s."
+msgstr ""
+
+msgid "Pickup cooldown reset to 10m (600s)."
+msgstr ""
+
+msgid "Pickup cooldown set to {val}s."
+msgstr ""
+
+msgid "Steal cooldown reset to 10m (600s)."
+msgstr ""
+
+msgid "Steal cooldown set to {val}s."
+msgstr ""
+
+msgid "Shield duration reset to 4 hours."
+msgstr ""
+
+msgid "Shield duration set to {hours} hours."
+msgstr ""
+
+msgid "You need to wait {remaining}s before picking up candy again."
+msgstr ""
+
+msgid "You start searching the area for candy..."
+msgstr ""
+
+msgid "There's no candy left on the ground!"
+msgstr ""
+
+msgid "You found {found} 🍬!"
+msgstr ""
+
+msgid "You need to wait {remaining}s before stealing again."
+msgstr ""
+
+msgid "No one has any candy yet!"
+msgstr ""
+
+msgid "You couldn't find anyone to steal from."
+msgstr ""
+
+msgid "🛡️ Shield Blocked!"
+msgstr ""
+
+msgid ""
+"You tried to steal from **{name}**, but their candy bag\n"
+"is protected by a **magical shield**! ✨\n"
+"\n"
+"Shield expires in: {remaining}"
+msgstr ""
+
+msgid "You snuck around for a while but didn't find anything."
+msgstr ""
+
+msgid "You see an unsuspecting guildmate..."
+msgstr ""
+
+msgid "There was nothing in {user1}'s pockets, so you picked {user2}'s pockets but they had no candy either!"
+msgstr ""
+
+msgid "There was nothing in {user1}'s pockets, so you looked around again... you saw {user2} in the distance, but you didn't think you could catch up..."
+msgstr ""
+
+msgid "You start sneaking around in the shadows..."
+msgstr ""
+
+msgid "You snuck up on {user} and tried picking their pockets but there was nothing there!"
+msgstr ""
+
+msgid "You start looking around for a target..."
+msgstr ""
+
+msgid "You stealthily move over to an unsuspecting person..."
+msgstr ""
+
+msgid "You found someone to pickpocket, but they had nothing but pocket lint."
+msgstr ""
+
+msgid "You look around furtively..."
+msgstr ""
+
+msgid "You glance around slowly, looking for your target..."
+msgstr ""
+
+msgid "You see someone with a full candy bag..."
+msgstr ""
+
+msgid "You creep closer to the target..."
+msgstr ""
+
+msgid "You hear a sound behind you! When you turn back, your target is gone."
+msgstr ""
+
+msgid "You look away for a moment and your target has vanished."
+msgstr ""
+
+msgid "Something flashes in your peripheral vision, and as you turn to look, your target gets away..."
+msgstr ""
+
+msgid "There seems to be an unsuspecting victim in the corner..."
+msgstr ""
+
+msgid "You stole {stolen} 🍬 from {user}!"
+msgstr ""
+
+msgid "🗡️ Candy Theft Alert!"
+msgstr ""
+
+msgid ""
+"**{thief}** just stole **{stolen}** 🍬 from your bag!\n"
+"\n"
+"Remaining candies: **{remaining}** 🍬\n"
+"\n"
+"*Buy a 🛡️ Shield from the shop to protect yourself!*"
+msgstr ""
+
+msgid ""
+"No active event. Use `{prefix}totevent start <type> <goal>` to start one!\n"
+"Event types: {event_types}"
+msgstr ""
+
+msgid "🎃 Guild Event — {desc}"
+msgstr ""
+
+msgid "Invalid event type! Choose from: {types}"
+msgstr ""
+
+msgid "Goal must be positive!"
+msgstr ""
+
+msgid "Reward must be positive!"
+msgstr ""
+
+msgid "An event is already active! Use `{prefix}totevent stop` to cancel it first."
+msgstr ""
+
+msgid "🎃 New Guild Event Started!"
+msgstr ""
+
+msgid ""
+"**{desc}**\n"
+"\n"
+"{emoji} Goal: **{goal}** candies {event_type}!\n"
+"🍬 Reward: **{reward}** candies per participant!\n"
+"\n"
+"*Everyone's progress counts! Work together!* 🎃"
+msgstr ""
+
+msgid "No active event right now."
+msgstr ""
+
+msgid "No active event to stop."
+msgstr ""
+
+msgid "🎃 Event Cancelled"
+msgstr ""
+
+msgid "The guild event has been cancelled."
+msgstr ""
+
+msgid ""
+"Trick or Treat Channels:\n"
+msgstr ""
+
+msgid ""
+"\n"
+"The game toggle for this server is **Off**. Turn it on with the `{prefix}tottoggle` command."
+msgstr ""
+
+msgid "{channel} added to the valid Trick or Treat channels.{toggle_info}"
+msgstr ""
+
+msgid "{channel} is already in the list of Trick or Treat channels.{toggle_info}"
+msgstr ""
+
+msgid "{channel} not in whitelist."
+msgstr ""
+
+msgid "{channel} removed from the list of Trick or Treat channels."
+msgstr ""
+
+msgid ""
+"Trick or Treating active: {status}.\n"
+msgstr ""
+
+msgid "Trick or Treating channel added: {channel}"
+msgstr ""
+
+msgid "Added {amount} 🍬 to the pool. Now there are {total} 🍬 available to pick up."
+msgstr ""
+
+msgid "Trick or Treat version {version}"
+msgstr ""
+
+msgid "The thought of candy right now doesn't really sound like a good idea."
+msgstr ""
+
+msgid "All the lights on this street are dark..."
+msgstr ""
+
+msgid "It's starting to get late."
+msgstr ""
+
+msgid "The wind howls through the trees. Does it seem darker all of a sudden?"
+msgstr ""
+
+msgid "You start to walk the long distance to the next house..."
+msgstr ""
+
+msgid "You take a moment to count your candy before moving on."
+msgstr ""
+
+msgid "The house you were approaching just turned the light off."
+msgstr ""
+
+msgid "The wind starts to pick up as you look for the next house..."
+msgstr ""
+
+msgid "*You hear footsteps...*"
+msgstr ""
+
+msgid "*You're left alone with your thoughts as you wait for the door to open...*"
+msgstr ""
+
+msgid "*The wind howls through the trees...*"
+msgstr ""
+
+msgid "*Does it feel colder out here all of a sudden?*"
+msgstr ""
+
+msgid "*Somewhere inside the house, you hear wood creaking...*"
+msgstr ""
+
+msgid "*You walk up the path to the door and knock...*"
+msgstr ""
+
+msgid "*You knock on the door...*"
+msgstr ""
+
+msgid "*There's a movement in the shadows by the side of the house...*"
+msgstr ""
+
+msgid "*The door slowly opens...*"
+msgstr ""
+
+msgid "*The ancient wooden door starts to open...*"
+msgstr ""
+
+msgid "*A light turns on overhead...*"
+msgstr ""
+
+msgid "*You hear a scuffling noise...*"
+msgstr ""
+
+msgid "*There's someone talking inside...*"
+msgstr ""
+
+msgid "*The wind whips around your feet...*"
+msgstr ""
+
+msgid "*A crow caws ominously...*"
+msgstr ""
+
+msgid "*You hear an owl hooting in the distance...*"
+msgstr ""
+
+msgid "💔 Lost **{candy_lost}** candies!"
+msgstr ""
+
+msgid "*Better luck next time...* 👻"
+msgstr ""
+
+msgid "🎃 TRICK! — {name}"
+msgstr ""
+
+msgid "⚠️ *Sickness penalty: rewards quartered!*"
+msgstr ""
+
+msgid "🤮 Too Sick!"
+msgstr ""
+
+msgid ""
+"You're so sick that you **dropped** {lost} candies!\n"
+"\n"
+"{face} {bar} **{sickness}**/100\n"
+"*Eat chocolate or lollipops to recover!*"
+msgstr ""
+
+msgid "⚠️ *Sickness penalty: rewards halved!*"
+msgstr ""
+
+msgid "Oh, hello. What a cute costume!"
+msgstr ""
+
+msgid "Look at that costume!"
+msgstr ""
+
+msgid "Out this late at night?"
+msgstr ""
+
+msgid "Here's a little something for you."
+msgstr ""
+
+msgid "The peppermint ones are my favorite."
+msgstr ""
+
+msgid "Come back again later if the light is still on."
+msgstr ""
+
+msgid "Go ahead, take a few."
+msgstr ""
+
+msgid "Aww, look at you. Here, take this."
+msgstr ""
+
+msgid "Don't eat all those at once!"
+msgstr ""
+
+msgid "Well, I think this is the last of it."
+msgstr ""
+
+msgid "**Bonus Drops:**"
+msgstr ""
+
+msgid "🌟 **RARE DROPS:**"
+msgstr ""
+
+msgid "🎃 TREAT! — {name}"
+msgstr ""

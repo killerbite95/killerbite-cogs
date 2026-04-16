@@ -9,7 +9,7 @@ import random
 import math
 from discord.ext import tasks
 from redbot.core import commands, checks, Config, bank
-from redbot.core.i18n import get_locale
+from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils.chat_formatting import box, pagify, humanize_number
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 
@@ -17,6 +17,8 @@ logger = logging.getLogger("red.killerbite95.trickortreat")
 
 __version__ = "3.0.0"
 __author__ = ["aikaterna", "Killerbite95"]
+
+_ = Translator("TrickOrTreat", __file__)
 
 # ──── Halloween Colors ────
 HALLOWEEN_ORANGE = 0xF4731C
@@ -164,259 +166,12 @@ def _streak_multiplier(streak: int) -> float:
     return min(3.0, 1.0 + (streak * 0.1))
 
 
-def _detect_lang() -> str:
-    """Detect language from Red's locale. Returns 'es' or 'en'."""
-    try:
-        locale = get_locale()  # e.g. "es-ES", "en-US", "pt-BR"
-    except Exception:
-        return "en"
-    lang = str(locale).split("-")[0].lower() if locale else "en"
-    return lang if lang in HELP_TEXTS else "en"
-
-
-# ──── Help Page Translations ────
-# Keys use {p} for prefix interpolation
-
-HELP_TEXTS = {
-    "en": {
-        "page": "Page",
-        # Page 1 — Introduction
-        "p1_title": "📖 Guide — How to Play?",
-        "p1_body": (
-            "Welcome to **Trick or Treat**! 🎃\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "**How to start?**\n"
-            "Type **`trick or treat`** in an enabled channel to go door-to-door "
-            "asking for candy. But be careful! You don't always get treats...\n\n"
-            "**🎁 Treat (75%)** — You receive candy and possible bonus drops.\n"
-            "**👻 Trick (25%)** — Something bad happens: lose candy, get sick, or both.\n\n"
-            "**Goal:** Eat as many candies as possible and climb the global leaderboard.\n\n"
-            "Use `{p}cinventory` to see your inventory and `{p}cboard` for the leaderboard."
-        ),
-        # Page 2 — Candy Types
-        "p2_title": "🍬 Guide — Candy Types",
-        "p2_body": (
-            "Each candy type has a special effect when eaten:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🍬 **Candies** — The main candy. Eating them increases your *eaten* score, "
-            "but **also raises sickness** (+2 per candy).\n\n"
-            "🍫 **Chocolates** — Reduces sickness by **10** per piece. Sweet medicine!\n\n"
-            "🍭 **Lollipops** — Reduces sickness by **20** per piece. More effective.\n\n"
-            "🥠 **Cookies** — Sets your sickness to a **random** number (0-100). A gamble!\n\n"
-            "⭐ **Stars** — Resets your sickness to **0** instantly. The best!\n\n"
-            "✨ **Golden Candy** — *LEGENDARY*. Worth **10×** in score and **no sickness**.\n\n"
-            "🌶️ **Ghost Pepper** — *ULTRA RARE*. Resets sickness to **0** when eaten."
-        ),
-        "p2_field_name": "📝 How to eat",
-        "p2_field_val": "`{p}eatcandy [amount] [type]`\nExamples: `{p}eatcandy 3 chocolate` · `{p}eatcandy star`",
-        # Page 3 — Sickness
-        "p3_title": "💊 Guide — Sickness System",
-        "p3_body": (
-            "Sickness rises when you eat candies and affects your rewards:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "😊 **0-40** — Everything normal. No penalty.\n\n"
-            "😰 **41-80** — You start feeling unwell, but no punishment yet.\n\n"
-            "🤮 **81-100** — ⚠️ **Rewards halved.** If you were going to "
-            "get 20 candies, you get 10.\n\n"
-            "💀 **>100** — ⚠️ **Rewards quartered** + a **50% chance** "
-            "of **dropping** candies on the ground when trick-or-treating.\n\n"
-            "**How to cure?**\n"
-            "🍫 Chocolates (-10) · 🍭 Lollipops (-20) · ⭐ Stars (reset) · 🌶️ Ghost Peppers (reset)\n"
-            "You also recover a little passively by chatting in ToT channels."
-        ),
-        "p3_field_name": "💡 Tip",
-        "p3_field_val": "Don't let sickness go above 80. Buy cures from the shop if you don't get them as bonus drops.",
-        # Page 4 — Shop & Shield
-        "p4_title": "🏪 Guide — Shop & Shield",
-        "p4_body": (
-            "Spend your candies at the shop to buy useful items:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Use `{p}totshop` to browse and `{p}totbuy <item> [amount]` to purchase.\n\n"
-            "🍫 **Chocolate** — 15 🍬 · Reduces sickness\n"
-            "🍭 **Lollipop** — 30 🍬 · Reduces more sickness\n"
-            "🥠 **Cookie** — 25 🍬 · Random sickness\n"
-            "⭐ **Star** — 50 🍬 · Resets sickness\n"
-            "🛡️ **Shield** — 75 🍬 · Theft protection\n"
-            "✨ **Golden Candy** — 200 🍬 · 10× score, no sickness\n"
-        ),
-        "p4_field_name": "🛡️ What does the Shield do?",
-        "p4_field_val": (
-            "The shield protects your candy bag from theft via `stealcandy`. "
-            "It lasts several hours (configurable by admins). You can only have **1 active** at a time."
-        ),
-        # Page 5 — Streaks, Stealing, Rare
-        "p5_title": "🔥 Guide — Streaks, Stealing & Rare Items",
-        "p5_body": (
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "**🔥 Daily Streaks**\n"
-            "Play `trick or treat` every consecutive day to build your streak.\n"
-            "Each streak day adds **×0.1** to your reward multiplier.\n"
-            "Day 1: ×1.0 · Day 5: ×1.5 · Day 10: ×2.0 · Max: **×3.0**\n"
-            "Miss a day and the streak resets!\n\n"
-            "**🗡️ Stealing Candy**\n"
-            "Use `{p}stealcandy [@user]` to attempt a theft.\n"
-            "It doesn't always work — there are various success/failure chances.\n"
-            "The victim receives a **DM notification** when stolen from. 📩\n"
-            "Buy a **🛡️ Shield** to protect yourself.\n\n"
-            "**💎 Rare Items**\n"
-            "When doing `trick or treat`, there's a small chance of getting:\n"
-            "✨ **Golden Candy** (0.5%) — Worth ×10 when eaten.\n"
-            "🌶️ **Ghost Pepper** (0.3%) — Resets your sickness.\n"
-        ),
-        # Page 6 — Commands
-        "p6_title": "📋 Guide — Command List",
-        "p6_player": "🎮 Player",
-        "p6_player_val": (
-            "`trick or treat` — Go door to door\n"
-            "`{p}eatcandy [n] [type]` — Eat candy\n"
-            "`{p}cinventory` — View your inventory\n"
-            "`{p}totstats [@user]` — Detailed statistics\n"
-            "`{p}cboard` — Global eaten leaderboard\n"
-            "`{p}totshop` — View the shop\n"
-            "`{p}totbuy <item> [n]` — Buy from the shop\n"
-            "`{p}buycandy <n>` — Buy candy with bot currency\n"
-            "`{p}pickup` — Pick up candy from the ground\n"
-            "`{p}stealcandy [@user]` — Steal candy\n"
-            "`{p}tothelp` — This guide"
-        ),
-        "p6_admin": "🔧 Admin / Mod",
-        "p6_admin_val": (
-            "`{p}tottoggle` — Toggle the game on/off\n"
-            "`{p}totchannel add/remove` — Game channels\n"
-            "`{p}totcooldown [s]` — Trick or treat cooldown\n"
-            "`{p}totpickupcooldown [s]` — Pickup cooldown\n"
-            "`{p}totstealcooldown [s]` — Steal cooldown\n"
-            "`{p}totshieldhours [h]` — Shield duration\n"
-            "`{p}totbalance` — Candies in the pool\n"
-            "`{p}totaddcandies <n>` — Add to pool\n"
-            "`{p}totgivecandy @user type n` — Give candy\n"
-            "`{p}totremovecandy @user type n` — Remove candy\n"
-            "`{p}totevent start/status/stop` — Guild events"
-        ),
-    },
-    "es": {
-        "page": "Página",
-        # Page 1
-        "p1_title": "📖 Guía — ¿Cómo jugar?",
-        "p1_body": (
-            "¡Bienvenido a **Trick or Treat**! 🎃\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "**¿Cómo empezar?**\n"
-            "Escribe **`trick or treat`** en un canal habilitado para ir de puerta en puerta "
-            "pidiendo caramelos. ¡Pero cuidado! No siempre te dan dulces...\n\n"
-            "**🎁 Treat (75%)** — Recibes caramelos y posibles bonus.\n"
-            "**👻 Trick (25%)** — Algo malo pasa: pierdes caramelos, te enfermas, o ambas cosas.\n\n"
-            "**Objetivo:** Comer la mayor cantidad de caramelos posible y subir en el ranking global.\n\n"
-            "Usa `{p}cinventory` para ver tu inventario y `{p}cboard` para el ranking."
-        ),
-        # Page 2
-        "p2_title": "🍬 Guía — Tipos de Caramelos",
-        "p2_body": (
-            "Cada tipo de caramelo tiene un efecto especial al comerlo:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "🍬 **Candies** — El caramelo principal. Comerlos aumenta tu contador de *eaten* (puntuación), "
-            "pero **también sube tu enfermedad** (+2 por candy).\n\n"
-            "🍫 **Chocolates** — Reduce enfermedad en **10** por unidad. ¡Medicina dulce!\n\n"
-            "🍭 **Lollipops** — Reduce enfermedad en **20** por unidad. Más efectivo.\n\n"
-            "🥠 **Cookies** — Pone tu enfermedad en un número **aleatorio** (0-100). ¡Una apuesta!\n\n"
-            "⭐ **Stars** — Resetea tu enfermedad a **0** instantáneamente. ¡Lo mejor!\n\n"
-            "✨ **Golden Candy** — *LEGENDARIO*. Vale **10×** en puntuación y **no da enfermedad**.\n\n"
-            "🌶️ **Ghost Pepper** — *ULTRA RARO*. Resetea enfermedad a **0** al comerlo."
-        ),
-        "p2_field_name": "📝 Cómo comer",
-        "p2_field_val": "`{p}eatcandy [cantidad] [tipo]`\nEjemplos: `{p}eatcandy 3 chocolate` · `{p}eatcandy star`",
-        # Page 3
-        "p3_title": "💊 Guía — Sistema de Enfermedad",
-        "p3_body": (
-            "La enfermedad sube cuando comes candies y afecta tus recompensas:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "😊 **0-40** — Todo normal. Sin penalización.\n\n"
-            "😰 **41-80** — Empiezas a sentirte mal, pero no hay castigo aún.\n\n"
-            "🤮 **81-100** — ⚠️ **Recompensas a la mitad.** Si ibas a "
-            "ganar 20 candies, ganas 10.\n\n"
-            "💀 **>100** — ⚠️ **Recompensas divididas entre 4** + un **50% de probabilidad** "
-            "de que se te **caigan** candies al suelo al ir de puerta en puerta.\n\n"
-            "**¿Cómo curarse?**\n"
-            "🍫 Chocolates (-10) · 🍭 Lollipops (-20) · ⭐ Stars (reset) · 🌶️ Ghost Peppers (reset)\n"
-            "También se recupera un poco de forma pasiva al chatear en canales de ToT."
-        ),
-        "p3_field_name": "💡 Consejo",
-        "p3_field_val": "No dejes subir la enfermedad por encima de 80. Compra curas en la tienda si no te salen de bonus.",
-        # Page 4
-        "p4_title": "🏪 Guía — Tienda y Escudo",
-        "p4_body": (
-            "Gasta tus candies en la tienda para comprar objetos útiles:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "Usa `{p}totshop` para ver la tienda y `{p}totbuy <item> [cantidad]` para comprar.\n\n"
-            "🍫 **Chocolate** — 15 🍬 · Reduce enfermedad\n"
-            "🍭 **Lollipop** — 30 🍬 · Reduce más enfermedad\n"
-            "🥠 **Cookie** — 25 🍬 · Enfermedad aleatoria\n"
-            "⭐ **Star** — 50 🍬 · Reset enfermedad\n"
-            "🛡️ **Shield** — 75 🍬 · Protección contra robo\n"
-            "✨ **Golden Candy** — 200 🍬 · 10× puntuación, sin enfermedad\n"
-        ),
-        "p4_field_name": "🛡️ ¿Qué hace el Escudo?",
-        "p4_field_val": (
-            "El escudo protege tu bolsa de caramelos contra robos con `stealcandy`. "
-            "Dura varias horas (configurable por admins). Solo puedes tener **1 activo** a la vez."
-        ),
-        # Page 5
-        "p5_title": "🔥 Guía — Rachas, Robos e Ítems Raros",
-        "p5_body": (
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
-            "**🔥 Rachas Diarias (Streak)**\n"
-            "Juega `trick or treat` cada día consecutivo para acumular racha.\n"
-            "Cada día de racha añade un **×0.1** a tu multiplicador de recompensa.\n"
-            "Día 1: ×1.0 · Día 5: ×1.5 · Día 10: ×2.0 · Máximo: **×3.0**\n"
-            "¡Si fallas un día, la racha se resetea!\n\n"
-            "**🗡️ Robar Caramelos**\n"
-            "Usa `{p}stealcandy [@usuario]` para intentar robar.\n"
-            "No siempre funciona — hay varias probabilidades de éxito o fracaso.\n"
-            "La víctima recibe una **notificación por DM** cuando le roban. 📩\n"
-            "Compra un **🛡️ Shield** para protegerte.\n\n"
-            "**💎 Ítems Raros**\n"
-            "Al hacer `trick or treat`, hay una pequeña probabilidad de obtener:\n"
-            "✨ **Golden Candy** (0.5%) — Vale ×10 al comerlo.\n"
-            "🌶️ **Ghost Pepper** (0.3%) — Resetea tu enfermedad.\n"
-        ),
-        # Page 6
-        "p6_title": "📋 Guía — Lista de Comandos",
-        "p6_player": "🎮 Jugador",
-        "p6_player_val": (
-            "`trick or treat` — Ir de puerta en puerta\n"
-            "`{p}eatcandy [n] [tipo]` — Comer caramelos\n"
-            "`{p}cinventory` — Ver tu inventario\n"
-            "`{p}totstats [@user]` — Estadísticas detalladas\n"
-            "`{p}cboard` — Ranking global de eaten\n"
-            "`{p}totshop` — Ver la tienda\n"
-            "`{p}totbuy <item> [n]` — Comprar en la tienda\n"
-            "`{p}buycandy <n>` — Comprar candies con moneda del bot\n"
-            "`{p}pickup` — Recoger candy del suelo\n"
-            "`{p}stealcandy [@user]` — Robar caramelos\n"
-            "`{p}tothelp` — Esta guía"
-        ),
-        "p6_admin": "🔧 Admin / Mod",
-        "p6_admin_val": (
-            "`{p}tottoggle` — Activar/desactivar el juego\n"
-            "`{p}totchannel add/remove` — Canales de juego\n"
-            "`{p}totcooldown [s]` — Cooldown de trick or treat\n"
-            "`{p}totpickupcooldown [s]` — Cooldown de pickup\n"
-            "`{p}totstealcooldown [s]` — Cooldown de steal\n"
-            "`{p}totshieldhours [h]` — Duración del escudo\n"
-            "`{p}totbalance` — Candies en el pool\n"
-            "`{p}totaddcandies <n>` — Añadir al pool\n"
-            "`{p}totgivecandy @user tipo n` — Dar candy\n"
-            "`{p}totremovecandy @user tipo n` — Quitar candy\n"
-            "`{p}totevent start/status/stop` — Eventos de guild"
-        ),
-    },
-}
-
 
 # ════════════════════════════════════════════════════════════════
 #  COG
 # ════════════════════════════════════════════════════════════════
 
+@cog_i18n(_)
 class TrickOrTreatV2(commands.Cog):
     """🎃 Trick or Treat — A spooky candy collecting game!
 
@@ -521,7 +276,7 @@ class TrickOrTreatV2(commands.Cog):
 
     def _make_embed(self, title: str, description: str = "", color: int = HALLOWEEN_ORANGE) -> discord.Embed:
         em = discord.Embed(title=title, description=description, color=color)
-        em.set_footer(text=f"🎃 Trick or Treat v{__version__}")
+        em.set_footer(text=_("🎃 Trick or Treat v{version}").format(version=__version__))
         return em
 
     async def _check_shield(self, user) -> bool:
@@ -557,10 +312,10 @@ class TrickOrTreatV2(commands.Cog):
     async def _announce_event_completion(self, channel, guild):
         reward = await self.config.guild(guild).event_reward()
         event_em = self._make_embed(
-            "🎉 Guild Event Complete!",
-            f"The event goal has been reached!\n\n"
-            f"🍬 All participants receive **{humanize_number(reward)}** bonus candies!\n"
-            f"*Congratulations!* 🎃",
+            _("🎉 Guild Event Complete!"),
+            _("The event goal has been reached!\n\n"
+            "🍬 All participants receive **{reward}** bonus candies!\n"
+            "*Congratulations!* 🎃").format(reward=humanize_number(reward)),
             HALLOWEEN_GOLD,
         )
         await channel.send(embed=event_em)
@@ -602,54 +357,59 @@ class TrickOrTreatV2(commands.Cog):
             candy_type = _resolve_candy_type(candy_type) or candy_type
         if number < 0:
             return await ctx.send(
-                "That doesn't sound fun.",
+                _("That doesn't sound fun."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         if number == 0:
             return await ctx.send(
-                "You pretend to eat a candy.",
+                _("You pretend to eat a candy."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         if candy_type not in CANDY_TYPES:
             return await ctx.send(
-                "That's not a candy type! Use the inventory command to see what you have.",
+                _("That's not a candy type! Use the inventory command to see what you have."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         if userdata[candy_type] < number:
             return await ctx.send(
-                f"You don't have that many {candy_type}.",
+                _("You don't have that many {candy_type}.").format(candy_type=candy_type),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         if userdata[candy_type] == 0:
             return await ctx.send(
-                f"You contemplate the idea of eating {candy_type}.",
+                _("You contemplate the idea of eating {candy_type}.").format(candy_type=candy_type),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
 
         eat_phrase = [
-            "You leisurely enjoy",
-            "You take the time to savor",
-            "You eat",
-            "You scarf down",
-            "You sigh in contentment after eating",
-            "You gobble up",
-            "You make a meal of",
-            "You devour",
-            "You monstrously pig out on",
-            "You hastily chomp down on",
-            "You daintily partake of",
-            "You earnestly consume",
+            _("You leisurely enjoy"),
+            _("You take the time to savor"),
+            _("You eat"),
+            _("You scarf down"),
+            _("You sigh in contentment after eating"),
+            _("You gobble up"),
+            _("You make a meal of"),
+            _("You devour"),
+            _("You monstrously pig out on"),
+            _("You hastily chomp down on"),
+            _("You daintily partake of"),
+            _("You earnestly consume"),
         ]
 
         # ── Golden Candy (10× eaten, no sickness) ──
         if candy_type == "golden_candies":
             eaten_value = number * 10
             em = self._make_embed(
-                "✨ Golden Candy!",
-                f"{random.choice(eat_phrase)} {number} golden {'candy' if number == 1 else 'candies'}!\n\n"
-                f"The golden shimmer fills you with warmth.\n"
-                f"**+{eaten_value}** eaten count! *(10× bonus!)*\n"
-                f"No sickness gained!",
+                _("✨ Golden Candy!"),
+                _("{eat_phrase} {number} golden {candy_word}!\n\n"
+                "The golden shimmer fills you with warmth.\n"
+                "**+{eaten_value}** eaten count! *(10× bonus!)*\n"
+                "No sickness gained!").format(
+                    eat_phrase=random.choice(eat_phrase),
+                    number=number,
+                    candy_word=_("candy") if number == 1 else _("candies"),
+                    eaten_value=eaten_value,
+                ),
                 color=HALLOWEEN_GOLD,
             )
             await self.config.user(ctx.author).golden_candies.set(userdata["golden_candies"] - number)
@@ -662,11 +422,15 @@ class TrickOrTreatV2(commands.Cog):
         # ── Ghost Pepper (reset sickness) ──
         if candy_type == "ghost_peppers":
             em = self._make_embed(
-                "🌶️ Ghost Pepper!",
-                f"{random.choice(eat_phrase)} {number} ghost {'pepper' if number == 1 else 'peppers'}!\n\n"
-                f"🔥 **SPICY!** Your mouth is on fire!\n"
-                f"...but the heat burns away all your sickness!\n"
-                f"💊 Sickness reset to **0**!",
+                _("🌶️ Ghost Pepper!"),
+                _("{eat_phrase} {number} ghost {pepper_word}!\n\n"
+                "🔥 **SPICY!** Your mouth is on fire!\n"
+                "...but the heat burns away all your sickness!\n"
+                "💊 Sickness reset to **0**!").format(
+                    eat_phrase=random.choice(eat_phrase),
+                    number=number,
+                    pepper_word=_("pepper") if number == 1 else _("peppers"),
+                ),
                 color=HALLOWEEN_RED,
             )
             await self.config.user(ctx.author).ghost_peppers.set(userdata["ghost_peppers"] - number)
@@ -678,7 +442,7 @@ class TrickOrTreatV2(commands.Cog):
         if candy_type in ["candies", "candy"]:
             if 70 <= (userdata["sickness"] + number * 2) < 95:
                 await ctx.send(
-                    "After all that candy, sugar doesn't sound so good.",
+                    _("After all that candy, sugar doesn't sound so good."),
                     reference=ctx.message.to_reference(fail_if_not_exists=False),
                 )
                 yuck = random.randint(1, 10)
@@ -707,7 +471,7 @@ class TrickOrTreatV2(commands.Cog):
                     await self._announce_event_completion(ctx.channel, ctx.guild)
 
                 return await ctx.send(
-                    f"You begin to think you don't need all this candy, maybe...\n*{lost_candy} candies are left behind*",
+                    _("You begin to think you don't need all this candy, maybe...\n*{lost_candy} candies are left behind*").format(lost_candy=lost_candy),
                     reference=ctx.message.to_reference(fail_if_not_exists=False),
                 )
 
@@ -724,7 +488,7 @@ class TrickOrTreatV2(commands.Cog):
                     await message.edit(content="..........")
                     await asyncio.sleep(2)
                     return await message.edit(
-                        content="You feel absolutely disgusted. At least you don't have any candies left."
+                        content=_("You feel absolutely disgusted. At least you don't have any candies left.")
                     )
                 await self.config.guild(ctx.guild).pick.set(pick + lost_candy)
                 await self.config.user(ctx.author).candies.set(0)
@@ -738,13 +502,13 @@ class TrickOrTreatV2(commands.Cog):
                 await message.edit(content="..........")
                 await asyncio.sleep(2)
                 return await message.edit(
-                    content=f"You toss your candies on the ground in disgust.\n*{lost_candy} candies are left behind*"
+                    content=_("You toss your candies on the ground in disgust.\n*{lost_candy} candies are left behind*").format(lost_candy=lost_candy)
                 )
 
             pluralcandy = "candy" if number == 1 else "candies"
             new_eaten = userdata["eaten"] + number
             await ctx.send(
-                f"{random.choice(eat_phrase)} {number} {pluralcandy}. (Total eaten: `{humanize_number(new_eaten)}` \N{CANDY})",
+                _("{eat_phrase} {number} {pluralcandy}. (Total eaten: `{eaten_count}` 🍬)").format(eat_phrase=random.choice(eat_phrase), number=number, pluralcandy=pluralcandy, eaten_count=humanize_number(new_eaten)),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             await self.config.user(ctx.author).sickness.set(userdata["sickness"] + (number * 2))
@@ -757,7 +521,7 @@ class TrickOrTreatV2(commands.Cog):
         if candy_type in ["chocolates", "chocolate"]:
             pluralchoc = "chocolate" if number == 1 else "chocolates"
             await ctx.send(
-                f"{random.choice(eat_phrase)} {number} {pluralchoc}. You feel slightly better!\n*Sickness has gone down by {number * 10}*",
+                _("{eat_phrase} {number} {pluralchoc}. You feel slightly better!\n*Sickness has gone down by {sickness_down}*").format(eat_phrase=random.choice(eat_phrase), number=number, pluralchoc=pluralchoc, sickness_down=number * 10),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             new_sickness = max(0, userdata["sickness"] - (number * 10))
@@ -771,7 +535,7 @@ class TrickOrTreatV2(commands.Cog):
         if candy_type in ["lollipops", "lollipop"]:
             pluralpop = "lollipop" if number == 1 else "lollipops"
             await ctx.send(
-                f"{random.choice(eat_phrase)} {number} {pluralpop}. You feel slightly better!\n*Sickness has gone down by {number * 20}*",
+                _("{eat_phrase} {number} {pluralpop}. You feel slightly better!\n*Sickness has gone down by {sickness_down}*").format(eat_phrase=random.choice(eat_phrase), number=number, pluralpop=pluralpop, sickness_down=number * 20),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             new_sickness = max(0, userdata["sickness"] - (number * 20))
@@ -787,10 +551,10 @@ class TrickOrTreatV2(commands.Cog):
             new_sickness = random.randint(0, 100)
             old_sickness = userdata["sickness"]
             if new_sickness > old_sickness:
-                phrase = f"You feel worse!\n*Sickness has gone up by {new_sickness - old_sickness}*"
+                phrase = _("You feel worse!\n*Sickness has gone up by {amount}*").format(amount=new_sickness - old_sickness)
             else:
-                phrase = f"You feel better!\n*Sickness has gone down by {old_sickness - new_sickness}*"
-            await ctx.reply(f"{random.choice(eat_phrase)} {number} {pluralcookie}. {phrase}")
+                phrase = _("You feel better!\n*Sickness has gone down by {amount}*").format(amount=old_sickness - new_sickness)
+            await ctx.reply(_("{eat_phrase} {number} {pluralcookie}. {phrase}").format(eat_phrase=random.choice(eat_phrase), number=number, pluralcookie=pluralcookie, phrase=phrase))
             await self.config.user(ctx.author).sickness.set(new_sickness)
             await self.config.user(ctx.author).cookies.set(userdata["cookies"] - number)
             await self.config.user(ctx.author).eaten.set(userdata["eaten"] + number)
@@ -801,7 +565,7 @@ class TrickOrTreatV2(commands.Cog):
         if candy_type in ["stars", "star"]:
             pluralstar = "star" if number == 1 else "stars"
             await ctx.send(
-                f"{random.choice(eat_phrase)} {number} {pluralstar}. You feel great!\n*Sickness has been reset*",
+                _("{eat_phrase} {number} {pluralstar}. You feel great!\n*Sickness has been reset*").format(eat_phrase=random.choice(eat_phrase), number=number, pluralstar=pluralstar),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             await self.config.user(ctx.author).sickness.set(0)
@@ -822,8 +586,8 @@ class TrickOrTreatV2(commands.Cog):
         """[Admin] Check how many candies are 'on the ground' in the guild."""
         pick = await self.config.guild(ctx.guild).pick()
         em = self._make_embed(
-            "🎃 Guild Candy Pool",
-            f"**{humanize_number(pick)}** \N{CANDY} on the ground",
+            _("🎃 Guild Candy Pool"),
+            _("**{pick}** 🍬 on the ground").format(pick=humanize_number(pick)),
             HALLOWEEN_ORANGE,
         )
         await ctx.send(embed=em)
@@ -834,15 +598,15 @@ class TrickOrTreatV2(commands.Cog):
     async def totgivecandy(self, ctx, user: discord.Member, candy_type: str, amount: int):
         """[Admin] Add candy to a user's inventory."""
         if amount <= 0:
-            return await ctx.send("La cantidad debe ser mayor que cero.")
+            return await ctx.send(_("Amount must be greater than zero."))
         resolved = _resolve_candy_type(candy_type)
         if resolved is None:
-            return await ctx.send(f"Tipo de caramelo inválido. Los tipos válidos son: {', '.join(CANDY_TYPES)}.")
+            return await ctx.send(_("Invalid candy type. Valid types are: {types}.").format(types=", ".join(CANDY_TYPES)))
         userdata = await self.config.user(user).all()
         userdata[resolved] += amount
         await self.config.user(user).set(userdata)
         emoji = CANDY_EMOJIS.get(resolved, '')
-        await ctx.send(f"Se han añadido {amount} {resolved} {emoji} al inventario de {user.display_name}.")
+        await ctx.send(_("Added {amount} {resolved} {emoji} to {name}'s inventory.").format(amount=amount, resolved=resolved, emoji=emoji, name=user.display_name))
 
     @commands.guild_only()
     @checks.admin_or_permissions(administrator=True)
@@ -850,18 +614,18 @@ class TrickOrTreatV2(commands.Cog):
     async def totremovecandy(self, ctx, user: discord.Member, candy_type: str, amount: int):
         """[Admin] Remove candy from a user's inventory."""
         if amount <= 0:
-            return await ctx.send("La cantidad debe ser mayor que cero.")
+            return await ctx.send(_("Amount must be greater than zero."))
         resolved = _resolve_candy_type(candy_type)
         if resolved is None:
-            return await ctx.send(f"Tipo de caramelo inválido. Los tipos válidos son: {', '.join(CANDY_TYPES)}.")
+            return await ctx.send(_("Invalid candy type. Valid types are: {types}.").format(types=", ".join(CANDY_TYPES)))
         userdata = await self.config.user(user).all()
         if userdata[resolved] < amount:
             emoji = CANDY_EMOJIS.get(resolved, '')
-            return await ctx.send(f"{user.display_name} solo tiene {userdata[resolved]} {resolved} {emoji}. No se pueden quitar {amount}.")
+            return await ctx.send(_("{name} only has {current} {resolved} {emoji}. Cannot remove {amount}.").format(name=user.display_name, current=userdata[resolved], resolved=resolved, emoji=emoji, amount=amount))
         userdata[resolved] -= amount
         await self.config.user(user).set(userdata)
         emoji = CANDY_EMOJIS.get(resolved, '')
-        await ctx.send(f"Se han quitado {amount} {resolved} {emoji} del inventario de {user.display_name}. Ahora tiene {userdata[resolved]} {resolved} {emoji}.")
+        await ctx.send(_("Removed {amount} {resolved} {emoji} from {name}'s inventory. Now has {current} {resolved} {emoji}.").format(amount=amount, resolved=resolved, emoji=emoji, name=user.display_name, current=userdata[resolved]))
 
     # ════════════════════════════════════════════════════════════
     #  BUY WITH CURRENCY
@@ -875,7 +639,7 @@ class TrickOrTreatV2(commands.Cog):
         credits_name = await bank.get_currency_name(ctx.guild)
         if pieces <= 0:
             return await ctx.send(
-                "Not in this reality.",
+                _("Not in this reality."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         per_piece = max(10, int(round(await bank.get_balance(ctx.author)) * 0.04))
@@ -884,13 +648,13 @@ class TrickOrTreatV2(commands.Cog):
             await bank.withdraw_credits(ctx.author, candy_price)
         except ValueError:
             return await ctx.send(
-                f"Not enough {credits_name} ({candy_price} required).",
+                _("Not enough {credits_name} ({candy_price} required).").format(credits_name=credits_name, candy_price=candy_price),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         await self.config.user(ctx.author).candies.set(candy_now + pieces)
         em = self._make_embed(
-            "🍬 Candy Purchased!",
-            f"Bought **{pieces}** candies for **{humanize_number(candy_price)}** {credits_name}.",
+            _("🍬 Candy Purchased!"),
+            _("Bought **{pieces}** candies for **{candy_price}** {credits_name}.").format(pieces=pieces, candy_price=humanize_number(candy_price), credits_name=credits_name),
             HALLOWEEN_GREEN,
         )
         await ctx.send(embed=em, reference=ctx.message.to_reference(fail_if_not_exists=False))
@@ -906,12 +670,12 @@ class TrickOrTreatV2(commands.Cog):
         """Browse the Candy Shop! Spend candy on special items."""
         shield_hours = await self.config.guild(ctx.guild).shield_hours()
         em = self._make_embed(
-            "🏪 Candy Shop",
-            "Spend your hard-earned candies on special treats!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            _("🏪 Candy Shop"),
+            _("Spend your hard-earned candies on special treats!\n━━━━━━━━━━━━━━━━━━━━━━━━━━━"),
             HALLOWEEN_PURPLE,
         )
         for name, item in SHOP_ITEMS.items():
-            desc = item["desc"]
+            desc = _(item["desc"])
             if name == "shield":
                 desc += f" ({shield_hours}h)"
             em.add_field(
@@ -921,11 +685,11 @@ class TrickOrTreatV2(commands.Cog):
             )
         em.add_field(
             name="\u200b",
-            value=f"Use `{ctx.prefix}totbuy <item> [amount]` to purchase!",
+            value=_("Use `{prefix}totbuy <item> [amount]` to purchase!").format(prefix=ctx.prefix),
             inline=False,
         )
         user_candies = await self.config.user(ctx.author).candies()
-        em.set_footer(text=f"🎃 Your candies: {humanize_number(user_candies)} | Trick or Treat v{__version__}")
+        em.set_footer(text=_("🎃 Your candies: {candies} | Trick or Treat v{version}").format(candies=humanize_number(user_candies), version=__version__))
         await ctx.send(embed=em)
 
     @commands.guild_only()
@@ -938,11 +702,11 @@ class TrickOrTreatV2(commands.Cog):
         item_key = item_name.lower().replace(" ", "_")
         if item_key not in SHOP_ITEMS:
             return await ctx.send(
-                f"Unknown item! Available: {', '.join(SHOP_ITEMS.keys())}",
+                _("Unknown item! Available: {items}").format(items=", ".join(SHOP_ITEMS.keys())),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         if amount <= 0:
-            return await ctx.send("Nice try.", reference=ctx.message.to_reference(fail_if_not_exists=False))
+            return await ctx.send(_("Nice try."), reference=ctx.message.to_reference(fail_if_not_exists=False))
 
         item = SHOP_ITEMS[item_key]
 
@@ -952,7 +716,7 @@ class TrickOrTreatV2(commands.Cog):
             if await self._check_shield(ctx.author):
                 remaining = await self._shield_remaining(ctx.author)
                 return await ctx.send(
-                    f"🛡️ You already have an active shield! ({remaining} remaining)",
+                    _("🛡️ You already have an active shield! ({remaining} remaining)").format(remaining=remaining),
                     reference=ctx.message.to_reference(fail_if_not_exists=False),
                 )
 
@@ -960,7 +724,7 @@ class TrickOrTreatV2(commands.Cog):
         user_candies = await self.config.user(ctx.author).candies()
         if user_candies < total_cost:
             return await ctx.send(
-                f"Not enough candies! You need **{total_cost}** 🍬 but have **{user_candies}** 🍬.",
+                _("Not enough candies! You need **{total_cost}** 🍬 but have **{user_candies}** 🍬.").format(total_cost=total_cost, user_candies=user_candies),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
 
@@ -972,10 +736,10 @@ class TrickOrTreatV2(commands.Cog):
             shield_until = time.time() + (shield_hours * 3600)
             await self.config.user(ctx.author).shield_until.set(shield_until)
             em = self._make_embed(
-                "🛡️ Shield Activated!",
-                f"A magical shield now protects your candy bag!\n\n"
-                f"⏱️ Duration: **{shield_hours} hours**\n"
-                f"🍬 Cost: **{total_cost}** candies",
+                _("🛡️ Shield Activated!"),
+                _("A magical shield now protects your candy bag!\n\n"
+                "⏱️ Duration: **{shield_hours} hours**\n"
+                "🍬 Cost: **{total_cost}** candies").format(shield_hours=shield_hours, total_cost=total_cost),
                 HALLOWEEN_GREEN,
             )
         else:
@@ -983,9 +747,12 @@ class TrickOrTreatV2(commands.Cog):
             current = await getattr(self.config.user(ctx.author), field)()
             await getattr(self.config.user(ctx.author), field).set(current + amount)
             em = self._make_embed(
-                f"{item['emoji']} Purchase Complete!",
-                f"Bought **{amount}** {item_key.replace('_', ' ')} for **{total_cost}** 🍬\n"
-                f"Remaining candies: **{user_candies - total_cost}** 🍬",
+                _("{emoji} Purchase Complete!").format(emoji=item["emoji"]),
+                _("Bought **{amount}** {item_name} for **{total_cost}** 🍬\n"
+                "Remaining candies: **{remaining}** 🍬").format(
+                    amount=amount, item_name=item_key.replace("_", " "),
+                    total_cost=total_cost, remaining=user_candies - total_cost,
+                ),
                 HALLOWEEN_GREEN,
             )
         await ctx.send(embed=em, reference=ctx.message.to_reference(fail_if_not_exists=False))
@@ -1003,7 +770,7 @@ class TrickOrTreatV2(commands.Cog):
         userinfo = await self.config._all_from_scope(scope="USER")
         if not userinfo:
             return await ctx.send(
-                "No one has any candy.",
+                _("No one has any candy."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         async with ctx.typing():
@@ -1013,9 +780,9 @@ class TrickOrTreatV2(commands.Cog):
         header = "{pound:{pound_len}}{score:{score_len}}{name:2}\n".format(
             pound="#",
             pound_len=pound_len + 3,
-            score="Candies Eaten",
+            score=_("Candies Eaten"),
             score_len=score_len + 6,
-            name="Name",
+            name=_("Name"),
         )
         scoreboard_msg = self._red(header)
         guild_member_ids = {m.id for m in ctx.guild.members}
@@ -1054,10 +821,14 @@ class TrickOrTreatV2(commands.Cog):
         for page in pagify(scoreboard_msg, delims=["\n"], page_length=1000):
             embed = discord.Embed(
                 colour=HALLOWEEN_ORANGE,
-                description=box(f"\N{CANDY} Global Leaderboard \N{CANDY}", lang="prolog") + (box(page, lang="ansi")),
+                description=box(_("\N{CANDY} Global Leaderboard \N{CANDY}"), lang="prolog") + (box(page, lang="ansi")),
             )
             embed.set_footer(
-                text=f"🎃 Page {humanize_number(pages)}/{humanize_number(math.ceil(len(scoreboard_msg) / 1000))} | Trick or Treat v{__version__}"
+                text=_("🎃 Page {current}/{total} | Trick or Treat v{version}").format(
+                    current=humanize_number(pages),
+                    total=humanize_number(math.ceil(len(scoreboard_msg) / 1000)),
+                    version=__version__,
+                )
             )
             pages += 1
             page_list.append(embed)
@@ -1086,7 +857,7 @@ class TrickOrTreatV2(commands.Cog):
 
         em = discord.Embed(color=color)
         em.set_author(
-            name=f"🎃 {ctx.author.display_name}'s Candy Bag",
+            name=_("🎃 {name}'s Candy Bag").format(name=ctx.author.display_name),
             icon_url=ctx.author.display_avatar.url,
         )
         em.set_thumbnail(url=ctx.author.display_avatar.url)
@@ -1099,19 +870,19 @@ class TrickOrTreatV2(commands.Cog):
             label = ctype.replace("_", " ").title()
             if count > 0 or ctype == "candies":
                 inv_lines.append(f"{emoji} **{humanize_number(count)}** {label}")
-        em.add_field(name="🍬 Inventory", value="\n".join(inv_lines), inline=False)
+        em.add_field(name=_("🍬 Inventory"), value="\n".join(inv_lines), inline=False)
 
         # Sickness
         sick_text = f"{face} {bar} **{sickness}**/100"
         if sickness > 100:
-            sick_text += "\n⚠️ *Rewards quartered! You might lose candy...*"
+            sick_text += _("\n⚠️ *Rewards quartered! You might lose candy...*")
         elif sickness > 80:
-            sick_text += "\n⚠️ *Rewards halved! Eat chocolate to recover.*"
+            sick_text += _("\n⚠️ *Rewards halved! Eat chocolate to recover.*")
         elif sickness > 60:
-            sick_text += "\n😨 *You really don't feel so good...*"
+            sick_text += _("\n😨 *You really don't feel so good...*")
         elif sickness > 40:
-            sick_text += "\n😰 *You don't feel so great...*"
-        em.add_field(name="💊 Sickness", value=sick_text, inline=False)
+            sick_text += _("\n😰 *You don't feel so great...*")
+        em.add_field(name=_("💊 Sickness"), value=sick_text, inline=False)
 
         # Streak & Shield
         status_lines = []
@@ -1122,9 +893,9 @@ class TrickOrTreatV2(commands.Cog):
             status_lines.append(f"🏆 **Best Streak:** {best_streak} days")
         if await self._check_shield(ctx.author):
             remaining = await self._shield_remaining(ctx.author)
-            status_lines.append(f"🛡️ **Shield:** ✅ Active ({remaining} left)")
+            status_lines.append(_("🛡️ **Shield:** ✅ Active ({remaining} left)").format(remaining=remaining))
         if status_lines:
-            em.add_field(name="📋 Status", value="\n".join(status_lines), inline=False)
+            em.add_field(name=_("📋 Status"), value="\n".join(status_lines), inline=False)
 
         # Stats
         stats_lines = [
@@ -1132,9 +903,9 @@ class TrickOrTreatV2(commands.Cog):
             f"🎭 **Tricks:** {userdata.get('trick_count', 0)} │ **Treats:** {userdata.get('treat_count', 0)}",
             f"🗡️ **Stolen:** {humanize_number(userdata.get('stolen', 0))} │ **Lost:** {humanize_number(userdata.get('been_stolen', 0))}",
         ]
-        em.add_field(name="📊 Stats", value="\n".join(stats_lines), inline=False)
+        em.add_field(name=_("📊 Stats"), value="\n".join(stats_lines), inline=False)
 
-        em.set_footer(text=f"🎃 Trick or Treat v{__version__}")
+        em.set_footer(text=_("🎃 Trick or Treat v{version}").format(version=__version__))
         await ctx.send(embed=em)
 
     # ════════════════════════════════════════════════════════════
@@ -1145,49 +916,158 @@ class TrickOrTreatV2(commands.Cog):
     @commands.command()
     @commands.bot_has_permissions(embed_links=True, add_reactions=True)
     async def tothelp(self, ctx):
-        """📖 Full game guide for Trick or Treat. / Guía completa del juego."""
+        """📖 Full game guide for Trick or Treat."""
         p = ctx.prefix
-        lang = _detect_lang()
-        t = HELP_TEXTS[lang]
         pages = []
+        footer_tpl = _("🎃 Page {current}/{total} — Trick or Treat v{version}")
 
         # ── Page 1: Introduction ──
         em1 = self._make_embed(
-            t["p1_title"],
-            t["p1_body"].format(p=p),
+            _("📖 Guide — How to Play?"),
+            _("Welcome to **Trick or Treat**! 🎃\n"
+              "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+              "**How to start?**\n"
+              "Type **`trick or treat`** in an enabled channel to go door-to-door "
+              "asking for candy. But be careful! You don't always get treats...\n\n"
+              "**🎁 Treat (75%)** — You receive candy and possible bonus drops.\n"
+              "**👻 Trick (25%)** — Something bad happens: lose candy, get sick, or both.\n\n"
+              "**Goal:** Eat as many candies as possible and climb the global leaderboard.\n\n"
+              "Use `{p}cinventory` to see your inventory and `{p}cboard` for the leaderboard.").format(p=p),
             HALLOWEEN_ORANGE,
         )
-        em1.set_footer(text=f"🎃 {t['page']} 1/6 — Trick or Treat v{__version__}")
+        em1.set_footer(text=footer_tpl.format(current=1, total=6, version=__version__))
         pages.append(em1)
 
         # ── Page 2: Candy Types ──
-        em2 = self._make_embed(t["p2_title"], t["p2_body"], HALLOWEEN_PURPLE)
-        em2.add_field(name=t["p2_field_name"], value=t["p2_field_val"].format(p=p), inline=False)
-        em2.set_footer(text=f"🎃 {t['page']} 2/6 — Trick or Treat v{__version__}")
+        em2 = self._make_embed(
+            _("🍬 Guide — Candy Types"),
+            _("Each candy type has a special effect when eaten:\n"
+              "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+              "🍬 **Candies** — The main candy. Eating them increases your *eaten* score, "
+              "but **also raises sickness** (+2 per candy).\n\n"
+              "🍫 **Chocolates** — Reduces sickness by **10** per piece. Sweet medicine!\n\n"
+              "🍭 **Lollipops** — Reduces sickness by **20** per piece. More effective.\n\n"
+              "🥠 **Cookies** — Sets your sickness to a **random** number (0-100). A gamble!\n\n"
+              "⭐ **Stars** — Resets your sickness to **0** instantly. The best!\n\n"
+              "✨ **Golden Candy** — *LEGENDARY*. Worth **10×** in score and **no sickness**.\n\n"
+              "🌶️ **Ghost Pepper** — *ULTRA RARE*. Resets sickness to **0** when eaten."),
+            HALLOWEEN_PURPLE,
+        )
+        em2.add_field(
+            name=_("📝 How to eat"),
+            value=_('`{p}eatcandy [amount] [type]`\nExamples: `{p}eatcandy 3 chocolate` · `{p}eatcandy star`').format(p=p),
+            inline=False,
+        )
+        em2.set_footer(text=footer_tpl.format(current=2, total=6, version=__version__))
         pages.append(em2)
 
         # ── Page 3: Sickness ──
-        em3 = self._make_embed(t["p3_title"], t["p3_body"], HALLOWEEN_RED)
-        em3.add_field(name=t["p3_field_name"], value=t["p3_field_val"], inline=False)
-        em3.set_footer(text=f"🎃 {t['page']} 3/6 — Trick or Treat v{__version__}")
+        em3 = self._make_embed(
+            _("💊 Guide — Sickness System"),
+            _("Sickness rises when you eat candies and affects your rewards:\n"
+              "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+              "😊 **0-40** — Everything normal. No penalty.\n\n"
+              "😰 **41-80** — You start feeling unwell, but no punishment yet.\n\n"
+              "🤮 **81-100** — ⚠️ **Rewards halved.** If you were going to "
+              "get 20 candies, you get 10.\n\n"
+              "💀 **>100** — ⚠️ **Rewards quartered** + a **50% chance** "
+              "of **dropping** candies on the ground when trick-or-treating.\n\n"
+              "**How to cure?**\n"
+              "🍫 Chocolates (-10) · 🍭 Lollipops (-20) · ⭐ Stars (reset) · 🌶️ Ghost Peppers (reset)\n"
+              "You also recover a little passively by chatting in ToT channels."),
+            HALLOWEEN_RED,
+        )
+        em3.add_field(
+            name=_("💡 Tip"),
+            value=_("Don't let sickness go above 80. Buy cures from the shop if you don't get them as bonus drops."),
+            inline=False,
+        )
+        em3.set_footer(text=footer_tpl.format(current=3, total=6, version=__version__))
         pages.append(em3)
 
         # ── Page 4: Shop & Shield ──
-        em4 = self._make_embed(t["p4_title"], t["p4_body"].format(p=p), HALLOWEEN_PURPLE)
-        em4.add_field(name=t["p4_field_name"], value=t["p4_field_val"], inline=False)
-        em4.set_footer(text=f"🎃 {t['page']} 4/6 — Trick or Treat v{__version__}")
+        em4 = self._make_embed(
+            _("🏪 Guide — Shop & Shield"),
+            _("Spend your candies at the shop to buy useful items:\n"
+              "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+              "Use `{p}totshop` to browse and `{p}totbuy <item> [amount]` to purchase.\n\n"
+              "🍫 **Chocolate** — 15 🍬 · Reduces sickness\n"
+              "🍭 **Lollipop** — 30 🍬 · Reduces more sickness\n"
+              "🥠 **Cookie** — 25 🍬 · Random sickness\n"
+              "⭐ **Star** — 50 🍬 · Resets sickness\n"
+              "🛡️ **Shield** — 75 🍬 · Theft protection\n"
+              "✨ **Golden Candy** — 200 🍬 · 10× score, no sickness\n").format(p=p),
+            HALLOWEEN_PURPLE,
+        )
+        em4.add_field(
+            name=_("🛡️ What does the Shield do?"),
+            value=_("The shield protects your candy bag from theft via `stealcandy`. "
+                    "It lasts several hours (configurable by admins). You can only have **1 active** at a time."),
+            inline=False,
+        )
+        em4.set_footer(text=footer_tpl.format(current=4, total=6, version=__version__))
         pages.append(em4)
 
         # ── Page 5: Streaks, Stealing, Rare ──
-        em5 = self._make_embed(t["p5_title"], t["p5_body"].format(p=p), HALLOWEEN_GOLD)
-        em5.set_footer(text=f"🎃 {t['page']} 5/6 — Trick or Treat v{__version__}")
+        em5 = self._make_embed(
+            _("🔥 Guide — Streaks, Stealing & Rare Items"),
+            _("━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
+              "**🔥 Daily Streaks**\n"
+              "Play `trick or treat` every consecutive day to build your streak.\n"
+              "Each streak day adds **×0.1** to your reward multiplier.\n"
+              "Day 1: ×1.0 · Day 5: ×1.5 · Day 10: ×2.0 · Max: **×3.0**\n"
+              "Miss a day and the streak resets!\n\n"
+              "**🗡️ Stealing Candy**\n"
+              "Use `{p}stealcandy [@user]` to attempt a theft.\n"
+              "It doesn't always work — there are various success/failure chances.\n"
+              "The victim receives a **DM notification** when stolen from. 📩\n"
+              "Buy a **🛡️ Shield** to protect yourself.\n\n"
+              "**💎 Rare Items**\n"
+              "When doing `trick or treat`, there's a small chance of getting:\n"
+              "✨ **Golden Candy** (0.5%) — Worth ×10 when eaten.\n"
+              "🌶️ **Ghost Pepper** (0.3%) — Resets your sickness.\n").format(p=p),
+            HALLOWEEN_GOLD,
+        )
+        em5.set_footer(text=footer_tpl.format(current=5, total=6, version=__version__))
         pages.append(em5)
 
         # ── Page 6: Commands ──
-        em6 = self._make_embed(t["p6_title"], "━━━━━━━━━━━━━━━━━━━━━━━━━━━", HALLOWEEN_ORANGE)
-        em6.add_field(name=t["p6_player"], value=t["p6_player_val"].format(p=p), inline=False)
-        em6.add_field(name=t["p6_admin"], value=t["p6_admin_val"].format(p=p), inline=False)
-        em6.set_footer(text=f"🎃 {t['page']} 6/6 — Trick or Treat v{__version__}")
+        em6 = self._make_embed(
+            _("📋 Guide — Command List"),
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            HALLOWEEN_ORANGE,
+        )
+        em6.add_field(
+            name=_("🎮 Player"),
+            value=_("`trick or treat` — Go door to door\n"
+                    "`{p}eatcandy [n] [type]` — Eat candy\n"
+                    "`{p}cinventory` — View your inventory\n"
+                    "`{p}totstats [@user]` — Detailed statistics\n"
+                    "`{p}cboard` — Global eaten leaderboard\n"
+                    "`{p}totshop` — View the shop\n"
+                    "`{p}totbuy <item> [n]` — Buy from the shop\n"
+                    "`{p}buycandy <n>` — Buy candy with bot currency\n"
+                    "`{p}pickup` — Pick up candy from the ground\n"
+                    "`{p}stealcandy [@user]` — Steal candy\n"
+                    "`{p}tothelp` — This guide").format(p=p),
+            inline=False,
+        )
+        em6.add_field(
+            name=_("🔧 Admin / Mod"),
+            value=_("`{p}tottoggle` — Toggle the game on/off\n"
+                    "`{p}totchannel add/remove` — Game channels\n"
+                    "`{p}totcooldown [s]` — Trick or treat cooldown\n"
+                    "`{p}totpickupcooldown [s]` — Pickup cooldown\n"
+                    "`{p}totstealcooldown [s]` — Steal cooldown\n"
+                    "`{p}totshieldhours [h]` — Shield duration\n"
+                    "`{p}totbalance` — Candies in the pool\n"
+                    "`{p}totaddcandies <n>` — Add to pool\n"
+                    "`{p}totgivecandy @user type n` — Give candy\n"
+                    "`{p}totremovecandy @user type n` — Remove candy\n"
+                    "`{p}totevent start/status/stop` — Guild events").format(p=p),
+            inline=False,
+        )
+        em6.set_footer(text=footer_tpl.format(current=6, total=6, version=__version__))
         pages.append(em6)
 
         await menu(ctx, pages, DEFAULT_CONTROLS)
@@ -1212,13 +1092,13 @@ class TrickOrTreatV2(commands.Cog):
 
         em = self._make_embed("", color=HALLOWEEN_PURPLE)
         em.set_author(
-            name=f"📊 {user.display_name}'s Statistics",
+            name=_("📊 {name}'s Statistics").format(name=user.display_name),
             icon_url=user.display_avatar.url,
         )
         em.set_thumbnail(url=user.display_avatar.url)
 
         em.add_field(
-            name="🍬 Candy Stats",
+            name=_("🍬 Candy Stats"),
             value=(
                 f"Total Eaten: **{humanize_number(userdata.get('eaten', 0))}**\n"
                 f"Current Candies: **{humanize_number(userdata.get('candies', 0))}**\n"
@@ -1227,7 +1107,7 @@ class TrickOrTreatV2(commands.Cog):
             inline=True,
         )
         em.add_field(
-            name="🔥 Streaks",
+            name=_("🔥 Streaks"),
             value=(
                 f"Current: **{streak}** day{'s' if streak != 1 else ''}\n"
                 f"Best: **{best_streak}** day{'s' if best_streak != 1 else ''}\n"
@@ -1236,7 +1116,7 @@ class TrickOrTreatV2(commands.Cog):
             inline=True,
         )
         em.add_field(
-            name="🎭 Trick or Treat",
+            name=_("🎭 Trick or Treat"),
             value=(
                 f"Total Visits: **{total_visits}**\n"
                 f"Treats: **{treats}** ({treat_pct}%)\n"
@@ -1245,7 +1125,7 @@ class TrickOrTreatV2(commands.Cog):
             inline=True,
         )
         em.add_field(
-            name="🗡️ Theft Record",
+            name=_("🗡️ Theft Record"),
             value=(
                 f"Stolen from others: **{humanize_number(userdata.get('stolen', 0))}** 🍬\n"
                 f"Lost to theft: **{humanize_number(userdata.get('been_stolen', 0))}** 🍬"
@@ -1262,11 +1142,11 @@ class TrickOrTreatV2(commands.Cog):
                 rare_text += f"✨ Golden Candies: **{golden}**\n"
             if peppers > 0:
                 rare_text += f"🌶️ Ghost Peppers: **{peppers}**\n"
-            em.add_field(name="💎 Rare Items", value=rare_text.strip(), inline=True)
+            em.add_field(name=_("💎 Rare Items"), value=rare_text.strip(), inline=True)
 
         if await self._check_shield(user):
             remaining = await self._shield_remaining(user)
-            em.add_field(name="🛡️ Shield", value=f"✅ Active ({remaining} left)", inline=True)
+            em.add_field(name=_("🛡️ Shield"), value=_("✅ Active ({remaining} left)").format(remaining=remaining), inline=True)
 
         await ctx.send(embed=em)
 
@@ -1280,11 +1160,11 @@ class TrickOrTreatV2(commands.Cog):
     async def totclearall(self, ctx, are_you_sure=False):
         """[Owner] Clear all saved game data."""
         if not are_you_sure:
-            msg = "This will clear ALL saved data for this cog and reset it to the defaults.\n"
-            msg += f"If you are absolutely sure you want to do this, use `{ctx.prefix}totclearall yes`."
+            msg = _("This will clear ALL saved data for this cog and reset it to the defaults.\n")
+            msg += _("If you are absolutely sure you want to do this, use `{prefix}totclearall yes`.").format(prefix=ctx.prefix)
             return await ctx.send(msg)
         await self.config.clear_all()
-        await ctx.send("All data for this cog has been cleared.")
+        await ctx.send(_("All data for this cog has been cleared."))
 
     @commands.guild_only()
     @checks.mod_or_permissions(administrator=True)
@@ -1292,16 +1172,16 @@ class TrickOrTreatV2(commands.Cog):
     async def totcooldown(self, ctx, cooldown_time: int = 0):
         """Set the cooldown time for trick or treating on the server."""
         if cooldown_time < 0:
-            return await ctx.send("Nice try.")
+            return await ctx.send(_("Nice try."))
         if cooldown_time == 0:
             await self.config.guild(ctx.guild).cooldown.set(300)
-            return await ctx.send("Trick or treating cooldown time reset to 5m.")
+            return await ctx.send(_("Trick or treating cooldown time reset to 5m."))
         elif 1 <= cooldown_time <= 30:
             await self.config.guild(ctx.guild).cooldown.set(30)
-            return await ctx.send("Trick or treating cooldown time set to the minimum of 30s.")
+            return await ctx.send(_("Trick or treating cooldown time set to the minimum of 30s."))
         else:
             await self.config.guild(ctx.guild).cooldown.set(cooldown_time)
-            await ctx.send(f"Trick or treating cooldown time set to {cooldown_time}s.")
+            await ctx.send(_("Trick or treating cooldown time set to {cooldown_time}s.").format(cooldown_time=cooldown_time))
 
     @commands.guild_only()
     @checks.mod_or_permissions(administrator=True)
@@ -1309,13 +1189,13 @@ class TrickOrTreatV2(commands.Cog):
     async def totpickupcooldown(self, ctx, seconds: int = 0):
         """Set the cooldown time for the pickup command (default: 600s)."""
         if seconds < 0:
-            return await ctx.send("Nice try.")
+            return await ctx.send(_("Nice try."))
         if seconds == 0:
             await self.config.guild(ctx.guild).pickup_cooldown.set(600)
-            return await ctx.send("Pickup cooldown reset to 10m (600s).")
+            return await ctx.send(_("Pickup cooldown reset to 10m (600s)."))
         val = max(30, seconds)
         await self.config.guild(ctx.guild).pickup_cooldown.set(val)
-        await ctx.send(f"Pickup cooldown set to {val}s.")
+        await ctx.send(_("Pickup cooldown set to {val}s.").format(val=val))
 
     @commands.guild_only()
     @checks.mod_or_permissions(administrator=True)
@@ -1323,13 +1203,13 @@ class TrickOrTreatV2(commands.Cog):
     async def totstealcooldown(self, ctx, seconds: int = 0):
         """Set the cooldown time for the stealcandy command (default: 600s)."""
         if seconds < 0:
-            return await ctx.send("Nice try.")
+            return await ctx.send(_("Nice try."))
         if seconds == 0:
             await self.config.guild(ctx.guild).steal_cooldown.set(600)
-            return await ctx.send("Steal cooldown reset to 10m (600s).")
+            return await ctx.send(_("Steal cooldown reset to 10m (600s)."))
         val = max(30, seconds)
         await self.config.guild(ctx.guild).steal_cooldown.set(val)
-        await ctx.send(f"Steal cooldown set to {val}s.")
+        await ctx.send(_("Steal cooldown set to {val}s.").format(val=val))
 
     @commands.guild_only()
     @checks.mod_or_permissions(administrator=True)
@@ -1338,9 +1218,9 @@ class TrickOrTreatV2(commands.Cog):
         """Set how many hours a shield lasts (default: 4)."""
         if hours <= 0:
             await self.config.guild(ctx.guild).shield_hours.set(4)
-            return await ctx.send("Shield duration reset to 4 hours.")
+            return await ctx.send(_("Shield duration reset to 4 hours."))
         await self.config.guild(ctx.guild).shield_hours.set(hours)
-        await ctx.send(f"Shield duration set to {hours} hours.")
+        await ctx.send(_("Shield duration set to {hours} hours.").format(hours=hours))
 
     # ════════════════════════════════════════════════════════════
     #  PICKUP & STEAL
@@ -1357,7 +1237,7 @@ class TrickOrTreatV2(commands.Cog):
         if now < retry_after:
             remaining = int(retry_after - now)
             return await ctx.send(
-                f"You need to wait {remaining}s before picking up candy again.",
+                _("You need to wait {remaining}s before picking up candy again.").format(remaining=remaining),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         bucket[ctx.author.id] = now + cooldown_secs
@@ -1365,21 +1245,21 @@ class TrickOrTreatV2(commands.Cog):
         to_pick = await self.config.guild(ctx.guild).pick()
         if to_pick <= 0:
             message = await ctx.send(
-                "You start searching the area for candy...",
+                _("You start searching the area for candy..."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             await asyncio.sleep(3)
-            return await message.edit(content="There's no candy left on the ground!")
+            return await message.edit(content=_("There's no candy left on the ground!"))
         chance = random.randint(1, 100)
         found = min(round((chance / 100) * to_pick), to_pick)
         await self.config.user(ctx.author).candies.set(candies + found)
         await self.config.guild(ctx.guild).pick.set(to_pick - found)
         message = await ctx.send(
-            "You start searching the area for candy...",
+            _("You start searching the area for candy..."),
             reference=ctx.message.to_reference(fail_if_not_exists=False),
         )
         await asyncio.sleep(3)
-        await message.edit(content=f"You found {found} \N{CANDY}!")
+        await message.edit(content=_("You found {found} 🍬!").format(found=found))
 
     @commands.guild_only()
     @commands.command()
@@ -1392,7 +1272,7 @@ class TrickOrTreatV2(commands.Cog):
         if now < retry_after:
             remaining = int(retry_after - now)
             return await ctx.send(
-                f"You need to wait {remaining}s before stealing again.",
+                _("You need to wait {remaining}s before stealing again.").format(remaining=remaining),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         bucket[ctx.author.id] = now + cooldown_secs
@@ -1401,7 +1281,7 @@ class TrickOrTreatV2(commands.Cog):
         valid_user = list(set(guild_users) & set(candy_users))
         if not valid_user:
             return await ctx.send(
-                "No one has any candy yet!",
+                _("No one has any candy yet!"),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
         if user and user != ctx.author and not user.bot:
@@ -1411,7 +1291,7 @@ class TrickOrTreatV2(commands.Cog):
 
         if picked_user is None:
             return await ctx.send(
-                "You couldn't find anyone to steal from.",
+                _("You couldn't find anyone to steal from."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
 
@@ -1419,10 +1299,10 @@ class TrickOrTreatV2(commands.Cog):
         if await self._check_shield(picked_user):
             remaining = await self._shield_remaining(picked_user)
             em = self._make_embed(
-                "🛡️ Shield Blocked!",
-                f"You tried to steal from **{picked_user.display_name}**, but their candy bag\n"
-                f"is protected by a **magical shield**! ✨\n\n"
-                f"Shield expires in: {remaining}",
+                _("🛡️ Shield Blocked!"),
+                _("You tried to steal from **{name}**, but their candy bag\n"
+                "is protected by a **magical shield**! ✨\n\n"
+                "Shield expires in: {remaining}").format(name=picked_user.display_name, remaining=remaining),
                 HALLOWEEN_PURPLE,
             )
             return await ctx.send(embed=em, reference=ctx.message.to_reference(fail_if_not_exists=False))
@@ -1436,7 +1316,7 @@ class TrickOrTreatV2(commands.Cog):
                 new_picked_user = self.bot.get_user(random.choice(valid_user))
                 if new_picked_user is None:
                     return await ctx.send(
-                        "You snuck around for a while but didn't find anything.",
+                        _("You snuck around for a while but didn't find anything."),
                         reference=ctx.message.to_reference(fail_if_not_exists=False),
                     )
                 new_picked_user_name = new_picked_user.display_name
@@ -1445,38 +1325,38 @@ class TrickOrTreatV2(commands.Cog):
                 if chance in range(24, 25):
                     if new_picked_candy_now == 0:
                         message = await ctx.send(
-                            "You see an unsuspecting guildmate...",
+                            _("You see an unsuspecting guildmate..."),
                             reference=ctx.message.to_reference(fail_if_not_exists=False),
                         )
                         await asyncio.sleep(random.randint(3, 6))
                         return await message.edit(
-                            content=f"There was nothing in {picked_user}'s pockets, so you picked {new_picked_user_name}'s pockets but they had no candy either!"
+                            content=_("There was nothing in {user1}'s pockets, so you picked {user2}'s pockets but they had no candy either!").format(user1=picked_user, user2=new_picked_user_name)
                         )
                 else:
                     message = await ctx.send(
-                        "You see an unsuspecting guildmate...",
+                        _("You see an unsuspecting guildmate..."),
                         reference=ctx.message.to_reference(fail_if_not_exists=False),
                     )
                     await asyncio.sleep(random.randint(3, 6))
                     return await message.edit(
-                        content=f"There was nothing in {picked_user}'s pockets, so you looked around again... you saw {new_picked_user_name} in the distance, but you didn't think you could catch up..."
+                        content=_("There was nothing in {user1}'s pockets, so you looked around again... you saw {user2} in the distance, but you didn't think you could catch up...").format(user1=picked_user, user2=new_picked_user_name)
                     )
             if chance in range(10, 20):
                 message = await ctx.send(
-                    "You start sneaking around in the shadows...",
+                    _("You start sneaking around in the shadows..."),
                     reference=ctx.message.to_reference(fail_if_not_exists=False),
                 )
                 await asyncio.sleep(random.randint(3, 6))
                 return await message.edit(
-                    content=f"You snuck up on {picked_user} and tried picking their pockets but there was nothing there!"
+                    content=_("You snuck up on {user} and tried picking their pockets but there was nothing there!").format(user=picked_user)
                 )
             else:
                 message = await ctx.send(
-                    "You start looking around for a target...",
+                    _("You start looking around for a target..."),
                     reference=ctx.message.to_reference(fail_if_not_exists=False),
                 )
                 await asyncio.sleep(random.randint(3, 6))
-                return await message.edit(content="You snuck around for a while but didn't find anything.")
+                return await message.edit(content=_("You snuck around for a while but didn't find anything."))
 
         user_candy_now = await self.config.user(ctx.author).candies()
         multip = random.randint(1, 100) / 100
@@ -1485,25 +1365,25 @@ class TrickOrTreatV2(commands.Cog):
         pieces = round(picked_candy_now * multip)
         if pieces <= 0:
             message = await ctx.send(
-                "You stealthily move over to an unsuspecting person...",
+                _("You stealthily move over to an unsuspecting person..."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             await asyncio.sleep(4)
-            return await message.edit(content="You found someone to pickpocket, but they had nothing but pocket lint.")
+            return await message.edit(content=_("You found someone to pickpocket, but they had nothing but pocket lint."))
 
         chance = random.randint(1, 25)
         sneak_phrases = [
-            "You look around furtively...",
-            "You glance around slowly, looking for your target...",
-            "You see someone with a full candy bag...",
+            _("You look around furtively..."),
+            _("You glance around slowly, looking for your target..."),
+            _("You see someone with a full candy bag..."),
         ]
         if chance <= 10:
             message = await ctx.send(
-                "You creep closer to the target...",
+                _("You creep closer to the target..."),
                 reference=ctx.message.to_reference(fail_if_not_exists=False),
             )
             await asyncio.sleep(random.randint(3, 5))
-            return await message.edit(content="You snuck around for a while but didn't find anything.")
+            return await message.edit(content=_("You snuck around for a while but didn't find anything."))
 
         # Determine stolen amount
         if chance > 18:
@@ -1517,9 +1397,9 @@ class TrickOrTreatV2(commands.Cog):
             )
             await asyncio.sleep(4)
             noise_msg = [
-                "You hear a sound behind you! When you turn back, your target is gone.",
-                "You look away for a moment and your target has vanished.",
-                "Something flashes in your peripheral vision, and as you turn to look, your target gets away...",
+                _("You hear a sound behind you! When you turn back, your target is gone."),
+                _("You look away for a moment and your target has vanished."),
+                _("Something flashes in your peripheral vision, and as you turn to look, your target gets away..."),
             ]
             return await message.edit(content=random.choice(noise_msg))
 
@@ -1543,17 +1423,19 @@ class TrickOrTreatV2(commands.Cog):
             reference=ctx.message.to_reference(fail_if_not_exists=False),
         )
         await asyncio.sleep(4)
-        await message.edit(content="There seems to be an unsuspecting victim in the corner...")
+        await message.edit(content=_("There seems to be an unsuspecting victim in the corner..."))
         await asyncio.sleep(4)
-        await message.edit(content=f"You stole {stolen} \N{CANDY} from {picked_user}!")
+        await message.edit(content=_("You stole {stolen} 🍬 from {user}!").format(stolen=stolen, user=picked_user))
 
         # ── Theft notification to victim ──
         try:
             notif_em = self._make_embed(
-                "🗡️ Candy Theft Alert!",
-                f"**{ctx.author.display_name}** just stole **{stolen}** 🍬 from your bag!\n\n"
-                f"Remaining candies: **{picked_candy_now - stolen}** 🍬\n\n"
-                f"*Buy a 🛡️ Shield from the shop to protect yourself!*",
+                _("🗡️ Candy Theft Alert!"),
+                _("**{thief}** just stole **{stolen}** 🍬 from your bag!\n\n"
+                "Remaining candies: **{remaining}** 🍬\n\n"
+                "*Buy a 🛡️ Shield from the shop to protect yourself!*").format(
+                    thief=ctx.author.display_name, stolen=stolen, remaining=picked_candy_now - stolen,
+                ),
                 HALLOWEEN_RED,
             )
             await picked_user.send(embed=notif_em)
@@ -1572,8 +1454,8 @@ class TrickOrTreatV2(commands.Cog):
         if ctx.invoked_subcommand is None:
             if not await self.config.guild(ctx.guild).event_active():
                 return await ctx.send(
-                    f"No active event. Use `{ctx.prefix}totevent start <type> <goal>` to start one!\n"
-                    f"Event types: {', '.join(EVENT_TYPES.keys())}"
+                    _("No active event. Use `{prefix}totevent start <type> <goal>` to start one!\n"
+                    "Event types: {event_types}").format(prefix=ctx.prefix, event_types=", ".join(EVENT_TYPES.keys()))
                 )
             await self._show_event_status(ctx)
 
@@ -1589,7 +1471,7 @@ class TrickOrTreatV2(commands.Cog):
         bar = "█" * bar_filled + "░" * (20 - bar_filled)
 
         em = self._make_embed(
-            f"🎃 Guild Event — {info.get('desc', 'Unknown')}",
+            _("🎃 Guild Event — {desc}").format(desc=_(info.get("desc", "Unknown"))),
             f"**Goal:** {info.get('emoji', '🍬')} {event_type.title()} **{humanize_number(goal)}** candies!\n\n"
             f"**Progress:**\n{bar} **{humanize_number(progress)}**/{humanize_number(goal)} ({pct}%)\n\n"
             f"**Reward:** {humanize_number(reward)} 🍬 per participant\n\n"
@@ -1607,13 +1489,13 @@ class TrickOrTreatV2(commands.Cog):
         """
         event_type = event_type.lower()
         if event_type not in EVENT_TYPES:
-            return await ctx.send(f"Invalid event type! Choose from: {', '.join(EVENT_TYPES.keys())}")
+            return await ctx.send(_("Invalid event type! Choose from: {types}").format(types=", ".join(EVENT_TYPES.keys())))
         if goal <= 0:
-            return await ctx.send("Goal must be positive!")
+            return await ctx.send(_("Goal must be positive!"))
         if reward <= 0:
-            return await ctx.send("Reward must be positive!")
+            return await ctx.send(_("Reward must be positive!"))
         if await self.config.guild(ctx.guild).event_active():
-            return await ctx.send(f"An event is already active! Use `{ctx.prefix}totevent stop` to cancel it first.")
+            return await ctx.send(_("An event is already active! Use `{prefix}totevent stop` to cancel it first.").format(prefix=ctx.prefix))
 
         await self.config.guild(ctx.guild).event_active.set(True)
         await self.config.guild(ctx.guild).event_type.set(event_type)
@@ -1623,11 +1505,15 @@ class TrickOrTreatV2(commands.Cog):
 
         info = EVENT_TYPES[event_type]
         em = self._make_embed(
-            "🎃 New Guild Event Started!",
-            f"**{info['desc']}**\n\n"
-            f"{info['emoji']} Goal: **{humanize_number(goal)}** candies {event_type}!\n"
-            f"🍬 Reward: **{humanize_number(reward)}** candies per participant!\n\n"
-            f"*Everyone's progress counts! Work together!* 🎃",
+            _("🎃 New Guild Event Started!"),
+            _("**{desc}**\n\n"
+            "{emoji} Goal: **{goal}** candies {event_type}!\n"
+            "🍬 Reward: **{reward}** candies per participant!\n\n"
+            "*Everyone's progress counts! Work together!* 🎃").format(
+                desc=_(info["desc"]), emoji=info["emoji"],
+                goal=humanize_number(goal), event_type=event_type,
+                reward=humanize_number(reward),
+            ),
             HALLOWEEN_GOLD,
         )
         await ctx.send(embed=em)
@@ -1636,16 +1522,16 @@ class TrickOrTreatV2(commands.Cog):
     async def totevent_status(self, ctx):
         """Check the current event progress."""
         if not await self.config.guild(ctx.guild).event_active():
-            return await ctx.send("No active event right now.")
+            return await ctx.send(_("No active event right now."))
         await self._show_event_status(ctx)
 
     @totevent.command(name="stop")
     async def totevent_stop(self, ctx):
         """Stop the current guild event."""
         if not await self.config.guild(ctx.guild).event_active():
-            return await ctx.send("No active event to stop.")
+            return await ctx.send(_("No active event to stop."))
         await self.config.guild(ctx.guild).event_active.set(False)
-        em = self._make_embed("🎃 Event Cancelled", "The guild event has been cancelled.", HALLOWEEN_RED)
+        em = self._make_embed(_("🎃 Event Cancelled"), _("The guild event has been cancelled."), HALLOWEEN_RED)
         await ctx.send(embed=em)
 
     # ════════════════════════════════════════════════════════════
@@ -1660,7 +1546,7 @@ class TrickOrTreatV2(commands.Cog):
         if ctx.invoked_subcommand is not None:
             return
         channel_list = await self.config.guild(ctx.guild).channel()
-        channel_msg = "Trick or Treat Channels:\n"
+        channel_msg = _("Trick or Treat Channels:\n")
         for chan in channel_list:
             channel_obj = self.bot.get_channel(chan)
             if channel_obj:
@@ -1675,7 +1561,7 @@ class TrickOrTreatV2(commands.Cog):
         tottoggle = await self.config.guild(ctx.guild).toggle()
         if not tottoggle:
             toggle_info = (
-                f"\nThe game toggle for this server is **Off**. Turn it on with the `{ctx.prefix}tottoggle` command."
+                _("\nThe game toggle for this server is **Off**. Turn it on with the `{prefix}tottoggle` command.").format(prefix=ctx.prefix)
             )
         else:
             toggle_info = ""
@@ -1683,9 +1569,9 @@ class TrickOrTreatV2(commands.Cog):
             channel_list.append(channel.id)
             await self.config.guild(ctx.guild).channel.set(channel_list)
             self._channel_cache[ctx.guild.id] = channel_list
-            await ctx.send(f"{channel.mention} added to the valid Trick or Treat channels.{toggle_info}")
+            await ctx.send(_("{channel} added to the valid Trick or Treat channels.{toggle_info}").format(channel=channel.mention, toggle_info=toggle_info))
         else:
-            await ctx.send(f"{channel.mention} is already in the list of Trick or Treat channels.{toggle_info}")
+            await ctx.send(_("{channel} is already in the list of Trick or Treat channels.{toggle_info}").format(channel=channel.mention, toggle_info=toggle_info))
 
     @commands.guild_only()
     @totchannel.command()
@@ -1695,10 +1581,10 @@ class TrickOrTreatV2(commands.Cog):
         if channel.id in channel_list:
             channel_list.remove(channel.id)
         else:
-            return await ctx.send(f"{channel.mention} not in whitelist.")
+            return await ctx.send(_("{channel} not in whitelist.").format(channel=channel.mention))
         await self.config.guild(ctx.guild).channel.set(channel_list)
         self._channel_cache[ctx.guild.id] = channel_list
-        await ctx.send(f"{channel.mention} removed from the list of Trick or Treat channels.")
+        await ctx.send(_("{channel} removed from the list of Trick or Treat channels.").format(channel=channel.mention))
 
     @commands.guild_only()
     @checks.mod_or_permissions(administrator=True)
@@ -1706,12 +1592,12 @@ class TrickOrTreatV2(commands.Cog):
     async def tottoggle(self, ctx):
         """Toggle trick or treating on the whole server."""
         toggle = await self.config.guild(ctx.guild).toggle()
-        msg = f"Trick or Treating active: {not toggle}.\n"
+        msg = _("Trick or Treating active: {status}.\n").format(status=not toggle)
         channel_list = await self.config.guild(ctx.guild).channel()
         if not channel_list:
             channel_list.append(ctx.message.channel.id)
             await self.config.guild(ctx.guild).channel.set(channel_list)
-            msg += f"Trick or Treating channel added: {ctx.message.channel.mention}"
+            msg += _("Trick or Treating channel added: {channel}").format(channel=ctx.message.channel.mention)
         await self.config.guild(ctx.guild).toggle.set(not toggle)
         self._toggle_cache[ctx.guild.id] = not toggle
         await ctx.send(msg)
@@ -1722,16 +1608,16 @@ class TrickOrTreatV2(commands.Cog):
     async def totaddcandies(self, ctx, amount: int):
         """Add candies to the guild pool."""
         if amount <= 0:
-            return await ctx.send("La cantidad debe ser mayor que cero.")
+            return await ctx.send(_("Amount must be greater than zero."))
         pick = await self.config.guild(ctx.guild).pick()
         await self.config.guild(ctx.guild).pick.set(pick + amount)
-        await ctx.send(f"Se han añadido {amount} 🍬 al pool actual. Ahora hay {pick + amount} 🍬 disponibles para recoger.")
+        await ctx.send(_("Added {amount} 🍬 to the pool. Now there are {total} 🍬 available to pick up.").format(amount=amount, total=pick + amount))
 
     @commands.guild_only()
     @commands.command(hidden=True)
     async def totversion(self, ctx):
         """Trick or Treat version."""
-        await ctx.send(f"Trick or Treat version {__version__}")
+        await ctx.send(_("Trick or Treat version {version}").format(version=__version__))
 
     async def has_perm(self, user):
         return await self.bot.allowed_by_whitelist_blacklist(user)
@@ -1787,14 +1673,14 @@ class TrickOrTreatV2(commands.Cog):
         now = now.replace(tzinfo=None)
         if int((now - last_time).total_seconds()) < await self.config.guild(message.guild).cooldown():
             cooldown_messages = [
-                "The thought of candy right now doesn't really sound like a good idea.",
-                "All the lights on this street are dark...",
-                "It's starting to get late.",
-                "The wind howls through the trees. Does it seem darker all of a sudden?",
-                "You start to walk the long distance to the next house...",
-                "You take a moment to count your candy before moving on.",
-                "The house you were approaching just turned the light off.",
-                "The wind starts to pick up as you look for the next house...",
+                _("The thought of candy right now doesn't really sound like a good idea."),
+                _("All the lights on this street are dark..."),
+                _("It's starting to get late."),
+                _("The wind howls through the trees. Does it seem darker all of a sudden?"),
+                _("You start to walk the long distance to the next house..."),
+                _("You take a moment to count your candy before moving on."),
+                _("The house you were approaching just turned the light off."),
+                _("The wind starts to pick up as you look for the next house..."),
             ]
             return await message.channel.send(
                 random.choice(cooldown_messages), reference=message.to_reference(fail_if_not_exists=False)
@@ -1824,14 +1710,14 @@ class TrickOrTreatV2(commands.Cog):
 
         # ── Walking Phase ──
         walking_messages = [
-            "*You hear footsteps...*",
-            "*You're left alone with your thoughts as you wait for the door to open...*",
-            "*The wind howls through the trees...*",
-            "*Does it feel colder out here all of a sudden?*",
-            "*Somewhere inside the house, you hear wood creaking...*",
-            "*You walk up the path to the door and knock...*",
-            "*You knock on the door...*",
-            "*There's a movement in the shadows by the side of the house...*",
+            _("*You hear footsteps...*"),
+            _("*You're left alone with your thoughts as you wait for the door to open...*"),
+            _("*The wind howls through the trees...*"),
+            _("*Does it feel colder out here all of a sudden?*"),
+            _("*Somewhere inside the house, you hear wood creaking...*"),
+            _("*You walk up the path to the door and knock...*"),
+            _("*You knock on the door...*"),
+            _("*There's a movement in the shadows by the side of the house...*"),
         ]
         bot_talking = await message.channel.send(
             random.choice(walking_messages), reference=message.to_reference(fail_if_not_exists=False)
@@ -1839,14 +1725,14 @@ class TrickOrTreatV2(commands.Cog):
         await asyncio.sleep(random.randint(4, 7))
 
         door_messages = [
-            "*The door slowly opens...*",
-            "*The ancient wooden door starts to open...*",
-            "*A light turns on overhead...*",
-            "*You hear a scuffling noise...*",
-            "*There's someone talking inside...*",
-            "*The wind whips around your feet...*",
-            "*A crow caws ominously...*",
-            "*You hear an owl hooting in the distance...*",
+            _("*The door slowly opens...*"),
+            _("*The ancient wooden door starts to open...*"),
+            _("*A light turns on overhead...*"),
+            _("*You hear a scuffling noise...*"),
+            _("*There's someone talking inside...*"),
+            _("*The wind whips around your feet...*"),
+            _("*A crow caws ominously...*"),
+            _("*You hear an owl hooting in the distance...*"),
         ]
         await bot_talking.edit(content=random.choice(door_messages))
         await asyncio.sleep(random.randint(4, 7))
@@ -1893,27 +1779,27 @@ class TrickOrTreatV2(commands.Cog):
                 await self.config.user(message.author).sickness.set(sickness + sickness_gained)
 
             # Build trick embed
-            trick_desc = event["desc"]
+            trick_desc = _(event["desc"])
             effects = []
             if candy_lost > 0:
-                effects.append(f"💔 Lost **{candy_lost}** candies!")
+                effects.append(_("💔 Lost **{candy_lost}** candies!").format(candy_lost=candy_lost))
             if sickness_gained > 0:
                 new_sick = sickness + sickness_gained
                 effects.append(f"{_sickness_face(new_sick)} Sickness: **+{sickness_gained}** ({_sickness_bar(new_sick)} {new_sick}/100)")
             if effects:
                 trick_desc += "\n\n" + "\n".join(effects)
-            trick_desc += f"\n\n*Better luck next time...* 👻"
+            trick_desc += "\n\n" + _("*Better luck next time...* 👻")
 
             em = discord.Embed(
-                title=event["title"],
+                title=_(event["title"]),
                 description=trick_desc,
                 color=HALLOWEEN_RED,
             )
             em.set_author(
-                name=f"🎃 TRICK! — {message.author.display_name}",
+                name=_("🎃 TRICK! — {name}").format(name=message.author.display_name),
                 icon_url=message.author.display_avatar.url,
             )
-            em.set_footer(text=f"🎃 Trick or Treat v{__version__}")
+            em.set_footer(text=_("🎃 Trick or Treat v{version}").format(version=__version__))
             await bot_talking.edit(content=None, embed=em)
             return
 
@@ -1930,7 +1816,7 @@ class TrickOrTreatV2(commands.Cog):
         sickness_penalty = ""
         if sickness > 100:
             candy = max(1, candy // 4)
-            sickness_penalty = "⚠️ *Sickness penalty: rewards quartered!*"
+            sickness_penalty = _("⚠️ *Sickness penalty: rewards quartered!*")
             # 50% chance of losing candy instead
             if random.random() < 0.5:
                 lost = min(random.randint(1, 5), userdata["candies"])
@@ -1938,11 +1824,14 @@ class TrickOrTreatV2(commands.Cog):
                 pool = await self.config.guild(guild).pick()
                 await self.config.guild(guild).pick.set(pool + lost)
                 em = discord.Embed(
-                    title="🤮 Too Sick!",
+                    title=_("🤮 Too Sick!"),
                     description=(
-                        f"You're so sick that you **dropped** {lost} candies!\n\n"
-                        f"{_sickness_face(sickness)} {_sickness_bar(sickness)} **{sickness}**/100\n"
-                        f"*Eat chocolate or lollipops to recover!*"
+                        _("You're so sick that you **dropped** {lost} candies!\n\n"
+                        "{face} {bar} **{sickness}**/100\n"
+                        "*Eat chocolate or lollipops to recover!*").format(
+                            lost=lost, face=_sickness_face(sickness),
+                            bar=_sickness_bar(sickness), sickness=sickness,
+                        )
                     ),
                     color=HALLOWEEN_RED,
                 )
@@ -1950,27 +1839,27 @@ class TrickOrTreatV2(commands.Cog):
                     name=f"🎃 {message.author.display_name}",
                     icon_url=message.author.display_avatar.url,
                 )
-                em.set_footer(text=f"🎃 Trick or Treat v{__version__}")
+                em.set_footer(text=_("🎃 Trick or Treat v{version}").format(version=__version__))
                 await bot_talking.edit(content=None, embed=em)
                 return
         elif sickness > 80:
             candy = max(1, candy // 2)
-            sickness_penalty = "⚠️ *Sickness penalty: rewards halved!*"
+            sickness_penalty = _("⚠️ *Sickness penalty: rewards halved!*")
 
         await self.config.user(message.author).candies.set(userdata["candies"] + candy)
 
         # Build treat embed
         greet_messages = [
-            "Oh, hello. What a cute costume!",
-            "Look at that costume!",
-            "Out this late at night?",
-            "Here's a little something for you.",
-            "The peppermint ones are my favorite.",
-            "Come back again later if the light is still on.",
-            "Go ahead, take a few.",
-            "Aww, look at you. Here, take this.",
-            "Don't eat all those at once!",
-            "Well, I think this is the last of it.",
+            _("Oh, hello. What a cute costume!"),
+            _("Look at that costume!"),
+            _("Out this late at night?"),
+            _("Here's a little something for you."),
+            _("The peppermint ones are my favorite."),
+            _("Come back again later if the light is still on."),
+            _("Go ahead, take a few."),
+            _("Aww, look at you. Here, take this."),
+            _("Don't eat all those at once!"),
+            _("Well, I think this is the last of it."),
         ]
 
         treat_desc = f"*\"{random.choice(greet_messages)}\"*\n\n"
@@ -2007,9 +1896,9 @@ class TrickOrTreatV2(commands.Cog):
             rare_lines.append("🌶️ **+1 Ghost Pepper!** *(ULTRA RARE!)*")
 
         if bonus_lines:
-            treat_desc += "\n**Bonus Drops:**\n" + "\n".join(bonus_lines) + "\n"
+            treat_desc += "\n" + _("**Bonus Drops:**") + "\n" + "\n".join(bonus_lines) + "\n"
         if rare_lines:
-            treat_desc += "\n🌟 **RARE DROPS:**\n" + "\n".join(rare_lines) + "\n"
+            treat_desc += "\n" + _("🌟 **RARE DROPS:**") + "\n" + "\n".join(rare_lines) + "\n"
 
         # Streak info
         if streak >= 2:
@@ -2033,10 +1922,10 @@ class TrickOrTreatV2(commands.Cog):
             color=embed_color,
         )
         em.set_author(
-            name=f"🎃 TREAT! — {message.author.display_name}",
+            name=_("🎃 TREAT! — {name}").format(name=message.author.display_name),
             icon_url=message.author.display_avatar.url,
         )
-        em.set_footer(text=f"🎃 Trick or Treat v{__version__}")
+        em.set_footer(text=_("🎃 Trick or Treat v{version}").format(version=__version__))
         await bot_talking.edit(content=None, embed=em)
 
         # Update guild event
