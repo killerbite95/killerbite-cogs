@@ -1449,7 +1449,7 @@ class TrickOrTreatV2(commands.Cog):
     # ════════════════════════════════════════════════════════════
 
     @commands.guild_only()
-    @commands.group()
+    @commands.group(invoke_without_command=True)
     async def totevent(self, ctx):
         """View or manage guild-wide trick-or-treat events!"""
         if ctx.invoked_subcommand is None:
