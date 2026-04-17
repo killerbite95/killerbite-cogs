@@ -331,7 +331,7 @@ class Giveaways(commands.Cog):
         giveaway_dict.get("kwargs", {}).pop("colour", None)
         await self.config.custom(GIVEAWAY_KEY, str(ctx.guild.id), str(msg.id)).set(giveaway_dict)
 
-    @commands.hybrid_group(aliases=["gw"])
+    @commands.hybrid_group(name="gw", aliases=["giveaway"])
     @commands.bot_has_permissions(add_reactions=True, embed_links=True)
     @commands.has_permissions(manage_guild=True)
     async def giveaway(self, ctx: commands.Context):
