@@ -1049,6 +1049,7 @@ class TrickOrTreatV2(commands.Cog):
                     "`{p}buycandy <n>` — Buy candy with bot currency\n"
                     "`{p}pickup` — Pick up candy from the ground\n"
                     "`{p}stealcandy [@user]` — Steal candy\n"
+                    "`{p}totevent` — View current event progress\n"
                     "`{p}tothelp` — This guide").format(p=p),
             inline=False,
         )
@@ -1064,7 +1065,8 @@ class TrickOrTreatV2(commands.Cog):
                     "`{p}totaddcandies <n>` — Add to pool\n"
                     "`{p}totgivecandy @user type n` — Give candy\n"
                     "`{p}totremovecandy @user type n` — Remove candy\n"
-                    "`{p}totevent start/status/stop` — Guild events").format(p=p),
+                    "`{p}totevent start/stop` — Start/stop events\n"
+                    "`{p}totevent reward/goal <n>` — Adjust event").format(p=p),
             inline=False,
         )
         em6.set_footer(text=footer_tpl.format(current=6, total=6, version=__version__))
@@ -1447,16 +1449,12 @@ class TrickOrTreatV2(commands.Cog):
     # ════════════════════════════════════════════════════════════
 
     @commands.guild_only()
-    @checks.mod_or_permissions(administrator=True)
     @commands.group()
     async def totevent(self, ctx):
-        """Manage guild-wide trick-or-treat events!"""
+        """View or manage guild-wide trick-or-treat events!"""
         if ctx.invoked_subcommand is None:
             if not await self.config.guild(ctx.guild).event_active():
-                return await ctx.send(
-                    _("No active event. Use `{prefix}totevent start <type> <goal>` to start one!\n"
-                    "Event types: {event_types}").format(prefix=ctx.prefix, event_types=", ".join(EVENT_TYPES.keys()))
-                )
+                return await ctx.send(_("❌ No active event right now."))
             await self._show_event_status(ctx)
 
     async def _show_event_status(self, ctx):
@@ -1481,6 +1479,7 @@ class TrickOrTreatV2(commands.Cog):
         await ctx.send(embed=em)
 
     @totevent.command(name="start")
+    @checks.mod_or_permissions(administrator=True)
     async def totevent_start(self, ctx, event_type: str, goal: int, reward: int = 50):
         """Start a guild event!
 
@@ -1526,6 +1525,7 @@ class TrickOrTreatV2(commands.Cog):
         await self._show_event_status(ctx)
 
     @totevent.command(name="stop")
+    @checks.mod_or_permissions(administrator=True)
     async def totevent_stop(self, ctx):
         """Stop the current guild event."""
         if not await self.config.guild(ctx.guild).event_active():
@@ -1533,6 +1533,47 @@ class TrickOrTreatV2(commands.Cog):
         await self.config.guild(ctx.guild).event_active.set(False)
         em = self._make_embed(_("🎃 Event Cancelled"), _("The guild event has been cancelled."), HALLOWEEN_RED)
         await ctx.send(embed=em)
+
+    @totevent.command(name="reward")
+    @checks.mod_or_permissions(administrator=True)
+    async def totevent_reward(self, ctx, amount: int):
+        """Change the reward for the current event.
+
+        Example: [p]totevent reward 200
+        """
+        if not await self.config.guild(ctx.guild).event_active():
+            return await ctx.send(_("No active event right now."))
+        if amount <= 0:
+            return await ctx.send(_("Reward must be positive!"))
+        await self.config.guild(ctx.guild).event_reward.set(amount)
+        await ctx.send(
+            _("✅ Event reward updated to **{reward}** 🍬 per participant!").format(
+                reward=humanize_number(amount)
+            )
+        )
+
+    @totevent.command(name="goal")
+    @checks.mod_or_permissions(administrator=True)
+    async def totevent_goal(self, ctx, amount: int):
+        """Change the goal for the current event.
+
+        Example: [p]totevent goal 10000
+        """
+        if not await self.config.guild(ctx.guild).event_active():
+            return await ctx.send(_("No active event right now."))
+        if amount <= 0:
+            return await ctx.send(_("Goal must be positive!"))
+        progress = await self.config.guild(ctx.guild).event_progress()
+        if amount <= progress:
+            return await ctx.send(
+                _("Goal must be higher than current progress ({progress})!").format(
+                    progress=humanize_number(progress)
+                )
+            )
+        await self.config.guild(ctx.guild).event_goal.set(amount)
+        await ctx.send(
+            _("✅ Event goal updated to **{goal}**!").format(goal=humanize_number(amount))
+        )
 
     # ════════════════════════════════════════════════════════════
     #  CHANNEL MANAGEMENT
