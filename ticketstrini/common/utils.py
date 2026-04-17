@@ -113,7 +113,7 @@ async def migrate_schema(guild: discord.Guild, conf: dict, config: Config) -> di
                     if "last_staff_message" not in ticket:
                         ticket["last_staff_message"] = None
                     if "close_warnings_sent" not in ticket:
-                        ticket["close_warnings_sent"] = []
+                        ticket["close_warnings_sent"] = 0
                     if "escalated" not in ticket:
                         ticket["escalated"] = False
                     if "escalation_level" not in ticket:
@@ -598,6 +598,7 @@ async def unclaim_ticket(
     staff: discord.Member,
     config: Config,
     conf: dict,
+    bot: Optional[Red] = None,
 ) -> Tuple[bool, str]:
     """
     Unclaim a ticket.
@@ -620,7 +621,10 @@ async def unclaim_ticket(
     
     if ticket_data["claimed_by"] != staff.id:
         # Check if user is admin
-        if not await is_admin_or_superior(None, staff):
+        is_admin = staff.guild_permissions.administrator
+        if bot and not is_admin:
+            is_admin = await is_admin_or_superior(bot, staff)
+        if not is_admin:
             return False, _("You can only unclaim tickets you have claimed.")
     
     async with config.guild(guild).opened() as opened:
@@ -648,6 +652,7 @@ async def transfer_ticket(
     to_staff: discord.Member,
     config: Config,
     conf: dict,
+    bot: Optional[Red] = None,
 ) -> Tuple[bool, str]:
     """
     Transfer a ticket from one staff member to another.
@@ -667,7 +672,10 @@ async def transfer_ticket(
     
     current_claimer = ticket_data.get("claimed_by")
     if current_claimer and current_claimer != from_staff.id:
-        if not await is_admin_or_superior(None, from_staff):
+        is_admin = from_staff.guild_permissions.administrator
+        if bot and not is_admin:
+            is_admin = await is_admin_or_superior(bot, from_staff)
+        if not is_admin:
             return False, _("You can only transfer tickets you have claimed.")
     
     now = datetime.now().astimezone()

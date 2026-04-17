@@ -64,6 +64,9 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         
         # Track message timestamps for smart auto-close
         self.last_activity: t.Dict[str, datetime.datetime] = {}  # channel_id -> last message time
+        
+        # Set of ticket channel IDs for fast on_message filtering
+        self.ticket_channel_ids: t.Set[str] = set()
 
         self.auto_close.start()
         self.escalation_check.start()
@@ -228,6 +231,9 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
             if not member:
                 continue
             for ticket_channel_id, ticket_info in opened_tickets.items():
+                # Register in ticket channel cache for fast on_message filtering
+                self.ticket_channel_ids.add(ticket_channel_id)
+                
                 ticket_channel = guild.get_channel_or_thread(int(ticket_channel_id))
                 if not ticket_channel:
                     continue
@@ -477,10 +483,10 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                         await escalate_ticket(
                             guild=guild,
                             channel=channel,
+                            ticket_data=ticket,
+                            owner_id=uid,
                             config=self.config,
                             conf=gconf,
-                            escalation_channel=escalation_channel,
-                            escalation_role=escalation_role,
                         )
                         log.info(f"Escalated ticket {channel_id} in {guild.name} after {minutes_elapsed:.0f} minutes")
 
@@ -497,11 +503,16 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         if not message.guild:
             return
         
-        # Check if this is a ticket channel
+        channel_id = str(message.channel.id)
+        
+        # Fast path: skip if channel is not a known ticket channel
+        if channel_id not in self.ticket_channel_ids:
+            return
+        
+        # Confirmed ticket channel - load full config
         conf = await self.config.guild(message.guild).all()
         opened = conf.get("opened", {})
         
-        channel_id = str(message.channel.id)
         ticket_owner_id = None
         ticket_data = None
         
@@ -552,6 +563,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
             return
 
         for cid in tickets:
+            self.ticket_channel_ids.discard(cid)
             chan = guild.get_channel_or_thread(int(cid))
             if not chan:
                 continue
@@ -573,6 +585,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     async def on_thread_delete(self, thread: discord.Thread):
         if not thread:
             return
+        self.ticket_channel_ids.discard(str(thread.id))
         guild = thread.guild
         conf = await self.config.guild(guild).all()
         pruned = await prune_invalid_tickets(guild, conf, self.config)
@@ -583,6 +596,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     async def on_guild_channel_delete(self, channel: discord.abc.GuildChannel):
         if not channel:
             return
+        self.ticket_channel_ids.discard(str(channel.id))
         guild = channel.guild
         conf = await self.config.guild(guild).all()
         pruned = await prune_invalid_tickets(guild, conf, self.config)

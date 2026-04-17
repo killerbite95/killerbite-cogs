@@ -71,6 +71,53 @@ class BaseCommands(MixinMeta):
             return await ctx.send(txt)
         await ctx.send(f"**{user.name}** " + _("has been added to this ticket!"))
 
+    @commands.hybrid_command(name="remove", description="Remove a user from your ticket")
+    @app_commands.describe(user="The Discord user you want to remove from your ticket")
+    @commands.guild_only()
+    async def remove_user_from_ticket(self, ctx: commands.Context, *, user: discord.Member):
+        """Remove a user from your ticket"""
+        conf = await self.config.guild(ctx.guild).all()
+        opened = conf["opened"]
+        owner_id = get_ticket_owner(opened, str(ctx.channel.id))
+        if not owner_id:
+            return await ctx.send(_("This is not a ticket channel, or it has been removed from config"))
+
+        # Cannot remove the ticket owner
+        if str(user.id) == owner_id:
+            return await ctx.send(_("You cannot remove the ticket owner from their own ticket"))
+
+        panel_name = opened[owner_id][str(ctx.channel.id)]["panel"]
+        panel_roles = conf["panels"][panel_name]["roles"]
+        user_roles = [r.id for r in ctx.author.roles]
+
+        support_roles = [i[0] for i in conf["support_roles"]]
+        support_roles.extend([i[0] for i in panel_roles])
+
+        can_remove = False
+        if any(i in support_roles for i in user_roles):
+            can_remove = True
+        elif ctx.author.id == ctx.guild.owner_id:
+            can_remove = True
+        elif await is_admin_or_superior(self.bot, ctx.author):
+            can_remove = True
+        elif owner_id == str(ctx.author.id) and conf["user_can_manage"]:
+            can_remove = True
+
+        if not can_remove:
+            return await ctx.send(_("You do not have permissions to remove users from this ticket"))
+
+        channel = ctx.channel
+        try:
+            if isinstance(channel, discord.TextChannel):
+                await channel.set_permissions(user, overwrite=None)
+            else:
+                await channel.remove_user(user)
+        except Exception as e:
+            log.exception(f"Failed to remove {user.name} from ticket", exc_info=e)
+            txt = _("Failed to remove user from ticket: {}").format(str(e))
+            return await ctx.send(txt)
+        await ctx.send(f"**{user.name}** " + _("has been removed from this ticket!"))
+
     @commands.hybrid_command(name="renameticket", description="Rename your ticket")
     @app_commands.describe(new_name="The new name for your ticket")
     @commands.guild_only()
@@ -240,6 +287,7 @@ class BaseCommands(MixinMeta):
             staff=ctx.author,
             config=self.config,
             conf=conf,
+            bot=self.bot,
         )
         
         await ctx.send(message)
@@ -285,6 +333,7 @@ class BaseCommands(MixinMeta):
             to_staff=new_staff,
             config=self.config,
             conf=conf,
+            bot=self.bot,
         )
         
         await ctx.send(message)
@@ -332,7 +381,7 @@ class BaseCommands(MixinMeta):
             else:
                 return await ctx.send(_("Please provide a note: `{}note Your note here`").format(ctx.prefix))
         
-        success = await add_ticket_note(
+        success, msg = await add_ticket_note(
             guild=ctx.guild,
             channel=ctx.channel,
             staff=ctx.author,
@@ -383,8 +432,8 @@ class BaseCommands(MixinMeta):
         )
         
         for i, note in enumerate(notes[-10:], 1):  # Last 10 notes
-            staff_id = note.get("staff_id")
-            staff = ctx.guild.get_member(staff_id) if staff_id else None
+            author_id = note.get("author_id")
+            staff = ctx.guild.get_member(author_id) if author_id else None
             staff_name = staff.display_name if staff else "Unknown"
             
             timestamp = note.get("timestamp", "Unknown")

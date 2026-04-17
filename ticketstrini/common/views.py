@@ -302,6 +302,7 @@ class CloseView(View):
                     user,
                     self.config,
                     conf,
+                    bot=self.bot,
                 )
                 if success:
                     self.claimed_by = None
@@ -1097,6 +1098,7 @@ class StaffActionsView(View):
             user,
             self.config,
             conf,
+            bot=self.bot,
         )
         
         if success:
@@ -1243,6 +1245,7 @@ class TransferView(View):
                     self.selected_staff,
                     self.config,
                     conf,
+                    bot=self.bot,
                 )
                 await interaction.followup.send(message, ephemeral=True)
                 if success:

@@ -33,7 +33,7 @@ DEFAULT_GUILD = {
     # Auto-close settings
     "auto_close_user_hours": 0,  # Auto-close if user doesn't respond (0 = disabled)
     "auto_close_staff_hours": 0,  # Auto-close if staff doesn't respond (0 = disabled)
-    "auto_close_warning_hours": [24, 1],  # Warning intervals before auto-close
+    "auto_close_warning_hours": 0,  # Hours before auto-close to send warning (0 = no warning)
     "reopen_hours": 0,  # Allow reopening for X hours after close (0 = disabled)
     # Staff settings
     "max_claims_per_staff": 0,  # Max tickets a single staff can claim (0 = unlimited)
@@ -122,7 +122,7 @@ OPENED_TICKET_SCHEMA = {
     "claimed_at": None,  # ISO timestamp
     "last_user_message": None,  # ISO timestamp
     "last_staff_message": None,  # ISO timestamp
-    "close_warnings_sent": [],  # List of warning timestamps sent
+    "close_warnings_sent": 0,  # Number of close warnings sent
     "escalated": False,  # Whether ticket has been escalated
     "escalation_level": 0,  # 0 = not escalated, 1 = first escalation, 2 = second
     "transferred_from": None,  # Previous claimer if transferred
