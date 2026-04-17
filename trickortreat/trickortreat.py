@@ -832,7 +832,7 @@ class TrickOrTreatV2(commands.Cog):
             )
             pages += 1
             page_list.append(embed)
-        return await menu(ctx, page_list, DEFAULT_CONTROLS)
+        return await menu(ctx, page_list, DEFAULT_CONTROLS, timeout=300)
 
     @commands.guild_only()
     @commands.command()
@@ -1070,7 +1070,7 @@ class TrickOrTreatV2(commands.Cog):
         em6.set_footer(text=footer_tpl.format(current=6, total=6, version=__version__))
         pages.append(em6)
 
-        await menu(ctx, pages, DEFAULT_CONTROLS)
+        await menu(ctx, pages, DEFAULT_CONTROLS, timeout=300)
 
     # ════════════════════════════════════════════════════════════
     #  PERSONAL STATS
