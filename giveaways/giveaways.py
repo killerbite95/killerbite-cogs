@@ -42,7 +42,7 @@ class Giveaways(commands.Cog):
         self.config = Config.get_conf(self, identifier=95932766180343808)
         self.config.init_custom(GIVEAWAY_KEY, 2)
         self.config.register_guild(
-            defaults={
+            guild_defaults={
                 "update_button": True,
                 "congratulate": True,
                 "notify": True,
@@ -231,7 +231,7 @@ class Giveaways(commands.Cog):
 
     async def _apply_guild_defaults(self, ctx: commands.Context, arguments: dict) -> dict:
         """Apply guild defaults to arguments where not explicitly set."""
-        defaults = await self.config.guild(ctx.guild).defaults()
+        defaults = await self.config.guild(ctx.guild).guild_defaults()
         for key, default_val in defaults.items():
             if arguments.get(key) is None:
                 arguments[key] = default_val
@@ -250,7 +250,7 @@ class Giveaways(commands.Cog):
         # Apply guild default for show_requirements
         show_reqs = arguments.get("show_requirements")
         if show_reqs is None:
-            defaults = await self.config.guild(ctx.guild).defaults()
+            defaults = await self.config.guild(ctx.guild).guild_defaults()
             show_reqs = defaults.get("show_requirements", True)
         if show_reqs:
             req_text = self.generate_settings_text(ctx, arguments)
@@ -285,7 +285,7 @@ class Giveaways(commands.Cog):
 
         update_btn = arguments.get("update_button")
         if update_btn is None:
-            defaults = await self.config.guild(ctx.guild).defaults()
+            defaults = await self.config.guild(ctx.guild).guild_defaults()
             update_btn = defaults.get("update_button", True)
 
         view = GiveawayView(self)
@@ -362,7 +362,7 @@ class Giveaways(commands.Cog):
         This by default will DM the winner and also DM a user if they cannot enter the giveaway.
         """
         channel = channel or ctx.channel
-        defaults = await self.config.guild(ctx.guild).defaults()
+        defaults = await self.config.guild(ctx.guild).guild_defaults()
         end = datetime.now(timezone.utc) + time
 
         emoji = defaults.get("emoji", "🎉")
@@ -926,7 +926,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_show(self, ctx: commands.Context):
         """Show current default giveaway settings."""
-        defaults = await self.config.guild(ctx.guild).defaults()
+        defaults = await self.config.guild(ctx.guild).guild_defaults()
         lines = []
         for key, value in defaults.items():
             if isinstance(value, bool):
@@ -945,7 +945,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_updatebutton(self, ctx: commands.Context, enabled: bool):
         """Set whether to update the button with entrant count by default."""
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["update_button"] = enabled
         await ctx.tick()
 
@@ -953,7 +953,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_congratulate(self, ctx: commands.Context, enabled: bool):
         """Set whether to DM winners by default."""
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["congratulate"] = enabled
         await ctx.tick()
 
@@ -961,7 +961,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_notify(self, ctx: commands.Context, enabled: bool):
         """Set whether to DM users when they fail to enter by default."""
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["notify"] = enabled
         await ctx.tick()
 
@@ -969,7 +969,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_showrequirements(self, ctx: commands.Context, enabled: bool):
         """Set whether to show requirements on the embed by default."""
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["show_requirements"] = enabled
         await ctx.tick()
 
@@ -977,7 +977,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_announce(self, ctx: commands.Context, enabled: bool):
         """Set whether to post a separate announcement when a giveaway ends."""
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["announce"] = enabled
         await ctx.tick()
 
@@ -985,7 +985,7 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def gw_set_emoji(self, ctx: commands.Context, emoji: str):
         """Set the default emoji for giveaways."""
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["emoji"] = emoji
         await ctx.tick()
 
@@ -995,7 +995,7 @@ class Giveaways(commands.Cog):
         """Set the default button text for giveaways."""
         if len(text) > 70:
             return await ctx.send("Button text must be less than 70 characters.")
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["button-text"] = text
         await ctx.tick()
 
@@ -1006,7 +1006,7 @@ class Giveaways(commands.Cog):
         from .menu import BUTTON_STYLE
         if style.lower() not in BUTTON_STYLE:
             return await ctx.send(f"Style must be one of: {', '.join(BUTTON_STYLE.keys())}")
-        async with self.config.guild(ctx.guild).defaults() as defaults:
+        async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["button-style"] = style.lower()
         await ctx.tick()
 
@@ -1121,7 +1121,7 @@ class Giveaways(commands.Cog):
         if winners is None or winners < 1:
             winners = 1
 
-        defaults = await self.config.guild(ctx.guild).defaults()
+        defaults = await self.config.guild(ctx.guild).guild_defaults()
         end = datetime.now(timezone.utc) + duration
 
         emoji = defaults.get("emoji", "🎉")

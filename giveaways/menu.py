@@ -157,7 +157,7 @@ class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
             )
 
         guild = interaction.guild
-        defaults = await self.cog.config.guild(guild).defaults()
+        defaults = await self.cog.config.guild(guild).guild_defaults()
 
         end = datetime.now(timezone.utc) + duration
         emoji = defaults.get("emoji", "🎉")
