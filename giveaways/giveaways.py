@@ -13,7 +13,7 @@ from redbot.core.utils.chat_formatting import pagify
 from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 
 from .converter import Args, EditArgs
-from .menu import GiveawayButton, GiveawayCreateModal, GiveawayView
+from .menu import GiveawayButton, GiveawayView
 from .objects import Giveaway, GiveawayEnterError, GiveawayExecError
 
 log = logging.getLogger("red.killerbite95.giveaways")
@@ -1086,21 +1086,102 @@ class Giveaways(commands.Cog):
         await ctx.send(f"Preset **{name}** deleted.")
 
     # ═══════════════════════════════════════════════════════════
-    #  MODAL CREATION (gw create)
+    #  QUICK CREATE (gw create)
     # ═══════════════════════════════════════════════════════════
 
     @giveaway.command(name="create")
     @commands.has_permissions(manage_guild=True)
-    @app_commands.describe(channel="The channel for the giveaway (defaults to current).")
-    async def create(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Create a giveaway using an interactive form (slash command only)."""
-        if not ctx.interaction:
-            return await ctx.send(
-                f"This command only works as a slash command. "
-                f"Use `{ctx.clean_prefix}gw start` or `{ctx.clean_prefix}gw advanced` for prefix commands."
+    @app_commands.describe(
+        prize="The prize for the giveaway.",
+        duration="How long the giveaway lasts (e.g. 1h30m, 2d, 30m).",
+        winners="Number of winners (default: 1).",
+        channel="The channel for the giveaway (defaults to current).",
+        description="Optional description for the giveaway.",
+    )
+    async def create(
+        self,
+        ctx: commands.Context,
+        prize: str,
+        duration: TimedeltaConverter(default_unit="minutes"),
+        winners: Optional[int] = 1,
+        channel: Optional[discord.TextChannel] = None,
+        *,
+        description: Optional[str] = None,
+    ):
+        """Create a giveaway with simple parameters.
+
+        Works with both prefix and slash commands.
+
+        Examples:
+        `[p]gw create Nitro 1h30m`
+        `[p]gw create "Steam Key" 2d 3 #giveaways`
+        `/giveaway create prize:Nitro duration:1h30m winners:2`
+        """
+        channel = channel or ctx.channel
+        if winners is None or winners < 1:
+            winners = 1
+
+        defaults = await self.config.guild(ctx.guild).defaults()
+        end = datetime.now(timezone.utc) + duration
+
+        emoji = defaults.get("emoji", "🎉")
+        button_text = defaults.get("button-text", "Join Giveaway")
+        button_style = defaults.get("button-style", "green")
+        update_button = defaults.get("update_button", True)
+        congratulate = defaults.get("congratulate", True)
+        notify = defaults.get("notify", True)
+
+        desc_text = f"{description}\n\n" if description else ""
+        embed = discord.Embed(
+            title=f"{f'{winners}x ' if winners > 1 else ''}{prize}",
+            description=(
+                f"{desc_text}Click the button below to enter\n\n"
+                f"**Hosted by:** {ctx.author.mention}\n\n"
+                f"Ends: <t:{int(end.timestamp())}:R>"
+            ),
+            color=await ctx.embed_color(),
+        )
+        embed.set_footer(text="🎉 0 participants")
+
+        view = GiveawayView(self)
+        msg = await channel.send(embed=embed)
+        view.add_item(
+            GiveawayButton(
+                label=button_text,
+                style=button_style,
+                emoji=emoji,
+                cog=self,
+                id=msg.id,
+                update=update_button,
             )
-        modal = GiveawayCreateModal(self, channel or ctx.channel)
-        await ctx.interaction.response.send_modal(modal)
+        )
+        self.bot.add_view(view)
+        await msg.edit(view=view)
+
+        kwargs = {
+            "congratulate": congratulate,
+            "notify": notify,
+            "update_button": update_button,
+            "button-text": button_text,
+            "button-style": button_style,
+            "winners": winners,
+        }
+        if description:
+            kwargs["description"] = description
+
+        giveaway_obj = Giveaway(
+            ctx.guild.id, channel.id, msg.id, end, prize, emoji,
+            **kwargs,
+        )
+        self.giveaways[msg.id] = giveaway_obj
+        giveaway_dict = deepcopy(giveaway_obj.__dict__)
+        giveaway_dict["endtime"] = giveaway_dict["endtime"].timestamp()
+        await self.config.custom(GIVEAWAY_KEY, str(ctx.guild.id), str(msg.id)).set(giveaway_dict)
+
+        if ctx.interaction:
+            await ctx.send("Giveaway created!", ephemeral=True)
+        else:
+            await ctx.tick()
 
     # ═══════════════════════════════════════════════════════════
     #  GUIDE / HELP (gw guide)
