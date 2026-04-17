@@ -1,12 +1,13 @@
 {
     "author": [
-        "flare(flare#0001)"
+        "flare(flare#0001)",
+        "killerbite95"
     ],
-    "install_msg": "Giveaway cog. Currently not fully finished, report any bugs in the 3rd party cog server.",
+    "install_msg": "Giveaway cog with advanced features: role restrictions, multipliers, presets, interactive creation, history, and more.",
     "name": "Giveaways",
     "disabled": false,
-    "short": "Giveaway cog with features such duration or end timing, multipliers, role only acces, bank integration etc.",
-    "description": "Giveaway cog with features such duration or end timing, multipliers, role only acces, bank integration etc.",
+    "short": "Giveaway cog with features such duration or end timing, multipliers, role only access, bank integration, presets, history etc.",
+    "description": "Giveaway cog with features such duration or end timing, multipliers, role only access, bank integration, presets, history etc.",
     "tags": [
         "giveaway",
         "giveaways",
