@@ -336,7 +336,9 @@ class Giveaways(commands.Cog):
     @commands.has_permissions(manage_guild=True)
     async def giveaway(self, ctx: commands.Context):
         """
-        Manage the giveaway system
+        Manage the giveaway system.
+
+        Use `[p]gw guide` for a full interactive guide.
         """
 
     @giveaway.command()
@@ -1104,7 +1106,7 @@ class Giveaways(commands.Cog):
     #  GUIDE / HELP (gw guide)
     # ═══════════════════════════════════════════════════════════
 
-    @giveaway.command(name="guide", aliases=["help"])
+    @giveaway.command(name="guide")
     @commands.bot_has_permissions(embed_links=True, add_reactions=True)
     async def guide(self, ctx: commands.Context):
         """📖 Full guide for the Giveaway system."""
