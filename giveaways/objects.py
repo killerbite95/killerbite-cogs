@@ -204,9 +204,20 @@ class Giveaway:
 
     def draw_winner(self):
         winner_count = self.kwargs.get("winners") or 1
-        if len(self.entrants) < winner_count:
+        unique_entrants = list(set(self.entrants))
+        if len(unique_entrants) < winner_count:
             return None
-        winners = random.sample(self.entrants, winner_count)
+        # Weighted random: more entries = higher chance, but each user can only win once
+        weights = [self.entrants.count(uid) for uid in unique_entrants]
+        winners = []
+        pool = list(unique_entrants)
+        pool_weights = list(weights)
+        for _ in range(winner_count):
+            chosen = random.choices(pool, weights=pool_weights, k=1)[0]
+            winners.append(chosen)
+            idx = pool.index(chosen)
+            pool.pop(idx)
+            pool_weights.pop(idx)
         for w in winners:
             self.remove_entrant(w)
         return winners
