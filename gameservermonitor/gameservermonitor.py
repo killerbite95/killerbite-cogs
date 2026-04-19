@@ -1646,7 +1646,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             else:
                 await ctx.send(_("❌ No se encontró servidor con clave **{}**.").format(server_key))
     
-    @commands.command(name="forzarstatus")
+    @commands.command(name="forcestatus", aliases=["forzarstatus"])
     async def force_status(self, ctx: commands.Context) -> None:
         """Forces a status update in the current channel."""
         servers = await self.config.guild(ctx.guild).servers()
@@ -1676,7 +1676,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             author=self.__author__
         ))
     
-    @commands.command(name="listaserver")
+    @commands.command(name="listservers", aliases=["listaserver"])
     async def list_servers(self, ctx: commands.Context) -> None:
         """Lists all monitored servers."""
         servers = await self.config.guild(ctx.guild).servers()

@@ -1,0 +1,428 @@
+# SimpleSuggestions - Spanish Translation
+# By Killerbite95
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: SimpleSuggestions\n"
+"POT-Creation-Date: 2025-01-01 00:00+0000\n"
+"PO-Revision-Date: 2025-01-01 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext\n"
+
+# STATUS_CONFIG labels (storage.py)
+msgid "Pending"
+msgstr "Pendiente"
+
+msgid "In Review"
+msgstr "En revisión"
+
+msgid "Planned"
+msgstr "Planeado"
+
+msgid "In Progress"
+msgstr "En progreso"
+
+msgid "Approved"
+msgstr "Aprobado"
+
+msgid "Implemented"
+msgstr "Implementado"
+
+msgid "Denied"
+msgstr "Rechazado"
+
+msgid "Duplicate"
+msgstr "Duplicado"
+
+msgid "Won't Do"
+msgstr "No se hará"
+
+# embeds.py
+msgid "Suggestion #{suggestion_id}"
+msgstr "Sugerencia #{suggestion_id}"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Votes"
+msgstr "Votos"
+
+msgid "ID: {suggestion_id} • {label}"
+msgstr "ID: {suggestion_id} • {label}"
+
+msgid "{emoji} Vote registered"
+msgstr "{emoji} Voto registrado"
+
+msgid "You voted in favor of suggestion #{suggestion_id}"
+msgstr "Has votado a favor de la sugerencia #{suggestion_id}"
+
+msgid "You voted against suggestion #{suggestion_id}"
+msgstr "Has votado en contra de la sugerencia #{suggestion_id}"
+
+msgid "🔄 Vote withdrawn"
+msgstr "🔄 Voto retirado"
+
+msgid "You withdrew your vote from suggestion #{suggestion_id}"
+msgstr "Has retirado tu voto de la sugerencia #{suggestion_id}"
+
+msgid "{emoji} Vote changed"
+msgstr "{emoji} Voto cambiado"
+
+msgid "You changed your vote to in favor of suggestion #{suggestion_id}"
+msgstr "Has cambiado tu voto a favor de la sugerencia #{suggestion_id}"
+
+msgid "You changed your vote to against suggestion #{suggestion_id}"
+msgstr "Has cambiado tu voto en contra de la sugerencia #{suggestion_id}"
+
+msgid "Current votes"
+msgstr "Votos actuales"
+
+msgid "📬 Update on your suggestion"
+msgstr "📬 Actualización de tu sugerencia"
+
+msgid "**Suggestion #{suggestion_id}** has changed status."
+msgstr "**Sugerencia #{suggestion_id}** ha cambiado de estado."
+
+msgid "Your suggestion"
+msgstr "Tu sugerencia"
+
+msgid "Status change"
+msgstr "Cambio de estado"
+
+msgid "Reason"
+msgstr "Motivo"
+
+msgid "Updated by {name}"
+msgstr "Actualizado por {name}"
+
+msgid "📊 Votes - Suggestion #{suggestion_id}"
+msgstr "📊 Votos - Sugerencia #{suggestion_id}"
+
+msgid "Summary"
+msgstr "Resumen"
+
+msgid ""
+"**Total:** {total} votes\n"
+"**In favor:** {upvotes} ({up_pct:.1f}%)\n"
+"**Against:** {downvotes} ({down_pct:.1f}%)\n"
+"\n"
+"{bar}"
+msgstr ""
+"**Total:** {total} votos\n"
+"**A favor:** {upvotes} ({up_pct:.1f}%)\n"
+"**En contra:** {downvotes} ({down_pct:.1f}%)\n"
+"\n"
+"{bar}"
+
+msgid "No votes yet"
+msgstr "Aún no hay votos"
+
+msgid "Score"
+msgstr "Puntuación"
+
+msgid "📋 Suggestion List"
+msgstr "📋 Lista de Sugerencias"
+
+msgid "No suggestions to show."
+msgstr "No hay sugerencias que mostrar."
+
+msgid "Page {page}/{total_pages}"
+msgstr "Página {page}/{total_pages}"
+
+msgid "📜 History - Suggestion #{suggestion_id}"
+msgstr "📜 Historial - Sugerencia #{suggestion_id}"
+
+msgid "No changes recorded."
+msgstr "No hay cambios registrados."
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "• {old_emoji} → {new_emoji} by **{user_name}**"
+msgstr "• {old_emoji} → {new_emoji} por **{user_name}**"
+
+# views.py
+msgid "New Suggestion"
+msgstr "Nueva Sugerencia"
+
+#, fuzzy
+msgid "Your suggestion"
+msgstr "Tu sugerencia"
+
+msgid "Describe your suggestion in detail..."
+msgstr "Describe tu sugerencia con detalle..."
+
+msgid "Edit Suggestion"
+msgstr "Editar Sugerencia"
+
+msgid "Suggestion content"
+msgstr "Contenido de la sugerencia"
+
+msgid "Change to: {label}"
+msgstr "Cambiar a: {label}"
+
+msgid "Reason (optional)"
+msgstr "Motivo (opcional)"
+
+msgid "Explain the reason for the status change..."
+msgstr "Explica el motivo del cambio de estado..."
+
+msgid "View votes"
+msgstr "Ver votos"
+
+msgid "Edit"
+msgstr "Editar"
+
+msgid "❌ Suggestion not found."
+msgstr "❌ Sugerencia no encontrada."
+
+msgid "❌ Only the author can edit this suggestion."
+msgstr "❌ Solo el autor puede editar esta sugerencia."
+
+msgid "❌ You cannot edit a suggestion with status: {label}"
+msgstr "❌ No puedes editar una sugerencia con estado: {label}"
+
+msgid "✅ Suggestion edited."
+msgstr "✅ Sugerencia editada."
+
+msgid "Approve"
+msgstr "Aprobar"
+
+msgid "Deny"
+msgstr "Rechazar"
+
+msgid "Change status"
+msgstr "Cambiar estado"
+
+msgid "Select a status..."
+msgstr "Selecciona un estado..."
+
+msgid "ℹ️ The suggestion already has the status: {emoji} {label}"
+msgstr "ℹ️ La sugerencia ya tiene el estado: {emoji} {label}"
+
+msgid "❌ Error updating."
+msgstr "❌ Error al actualizar."
+
+msgid "✅ Status changed to: {emoji} {label}"
+msgstr "✅ Estado cambiado a: {emoji} {label}"
+
+msgid "❌ This command can only be used in a server."
+msgstr "❌ Este comando solo puede usarse en un servidor."
+
+msgid "❌ Could not verify your membership in the server."
+msgstr "❌ No se pudo verificar tu membresía en el servidor."
+
+msgid ""
+"❌ You don't have permission to perform this action.\n"
+"You need to be an **Administrator**, have **Manage Server** permission, "
+"or have the configured staff role."
+msgstr ""
+"❌ No tienes permisos para realizar esta acción.\n"
+"Necesitas ser **Administrador**, tener permiso de **Gestionar servidor**, "
+"o tener el rol de staff configurado."
+
+msgid "Select the new status:"
+msgstr "Selecciona el nuevo estado:"
+
+# simplesuggestions.py
+msgid "❌ The suggestion channel has not been configured."
+msgstr "❌ El canal de sugerencias no ha sido configurado."
+
+msgid "❌ Please include your suggestion: `[p]suggest <your suggestion>`"
+msgstr "❌ Por favor, incluye tu sugerencia: `[p]suggest <tu sugerencia>`"
+
+msgid "✅ Your suggestion **#{suggestion_id}** has been sent in {channel}"
+msgstr "✅ Tu sugerencia **#{suggestion_id}** ha sido enviada en {channel}"
+
+msgid "❌ That suggestion was not found."
+msgstr "❌ No se encontró esa sugerencia."
+
+msgid "❌ You can only edit your own suggestions."
+msgstr "❌ Solo puedes editar tus propias sugerencias."
+
+msgid "✅ Your suggestion has been edited."
+msgstr "✅ Tu sugerencia ha sido editada."
+
+msgid "You have no suggestions."
+msgstr "No tienes sugerencias."
+
+msgid "❌ Invalid status: {status}"
+msgstr "❌ Estado inválido: {status}"
+
+msgid "✅ Suggestion #{suggestion_id} updated to: {emoji} {label}"
+msgstr "✅ Sugerencia #{suggestion_id} actualizada a: {emoji} {label}"
+
+msgid "No suggestions found."
+msgstr "No hay sugerencias."
+
+msgid "📝 Additional information"
+msgstr "📝 Información adicional"
+
+msgid ""
+"**Message ID:** {message_id}\n"
+"**Thread:** {thread}\n"
+"**Changes:** {changes}"
+msgstr ""
+"**Message ID:** {message_id}\n"
+"**Hilo:** {thread}\n"
+"**Cambios:** {changes}"
+
+msgid "Yes"
+msgstr "Sí"
+
+msgid "No"
+msgstr "No"
+
+msgid "❌ No suggestion channel configured."
+msgstr "❌ No hay canal de sugerencias configurado."
+
+msgid "🔄 Syncing suggestions..."
+msgstr "🔄 Sincronizando sugerencias..."
+
+msgid ""
+"✅ Sync completed:\n"
+"• Valid suggestions: {valid}\n"
+"• Marked as deleted: {deleted}"
+msgstr ""
+"✅ Sincronización completada:\n"
+"• Sugerencias válidas: {valid}\n"
+"• Marcadas como eliminadas: {deleted}"
+
+#, fuzzy
+msgid "❌ Suggestion not found."
+msgstr "❌ Sugerencia no encontrada."
+
+msgid "✅ Suggestion #{suggestion_id} reposted: {url}"
+msgstr "✅ Sugerencia #{suggestion_id} republicada: {url}"
+
+msgid ""
+"⚠️ This will permanently delete all suggestions marked as deleted.\n"
+"Are you sure? Reply `confirm` within 30 seconds."
+msgstr ""
+"⚠️ Esto eliminará permanentemente todas las sugerencias marcadas como eliminadas.\n"
+"¿Estás seguro? Responde `confirmar` en 30 segundos."
+
+msgid "❌ Operation cancelled."
+msgstr "❌ Operación cancelada."
+
+msgid "❌ Timed out."
+msgstr "❌ Tiempo agotado."
+
+msgid "✅ {count} suggestions permanently deleted."
+msgstr "✅ {count} sugerencias eliminadas permanentemente."
+
+msgid "❌ Invalid option. Use: `deleted`"
+msgstr "❌ Opción no válida. Usa: `deleted`"
+
+msgid "✅ Suggestion channel: {channel}"
+msgstr "✅ Canal de sugerencias: {channel}"
+
+msgid "✅ Log channel: {channel}"
+msgstr "✅ Canal de logs: {channel}"
+
+msgid "✅ Log channel disabled."
+msgstr "✅ Canal de logs desactivado."
+
+msgid "✅ Notification channel: {channel}"
+msgstr "✅ Canal de notificaciones: {channel}"
+
+msgid "✅ Notification channel disabled."
+msgstr "✅ Canal de notificaciones desactivado."
+
+msgid "✅ Staff role: {role}"
+msgstr "✅ Rol de staff: {role}"
+
+msgid "✅ Staff role removed."
+msgstr "✅ Rol de staff eliminado."
+
+msgid "buttons"
+msgstr "botones"
+
+msgid "reactions"
+msgstr "reacciones"
+
+msgid "✅ Interaction mode: **{mode}**"
+msgstr "✅ Modo de interacción: **{mode}**"
+
+msgid "enabled"
+msgstr "activado"
+
+msgid "disabled"
+msgstr "desactivado"
+
+msgid "✅ Automatic threads: **{state}**"
+msgstr "✅ Hilos automáticos: **{state}**"
+
+msgid "✅ Automatic thread archiving: **{state}**"
+msgstr "✅ Archivado automático de hilos: **{state}**"
+
+msgid "✅ Author notifications: **{state}**"
+msgstr "✅ Notificaciones al autor: **{state}**"
+
+msgid "⚙️ Suggestion Settings"
+msgstr "⚙️ Configuración de Sugerencias"
+
+msgid "📢 Channels"
+msgstr "📢 Canales"
+
+msgid ""
+"**Suggestions:** {suggestions}\n"
+"**Logs:** {logs}\n"
+"**Notifications:** {notifications}"
+msgstr ""
+"**Sugerencias:** {suggestions}\n"
+"**Logs:** {logs}\n"
+"**Notificaciones:** {notifications}"
+
+msgid "Not configured"
+msgstr "No configurado"
+
+msgid "Disabled"
+msgstr "Desactivado"
+
+msgid "DM"
+msgstr "DM"
+
+msgid "🔧 Options"
+msgstr "🔧 Opciones"
+
+msgid ""
+"**Mode:** {mode}\n"
+"**Automatic threads:** {threads}\n"
+"**Thread archiving:** {archive}\n"
+"**Notify author:** {notify}"
+msgstr ""
+"**Modo:** {mode}\n"
+"**Hilos automáticos:** {threads}\n"
+"**Archivado de hilos:** {archive}\n"
+"**Notificar autor:** {notify}"
+
+msgid "Buttons"
+msgstr "Botones"
+
+msgid "Reactions"
+msgstr "Reacciones"
+
+msgid "👥 Permissions"
+msgstr "👥 Permisos"
+
+msgid "**Staff role:** {role}"
+msgstr "**Rol staff:** {role}"
+
+msgid "Admins only"
+msgstr "Solo admins"
+
+msgid "📊 Statistics"
+msgstr "📊 Estadísticas"
+
+msgid ""
+"**Total suggestions:** {total}\n"
+"**Current counter:** #{counter}"
+msgstr ""
+"**Total sugerencias:** {total}\n"
+"**Contador actual:** #{counter}"

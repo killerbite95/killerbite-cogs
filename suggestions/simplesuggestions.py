@@ -13,6 +13,7 @@ Features:
 import discord # pyright: ignore[reportMissingImports]
 from redbot.core import commands, Config, checks, app_commands
 from redbot.core.bot import Red
+from redbot.core.i18n import Translator, cog_i18n
 from typing import Optional, Union
 import logging
 import re
@@ -44,11 +45,14 @@ from .dashboard_integration import DashboardIntegration, dashboard_page
 
 logger = logging.getLogger("red.killerbite95.suggestions")
 
+_ = Translator("SimpleSuggestions", __file__)
 
+
+@cog_i18n(_)
 class SimpleSuggestions(DashboardIntegration, commands.Cog):
     """
-    Sistema de sugerencias completo con botones interactivos, votaciones persistentes,
-    múltiples estados y panel de control web.
+    A comprehensive suggestion system with interactive buttons, persistent voting,
+    multiple statuses, and web control panel.
     
     By Killerbite95
     """
@@ -265,22 +269,22 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     # ==================== USER COMMANDS ====================
     
     @commands.hybrid_command(name="suggest")
-    @app_commands.describe(suggestion="Tu sugerencia")
+    @app_commands.describe(suggestion="Your suggestion")
     async def suggest(self, ctx: commands.Context, *, suggestion: Optional[str] = None):
         """
-        Envía una nueva sugerencia.
+        Submit a new suggestion.
         
-        Puedes escribir la sugerencia directamente o usar el modal interactivo.
+        You can type the suggestion directly or use the interactive modal.
         
-        **Ejemplos:**
-        - `[p]suggest Añadir más emojis al servidor`
-        - `[p]suggest` (abre un modal para escribir)
+        **Examples:**
+        - `[p]suggest Add more emojis to the server`
+        - `[p]suggest` (opens a modal to write)
         """
         await self._ensure_migrated(ctx.guild)
         
         channel = await self._get_suggestion_channel(ctx.guild)
         if not channel:
-            await ctx.send("❌ El canal de sugerencias no ha sido configurado.", ephemeral=True)
+            await ctx.send(_("❌ The suggestion channel has not been configured."), ephemeral=True)
             return
         
         # If no suggestion provided, show modal (only works with slash commands)
@@ -294,7 +298,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
                 # Use followup since we already responded with modal
                 respond = modal.interaction.followup.send
             else:
-                await ctx.send("❌ Por favor, incluye tu sugerencia: `[p]suggest <tu sugerencia>`")
+                await ctx.send(_("❌ Please include your suggestion: `[p]suggest <your suggestion>`"))
                 return
         else:
             respond = ctx.send
@@ -321,7 +325,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
             try:
                 duration = await self.config.guild(ctx.guild).thread_archive_duration()
                 thread = await message.create_thread(
-                    name=f"Sugerencia #{suggestion_data.suggestion_id}",
+                    name=_("Suggestion #{suggestion_id}").format(suggestion_id=suggestion_data.suggestion_id),
                     auto_archive_duration=duration
                 )
                 suggestion_data.thread_id = thread.id
@@ -331,14 +335,16 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         await self.storage.update_suggestion(ctx.guild, suggestion_data)
         
         await respond(
-            f"✅ Tu sugerencia **#{suggestion_data.suggestion_id}** ha sido enviada en {channel.mention}",
+            _("✅ Your suggestion **#{suggestion_id}** has been sent in {channel}").format(
+                suggestion_id=suggestion_data.suggestion_id, channel=channel.mention
+            ),
             ephemeral=True
         )
     
     @commands.hybrid_command(name="editsuggest")
     @app_commands.describe(
-        reference="ID de sugerencia (#123), ID de mensaje, o link del mensaje",
-        new_content="Nuevo contenido de la sugerencia"
+        reference="Suggestion ID (#123), message ID, or message link",
+        new_content="New suggestion content"
     )
     async def edit_suggestion(
         self,
@@ -348,32 +354,34 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         new_content: str
     ):
         """
-        Edita tu propia sugerencia (solo si está pendiente).
+        Edit your own suggestion (only if pending).
         
-        **Ejemplos:**
-        - `[p]editsuggest #123 Nuevo texto de mi sugerencia`
-        - `[p]editsuggest 1234567890 Nuevo texto`
+        **Examples:**
+        - `[p]editsuggest #123 New text for my suggestion`
+        - `[p]editsuggest 1234567890 New text`
         """
         await self._ensure_migrated(ctx.guild)
         
         suggestion_id = await self._parse_suggestion_reference(ctx.guild, reference)
         if not suggestion_id:
-            await ctx.send("❌ No se encontró esa sugerencia.", ephemeral=True)
+            await ctx.send(_("❌ That suggestion was not found."), ephemeral=True)
             return
         
         suggestion = await self.storage.get_suggestion(ctx.guild, suggestion_id)
         if not suggestion:
-            await ctx.send("❌ Sugerencia no encontrada.", ephemeral=True)
+            await ctx.send(_("❌ Suggestion not found."), ephemeral=True)
             return
         
         if suggestion.author_id != ctx.author.id:
-            await ctx.send("❌ Solo puedes editar tus propias sugerencias.", ephemeral=True)
+            await ctx.send(_("❌ You can only edit your own suggestions."), ephemeral=True)
             return
         
         if suggestion.status != SuggestionStatus.PENDING:
             status_info = STATUS_CONFIG.get(suggestion.status, {})
             await ctx.send(
-                f"❌ No puedes editar una sugerencia con estado: {status_info.get('label', suggestion.status.value)}",
+                _("❌ You cannot edit a suggestion with status: {label}").format(
+                    label=_(status_info.get('label', suggestion.status.value))
+                ),
                 ephemeral=True
             )
             return
@@ -393,11 +401,11 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
             except discord.NotFound:
                 pass
         
-        await ctx.send("✅ Tu sugerencia ha sido editada.", ephemeral=True)
+        await ctx.send(_("✅ Your suggestion has been edited."), ephemeral=True)
     
     @commands.hybrid_command(name="mysuggestions")
     async def my_suggestions(self, ctx: commands.Context):
-        """Ver tus propias sugerencias."""
+        """View your own suggestions."""
         await self._ensure_migrated(ctx.guild)
         
         suggestions = await self.storage.get_all_suggestions(
@@ -406,7 +414,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         )
         
         if not suggestions:
-            await ctx.send("No tienes sugerencias.", ephemeral=True)
+            await ctx.send(_("You have no suggestions."), ephemeral=True)
             return
         
         view = SuggestionListView(self, suggestions)
@@ -422,8 +430,8 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @commands.hybrid_command(name="approve")
     @checks.admin_or_permissions(manage_guild=True)
     @app_commands.describe(
-        reference="ID de sugerencia (#123), ID de mensaje, o link",
-        reason="Motivo de la aprobación (opcional)"
+        reference="Suggestion ID (#123), message ID, or link",
+        reason="Reason for approval (optional)"
     )
     async def approve_suggestion(
         self,
@@ -433,11 +441,11 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         reason: Optional[str] = None
     ):
         """
-        Aprueba una sugerencia.
+        Approve a suggestion.
         
-        **Ejemplos:**
+        **Examples:**
         - `[p]approve #123`
-        - `[p]approve #123 Buena idea, lo implementaremos`
+        - `[p]approve #123 Great idea, we'll implement it`
         """
         await self._change_suggestion_status(
             ctx, reference, SuggestionStatus.APPROVED, reason
@@ -446,8 +454,8 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @commands.hybrid_command(name="deny")
     @checks.admin_or_permissions(manage_guild=True)
     @app_commands.describe(
-        reference="ID de sugerencia (#123), ID de mensaje, o link",
-        reason="Motivo del rechazo (opcional)"
+        reference="Suggestion ID (#123), message ID, or link",
+        reason="Reason for denial (optional)"
     )
     async def deny_suggestion(
         self,
@@ -457,11 +465,11 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         reason: Optional[str] = None
     ):
         """
-        Rechaza una sugerencia.
+        Deny a suggestion.
         
-        **Ejemplos:**
+        **Examples:**
         - `[p]deny #123`
-        - `[p]deny #123 No es viable actualmente`
+        - `[p]deny #123 Not feasible at this time`
         """
         await self._change_suggestion_status(
             ctx, reference, SuggestionStatus.DENIED, reason
@@ -470,20 +478,20 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @commands.hybrid_command(name="setstatus")
     @checks.admin_or_permissions(manage_guild=True)
     @app_commands.describe(
-        reference="ID de sugerencia (#123), ID de mensaje, o link",
-        status="Nuevo estado",
-        reason="Motivo del cambio (opcional)"
+        reference="Suggestion ID (#123), message ID, or link",
+        status="New status",
+        reason="Reason for change (optional)"
     )
     @app_commands.choices(status=[
-        app_commands.Choice(name="Pendiente", value="pending"),
-        app_commands.Choice(name="En revisión", value="in_review"),
-        app_commands.Choice(name="Planeado", value="planned"),
-        app_commands.Choice(name="En progreso", value="in_progress"),
-        app_commands.Choice(name="Aprobado", value="approved"),
-        app_commands.Choice(name="Implementado", value="implemented"),
-        app_commands.Choice(name="Rechazado", value="denied"),
-        app_commands.Choice(name="Duplicado", value="duplicate"),
-        app_commands.Choice(name="No se hará", value="wont_do"),
+        app_commands.Choice(name="Pending", value="pending"),
+        app_commands.Choice(name="In Review", value="in_review"),
+        app_commands.Choice(name="Planned", value="planned"),
+        app_commands.Choice(name="In Progress", value="in_progress"),
+        app_commands.Choice(name="Approved", value="approved"),
+        app_commands.Choice(name="Implemented", value="implemented"),
+        app_commands.Choice(name="Denied", value="denied"),
+        app_commands.Choice(name="Duplicate", value="duplicate"),
+        app_commands.Choice(name="Won't Do", value="wont_do"),
     ])
     async def set_status(
         self,
@@ -494,15 +502,15 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         reason: Optional[str] = None
     ):
         """
-        Cambia el estado de una sugerencia.
+        Change the status of a suggestion.
         
-        **Estados disponibles:**
+        **Available statuses:**
         pending, in_review, planned, in_progress, approved, implemented, denied, duplicate, wont_do
         """
         try:
             new_status = SuggestionStatus(status)
         except ValueError:
-            await ctx.send(f"❌ Estado inválido: {status}", ephemeral=True)
+            await ctx.send(_("❌ Invalid status: {status}").format(status=status), ephemeral=True)
             return
         
         await self._change_suggestion_status(ctx, reference, new_status, reason)
@@ -519,12 +527,12 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         
         suggestion_id = await self._parse_suggestion_reference(ctx.guild, reference)
         if not suggestion_id:
-            await ctx.send("❌ No se encontró esa sugerencia.", ephemeral=True)
+            await ctx.send(_("❌ That suggestion was not found."), ephemeral=True)
             return
         
         suggestion = await self.storage.get_suggestion(ctx.guild, suggestion_id)
         if not suggestion:
-            await ctx.send("❌ Sugerencia no encontrada.", ephemeral=True)
+            await ctx.send(_("❌ Suggestion not found."), ephemeral=True)
             return
         
         old_status = suggestion.status
@@ -571,29 +579,33 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         
         status_info = STATUS_CONFIG.get(new_status, {})
         await ctx.send(
-            f"✅ Sugerencia #{suggestion_id} actualizada a: {status_info.get('emoji', '')} {status_info.get('label', new_status.value)}",
+            _("✅ Suggestion #{suggestion_id} updated to: {emoji} {label}").format(
+                suggestion_id=suggestion_id,
+                emoji=status_info.get('emoji', ''),
+                label=_(status_info.get('label', new_status.value))
+            ),
             ephemeral=True
         )
     
     @commands.hybrid_command(name="suggestions")
     @checks.admin_or_permissions(manage_guild=True)
-    @app_commands.describe(status="Filtrar por estado")
+    @app_commands.describe(status="Filter by status")
     @app_commands.choices(status=[
-        app_commands.Choice(name="Todos", value="all"),
-        app_commands.Choice(name="Pendiente", value="pending"),
-        app_commands.Choice(name="En revisión", value="in_review"),
-        app_commands.Choice(name="Planeado", value="planned"),
-        app_commands.Choice(name="En progreso", value="in_progress"),
-        app_commands.Choice(name="Aprobado", value="approved"),
-        app_commands.Choice(name="Implementado", value="implemented"),
-        app_commands.Choice(name="Rechazado", value="denied"),
+        app_commands.Choice(name="All", value="all"),
+        app_commands.Choice(name="Pending", value="pending"),
+        app_commands.Choice(name="In Review", value="in_review"),
+        app_commands.Choice(name="Planned", value="planned"),
+        app_commands.Choice(name="In Progress", value="in_progress"),
+        app_commands.Choice(name="Approved", value="approved"),
+        app_commands.Choice(name="Implemented", value="implemented"),
+        app_commands.Choice(name="Denied", value="denied"),
     ])
     async def list_suggestions(
         self,
         ctx: commands.Context,
         status: Optional[str] = "all"
     ):
-        """Lista las sugerencias del servidor."""
+        """List server suggestions."""
         await self._ensure_migrated(ctx.guild)
         
         status_filter = None
@@ -609,7 +621,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         )
         
         if not suggestions:
-            await ctx.send("No hay sugerencias.", ephemeral=True)
+            await ctx.send(_("No suggestions found."), ephemeral=True)
             return
         
         view = SuggestionListView(self, suggestions, status_filter=status_filter)
@@ -622,19 +634,19 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         await ctx.send(embed=embed, view=view)
     
     @commands.hybrid_command(name="suggestioninfo")
-    @app_commands.describe(reference="ID de sugerencia (#123), ID de mensaje, o link")
+    @app_commands.describe(reference="Suggestion ID (#123), message ID, or link")
     async def suggestion_info(self, ctx: commands.Context, reference: str):
-        """Ver información detallada de una sugerencia."""
+        """View detailed information about a suggestion."""
         await self._ensure_migrated(ctx.guild)
         
         suggestion_id = await self._parse_suggestion_reference(ctx.guild, reference)
         if not suggestion_id:
-            await ctx.send("❌ No se encontró esa sugerencia.", ephemeral=True)
+            await ctx.send(_("❌ That suggestion was not found."), ephemeral=True)
             return
         
         suggestion = await self.storage.get_suggestion(ctx.guild, suggestion_id)
         if not suggestion:
-            await ctx.send("❌ Sugerencia no encontrada.", ephemeral=True)
+            await ctx.send(_("❌ Suggestion not found."), ephemeral=True)
             return
         
         author = ctx.guild.get_member(suggestion.author_id)
@@ -642,10 +654,14 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         
         # Add extra info
         embed.add_field(
-            name="📝 Información adicional",
-            value=f"**Message ID:** {suggestion.message_id}\n"
-                  f"**Thread:** {'Sí' if suggestion.thread_id else 'No'}\n"
-                  f"**Cambios:** {len(suggestion.history)}",
+            name=_("📝 Additional information"),
+            value=_("**Message ID:** {message_id}\n"
+                  "**Thread:** {thread}\n"
+                  "**Changes:** {changes}").format(
+                      message_id=suggestion.message_id,
+                      thread=_("Yes") if suggestion.thread_id else _("No"),
+                      changes=len(suggestion.history)
+                  ),
             inline=False
         )
         
@@ -653,19 +669,19 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     
     @commands.hybrid_command(name="suggestionhistory")
     @checks.admin_or_permissions(manage_guild=True)
-    @app_commands.describe(reference="ID de sugerencia (#123), ID de mensaje, o link")
+    @app_commands.describe(reference="Suggestion ID (#123), message ID, or link")
     async def suggestion_history(self, ctx: commands.Context, reference: str):
-        """Ver el historial de cambios de una sugerencia."""
+        """View the change history of a suggestion."""
         await self._ensure_migrated(ctx.guild)
         
         suggestion_id = await self._parse_suggestion_reference(ctx.guild, reference)
         if not suggestion_id:
-            await ctx.send("❌ No se encontró esa sugerencia.", ephemeral=True)
+            await ctx.send(_("❌ That suggestion was not found."), ephemeral=True)
             return
         
         suggestion = await self.storage.get_suggestion(ctx.guild, suggestion_id)
         if not suggestion:
-            await ctx.send("❌ Sugerencia no encontrada.", ephemeral=True)
+            await ctx.send(_("❌ Suggestion not found."), ephemeral=True)
             return
         
         embed = create_history_embed(suggestion, self.bot)
@@ -676,24 +692,24 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @commands.group(name="suggestadmin", aliases=["sadmin"])
     @checks.admin_or_permissions(administrator=True)
     async def suggest_admin(self, ctx: commands.Context):
-        """Comandos de administración de sugerencias."""
+        """Suggestion administration commands."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
     
     @suggest_admin.command(name="resync")
     async def suggest_resync(self, ctx: commands.Context):
         """
-        Sincroniza las sugerencias verificando qué mensajes aún existen.
-        Marca como eliminadas las sugerencias cuyo mensaje ya no existe.
+        Sync suggestions by verifying which messages still exist.
+        Marks as deleted those suggestions whose message no longer exists.
         """
         await self._ensure_migrated(ctx.guild)
         
         channel = await self._get_suggestion_channel(ctx.guild)
         if not channel:
-            await ctx.send("❌ No hay canal de sugerencias configurado.")
+            await ctx.send(_("❌ No suggestion channel configured."))
             return
         
-        await ctx.send("🔄 Sincronizando sugerencias...")
+        await ctx.send(_("🔄 Syncing suggestions..."))
         
         suggestions = await self.storage.get_all_suggestions(ctx.guild)
         deleted_count = 0
@@ -710,30 +726,30 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
                 pass
         
         await ctx.send(
-            f"✅ Sincronización completada:\n"
-            f"• Sugerencias válidas: {valid_count}\n"
-            f"• Marcadas como eliminadas: {deleted_count}"
+            _("✅ Sync completed:\n"
+            "• Valid suggestions: {valid}\n"
+            "• Marked as deleted: {deleted}").format(valid=valid_count, deleted=deleted_count)
         )
     
     @suggest_admin.command(name="repost")
     async def suggest_repost(self, ctx: commands.Context, reference: str):
         """
-        Re-publica una sugerencia eliminada manteniendo su ID original.
+        Re-publish a deleted suggestion keeping its original ID.
         
-        **Uso:** `[p]suggestadmin repost #123`
+        **Usage:** `[p]suggestadmin repost #123`
         """
         await self._ensure_migrated(ctx.guild)
         
         suggestion_id = await self._parse_suggestion_reference(ctx.guild, reference)
         if not suggestion_id:
-            await ctx.send("❌ No se encontró esa sugerencia.")
+            await ctx.send(_("❌ That suggestion was not found."))
             return
         
         # Get suggestion including deleted
         suggestions = await self.config.guild(ctx.guild).suggestions()
         data = suggestions.get(str(suggestion_id))
         if not data:
-            await ctx.send("❌ Sugerencia no encontrada.")
+            await ctx.send(_("❌ Suggestion not found."))
             return
         
         from .storage import SuggestionData
@@ -741,7 +757,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         
         channel = await self._get_suggestion_channel(ctx.guild)
         if not channel:
-            await ctx.send("❌ No hay canal de sugerencias configurado.")
+            await ctx.send(_("❌ No suggestion channel configured."))
             return
         
         # Re-create message
@@ -751,22 +767,24 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         # Update message_id
         await self.storage.update_message_id(ctx.guild, suggestion_id, message.id)
         
-        await ctx.send(f"✅ Sugerencia #{suggestion_id} republicada: {message.jump_url}")
+        await ctx.send(_("✅ Suggestion #{suggestion_id} reposted: {url}").format(
+            suggestion_id=suggestion_id, url=message.jump_url
+        ))
     
     @suggest_admin.command(name="purge")
     async def suggest_purge(self, ctx: commands.Context, what: str = "deleted"):
         """
-        Elimina permanentemente sugerencias del registro.
+        Permanently delete suggestions from the record.
         
-        **Opciones:**
-        - `deleted`: Elimina sugerencias marcadas como eliminadas
+        **Options:**
+        - `deleted`: Delete suggestions marked as deleted
         
-        **Uso:** `[p]suggestadmin purge deleted`
+        **Usage:** `[p]suggestadmin purge deleted`
         """
         if what == "deleted":
             await ctx.send(
-                "⚠️ Esto eliminará permanentemente todas las sugerencias marcadas como eliminadas.\n"
-                "¿Estás seguro? Responde `confirmar` en 30 segundos."
+                _("⚠️ This will permanently delete all suggestions marked as deleted.\n"
+                "Are you sure? Reply `confirm` within 30 seconds.")
             )
             
             def check(m):
@@ -774,98 +792,98 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
             
             try:
                 msg = await self.bot.wait_for("message", check=check, timeout=30)
-                if msg.content.lower() != "confirmar":
-                    await ctx.send("❌ Operación cancelada.")
+                if msg.content.lower() not in ("confirm", "confirmar"):
+                    await ctx.send(_("❌ Operation cancelled."))
                     return
             except:
-                await ctx.send("❌ Tiempo agotado.")
+                await ctx.send(_("❌ Timed out."))
                 return
             
             count = await self.storage.purge_deleted(ctx.guild)
-            await ctx.send(f"✅ {count} sugerencias eliminadas permanentemente.")
+            await ctx.send(_("✅ {count} suggestions permanently deleted.").format(count=count))
         else:
-            await ctx.send("❌ Opción no válida. Usa: `deleted`")
+            await ctx.send(_("❌ Invalid option. Use: `deleted`"))
     
     # ==================== CONFIGURATION COMMANDS ====================
     
     @commands.group(name="suggestset", aliases=["sset"])
     @checks.admin_or_permissions(administrator=True)
     async def suggest_set(self, ctx: commands.Context):
-        """Configuración del sistema de sugerencias."""
+        """Suggestion system configuration."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
     
     @suggest_set.command(name="channel")
     async def set_channel(self, ctx: commands.Context, channel: discord.TextChannel):
-        """Establece el canal de sugerencias."""
+        """Set the suggestion channel."""
         await self.config.guild(ctx.guild).suggestion_channel.set(channel.id)
-        await ctx.send(f"✅ Canal de sugerencias: {channel.mention}")
+        await ctx.send(_("✅ Suggestion channel: {channel}").format(channel=channel.mention))
     
     @suggest_set.command(name="logchannel")
     async def set_log_channel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Establece el canal de logs (o desactiva con ningún argumento)."""
+        """Set the log channel (or disable with no argument)."""
         if channel:
             await self.config.guild(ctx.guild).log_channel.set(channel.id)
-            await ctx.send(f"✅ Canal de logs: {channel.mention}")
+            await ctx.send(_("✅ Log channel: {channel}").format(channel=channel.mention))
         else:
             await self.config.guild(ctx.guild).log_channel.set(None)
-            await ctx.send("✅ Canal de logs desactivado.")
+            await ctx.send(_("✅ Log channel disabled."))
     
     @suggest_set.command(name="notifychannel")
     async def set_notify_channel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Canal alternativo para notificaciones (si DM falla)."""
+        """Alternative channel for notifications (if DM fails)."""
         if channel:
             await self.config.guild(ctx.guild).notify_channel.set(channel.id)
-            await ctx.send(f"✅ Canal de notificaciones: {channel.mention}")
+            await ctx.send(_("✅ Notification channel: {channel}").format(channel=channel.mention))
         else:
             await self.config.guild(ctx.guild).notify_channel.set(None)
-            await ctx.send("✅ Canal de notificaciones desactivado.")
+            await ctx.send(_("✅ Notification channel disabled."))
     
     @suggest_set.command(name="staffrole")
     async def set_staff_role(self, ctx: commands.Context, role: Optional[discord.Role] = None):
-        """Establece el rol de staff que puede gestionar sugerencias."""
+        """Set the staff role that can manage suggestions."""
         if role:
             await self.config.guild(ctx.guild).staff_role.set(role.id)
-            await ctx.send(f"✅ Rol de staff: {role.mention}")
+            await ctx.send(_("✅ Staff role: {role}").format(role=role.mention))
         else:
             await self.config.guild(ctx.guild).staff_role.set(None)
-            await ctx.send("✅ Rol de staff eliminado.")
+            await ctx.send(_("✅ Staff role removed."))
     
     @suggest_set.command(name="buttons")
     async def toggle_buttons(self, ctx: commands.Context):
-        """Alterna entre botones y reacciones."""
+        """Toggle between buttons and reactions."""
         current = await self.config.guild(ctx.guild).use_buttons()
         await self.config.guild(ctx.guild).use_buttons.set(not current)
-        mode = "botones" if not current else "reacciones"
-        await ctx.send(f"✅ Modo de interacción: **{mode}**")
+        mode = _("buttons") if not current else _("reactions")
+        await ctx.send(_("✅ Interaction mode: **{mode}**").format(mode=mode))
     
     @suggest_set.command(name="threads")
     async def toggle_threads(self, ctx: commands.Context):
-        """Activa/desactiva hilos automáticos."""
+        """Enable/disable automatic threads."""
         current = await self.config.guild(ctx.guild).suggestion_threads()
         await self.config.guild(ctx.guild).suggestion_threads.set(not current)
-        state = "activados" if not current else "desactivados"
-        await ctx.send(f"✅ Hilos automáticos: **{state}**")
+        state = _("enabled") if not current else _("disabled")
+        await ctx.send(_("✅ Automatic threads: **{state}**").format(state=state))
     
     @suggest_set.command(name="autoarchive")
     async def toggle_auto_archive(self, ctx: commands.Context):
-        """Activa/desactiva archivado automático de hilos."""
+        """Enable/disable automatic thread archiving."""
         current = await self.config.guild(ctx.guild).thread_auto_archive()
         await self.config.guild(ctx.guild).thread_auto_archive.set(not current)
-        state = "activado" if not current else "desactivado"
-        await ctx.send(f"✅ Archivado automático de hilos: **{state}**")
+        state = _("enabled") if not current else _("disabled")
+        await ctx.send(_("✅ Automatic thread archiving: **{state}**").format(state=state))
     
     @suggest_set.command(name="notify")
     async def toggle_notify(self, ctx: commands.Context):
-        """Activa/desactiva notificaciones al autor."""
+        """Enable/disable author notifications."""
         current = await self.config.guild(ctx.guild).notify_author()
         await self.config.guild(ctx.guild).notify_author.set(not current)
-        state = "activadas" if not current else "desactivadas"
-        await ctx.send(f"✅ Notificaciones al autor: **{state}**")
+        state = _("enabled") if not current else _("disabled")
+        await ctx.send(_("✅ Author notifications: **{state}**").format(state=state))
     
     @suggest_set.command(name="settings")
     async def show_settings(self, ctx: commands.Context):
-        """Muestra la configuración actual."""
+        """Show the current configuration."""
         guild_config = await self.config.guild(ctx.guild).all()
         
         channel = ctx.guild.get_channel(guild_config["suggestion_channel"])
@@ -874,37 +892,51 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
         staff_role = ctx.guild.get_role(guild_config["staff_role"]) if guild_config["staff_role"] else None
         
         embed = discord.Embed(
-            title="⚙️ Configuración de Sugerencias",
+            title=_("⚙️ Suggestion Settings"),
             color=discord.Color.blurple()
         )
         
         embed.add_field(
-            name="📢 Canales",
-            value=f"**Sugerencias:** {channel.mention if channel else 'No configurado'}\n"
-                  f"**Logs:** {log_channel.mention if log_channel else 'Desactivado'}\n"
-                  f"**Notificaciones:** {notify_channel.mention if notify_channel else 'DM'}",
+            name=_("📢 Channels"),
+            value=_("**Suggestions:** {suggestions}\n"
+                  "**Logs:** {logs}\n"
+                  "**Notifications:** {notifications}").format(
+                      suggestions=channel.mention if channel else _("Not configured"),
+                      logs=log_channel.mention if log_channel else _("Disabled"),
+                      notifications=notify_channel.mention if notify_channel else _("DM")
+                  ),
             inline=False
         )
         
         embed.add_field(
-            name="🔧 Opciones",
-            value=f"**Modo:** {'Botones' if guild_config['use_buttons'] else 'Reacciones'}\n"
-                  f"**Hilos automáticos:** {'✅' if guild_config['suggestion_threads'] else '❌'}\n"
-                  f"**Archivado de hilos:** {'✅' if guild_config['thread_auto_archive'] else '❌'}\n"
-                  f"**Notificar autor:** {'✅' if guild_config['notify_author'] else '❌'}",
+            name=_("🔧 Options"),
+            value=_("**Mode:** {mode}\n"
+                  "**Automatic threads:** {threads}\n"
+                  "**Thread archiving:** {archive}\n"
+                  "**Notify author:** {notify}").format(
+                      mode=_("Buttons") if guild_config['use_buttons'] else _("Reactions"),
+                      threads="✅" if guild_config['suggestion_threads'] else "❌",
+                      archive="✅" if guild_config['thread_auto_archive'] else "❌",
+                      notify="✅" if guild_config['notify_author'] else "❌"
+                  ),
             inline=False
         )
         
         embed.add_field(
-            name="👥 Permisos",
-            value=f"**Rol staff:** {staff_role.mention if staff_role else 'Solo admins'}",
+            name=_("👥 Permissions"),
+            value=_("**Staff role:** {role}").format(
+                role=staff_role.mention if staff_role else _("Admins only")
+            ),
             inline=False
         )
         
         embed.add_field(
-            name="📊 Estadísticas",
-            value=f"**Total sugerencias:** {len(guild_config['suggestions'])}\n"
-                  f"**Contador actual:** #{guild_config['suggestion_counter']}",
+            name=_("📊 Statistics"),
+            value=_("**Total suggestions:** {total}\n"
+                  "**Current counter:** #{counter}").format(
+                      total=len(guild_config['suggestions']),
+                      counter=guild_config['suggestion_counter']
+                  ),
             inline=False
         )
         
@@ -915,25 +947,25 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @commands.command(name="setsuggestionchannel", hidden=True)
     @checks.admin_or_permissions(administrator=True)
     async def legacy_set_channel(self, ctx: commands.Context, channel: discord.TextChannel):
-        """[Legacy] Usa [p]suggestset channel"""
+        """[Legacy] Use [p]suggestset channel"""
         await self.set_channel(ctx, channel)
     
     @commands.command(name="setlogchannel", hidden=True)
     @checks.admin_or_permissions(administrator=True)
     async def legacy_set_log(self, ctx: commands.Context, channel: discord.TextChannel):
-        """[Legacy] Usa [p]suggestset logchannel"""
+        """[Legacy] Use [p]suggestset logchannel"""
         await self.set_log_channel(ctx, channel)
     
     @commands.command(name="togglesuggestionthreads", hidden=True)
     @checks.admin_or_permissions(administrator=True)
     async def legacy_toggle_threads(self, ctx: commands.Context):
-        """[Legacy] Usa [p]suggestset threads"""
+        """[Legacy] Use [p]suggestset threads"""
         await self.toggle_threads(ctx)
     
     @commands.command(name="togglethreadarchive", hidden=True)
     @checks.admin_or_permissions(administrator=True)
     async def legacy_toggle_archive(self, ctx: commands.Context):
-        """[Legacy] Usa [p]suggestset autoarchive"""
+        """[Legacy] Use [p]suggestset autoarchive"""
         await self.toggle_auto_archive(ctx)
 
 

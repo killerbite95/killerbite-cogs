@@ -1,24 +1,29 @@
 import json
 import os
 from redbot.core import commands, Config, checks
+from redbot.core.i18n import Translator, cog_i18n
 import discord
 import asyncio
 import logging
 
+_ = Translator("ColaCoins", __file__)
+
+
+@cog_i18n(_)
 class ColaCoins(commands.Cog):
-    """Gestiona las ColaCoins para los usuarios. By Killerbite95"""
-    __author__ = "Killerbite95"  # Aquí se declara el autor
+    """Manage ColaCoins for users."""
+    __author__ = "Killerbite95"
 
     def __init__(self, bot):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         default_global = {
             "colacoins": {},
-            "emoji": ""  # Emoji predeterminado, inicialmente vacío
+            "emoji": ""
         }
         self.config.register_global(**default_global)
         self.logger = logging.getLogger("red.ColaCoins")
-        self.logger.setLevel(logging.INFO)  # Cambia a DEBUG para más detalles
+        self.logger.setLevel(logging.INFO)
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
         handler.setFormatter(formatter)
@@ -29,32 +34,23 @@ class ColaCoins(commands.Cog):
         data = await self.config.colacoins()
         with open("colacoins_data.json", "w") as f:
             json.dump(data, f)
-        self.logger.debug("Datos de ColaCoins guardados en colacoins_data.json.")
 
     async def load_data(self):
         if os.path.exists("colacoins_data.json"):
             with open("colacoins_data.json", "r") as f:
                 data = json.load(f)
                 await self.config.colacoins.set(data)
-                self.logger.info("Datos de ColaCoins cargados desde colacoins_data.json.")
 
     @commands.Cog.listener()
     async def on_ready(self):
         await self.load_data()
-        self.logger.info("ColaCoins cog cargado y datos cargados.")
 
     @commands.admin_or_permissions(administrator=True)
     @commands.command(name="givecolacoins", aliases=["darcolacoins"])
     async def give_colacoins(self, ctx, user: discord.Member, amount: int):
-        """Da ColaCoins a un usuario. / Give ColaCoins to a user."""
+        """Give ColaCoins to a user."""
         if amount <= 0:
-            mensaje = (
-                "El monto a dar debe ser positivo." 
-                if ctx.invoked_with == 'darcolacoins' 
-                else 
-                "The amount to give must be positive."
-            )
-            await ctx.send(mensaje)
+            await ctx.send(_("The amount to give must be positive."))
             return
 
         async with self.config.colacoins() as colacoins:
@@ -62,126 +58,83 @@ class ColaCoins(commands.Cog):
                 colacoins[str(user.id)] = 0
             colacoins[str(user.id)] += amount
             emoji = await self.config.emoji() or ""
-            mensaje = (
-                f"{amount} {emoji} ColaCoins dados a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} {emoji} ColaCoins."
-                if ctx.invoked_with == 'darcolacoins' 
-                else 
-                f"{amount} {emoji} ColaCoins given to {user.display_name}. Now they have {colacoins[str(user.id)]} {emoji} ColaCoins."
+            await ctx.send(
+                _("{amount} {emoji} ColaCoins given to {user}. Now they have {total} {emoji} ColaCoins.").format(
+                    amount=amount, emoji=emoji, user=user.display_name,
+                    total=colacoins[str(user.id)]
+                )
             )
-            await ctx.send(mensaje)
         await self.save_data()
-        self.logger.info(f"{ctx.author} ha dado {amount} ColaCoins a {user}.")
+        self.logger.info(f"{ctx.author} gave {amount} ColaCoins to {user}.")
 
     @commands.admin_or_permissions(administrator=True)
     @commands.command(name="removecolacoins", aliases=["quitarcolacoins"])
     async def remove_colacoins(self, ctx, user: discord.Member, amount: int):
-        """Quita ColaCoins a un usuario. / Remove ColaCoins from a user."""
+        """Remove ColaCoins from a user."""
         if amount <= 0:
-            mensaje = (
-                "El monto a quitar debe ser positivo." 
-                if ctx.invoked_with == 'quitarcolacoins' 
-                else 
-                "The amount to remove must be positive."
-            )
-            await ctx.send(mensaje)
+            await ctx.send(_("The amount to remove must be positive."))
             return
 
         async with self.config.colacoins() as colacoins:
             current = colacoins.get(str(user.id), 0)
             if current < amount:
                 emoji = await self.config.emoji() or ""
-                mensaje = (
-                    f"No se puede quitar {amount} {emoji} ColaCoins. {user.display_name} no tiene suficientes ColaCoins."
-                    if ctx.invoked_with == 'quitarcolacoins' 
-                    else 
-                    f"Cannot remove {amount} {emoji} ColaCoins. {user.display_name} does not have enough ColaCoins."
+                await ctx.send(
+                    _("Cannot remove {amount} {emoji} ColaCoins. {user} does not have enough ColaCoins.").format(
+                        amount=amount, emoji=emoji, user=user.display_name
+                    )
                 )
-                await ctx.send(mensaje)
                 return
             colacoins[str(user.id)] -= amount
             emoji = await self.config.emoji() or ""
-            mensaje = (
-                f"{amount} {emoji} ColaCoins quitadas a {user.display_name}. Ahora tiene {colacoins[str(user.id)]} {emoji} ColaCoins."
-                if ctx.invoked_with == 'quitarcolacoins' 
-                else 
-                f"{amount} {emoji} ColaCoins removed from {user.display_name}. Now they have {colacoins[str(user.id)]} {emoji} ColaCoins."
+            await ctx.send(
+                _("{amount} {emoji} ColaCoins removed from {user}. Now they have {total} {emoji} ColaCoins.").format(
+                    amount=amount, emoji=emoji, user=user.display_name,
+                    total=colacoins[str(user.id)]
+                )
             )
-            await ctx.send(mensaje)
         await self.save_data()
-        self.logger.info(f"{ctx.author} ha quitado {amount} ColaCoins a {user}.")
+        self.logger.info(f"{ctx.author} removed {amount} ColaCoins from {user}.")
 
     @commands.admin_or_permissions(administrator=True)
     @commands.command(name="vercolacoins", aliases=["viewcolacoins"])
     async def ver_colacoins(self, ctx, user: discord.Member):
-        """Verifica la cantidad de ColaCoins de un usuario. / Check the ColaCoins amount of a user."""
+        """Check the ColaCoins amount of a user."""
         colacoins = await self.config.colacoins()
         amount = colacoins.get(str(user.id), 0)
         emoji = await self.config.emoji() or ""
-        mensaje = (
-            f"{user.display_name} tiene {amount} {emoji} ColaCoins."
-            if ctx.invoked_with == 'vercolacoins' 
-            else 
-            f"{user.display_name} has {amount} {emoji} ColaCoins."
+        await ctx.send(
+            _("{user} has {amount} {emoji} ColaCoins.").format(
+                user=user.display_name, amount=amount, emoji=emoji
+            )
         )
-        await ctx.send(mensaje)
-        self.logger.info(f"{ctx.author} ha verificado las ColaCoins de {user}: {amount}.")
 
     @commands.command(name="colacoins", aliases=["miscolacoins"])
     async def user_colacoins(self, ctx):
-        """Permite a un usuario ver cuántas ColaCoins tiene. / Allows a user to see how many ColaCoins they have."""
+        """See how many ColaCoins you have."""
         colacoins = await self.config.colacoins()
         amount = colacoins.get(str(ctx.author.id), 0)
         emoji = await self.config.emoji() or ""
-        mensaje = (
-            f"Tienes {amount} {emoji} ColaCoins."
-            if ctx.invoked_with == 'miscolacoins' 
-            else 
-            f"You have {amount} {emoji} ColaCoins."
+        await ctx.send(
+            _("You have {amount} {emoji} ColaCoins.").format(amount=amount, emoji=emoji)
         )
-        await ctx.send(mensaje)
-        self.logger.info(f"{ctx.author} ha consultado sus ColaCoins: {amount}.")
 
     @commands.admin_or_permissions(administrator=True)
     @commands.command(name="setcolacoinemoji", aliases=["establecercolacoinemoji"])
     async def set_colacoin_emoji(self, ctx, emoji: str):
-        """Establece el emoji para las ColaCoins. / Set the emoji for ColaCoins."""
+        """Set the emoji for ColaCoins."""
         await self.config.emoji.set(emoji)
-        mensaje = (
-            f"Emoji de ColaCoins establecido a {emoji}."
-            if ctx.invoked_with == 'establecercolacoinemoji' 
-            else 
-            f"ColaCoins emoji set to {emoji}."
-        )
-        await ctx.send(mensaje)
-        self.logger.info(f"{ctx.author} ha establecido el emoji de ColaCoins a {emoji}.")
+        await ctx.send(_("ColaCoins emoji set to {emoji}.").format(emoji=emoji))
 
-    # --- Nuevos Comandos Añadidos ---
-
-    @commands.command(name="colacoinslist")
+    @commands.command(name="colacoinslist", aliases=["colacoinslista"])
     @checks.admin_or_permissions(administrator=True)
     async def colacoins_list_command(self, ctx):
-        """Muestra una leaderboard de los usuarios con más ColaCoins. / Shows a leaderboard of users with the most ColaCoins."""
-        await self.send_leaderboard(ctx, language="en")
-
-    @commands.command(name="colacoinslista")
-    @checks.admin_or_permissions(administrator=True)
-    async def colacoins_lista_command(self, ctx):
-        """Muestra una leaderboard de los usuarios con más ColaCoins. / Shows a leaderboard of users with the most ColaCoins."""
-        await self.send_leaderboard(ctx, language="es")
-
-    async def send_leaderboard(self, ctx, language="en"):
+        """Shows a leaderboard of users with the most ColaCoins."""
         colacoins = await self.config.colacoins()
         if not colacoins:
-            mensaje = (
-                "No hay usuarios con ColaCoins actualmente." 
-                if language == "es" 
-                else 
-                "There are no users with ColaCoins currently."
-            )
-            await ctx.send(mensaje)
+            await ctx.send(_("There are no users with ColaCoins currently."))
             return
 
-        # Crear una lista de tuplas (usuario_id, cantidad) excluyendo ColaCoins <= 0
         sorted_colacoins = sorted(
             ((user_id, amount) for user_id, amount in colacoins.items() if amount > 0),
             key=lambda x: x[1],
@@ -189,29 +142,20 @@ class ColaCoins(commands.Cog):
         )
 
         if not sorted_colacoins:
-            mensaje = (
-                "No hay usuarios con ColaCoins de más de 0 actualmente." 
-                if language == "es" 
-                else 
-                "There are no users with more than 0 ColaCoins currently."
-            )
-            await ctx.send(mensaje)
+            await ctx.send(_("There are no users with more than 0 ColaCoins currently."))
             return
 
-        # Preparar los datos para la leaderboard
         leaderboard = []
         for idx, (user_id, amount) in enumerate(sorted_colacoins, start=1):
             try:
                 user = self.bot.get_user(int(user_id))
                 if user:
                     username = user.display_name
-                    avatar = user.avatar.url if user.avatar else user.default_avatar.url
                 else:
-                    username = f"Usuario ID {user_id}" if language == "es" else f"User ID {user_id}"
+                    username = _("User ID {user_id}").format(user_id=user_id)
             except ValueError:
-                username = f"Usuario ID {user_id}" if language == "es" else f"User ID {user_id}"
+                username = _("User ID {user_id}").format(user_id=user_id)
             emoji = await self.config.emoji() or ""
-            # Asignar medallas a los primeros 3 puestos
             if idx == 1:
                 medal = "🥇"
             elif idx == 2:
@@ -223,27 +167,26 @@ class ColaCoins(commands.Cog):
 
             leaderboard.append(f"{medal} **{username}** - {amount} {emoji} ColaCoins")
 
-        # Implementar la paginación (10 usuarios por página)
         per_page = 10
         pages = [leaderboard[i:i + per_page] for i in range(0, len(leaderboard), per_page)]
         total_pages = len(pages)
         current_page = 0
 
-        # Crear el embed inicial
         embed = discord.Embed(
-            title="🏆 Leaderboard de ColaCoins" if language == "es" else "🏆 ColaCoins Leaderboard",
+            title=_("🏆 ColaCoins Leaderboard"),
             description="\n".join(pages[current_page]),
             color=discord.Color.gold()
         )
         embed.set_thumbnail(url=self.bot.user.avatar.url if self.bot.user.avatar else self.bot.user.default_avatar.url)
-        embed.set_footer(text=f"Página {current_page + 1} de {total_pages} • Total Usuarios: {len(sorted_colacoins)}")
+        embed.set_footer(text=_("Page {current} of {total} • Total Users: {users}").format(
+            current=current_page + 1, total=total_pages, users=len(sorted_colacoins)
+        ))
 
         message = await ctx.send(embed=embed)
 
         if total_pages <= 1:
-            return  # No se necesita paginación
+            return
 
-        # Agregar reacciones de navegación
         await message.add_reaction("◀️")
         await message.add_reaction("▶️")
 
@@ -254,7 +197,6 @@ class ColaCoins(commands.Cog):
             try:
                 reaction, user = await self.bot.wait_for("reaction_add", timeout=120.0, check=check)
             except asyncio.TimeoutError:
-                # Quitar las reacciones si no hay actividad
                 await message.clear_reactions()
                 break
             else:
@@ -262,13 +204,16 @@ class ColaCoins(commands.Cog):
                     if current_page + 1 < total_pages:
                         current_page += 1
                         embed.description = "\n".join(pages[current_page])
-                        embed.set_footer(text=f"Página {current_page + 1} de {total_pages} • Total Usuarios: {len(sorted_colacoins)}")
+                        embed.set_footer(text=_("Page {current} of {total} • Total Users: {users}").format(
+                            current=current_page + 1, total=total_pages, users=len(sorted_colacoins)
+                        ))
                         await message.edit(embed=embed)
                 elif str(reaction.emoji) == "◀️":
                     if current_page > 0:
                         current_page -= 1
                         embed.description = "\n".join(pages[current_page])
-                        embed.set_footer(text=f"Página {current_page + 1} de {total_pages} • Total Usuarios: {len(sorted_colacoins)}")
+                        embed.set_footer(text=_("Page {current} of {total} • Total Users: {users}").format(
+                            current=current_page + 1, total=total_pages, users=len(sorted_colacoins)
+                        ))
                         await message.edit(embed=embed)
-                # Remover la reacción del usuario para permitir múltiples reacciones
                 await message.remove_reaction(reaction, user)

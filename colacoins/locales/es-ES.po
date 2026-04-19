@@ -1,0 +1,50 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: killerbite-cogs\n"
+"POT-Creation-Date: 2026-04-19 00:00+0000\n"
+"PO-Revision-Date: 2026-04-19 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "The amount to give must be positive."
+msgstr "El monto a dar debe ser positivo."
+
+msgid "{amount} {emoji} ColaCoins given to {user}. Now they have {total} {emoji} ColaCoins."
+msgstr "{amount} {emoji} ColaCoins dados a {user}. Ahora tiene {total} {emoji} ColaCoins."
+
+msgid "The amount to remove must be positive."
+msgstr "El monto a quitar debe ser positivo."
+
+msgid "Cannot remove {amount} {emoji} ColaCoins. {user} does not have enough ColaCoins."
+msgstr "No se puede quitar {amount} {emoji} ColaCoins. {user} no tiene suficientes ColaCoins."
+
+msgid "{amount} {emoji} ColaCoins removed from {user}. Now they have {total} {emoji} ColaCoins."
+msgstr "{amount} {emoji} ColaCoins quitadas a {user}. Ahora tiene {total} {emoji} ColaCoins."
+
+msgid "{user} has {amount} {emoji} ColaCoins."
+msgstr "{user} tiene {amount} {emoji} ColaCoins."
+
+msgid "You have {amount} {emoji} ColaCoins."
+msgstr "Tienes {amount} {emoji} ColaCoins."
+
+msgid "ColaCoins emoji set to {emoji}."
+msgstr "Emoji de ColaCoins establecido a {emoji}."
+
+msgid "There are no users with ColaCoins currently."
+msgstr "No hay usuarios con ColaCoins actualmente."
+
+msgid "There are no users with more than 0 ColaCoins currently."
+msgstr "No hay usuarios con ColaCoins de más de 0 actualmente."
+
+msgid "User ID {user_id}"
+msgstr "Usuario ID {user_id}"
+
+msgid "🏆 ColaCoins Leaderboard"
+msgstr "🏆 Leaderboard de ColaCoins"
+
+msgid "Page {current} of {total} • Total Users: {users}"
+msgstr "Página {current} de {total} • Total Usuarios: {users}"

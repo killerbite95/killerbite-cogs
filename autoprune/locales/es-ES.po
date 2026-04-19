@@ -1,0 +1,95 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: killerbite-cogs\n"
+"POT-Creation-Date: 2026-04-19 00:00+0000\n"
+"PO-Revision-Date: 2026-04-19 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Prune log channel set to: {channel}"
+msgstr "Canal de logs de prune establecido en: {channel}"
+
+msgid "Ban log channel set to: {channel}"
+msgstr "Canal de logs de baneos establecido en: {channel}"
+
+msgid "There are no banned users in this server."
+msgstr "No hay usuarios baneados en este servidor."
+
+msgid "Unknown"
+msgstr "Desconocido"
+
+msgid "There are no banned users with tracking records to prune."
+msgstr "No hay usuarios baneados con registros en seguimiento para prunear."
+
+msgid "**Users that will be affected by prune:**"
+msgstr "**Usuarios que serán afectados por el prune:**"
+
+msgid "- {user} (ID: `{user_id}`), Credits: `{balance}`"
+msgstr "- {user} (ID: `{user_id}`), Créditos: `{balance}`"
+
+msgid "**Do you want to continue?** React with ✅ to confirm or ❌ to cancel. *This action is irreversible.*"
+msgstr "**¿Deseas continuar?** Reacciona con ✅ para confirmar o ❌ para cancelar. *Esta acción es irreversible.*"
+
+msgid "Prune executed successfully. Bank accounts of banned users have been removed."
+msgstr "Función prune ejecutada correctamente. Las cuentas bancarias de los usuarios baneados han sido eliminadas."
+
+msgid "Prune executed with errors. Details:"
+msgstr "Función prune ejecutada con errores. Detalles:"
+
+msgid "Prune executed by {user}. Bank accounts of banned users have been removed."
+msgstr "Prune ejecutado por {user}. Las cuentas bancarias de los usuarios baneados han sido eliminadas."
+
+msgid "Operation cancelled."
+msgstr "Operación cancelada."
+
+msgid "No confirmation received in time. Operation cancelled."
+msgstr "No se recibió confirmación a tiempo. Operación cancelada."
+
+msgid "**Users that would be affected by prune:**"
+msgstr "**Usuarios que serían afectados por el prune:**"
+
+msgid "There are no tracked bans."
+msgstr "No hay baneos en seguimiento."
+
+msgid "**Current Bans:**"
+msgstr "**Baneos Actuales:**"
+
+msgid "- User ID: `{user_id}`, Credits: `{balance}`"
+msgstr "- Usuario ID: `{user_id}`, Créditos: `{balance}`"
+
+msgid "**Ban Countdown:**"
+msgstr "**Cuenta Atrás de Baneos:**"
+
+msgid "- {user}: `{days}` days, `{hours}` hours, `{minutes}` minutes remaining, Credits: `{balance}`"
+msgstr "- {user}: `{days}` días, `{hours}` horas, `{minutes}` minutos restantes, Créditos: `{balance}`"
+
+msgid "🔨 User Banned"
+msgstr "🔨 Usuario Baneado"
+
+msgid "User"
+msgstr "Usuario"
+
+msgid "Ban Date"
+msgstr "Fecha de Baneo"
+
+msgid "Countdown"
+msgstr "Cuenta Atrás"
+
+msgid "in 7 days"
+msgstr "en 7 días"
+
+msgid "End Date"
+msgstr "Fecha de Finalización"
+
+msgid "Credits"
+msgstr "Créditos"
+
+msgid "🔓 **User Unbanned Manually:** {user} (ID: {user_id})"
+msgstr "🔓 **Usuario Desbaneado Manualmente:** {user} (ID: {user_id})"
+
+msgid "⏰ **User ID {user_id} has passed the 7-day ban period and is ready to be pruned.**"
+msgstr "⏰ **El usuario ID {user_id} ha pasado los 7 días de baneo y está listo para ser pruneado.**"

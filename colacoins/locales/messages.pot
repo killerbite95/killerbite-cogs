@@ -1,0 +1,51 @@
+# ColaCoins locale template
+msgid ""
+msgstr ""
+"Project-Id-Version: killerbite-cogs\n"
+"POT-Creation-Date: 2026-04-19 00:00+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext\n"
+
+msgid "The amount to give must be positive."
+msgstr ""
+
+msgid "{amount} {emoji} ColaCoins given to {user}. Now they have {total} {emoji} ColaCoins."
+msgstr ""
+
+msgid "The amount to remove must be positive."
+msgstr ""
+
+msgid "Cannot remove {amount} {emoji} ColaCoins. {user} does not have enough ColaCoins."
+msgstr ""
+
+msgid "{amount} {emoji} ColaCoins removed from {user}. Now they have {total} {emoji} ColaCoins."
+msgstr ""
+
+msgid "{user} has {amount} {emoji} ColaCoins."
+msgstr ""
+
+msgid "You have {amount} {emoji} ColaCoins."
+msgstr ""
+
+msgid "ColaCoins emoji set to {emoji}."
+msgstr ""
+
+msgid "There are no users with ColaCoins currently."
+msgstr ""
+
+msgid "There are no users with more than 0 ColaCoins currently."
+msgstr ""
+
+msgid "User ID {user_id}"
+msgstr ""
+
+msgid "🏆 ColaCoins Leaderboard"
+msgstr ""
+
+msgid "Page {current} of {total} • Total Users: {users}"
+msgstr ""

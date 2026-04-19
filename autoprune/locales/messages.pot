@@ -1,0 +1,95 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: killerbite-cogs\n"
+"POT-Creation-Date: 2026-04-19 00:00+0000\n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext\n"
+
+msgid "Prune log channel set to: {channel}"
+msgstr ""
+
+msgid "Ban log channel set to: {channel}"
+msgstr ""
+
+msgid "There are no banned users in this server."
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "There are no banned users with tracking records to prune."
+msgstr ""
+
+msgid "**Users that will be affected by prune:**"
+msgstr ""
+
+msgid "- {user} (ID: `{user_id}`), Credits: `{balance}`"
+msgstr ""
+
+msgid "**Do you want to continue?** React with ✅ to confirm or ❌ to cancel. *This action is irreversible.*"
+msgstr ""
+
+msgid "Prune executed successfully. Bank accounts of banned users have been removed."
+msgstr ""
+
+msgid "Prune executed with errors. Details:"
+msgstr ""
+
+msgid "Prune executed by {user}. Bank accounts of banned users have been removed."
+msgstr ""
+
+msgid "Operation cancelled."
+msgstr ""
+
+msgid "No confirmation received in time. Operation cancelled."
+msgstr ""
+
+msgid "**Users that would be affected by prune:**"
+msgstr ""
+
+msgid "There are no tracked bans."
+msgstr ""
+
+msgid "**Current Bans:**"
+msgstr ""
+
+msgid "- User ID: `{user_id}`, Credits: `{balance}`"
+msgstr ""
+
+msgid "**Ban Countdown:**"
+msgstr ""
+
+msgid "- {user}: `{days}` days, `{hours}` hours, `{minutes}` minutes remaining, Credits: `{balance}`"
+msgstr ""
+
+msgid "🔨 User Banned"
+msgstr ""
+
+msgid "User"
+msgstr ""
+
+msgid "Ban Date"
+msgstr ""
+
+msgid "Countdown"
+msgstr ""
+
+msgid "in 7 days"
+msgstr ""
+
+msgid "End Date"
+msgstr ""
+
+msgid "Credits"
+msgstr ""
+
+msgid "🔓 **User Unbanned Manually:** {user} (ID: {user_id})"
+msgstr ""
+
+msgid "⏰ **User ID {user_id} has passed the 7-day ban period and is ready to be pruned.**"
+msgstr ""

@@ -33,16 +33,17 @@ class SuggestionStatus(Enum):
 
 
 # Status display configuration
+# Labels are in English; use _() at display time for translation
 STATUS_CONFIG = {
-    SuggestionStatus.PENDING: {"color": discord.Color.blue(), "emoji": "🔵", "label": "Pendiente"},
-    SuggestionStatus.IN_REVIEW: {"color": discord.Color.gold(), "emoji": "🟡", "label": "En revisión"},
-    SuggestionStatus.PLANNED: {"color": discord.Color.purple(), "emoji": "🟣", "label": "Planeado"},
-    SuggestionStatus.IN_PROGRESS: {"color": discord.Color.orange(), "emoji": "🟠", "label": "En progreso"},
-    SuggestionStatus.APPROVED: {"color": discord.Color.green(), "emoji": "🟢", "label": "Aprobado"},
-    SuggestionStatus.IMPLEMENTED: {"color": discord.Color.dark_green(), "emoji": "✅", "label": "Implementado"},
-    SuggestionStatus.DENIED: {"color": discord.Color.red(), "emoji": "🔴", "label": "Rechazado"},
-    SuggestionStatus.DUPLICATE: {"color": discord.Color.greyple(), "emoji": "🔄", "label": "Duplicado"},
-    SuggestionStatus.WONT_DO: {"color": discord.Color.dark_grey(), "emoji": "⛔", "label": "No se hará"},
+    SuggestionStatus.PENDING: {"color": discord.Color.blue(), "emoji": "🔵", "label": "Pending"},
+    SuggestionStatus.IN_REVIEW: {"color": discord.Color.gold(), "emoji": "🟡", "label": "In Review"},
+    SuggestionStatus.PLANNED: {"color": discord.Color.purple(), "emoji": "🟣", "label": "Planned"},
+    SuggestionStatus.IN_PROGRESS: {"color": discord.Color.orange(), "emoji": "🟠", "label": "In Progress"},
+    SuggestionStatus.APPROVED: {"color": discord.Color.green(), "emoji": "🟢", "label": "Approved"},
+    SuggestionStatus.IMPLEMENTED: {"color": discord.Color.dark_green(), "emoji": "✅", "label": "Implemented"},
+    SuggestionStatus.DENIED: {"color": discord.Color.red(), "emoji": "🔴", "label": "Denied"},
+    SuggestionStatus.DUPLICATE: {"color": discord.Color.greyple(), "emoji": "🔄", "label": "Duplicate"},
+    SuggestionStatus.WONT_DO: {"color": discord.Color.dark_grey(), "emoji": "⛔", "label": "Won't Do"},
 }
 
 
@@ -347,7 +348,7 @@ async def migrate_schema(config: Config, guild: discord.Guild) -> bool:
             if suggestion_id == 0:
                 continue
             
-            # Convert old status format
+            # Convert old status format (legacy Spanish labels)
             old_status = data.get("status", "Pendiente")
             status_map = {
                 "Pendiente": "pending",

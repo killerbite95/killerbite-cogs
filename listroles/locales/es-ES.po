@@ -1,0 +1,17 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: killerbite-cogs\n"
+"POT-Creation-Date: 2026-04-19 00:00+0000\n"
+"PO-Revision-Date: 2026-04-19 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "No roles found in this server."
+msgstr "No se encontraron roles en este servidor."
+
+msgid "Server roles:"
+msgstr "Roles del servidor:"

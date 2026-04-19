@@ -2,24 +2,28 @@ import discord
 from discord.ext import commands, tasks
 from redbot.core import commands, Config, checks, bank
 from redbot.core.bot import Red
+from redbot.core.i18n import Translator, cog_i18n
 import asyncio
 import datetime
 
-# Importar la función bank_prune desde redbot.core.bank
 from redbot.core.bank import bank_prune
 from .dashboard_integration import DashboardIntegration
 
+_ = Translator("PruneBans", __file__)
+
+
+@cog_i18n(_)
 class PruneBans(DashboardIntegration, commands.Cog):
-    """Cog para manejar la eliminación de créditos de usuarios baneados y hacer seguimiento de los baneos."""
-    __author__ = "Killerbite95"  # Aquí se declara el autor
+    """Cog to manage credit removal of banned users and track bans."""
+    __author__ = "Killerbite95"
 
     def __init__(self, bot: Red):
         self.bot = bot
         self.config = Config.get_conf(self, identifier=1234567890, force_registration=True)
         self.config.register_guild(
-            log_channel=None,           # Canal para logs de prune
-            ban_log_channel=None,       # Canal para logs de baneos
-            ban_track={}                # Seguimiento de baneos
+            log_channel=None,
+            ban_log_channel=None,
+            ban_track={}
         )
         self.update_ban_countdown.start()
 
@@ -29,30 +33,28 @@ class PruneBans(DashboardIntegration, commands.Cog):
     @commands.command(name="setlogprune")
     @checks.admin_or_permissions(administrator=True)
     async def set_log_prune(self, ctx, channel: discord.TextChannel):
-        """Establece el canal donde se enviarán los logs de prune."""
+        """Set the channel where prune logs will be sent."""
         await self.config.guild(ctx.guild).log_channel.set(channel.id)
-        await ctx.send(f"Canal de logs de prune establecido en: {channel.mention}")
+        await ctx.send(_("Prune log channel set to: {channel}").format(channel=channel.mention))
 
     @commands.command(name="setbanlog")
     @checks.admin_or_permissions(administrator=True)
     async def set_ban_log(self, ctx, channel: discord.TextChannel):
-        """Establece el canal donde se enviarán los logs de baneos."""
+        """Set the channel where ban logs will be sent."""
         await self.config.guild(ctx.guild).ban_log_channel.set(channel.id)
-        await ctx.send(f"Canal de logs de baneos establecido en: {channel.mention}")
+        await ctx.send(_("Ban log channel set to: {channel}").format(channel=channel.mention))
 
     @commands.command(name="prune")
     @checks.admin_or_permissions(administrator=True)
     async def manual_prune(self, ctx):
-        """Ejecuta prune manualmente después de una confirmación."""
+        """Execute prune manually after confirmation."""
         guild = ctx.guild
 
-        # Obtener la lista de usuarios baneados
         banned_users = [ban async for ban in guild.bans()]
         if not banned_users:
-            await ctx.send("No hay usuarios baneados en este servidor.")
+            await ctx.send(_("There are no banned users in this server."))
             return
 
-        # Obtener información de cada usuario baneado para prunear
         async with self.config.guild(guild).ban_track() as ban_track:
             users_to_prune = []
             for ban_entry in banned_users:
@@ -60,26 +62,22 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 user_id_str = str(user.id)
                 ban_info = ban_track.get(user_id_str)
                 if ban_info:
-                    users_to_prune.append((user, ban_info.get("balance", "Desconocido")))
-                else:
-                    # Si el usuario no está en ban_track, considerar si se debe prunear
-                    # En este caso, decidimos no prunear si no hay registro en ban_track
-                    pass
+                    users_to_prune.append((user, ban_info.get("balance", _("Unknown"))))
 
         if not users_to_prune:
-            await ctx.send("No hay usuarios baneados con registros en seguimiento para prunear.")
+            await ctx.send(_("There are no banned users with tracking records to prune."))
             return
 
-        # Preparar el mensaje de confirmación
-        description = "**Usuarios que serán afectados por el prune:**\n"
+        description = _("**Users that will be affected by prune:**") + "\n"
         for user, balance in users_to_prune:
-            description += f"- {user.mention} (ID: `{user.id}`), Créditos: `{balance}`\n"
+            description += _("- {user} (ID: `{user_id}`), Credits: `{balance}`").format(
+                user=user.mention, user_id=user.id, balance=balance
+            ) + "\n"
 
-        description += "\n**¿Deseas continuar?** Reacciona con ✅ para confirmar o ❌ para cancelar. *Esta acción es irreversible.*"
+        description += "\n" + _("**Do you want to continue?** React with ✅ to confirm or ❌ to cancel. *This action is irreversible.*")
 
         message = await ctx.send(description)
 
-        # Añadir reacciones de confirmación
         await message.add_reaction("✅")
         await message.add_reaction("❌")
 
@@ -93,47 +91,45 @@ class PruneBans(DashboardIntegration, commands.Cog):
         try:
             reaction, user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
             if str(reaction.emoji) == "✅":
-                # Ejecutar el prune usando bank_prune importado
                 failed_prunes = await bank_prune(self.bot, guild=guild)
 
                 if not failed_prunes:
-                    await ctx.send("Función prune ejecutada correctamente. Las cuentas bancarias de los usuarios baneados han sido eliminadas.")
+                    await ctx.send(_("Prune executed successfully. Bank accounts of banned users have been removed."))
                 else:
-                    # Formatear los mensajes de error
                     error_messages = "\n".join([f"ID {uid}: {error}" for uid, error in failed_prunes])
-                    await ctx.send(f"Función prune ejecutada con errores. Detalles:\n{error_messages}")
+                    await ctx.send(_("Prune executed with errors. Details:") + f"\n{error_messages}")
 
-                # Limpiar las entradas en ban_track para los usuarios pruneados
                 async with self.config.guild(guild).ban_track() as ban_track:
                     for user, _ in users_to_prune:
                         user_id_str = str(user.id)
                         if user_id_str in ban_track:
                             del ban_track[user_id_str]
 
-                # Enviar log al canal configurado
                 log_channel_id = await self.config.guild(guild).log_channel()
                 if log_channel_id:
                     log_channel = guild.get_channel(log_channel_id)
                     if log_channel:
-                        await log_channel.send(f"Prune ejecutado por {ctx.author.mention}. Las cuentas bancarias de los usuarios baneados han sido eliminadas.")
+                        await log_channel.send(
+                            _("Prune executed by {user}. Bank accounts of banned users have been removed.").format(
+                                user=ctx.author.mention
+                            )
+                        )
             else:
-                await ctx.send("Operación cancelada.")
+                await ctx.send(_("Operation cancelled."))
         except asyncio.TimeoutError:
-            await ctx.send("No se recibió confirmación a tiempo. Operación cancelada.")
+            await ctx.send(_("No confirmation received in time. Operation cancelled."))
 
     @commands.command(name="prunetest")
     @checks.admin_or_permissions(administrator=True)
     async def prune_test(self, ctx):
-        """Comando de prueba para mostrar los usuarios que serían afectados por prune."""
+        """Test command to show users that would be affected by prune."""
         guild = ctx.guild
 
-        # Obtener la lista de usuarios baneados
         banned_users = [ban async for ban in guild.bans()]
         if not banned_users:
-            await ctx.send("No hay usuarios baneados en este servidor.")
+            await ctx.send(_("There are no banned users in this server."))
             return
 
-        # Obtener la información de ban_track
         async with self.config.guild(guild).ban_track() as ban_track:
             users_to_prune = []
             for ban_entry in banned_users:
@@ -141,62 +137,59 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 user_id_str = str(user.id)
                 ban_info = ban_track.get(user_id_str)
                 if ban_info:
-                    users_to_prune.append((user, ban_info.get("balance", "Desconocido")))
-                else:
-                    # Si el usuario no está en ban_track, decidir si se muestra o no
-                    pass  # En este caso, no se muestra
+                    users_to_prune.append((user, ban_info.get("balance", _("Unknown"))))
 
         if not users_to_prune:
-            await ctx.send("No hay usuarios baneados con registros en seguimiento para prunear.")
+            await ctx.send(_("There are no banned users with tracking records to prune."))
             return
 
-        # Preparar la lista de usuarios afectados
-        description = "**Usuarios que serían afectados por el prune:**\n"
+        description = _("**Users that would be affected by prune:**") + "\n"
         for user, balance in users_to_prune:
-            description += f"- {user.mention} (ID: `{user.id}`), Créditos: `{balance}`\n"
+            description += _("- {user} (ID: `{user_id}`), Credits: `{balance}`").format(
+                user=user.mention, user_id=user.id, balance=balance
+            ) + "\n"
 
         await ctx.send(description)
 
     @commands.command(name="listbans")
     @checks.admin_or_permissions(administrator=True)
     async def list_bans(self, ctx):
-        """Lista los usuarios baneados con sus créditos."""
+        """List banned users with their credits."""
         guild = ctx.guild
         async with self.config.guild(guild).ban_track() as ban_track:
             if not ban_track:
-                await ctx.send("No hay baneos en seguimiento.")
+                await ctx.send(_("There are no tracked bans."))
                 return
 
-            description = "**Baneos Actuales:**\n"
+            description = _("**Current Bans:**") + "\n"
             for user_id_str, ban_info in ban_track.items():
                 user_id = int(user_id_str)
-                balance = ban_info.get("balance", "Desconocido")
-                description += (
-                    f"- Usuario ID: `{user_id}`, Créditos: `{balance}`\n"
-                )
+                balance = ban_info.get("balance", _("Unknown"))
+                description += _("- User ID: `{user_id}`, Credits: `{balance}`").format(
+                    user_id=user_id, balance=balance
+                ) + "\n"
             await ctx.send(description)
 
     @commands.command(name="countdown")
     @checks.admin_or_permissions(administrator=True)
     async def countdown_bans(self, ctx):
-        """Muestra una cuenta atrás personalizada de 7 días para cada baneo."""
+        """Show a custom 7-day countdown for each ban."""
         guild = ctx.guild
         async with self.config.guild(guild).ban_track() as ban_track:
             if not ban_track:
-                await ctx.send("No hay baneos en seguimiento.")
+                await ctx.send(_("There are no tracked bans."))
                 return
 
-            description = "**Cuenta Atrás de Baneos:**\n"
+            description = _("**Ban Countdown:**") + "\n"
             now = datetime.datetime.utcnow()
             for user_id_str, ban_info in ban_track.items():
                 user_id = int(user_id_str)
                 unban_date = datetime.datetime.fromisoformat(ban_info["unban_date"])
                 remaining_time = unban_date - now
-                remaining_days = remaining_time.days
+                remaining_days = max(0, remaining_time.days)
                 remaining_seconds = remaining_time.seconds
                 remaining_hours, remaining_minutes = divmod(remaining_seconds, 3600)
                 remaining_minutes, _ = divmod(remaining_minutes, 60)
-                remaining_days = max(0, remaining_days)
                 remaining_hours = max(0, remaining_hours)
                 remaining_minutes = max(0, remaining_minutes)
                 user = guild.get_member(user_id)
@@ -204,17 +197,18 @@ class PruneBans(DashboardIntegration, commands.Cog):
                     user_display = f"{user} (ID: {user_id})"
                 else:
                     user_display = f"ID: {user_id}"
-                balance = ban_info.get("balance", "Desconocido")
+                balance = ban_info.get("balance", _("Unknown"))
                 description += (
-                    f"- {user_display}: `{remaining_days}` días, "
-                    f"`{remaining_hours}` horas, `{remaining_minutes}` minutos restantes, "
-                    f"Créditos: `{balance}`\n"
+                    _("- {user}: `{days}` days, `{hours}` hours, `{minutes}` minutes remaining, Credits: `{balance}`").format(
+                        user=user_display, days=remaining_days, hours=remaining_hours,
+                        minutes=remaining_minutes, balance=balance
+                    ) + "\n"
                 )
             await ctx.send(description)
 
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
-        """Evento que se dispara cuando un usuario es baneado."""
+        """Event triggered when a user is banned."""
         ban_log_channel_id = await self.config.guild(guild).ban_log_channel()
         if ban_log_channel_id:
             ban_log_channel = guild.get_channel(ban_log_channel_id)
@@ -222,61 +216,57 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 ban_date = datetime.datetime.utcnow()
                 unban_date = ban_date + datetime.timedelta(days=7)
 
-                # Intentar obtener el balance del usuario
                 try:
                     balance = await bank.get_balance(user)
                     if not isinstance(balance, int):
-                        balance = "Desconocido"
+                        balance = _("Unknown")
                 except Exception:
-                    balance = "Desconocido"  # No se pudo obtener el balance
+                    balance = _("Unknown")
 
                 if isinstance(balance, int) and balance > 0:
                     balance_info = balance
                 else:
-                    balance_info = "Desconocido"
+                    balance_info = _("Unknown")
 
-                # Crear el embed
                 embed = discord.Embed(
-                    title="🔨 Usuario Baneado",
+                    title=_("🔨 User Banned"),
                     color=discord.Color.red(),
                     timestamp=ban_date
                 )
-                embed.add_field(name="Usuario", value=f"{user.mention} (ID: {user.id})", inline=False)
-                embed.add_field(name="Fecha de Baneo", value=ban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
-                
-                # Asignar 'countdown' en una línea separada
-                countdown = f"in 7 días"
-                embed.add_field(name="Cuenta Atrás", value=countdown, inline=False)
-                
-                embed.add_field(name="Fecha de Finalización", value=unban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
-                embed.add_field(name="Créditos", value=f"{balance_info}", inline=False)
+                embed.add_field(name=_("User"), value=f"{user.mention} (ID: {user.id})", inline=False)
+                embed.add_field(name=_("Ban Date"), value=ban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
+                embed.add_field(name=_("Countdown"), value=_("in 7 days"), inline=False)
+                embed.add_field(name=_("End Date"), value=unban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
+                embed.add_field(name=_("Credits"), value=f"{balance_info}", inline=False)
                 await ban_log_channel.send(embed=embed)
-                
-                # Guardar información del baneo
+
                 async with self.config.guild(guild).ban_track() as ban_track:
                     ban_track[str(user.id)] = {
                         "ban_date": ban_date.isoformat(),
                         "unban_date": unban_date.isoformat(),
                         "balance": balance_info,
-                        "message_id": None  # Podemos guardar el ID del mensaje si lo necesitamos en el futuro
+                        "message_id": None
                     }
 
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
-        """Evento que se dispara cuando un usuario es desbaneado manualmente."""
+        """Event triggered when a user is unbanned manually."""
         async with self.config.guild(guild).ban_track() as ban_track:
             if str(user.id) in ban_track:
                 del ban_track[str(user.id)]
-                # Opcional: Notificar que el usuario ha sido desbaneado antes de completar el seguimiento
                 ban_log_channel_id = await self.config.guild(guild).ban_log_channel()
                 if ban_log_channel_id:
                     ban_log_channel = guild.get_channel(ban_log_channel_id)
                     if ban_log_channel:
-                        await ban_log_channel.send(f"🔓 **Usuario Desbaneado Manualmente:** {user.mention} (ID: {user.id})")
+                        await ban_log_channel.send(
+                            _("🔓 **User Unbanned Manually:** {user} (ID: {user_id})").format(
+                                user=user.mention, user_id=user.id
+                            )
+                        )
 
     @tasks.loop(hours=24)
     async def update_ban_countdown(self):
-        """Actualiza la cuenta atrás de los baneos cada 24 horas."""
+        """Update ban countdowns every 24 hours."""
         for guild in self.bot.guilds:
             ban_log_channel_id = await self.config.guild(guild).ban_log_channel()
             if not ban_log_channel_id:
@@ -290,10 +280,12 @@ class PruneBans(DashboardIntegration, commands.Cog):
                     now = datetime.datetime.utcnow()
                     time_since_ban = now - ban_date
 
-                    # Verificar si han pasado 7 días o más desde el baneo
                     if time_since_ban >= datetime.timedelta(days=7):
-                        # Opcional: Notificar que el usuario está listo para ser pruneado
-                        await ban_log_channel.send(f"⏰ **El usuario ID {user_id_str} ha pasado los 7 días de baneo y está listo para ser pruneado.**")
+                        await ban_log_channel.send(
+                            _("⏰ **User ID {user_id} has passed the 7-day ban period and is ready to be pruned.**").format(
+                                user_id=user_id_str
+                            )
+                        )
 
     @update_ban_countdown.before_loop
     async def before_update_ban_countdown(self):

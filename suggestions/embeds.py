@@ -3,6 +3,7 @@ Embed builders for SimpleSuggestions.
 Handles all embed creation and formatting.
 """
 import discord # pyright: ignore[reportMissingImports]
+from redbot.core.i18n import Translator
 from typing import Optional, TYPE_CHECKING
 from datetime import datetime
 
@@ -10,6 +11,8 @@ from .storage import SuggestionData, SuggestionStatus, STATUS_CONFIG
 
 if TYPE_CHECKING:
     from redbot.core.bot import Red
+
+_ = Translator("SimpleSuggestions", __file__)
 
 
 def create_suggestion_embed(
@@ -21,7 +24,7 @@ def create_suggestion_embed(
     status_info = STATUS_CONFIG.get(suggestion.status, STATUS_CONFIG[SuggestionStatus.PENDING])
     
     embed = discord.Embed(
-        title=f"Sugerencia #{suggestion.suggestion_id}",
+        title=_("Suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id),
         description=suggestion.content,
         color=status_info["color"],
         timestamp=datetime.fromisoformat(suggestion.created_at) if suggestion.created_at else datetime.utcnow()
@@ -31,10 +34,11 @@ def create_suggestion_embed(
         embed.set_author(name=author.display_name, icon_url=author.display_avatar.url)
     
     # Status field
-    status_text = f"{status_info['emoji']} {status_info['label']}"
+    label = _(status_info['label'])
+    status_text = f"{status_info['emoji']} {label}"
     if suggestion.reason:
         status_text += f"\n📝 *{suggestion.reason}*"
-    embed.add_field(name="Estado", value=status_text, inline=True)
+    embed.add_field(name=_("Status"), value=status_text, inline=True)
     
     # Votes field
     if show_votes:
@@ -42,10 +46,12 @@ def create_suggestion_embed(
         if suggestion.score != 0:
             score_emoji = "📈" if suggestion.score > 0 else "📉"
             votes_text += f"  |  {score_emoji} {suggestion.score:+d}"
-        embed.add_field(name="Votos", value=votes_text, inline=True)
+        embed.add_field(name=_("Votes"), value=votes_text, inline=True)
     
     # Footer with status
-    embed.set_footer(text=f"ID: {suggestion.suggestion_id} • {status_info['label']}")
+    embed.set_footer(text=_("ID: {suggestion_id} • {label}").format(
+        suggestion_id=suggestion.suggestion_id, label=label
+    ))
     
     return embed
 
@@ -60,16 +66,22 @@ def create_vote_result_embed(
     emoji = "👍" if vote_type == "up" else "👎"
     
     if action == "added":
-        title = f"{emoji} Voto registrado"
-        description = f"Has votado {'a favor' if vote_type == 'up' else 'en contra'} de la sugerencia #{suggestion.suggestion_id}"
+        title = _("{emoji} Vote registered").format(emoji=emoji)
+        if vote_type == "up":
+            description = _("You voted in favor of suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id)
+        else:
+            description = _("You voted against suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id)
         color = discord.Color.green() if vote_type == "up" else discord.Color.red()
     elif action == "removed":
-        title = "🔄 Voto retirado"
-        description = f"Has retirado tu voto de la sugerencia #{suggestion.suggestion_id}"
+        title = _("🔄 Vote withdrawn")
+        description = _("You withdrew your vote from suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id)
         color = discord.Color.light_grey()
     else:  # switched
-        title = f"{emoji} Voto cambiado"
-        description = f"Has cambiado tu voto a {'a favor' if vote_type == 'up' else 'en contra'} de la sugerencia #{suggestion.suggestion_id}"
+        title = _("{emoji} Vote changed").format(emoji=emoji)
+        if vote_type == "up":
+            description = _("You changed your vote to in favor of suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id)
+        else:
+            description = _("You changed your vote to against suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id)
         color = discord.Color.gold()
     
     embed = discord.Embed(
@@ -78,7 +90,7 @@ def create_vote_result_embed(
         color=color
     )
     embed.add_field(
-        name="Votos actuales",
+        name=_("Current votes"),
         value=f"👍 {suggestion.upvotes}  |  👎 {suggestion.downvotes}",
         inline=False
     )
@@ -97,27 +109,27 @@ def create_status_change_embed(
     new_info = STATUS_CONFIG.get(suggestion.status, STATUS_CONFIG[SuggestionStatus.PENDING])
     
     embed = discord.Embed(
-        title="📬 Actualización de tu sugerencia",
-        description=f"**Sugerencia #{suggestion.suggestion_id}** ha cambiado de estado.",
+        title=_("📬 Update on your suggestion"),
+        description=_("**Suggestion #{suggestion_id}** has changed status.").format(suggestion_id=suggestion.suggestion_id),
         color=new_info["color"]
     )
     
     embed.add_field(
-        name="Tu sugerencia",
+        name=_("Your suggestion"),
         value=suggestion.content[:200] + ("..." if len(suggestion.content) > 200 else ""),
         inline=False
     )
     
     embed.add_field(
-        name="Cambio de estado",
-        value=f"{old_info['emoji']} {old_info['label']} → {new_info['emoji']} {new_info['label']}",
+        name=_("Status change"),
+        value=f"{old_info['emoji']} {_(old_info['label'])} → {new_info['emoji']} {_(new_info['label'])}",
         inline=False
     )
     
     if reason:
-        embed.add_field(name="Motivo", value=reason, inline=False)
+        embed.add_field(name=_("Reason"), value=reason, inline=False)
     
-    embed.set_footer(text=f"Actualizado por {changed_by.display_name}")
+    embed.set_footer(text=_("Updated by {name}").format(name=changed_by.display_name))
     embed.timestamp = datetime.utcnow()
     
     return embed
@@ -126,7 +138,7 @@ def create_status_change_embed(
 def create_votes_detail_embed(suggestion: SuggestionData, bot: "Red") -> discord.Embed:
     """Create a detailed votes embed."""
     embed = discord.Embed(
-        title=f"📊 Votos - Sugerencia #{suggestion.suggestion_id}",
+        title=_("📊 Votes - Suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id),
         color=discord.Color.blurple()
     )
     
@@ -143,24 +155,27 @@ def create_votes_detail_embed(suggestion: SuggestionData, bot: "Red") -> discord
         bar = "🟩" * up_bars + "🟥" * down_bars
         
         embed.add_field(
-            name="Resumen",
-            value=f"**Total:** {total} votos\n"
-                  f"**A favor:** {suggestion.upvotes} ({up_pct:.1f}%)\n"
-                  f"**En contra:** {suggestion.downvotes} ({down_pct:.1f}%)\n\n"
-                  f"{bar}",
+            name=_("Summary"),
+            value=_("**Total:** {total} votes\n"
+                  "**In favor:** {upvotes} ({up_pct:.1f}%)\n"
+                  "**Against:** {downvotes} ({down_pct:.1f}%)\n\n"
+                  "{bar}").format(
+                      total=total, upvotes=suggestion.upvotes, up_pct=up_pct,
+                      downvotes=suggestion.downvotes, down_pct=down_pct, bar=bar
+                  ),
             inline=False
         )
     else:
         embed.add_field(
-            name="Resumen",
-            value="Aún no hay votos",
+            name=_("Summary"),
+            value=_("No votes yet"),
             inline=False
         )
     
     # Score
     score_emoji = "📈" if suggestion.score > 0 else ("📉" if suggestion.score < 0 else "➖")
     embed.add_field(
-        name="Puntuación",
+        name=_("Score"),
         value=f"{score_emoji} **{suggestion.score:+d}**",
         inline=True
     )
@@ -175,10 +190,10 @@ def create_suggestion_list_embed(
     status_filter: Optional[SuggestionStatus] = None
 ) -> discord.Embed:
     """Create an embed listing multiple suggestions."""
-    title = "📋 Lista de Sugerencias"
+    title = _("📋 Suggestion List")
     if status_filter:
         status_info = STATUS_CONFIG.get(status_filter)
-        title += f" - {status_info['emoji']} {status_info['label']}"
+        title += f" - {status_info['emoji']} {_(status_info['label'])}"
     
     embed = discord.Embed(
         title=title,
@@ -186,7 +201,7 @@ def create_suggestion_list_embed(
     )
     
     if not suggestions:
-        embed.description = "No hay sugerencias que mostrar."
+        embed.description = _("No suggestions to show.")
     else:
         lines = []
         for s in suggestions:
@@ -197,7 +212,7 @@ def create_suggestion_list_embed(
         
         embed.description = "\n".join(lines)
     
-    embed.set_footer(text=f"Página {page}/{total_pages}")
+    embed.set_footer(text=_("Page {page}/{total_pages}").format(page=page, total_pages=total_pages))
     
     return embed
 
@@ -205,17 +220,17 @@ def create_suggestion_list_embed(
 def create_history_embed(suggestion: SuggestionData, bot: "Red") -> discord.Embed:
     """Create an embed showing suggestion history."""
     embed = discord.Embed(
-        title=f"📜 Historial - Sugerencia #{suggestion.suggestion_id}",
+        title=_("📜 History - Suggestion #{suggestion_id}").format(suggestion_id=suggestion.suggestion_id),
         color=discord.Color.blurple()
     )
     
     if not suggestion.history:
-        embed.description = "No hay cambios registrados."
+        embed.description = _("No changes recorded.")
     else:
         lines = []
         for entry in suggestion.history[-10:]:  # Last 10 entries
             user = bot.get_user(entry.get("changed_by", 0))
-            user_name = user.display_name if user else "Desconocido"
+            user_name = user.display_name if user else _("Unknown")
             
             old_status = entry.get("old_status", "?")
             new_status = entry.get("new_status", "?")
@@ -227,7 +242,9 @@ def create_history_embed(suggestion: SuggestionData, bot: "Red") -> discord.Embe
                 old_info = {"emoji": "?"}
                 new_info = {"emoji": "?"}
             
-            line = f"• {old_info['emoji']} → {new_info['emoji']} por **{user_name}**"
+            line = _("• {old_emoji} → {new_emoji} by **{user_name}**").format(
+                old_emoji=old_info['emoji'], new_emoji=new_info['emoji'], user_name=user_name
+            )
             if entry.get("reason"):
                 line += f"\n  └ *{entry['reason'][:50]}*"
             
