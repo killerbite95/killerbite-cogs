@@ -97,7 +97,7 @@ class ColaCoins(commands.Cog):
         self.logger.info(f"{ctx.author} removed {amount} ColaCoins from {user}.")
 
     @commands.admin_or_permissions(administrator=True)
-    @commands.command(name="vercolacoins", aliases=["viewcolacoins"])
+    @commands.command(name="checkcolacoins", aliases=["vercolacoins", "viewcolacoins"])
     async def ver_colacoins(self, ctx, user: discord.Member):
         """Check the ColaCoins amount of a user."""
         colacoins = await self.config.colacoins()
@@ -109,7 +109,7 @@ class ColaCoins(commands.Cog):
             )
         )
 
-    @commands.command(name="colacoins", aliases=["miscolacoins"])
+    @commands.command(name="colacoins", aliases=["mycolacoins", "miscolacoins"])
     async def user_colacoins(self, ctx):
         """See how many ColaCoins you have."""
         colacoins = await self.config.colacoins()
