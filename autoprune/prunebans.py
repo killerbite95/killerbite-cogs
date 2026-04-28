@@ -100,7 +100,7 @@ class PruneBans(DashboardIntegration, commands.Cog):
                     await ctx.send(_("Prune executed with errors. Details:") + f"\n{error_messages}")
 
                 async with self.config.guild(guild).ban_track() as ban_track:
-                    for user, _ in users_to_prune:
+                    for user, _balance in users_to_prune:
                         user_id_str = str(user.id)
                         if user_id_str in ban_track:
                             del ban_track[user_id_str]
