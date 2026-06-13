@@ -210,7 +210,17 @@ class ServerData:
         if len(parts) > 1:
             return int(parts[1])
         return self.game.default_port if self.game else 27015
-    
+
+    @property
+    def effective_query_port(self) -> int:
+        """Puerto a usar para la query A2S.
+
+        Si se configuró un query_port distinto del puerto de conexión
+        (p.ej. Rust lanzado con +queryport), se usa ese; si no, el puerto
+        del server_key.
+        """
+        return self.query_port or self.port
+
     @property
     def uptime_percentage(self) -> float:
         """Calcula el porcentaje de uptime basado en queries exitosas."""
@@ -231,10 +241,16 @@ class ServerData:
             "last_offline": self.last_offline.isoformat() if self.last_offline else None,
             "last_status": self.last_status.name if self.last_status else None
         }
-        # Campos específicos de DayZ
+        # Puertos personalizados: DayZ siempre los conserva; el resto de juegos
+        # (p.ej. Rust con +queryport) solo si se especificaron.
         if self.game == GameType.DAYZ:
             data["game_port"] = self.game_port
             data["query_port"] = self.query_port
+        else:
+            if self.game_port is not None:
+                data["game_port"] = self.game_port
+            if self.query_port is not None:
+                data["query_port"] = self.query_port
         return data
     
     @classmethod

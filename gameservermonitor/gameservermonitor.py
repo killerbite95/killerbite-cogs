@@ -354,7 +354,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             query_kwargs["query_port"] = server_data.query_port
             port = server_data.game_port or server_data.port
         else:
-            port = server_data.port
+            port = server_data.effective_query_port
         
         query_result = await self.query_service.query_server(
             host=server_data.host,
@@ -514,7 +514,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             query_kwargs["query_port"] = server_data.query_port
             port = server_data.game_port or server_data.port
         else:
-            port = server_data.port
+            port = server_data.effective_query_port
         
         query_result = await self.query_service.query_server(
             host=server_data.host,
@@ -618,7 +618,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             query_kwargs["query_port"] = server_data.query_port
             port = server_data.game_port or server_data.port
         else:
-            port = server_data.port
+            port = server_data.effective_query_port
         
         query_result = await self.query_service.query_server(
             host=server_data.host,
@@ -729,7 +729,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             query_kwargs["query_port"] = server_data.query_port
             port = server_data.game_port or server_data.port
         else:
-            port = server_data.port
+            port = server_data.effective_query_port
         
         query_result = await self.query_service.query_server(
             host=server_data.host,
@@ -1250,10 +1250,14 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             query_kwargs = {}
             if server_data.game == GameType.DAYZ:
                 query_kwargs["query_port"] = server_data.query_port
-            
+                query_target_port = server_data.game_port or port
+            else:
+                # Juegos Source (Rust, etc.): usar query_port si difiere del de conexión
+                query_target_port = server_data.effective_query_port
+
             query_result = await self.query_service.query_server(
                 host=host,
-                port=server_data.game_port if server_data.game == GameType.DAYZ else port,
+                port=query_target_port,
                 game=server_data.game,
                 **query_kwargs
             )
@@ -1486,6 +1490,10 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         **General usage:**
         `[p]addserver <ip[:port]> <game> [#channel] [domain]`
 
+        **Source games with a separate query port (e.g. Rust with +queryport):**
+        `[p]addserver <ip:game_port> <game> <game_port> <query_port> [#channel] [domain]`
+        The A2S query is sent to `query_port`; players still connect to `game_port`.
+
         **DayZ usage (separate ports):**
         `[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]`
 
@@ -1573,21 +1581,33 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 _("❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por defecto).")
             )
             return
-        
+
         ip_part, port_part, server_key = parsed
-        
+
+        # Puerto de query opcional (p.ej. Rust con +queryport distinto del puerto de juego).
+        # En estos juegos el primer puerto posicional es el de juego/conexión (ya viene en
+        # server_ip), por lo que solo necesitamos validar el query_port para la consulta A2S.
+        if query_port is not None and not self._valid_port(query_port):
+            await ctx.send(_("❌ Puerto de query inválido (1-65535)."))
+            return
+        if game_port is not None and not self._valid_port(game_port):
+            await ctx.send(_("❌ Puerto de juego inválido (1-65535)."))
+            return
+
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_key in servers:
                 await ctx.send(
                     _("❌ El servidor **{}** ya está siendo monitoreado.").format(server_key)
                 )
                 return
-            
+
             servers[server_key] = {
                 "game": game_type.value,
                 "channel_id": channel.id,
                 "message_id": None,
                 "domain": domain,
+                "game_port": game_port,
+                "query_port": query_port,
                 "total_queries": 0,
                 "successful_queries": 0,
                 "last_online": None,
@@ -1595,10 +1615,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 "last_status": None,
                 "server_id": self._generate_server_id()  # Nuevo: ID único para botones
             }
-        
+
         msg = _("✅ Servidor **{}** ({}) añadido en {}.").format(
             server_key, game_type.display_name, channel.mention
         )
+        if query_port:
+            msg += _("\nPuerto de query: **{}**").format(query_port)
         if domain:
             msg += _("\nDominio: {}").format(domain)
         
@@ -1654,11 +1676,17 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         for server_key, data in servers.items():
             if data.get("channel_id") == ctx.channel.id:
-                # Limpiar caché para este servidor
+                # Limpiar caché para este servidor (usar el puerto real de query)
                 game = GameType.from_string(data.get("game", ""))
                 if game:
-                    host, port = server_key.split(":")
-                    self.query_service._cache.invalidate(host, int(port), game)
+                    server_data = ServerData.from_dict(server_key, data)
+                    if game == GameType.DAYZ:
+                        cache_port = server_data.game_port or server_data.port
+                    else:
+                        cache_port = server_data.effective_query_port
+                    self.query_service._cache.invalidate(
+                        server_data.host, int(cache_port), game
+                    )
                 
                 await self.update_server_status(ctx.guild, server_key, first_time=False)
                 updated = True
