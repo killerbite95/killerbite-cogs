@@ -381,13 +381,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Obtener IP para mostrar y conectar
         public_ip = await self.config.guild(guild).public_ip()
-        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        ip_to_show = self._format_display_address(server_data, public_ip)
         
         # Obtener nombre para mostrar con fallback
         display_name = query_result.hostname
         if not display_name or display_name == "Unknown Server":
             if public_ip:
-                display_name = f"{public_ip}:{port}"
+                display_name = f"{public_ip}:{server_data.connect_port}"
             elif server_data.domain:
                 display_name = server_data.domain
             else:
@@ -408,8 +408,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         if server_data.game and server_data.game.thumbnail_url:
             embed.set_thumbnail(url=server_data.game.thumbnail_url)
         
-        # Botón de conexión (no para Minecraft)
-        if server_data.game != GameType.MINECRAFT:
+        # Botón de conexión (no para Minecraft ni Rust: se conectan por consola)
+        if server_data.game and server_data.game.supports_connect_button:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
@@ -526,13 +526,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Obtener IP para mostrar y conectar
         public_ip = await self.config.guild(guild).public_ip()
-        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        ip_to_show = self._format_display_address(server_data, public_ip)
         
         # Obtener nombre para mostrar con fallback
         display_name = query_result.hostname
         if not display_name or display_name == "Unknown Server":
             if public_ip:
-                display_name = f"{public_ip}:{port}"
+                display_name = f"{public_ip}:{server_data.connect_port}"
             elif server_data.domain:
                 display_name = server_data.domain
             elif server_data.game:
@@ -559,8 +559,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         timezone = await self.config.guild(guild).timezone()
         embed = stats.to_embed(timezone)
         
-        # Botón de conexión (no para Minecraft)
-        if server_data.game != GameType.MINECRAFT:
+        # Botón de conexión (no para Minecraft ni Rust: se conectan por consola)
+        if server_data.game and server_data.game.supports_connect_button:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
@@ -633,13 +633,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             # Intentar con IP pública configurada
             public_ip = await self.config.guild(guild).public_ip()
             if public_ip:
-                display_name = f"{public_ip}:{port}"
+                display_name = f"{public_ip}:{server_data.connect_port}"
             else:
                 display_name = server_data.domain or game_name
         
         # Obtener IP para conectar
         public_ip = await self.config.guild(guild).public_ip()
-        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        ip_to_show = self._format_display_address(server_data, public_ip)
         
         # Generar gráfico
         graph = history.generate_ascii_graph(hours=hours, width=24)
@@ -684,8 +684,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             inline=False
         )
         
-        # Botón de conexión (no para Minecraft)
-        if server_data.game != GameType.MINECRAFT:
+        # Botón de conexión (no para Minecraft ni Rust: se conectan por consola)
+        if server_data.game and server_data.game.supports_connect_button:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
@@ -746,13 +746,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         # Obtener IP para mostrar y conectar
         public_ip = await self.config.guild(guild).public_ip()
-        ip_to_show = f"{public_ip}:{port}" if public_ip else server_key
+        ip_to_show = self._format_display_address(server_data, public_ip)
         
         # Obtener nombre para mostrar con fallback
         display_name = query_result.hostname
         if not display_name or display_name == "Unknown Server":
             if public_ip:
-                display_name = f"{public_ip}:{port}"
+                display_name = f"{public_ip}:{server_data.connect_port}"
             elif server_data.domain:
                 display_name = server_data.domain
             else:
@@ -798,8 +798,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 inline=True
             )
         
-        # Botón de conexión (no para Minecraft)
-        if server_data.game != GameType.MINECRAFT:
+        # Botón de conexión (no para Minecraft ni Rust: se conectan por consola)
+        if server_data.game and server_data.game.supports_connect_button:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
@@ -893,12 +893,26 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             IP pública o la original si no aplica
         """
         public_ip = await self.config.guild(guild).public_ip()
-        
+
         # Solo reemplazar si hay IP pública configurada y la original es privada
         if public_ip and self._is_private_ip(original_ip):
             return public_ip
         return original_ip
-    
+
+    def _format_display_address(
+        self,
+        server_data: ServerData,
+        public_ip: Optional[str]
+    ) -> str:
+        """Dirección a mostrar en el campo IP del embed.
+
+        Prioriza el dominio configurado; si no, la IP pública; si no, el host
+        real. Siempre incluye el puerto de conexión para que sea directamente
+        usable por los jugadores.
+        """
+        host = server_data.domain or public_ip or server_data.host
+        return f"{host}:{server_data.connect_port}"
+
     async def _check_channel_permissions(
         self, 
         channel: discord.TextChannel
@@ -991,8 +1005,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         game_name = server_data.game.display_name if server_data.game else _("Unknown")
         embed.add_field(name=f"🎮 {_('Game')}", value=game_name, inline=True)
         
-        # Botón de conexión (no para Minecraft)
-        if embed_config.show_connect_button and server_data.game != GameType.MINECRAFT:
+        # Botón de conexión (no para Minecraft ni Rust: se conectan por consola)
+        if embed_config.show_connect_button and server_data.game and server_data.game.supports_connect_button:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
@@ -1071,8 +1085,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         )
         embed.add_field(name=f"📌 {_('IP')}", value=ip_to_show, inline=True)
         
-        # Botón de conexión (no para Minecraft)
-        if embed_config.show_connect_button and server_data.game != GameType.MINECRAFT:
+        # Botón de conexión (no para Minecraft ni Rust: se conectan por consola)
+        if embed_config.show_connect_button and server_data.game and server_data.game.supports_connect_button:
             connect_template = await self.config.guild(guild).connect_url_template()
             connect_url = connect_template.format(ip=ip_to_show)
             embed.add_field(
@@ -1239,12 +1253,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             host = server_data.host
             port = server_data.port
             public_ip = await self._get_public_ip(guild, host)
-            
-            if server_data.game == GameType.DAYZ:
-                game_port = server_data.game_port or port
-                ip_to_show = f"{public_ip}:{game_port}"
-            else:
-                ip_to_show = f"{public_ip}:{port}"
+
+            # Dirección a mostrar: dominio > IP pública > host, con el puerto de conexión
+            ip_to_show = self._format_display_address(server_data, public_ip)
             
             # Realizar query (siempre usa la IP original del servidor)
             query_kwargs = {}

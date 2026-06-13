@@ -115,6 +115,15 @@ class GameType(Enum):
         if self == GameType.MINECRAFT:
             return "minecraft"
         return "source"
+
+    @property
+    def supports_connect_button(self) -> bool:
+        """Si tiene sentido mostrar el enlace web de conexión (steam://connect).
+
+        Rust y Minecraft no usan ese mecanismo (los jugadores se conectan desde
+        la consola del cliente), por lo que se omite el botón para no confundir.
+        """
+        return self not in (GameType.MINECRAFT, GameType.RUST)
     
     @property
     def thumbnail_url(self) -> Optional[str]:
@@ -220,6 +229,16 @@ class ServerData:
         del server_key.
         """
         return self.query_port or self.port
+
+    @property
+    def connect_port(self) -> int:
+        """Puerto de conexión que se muestra a los jugadores.
+
+        DayZ usa game_port; el resto usa el puerto del server_key.
+        """
+        if self.game == GameType.DAYZ:
+            return self.game_port or self.port
+        return self.port
 
     @property
     def uptime_percentage(self) -> float:
