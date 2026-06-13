@@ -907,11 +907,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """Dirección a mostrar en el campo IP del embed.
 
         Prioriza el dominio configurado; si no, la IP pública; si no, el host
-        real. Siempre incluye el puerto de conexión para que sea directamente
-        usable por los jugadores.
+        real. Se omite el puerto cuando coincide con el puerto por defecto del
+        juego (es el principal, p.ej. 28015 en Rust); en otro caso se incluye
+        para que la dirección sea directamente usable.
         """
         host = server_data.domain or public_ip or server_data.host
-        return f"{host}:{server_data.connect_port}"
+        port = server_data.connect_port
+        if server_data.game and port == server_data.game.default_port:
+            return host
+        return f"{host}:{port}"
 
     async def _check_channel_permissions(
         self, 
@@ -1322,7 +1326,10 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 "stats": _("Stats"),
                 "history": _("History")
             }
-            view = create_server_view(server_id, labels=button_labels) if buttons_enabled else None
+            show_players_button = server_data.game.supports_player_list if server_data.game else True
+            view = create_server_view(
+                server_id, labels=button_labels, show_players=show_players_button
+            ) if buttons_enabled else None
             
             # Enviar o editar mensaje
             try:

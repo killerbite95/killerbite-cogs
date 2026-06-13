@@ -91,29 +91,32 @@ class ServerActionsView(ui.View):
     """
     
     def __init__(
-        self, 
-        server_id: str, 
+        self,
+        server_id: str,
         cog: Optional["GameServerMonitor"] = None,
-        labels: Optional[dict] = None
+        labels: Optional[dict] = None,
+        show_players: bool = True
     ):
         """
         Inicializa la view.
-        
+
         Args:
             server_id: ID único y estable del servidor
             cog: Referencia al cog (opcional, se obtiene del bot en callbacks)
             labels: Dict con traducciones {"players": ..., "stats": ..., "history": ...}
+            show_players: Si incluir el botón de jugadores (Rust no expone lista útil)
         """
         super().__init__(timeout=None)  # Persistente
         self.server_id = server_id
         self._cog = cog
-        
+
         # Usar labels traducidos o por defecto
         if labels is None:
             labels = {"players": "Players", "stats": "Stats", "history": "History"}
-        
+
         # Crear botones con custom_id que incluye server_id
-        self.add_item(PlayersButton(server_id, label=labels.get("players", "Players")))
+        if show_players:
+            self.add_item(PlayersButton(server_id, label=labels.get("players", "Players")))
         self.add_item(StatsButton(server_id, label=labels.get("stats", "Stats")))
         self.add_item(HistoryButton(server_id, label=labels.get("history", "History")))
     
@@ -364,15 +367,20 @@ def setup_persistent_views(bot: commands.Bot, cog: "GameServerMonitor") -> None:
     logger.info("Views persistentes de GSM registradas correctamente")
 
 
-def create_server_view(server_id: str, labels: Optional[dict] = None) -> ServerActionsView:
+def create_server_view(
+    server_id: str,
+    labels: Optional[dict] = None,
+    show_players: bool = True
+) -> ServerActionsView:
     """
     Crea una nueva instancia de ServerActionsView para un servidor.
-    
+
     Args:
         server_id: ID único del servidor
         labels: Dict con traducciones {"players": ..., "stats": ..., "history": ...}
-        
+        show_players: Si incluir el botón de jugadores (Rust no expone lista útil)
+
     Returns:
         ServerActionsView configurada
     """
-    return ServerActionsView(server_id=server_id, labels=labels)
+    return ServerActionsView(server_id=server_id, labels=labels, show_players=show_players)

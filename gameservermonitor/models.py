@@ -124,6 +124,15 @@ class GameType(Enum):
         la consola del cliente), por lo que se omite el botón para no confundir.
         """
         return self not in (GameType.MINECRAFT, GameType.RUST)
+
+    @property
+    def supports_player_list(self) -> bool:
+        """Si el juego expone una lista de jugadores útil vía query.
+
+        Rust anonimiza/oculta la lista de jugadores en A2S, por lo que el botón
+        de jugadores no aporta información y se omite.
+        """
+        return self != GameType.RUST
     
     @property
     def thumbnail_url(self) -> Optional[str]:
