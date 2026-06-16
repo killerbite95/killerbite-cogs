@@ -180,13 +180,13 @@ class RustMapsVote(commands.Cog):
             inline=False,
         )
 
-        # Big render as the main image; small icon as the thumbnail.
-        if map_info.image_url:
+        # The thumbnailUrl render is the good one -> show it big; imageUrl as the small icon.
+        if map_info.thumbnail_url:
+            embed.set_image(url=map_info.thumbnail_url)
+            if map_info.image_url:
+                embed.set_thumbnail(url=map_info.image_url)
+        elif map_info.image_url:
             embed.set_image(url=map_info.image_url)
-            if map_info.thumbnail_url:
-                embed.set_thumbnail(url=map_info.thumbnail_url)
-        elif map_info.thumbnail_url:
-            embed.set_thumbnail(url=map_info.thumbnail_url)
 
         embed.set_footer(text=f"RustMaps Vote • {total_maps} mapas en esta votación")
         return embed
