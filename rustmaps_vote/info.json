@@ -1,0 +1,33 @@
+{
+    "author": [
+        "Killerbite95"
+    ],
+    "name": "RustMapsVote",
+    "short": "Votaciones de mapas de Rust con botones",
+    "description": "Sistema de votaciones de mapas de Rust usando rustmaps.com, con embeds y botones numerados. Cada persona vota una sola vez por votación (configurable).",
+    "end_user_data_statement": "Este cog almacena la ID de usuario para registrar sus votos en las votaciones de mapas.",
+    "install_msg": "RustMapsVote v1.0.0 instalado!\n\nConfigura la API key con: `[p]votemap setapi <key>`\nAñade mapas con: `[p]votemap add <url>` y empieza con `[p]votemap start`",
+    "hidden": false,
+    "disabled": false,
+    "min_bot_version": "3.5.0",
+    "min_python_version": [
+        3,
+        10,
+        0
+    ],
+    "requirements": [],
+    "tags": [
+        "rust",
+        "rustmaps",
+        "voting",
+        "maps",
+        "buttons",
+        "interactive"
+    ],
+    "type": "COG",
+    "permissions": [
+        "send_messages",
+        "embed_links",
+        "read_message_history"
+    ]
+}
