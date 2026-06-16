@@ -145,15 +145,49 @@ class RustMapsVote(commands.Cog):
             title=f"🗺️ Mapa {map_info.map_id}",
             color=discord.Color.blue(),
         )
-        embed.add_field(name="🌱 Seed", value=str(map_info.seed), inline=True)
-        embed.add_field(name="📏 Size", value=str(map_info.size), inline=True)
+        if map_info.map_type:
+            embed.description = f"**Tipo:** {map_info.map_type}"
+
+        embed.add_field(name="🌱 Seed", value=f"`{map_info.seed}`", inline=True)
+        embed.add_field(name="📏 Size", value=f"`{map_info.size}`", inline=True)
+        if map_info.total_monuments:
+            embed.add_field(
+                name="🏛️ Monumentos", value=str(map_info.total_monuments), inline=True
+            )
+
+        biomes = map_info.biomes_display()
+        if biomes:
+            embed.add_field(name="🌍 Biomas", value=biomes, inline=False)
+
+        terrain = map_info.terrain_display()
+        if terrain:
+            embed.add_field(name="🏔️ Terreno", value=terrain, inline=False)
+
+        if map_info.land_percentage is not None:
+            embed.add_field(
+                name="🗺️ Tierra firme", value=f"{map_info.land_percentage}%", inline=True
+            )
+
+        if map_info.monument_names:
+            names = ", ".join(map_info.monument_names[:8])
+            if len(map_info.monument_names) > 8:
+                names += f" (+{len(map_info.monument_names) - 8})"
+            embed.add_field(name="📍 Monumentos destacados", value=names, inline=False)
+
         embed.add_field(
             name="🔗 Ver mapa completo",
             value=f"[rustmaps.com]({map_info.url})",
             inline=False,
         )
-        if map_info.thumbnail_url:
+
+        # Big render as the main image; small icon as the thumbnail.
+        if map_info.image_url:
+            embed.set_image(url=map_info.image_url)
+            if map_info.thumbnail_url:
+                embed.set_thumbnail(url=map_info.thumbnail_url)
+        elif map_info.thumbnail_url:
             embed.set_thumbnail(url=map_info.thumbnail_url)
+
         embed.set_footer(text=f"RustMaps Vote • {total_maps} mapas en esta votación")
         return embed
 
@@ -216,13 +250,18 @@ class RustMapsVote(commands.Cog):
             title="✅ Mapa añadido",
             color=discord.Color.green(),
         )
+        lines = [
+            f"🌱 Seed: `{map_info.seed}`",
+            f"📏 Size: `{map_info.size}`",
+        ]
+        if map_info.map_type:
+            lines.append(f"🏷️ Tipo: {map_info.map_type}")
+        if map_info.total_monuments:
+            lines.append(f"🏛️ Monumentos: {map_info.total_monuments}")
+        lines.append(f"🗺️ Mapas en la sesión: **{map_count}/{MAX_MAPS}**")
         embed.add_field(
             name=f"Mapa {map_info.map_id} añadido correctamente",
-            value=(
-                f"🌱 Seed: `{map_info.seed}`\n"
-                f"📏 Size: `{map_info.size}`\n"
-                f"🗺️ Mapas en la sesión: **{map_count}/{MAX_MAPS}**"
-            ),
+            value="\n".join(lines),
             inline=False,
         )
         if map_info.thumbnail_url:
