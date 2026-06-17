@@ -1,0 +1,2544 @@
+{
+  "x-generator": "NSwag v13.20.0.0 (NJsonSchema v10.9.0.0 (Newtonsoft.Json v13.0.0.0))",
+  "openapi": "3.0.0",
+  "info": {
+    "title": "RustMaps API",
+    "description": "The public API for RustMaps",
+    "version": "v4.0"
+  },
+  "servers": [
+    {
+      "url": "https://api.rustmaps.com"
+    }
+  ],
+  "paths": {
+    "/v4/maps/filter/{filterId}": {
+      "get": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Get maps from a filter id that was created on the homepage",
+        "operationId": "RustMapsAPIFeaturesPublicApiSearchSearchByFilter",
+        "parameters": [
+          {
+            "name": "filterId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Pagination starts at 0",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "staging",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "orgId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "customMaps",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedServiceResponseOfIEnumerableOfMapThumbnailAPIDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/search": {
+      "post": {
+        "tags": [
+          "search"
+        ],
+        "summary": "Search for maps using a raw post body, not all settings need to be provided, only passing the size object for example will work",
+        "operationId": "RustMapsAPIFeaturesPublicApiSearchSearchRaw",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "description": "Pagination starts at 0",
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "staging",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "includeAllProtocols",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "orgId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "customMaps",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "ignoreVisitedMaps",
+            "in": "query",
+            "schema": {
+              "type": "boolean",
+              "nullable": true
+            }
+          },
+          {
+            "name": "sortBy",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "requestBody": {
+          "x-name": "MapSearchRequest",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapSearchRequest"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedServiceResponseOfIEnumerableOfMapThumbnailAPIDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/limits": {
+      "get": {
+        "tags": [
+          "misc"
+        ],
+        "summary": "Returns current map gen limits",
+        "operationId": "RustMapsAPIFeaturesPublicApiMiscGetLimits",
+        "parameters": [
+          {
+            "name": "x-org-id",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapGenerationStatsOverviewDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps": {
+      "post": {
+        "tags": [
+          "maps"
+        ],
+        "summary": "Creates a new map generation request",
+        "operationId": "RustMapsAPIFeaturesPublicApiMapsCreate",
+        "requestBody": {
+          "x-name": "MapGenerationRequestDTO",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MapGenerationRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "Map already exists"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Map already exists, but is not ready yet",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfPartialMapDTO"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "Map generation request successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapStatusDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/{mapId}": {
+      "get": {
+        "tags": [
+          "maps"
+        ],
+        "summary": "Get a map by id",
+        "operationId": "RustMapsAPIFeaturesPublicApiMapsGetId",
+        "parameters": [
+          {
+            "name": "mapId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns map data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapAPIDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Map not found"
+          },
+          "409": {
+            "description": "Map has not finished generating"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/{size}/{seed}": {
+      "get": {
+        "tags": [
+          "maps"
+        ],
+        "summary": "Get a map by seed and size",
+        "operationId": "RustMapsAPIFeaturesPublicApiMapsGetSeedSize",
+        "parameters": [
+          {
+            "name": "size",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "seed",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          {
+            "name": "staging",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapAPIDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Map not found"
+          },
+          "409": {
+            "description": "Map has not finished generating"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/{mapId}/settings": {
+      "get": {
+        "tags": [
+          "subscription-required"
+        ],
+        "summary": "Get custom map settings for a map",
+        "operationId": "RustMapsAPIFeaturesPublicApiMapsGetSettingsById",
+        "parameters": [
+          {
+            "name": "mapId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns custom map settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfCustomMapSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "No access to map"
+          },
+          "404": {
+            "description": "Map not custom map settings"
+          },
+          "409": {
+            "description": "Map has not finished generating"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/url": {
+      "get": {
+        "tags": [
+          "maps"
+        ],
+        "summary": "Get a map by its download url",
+        "operationId": "RustMapsAPIFeaturesPublicApiMapsGetUrl",
+        "parameters": [
+          {
+            "name": "url",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Returns map data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapAPIDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Map not found"
+          },
+          "409": {
+            "description": "Map has not finished generating"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/upload": {
+      "post": {
+        "tags": [
+          "maps-upload"
+        ],
+        "summary": "Upload a new map",
+        "operationId": "RustMapsAPIFeaturesPublicApiMapsUpload",
+        "requestBody": {
+          "x-name": "MapUploadNormalDTO",
+          "description": "",
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/MapUploadNormalDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfUploadedMapDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "201": {
+            "description": "Created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfUploadedMapDTO"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/custom": {
+      "post": {
+        "tags": [
+          "subscription-required"
+        ],
+        "summary": "Used to generate custom maps, provide org id header if the maps are supposed to be generated for an org",
+        "operationId": "RustMapsAPIFeaturesPublicApiCustomMapsCreate",
+        "parameters": [
+          {
+            "name": "x-org-id",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "requestBody": {
+          "x-name": "CreateApiCustomMapRequestDTO",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiCustomMapRequestDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "Map already exists"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Map already exists, but is not ready yet"
+          },
+          "201": {
+            "description": "Map generation request successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapStatusDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      },
+      "get": {
+        "tags": [
+          "subscription-required"
+        ],
+        "summary": "Returns default config for custom maps",
+        "operationId": "RustMapsAPIFeaturesPublicApiCustomMapsDefaultConfig",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfCustomMapSettings"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/custom/saved-config": {
+      "post": {
+        "tags": [
+          "subscription-required"
+        ],
+        "summary": "Used to generate custom maps, provide org id header if the maps are supposed to be generated for an org",
+        "operationId": "RustMapsAPIFeaturesPublicApiCustomMapsCreateFromConfig",
+        "parameters": [
+          {
+            "name": "x-org-id",
+            "in": "header",
+            "schema": {
+              "type": "string",
+              "nullable": true
+            }
+          }
+        ],
+        "requestBody": {
+          "x-name": "CreateApiCustomMapRequestFromConfigDTO",
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiCustomMapRequestFromConfigDTO"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "Map already exists"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "409": {
+            "description": "Map already exists, but is not ready yet"
+          },
+          "201": {
+            "description": "Map generation request successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfMapStatusDTO"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    },
+    "/v4/maps/custom/saved-configs": {
+      "get": {
+        "tags": [
+          "misc"
+        ],
+        "summary": "Get all custom map configs",
+        "operationId": "RustMapsAPIFeaturesPublicApiCustomMapsGetConfigs",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceResponseOfListOfCustomMapSettingsDTO"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          }
+        },
+        "security": [
+          {
+            "APIKey": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "PagedServiceResponseOfIEnumerableOfMapThumbnailAPIDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PagedMetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/MapThumbnailAPIDTO"
+            }
+          }
+        }
+      },
+      "PagedMetaDTO": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/MetaDTO"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "page": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "itemsPerPage": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "totalItems": {
+                "type": "integer",
+                "format": "int32",
+                "nullable": true
+              },
+              "lastPage": {
+                "type": "boolean",
+                "nullable": true
+              }
+            }
+          }
+        ]
+      },
+      "MetaDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ResponseStatus"
+          },
+          "statusCode": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "errors": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "ResponseStatus": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Success",
+          "Failed"
+        ],
+        "enum": [
+          "Success",
+          "Failed"
+        ]
+      },
+      "MapThumbnailAPIDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mapId": {
+            "type": "string",
+            "nullable": true
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MapSearchParametersPublicAPI": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "MapSearchRequest": {
+        "type": "object",
+        "example": "{\n  \"searchQuery\": {\n    \"size\": {\n      \"min\": 1000,\n      \"max\": 6000\n    },\n    \"biomes\": [\n      {\n        \"type\": \"Snow\",\n        \"settings\": {\n          \"min\": 0,\n          \"max\": 100\n        }\n      },\n      {\n        \"type\": \"Desert\",\n        \"settings\": {\n          \"min\": 0,\n          \"max\": 100\n        }\n      },\n      {\n        \"type\": \"Forest\",\n        \"settings\": {\n          \"min\": 0,\n          \"max\": 100\n        }\n      },\n      {\n        \"type\": \"Tundra\",\n        \"settings\": {\n          \"min\": 0,\n          \"max\": 100\n        }\n      },\n      {\n        \"type\": \"Jungle\",\n        \"settings\": {\n          \"min\": 0,\n          \"max\": 100\n        }\n      }\n    ],\n    \"monuments\": {\n      \"min\": 0,\n      \"max\": 300\n    },\n    \"largeMonuments\": [\n      {\n        \"type\": \"Airfield\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Bandit Town\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Ferry Terminal\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Outpost\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Excavator\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Junkyard\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Launch Site\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Large Harbor\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Military Tunnels\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Nuclear Missile Silo\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Powerplant\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Satellite Dish\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Sewer Branch\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Small Harbor\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Sphere Tank\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Trainyard\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Radtown\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Water Treatment\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      },\n      {\n        \"type\": \"Ziggurat\",\n        \"selectionStatus\": \"NoPreference\",\n        \"requiredBiomes\": [],\n        \"blockedBiomes\": []\n      }\n    ],\n    \"gasStations\": {\n      \"min\": 0,\n      \"max\": 4\n    },\n    \"supermarkets\": {\n      \"min\": 0,\n      \"max\": 4\n    },\n    \"warehouses\": {\n      \"min\": 0,\n      \"max\": 4\n    },\n    \"lighthouses\": {\n      \"min\": 0,\n      \"max\": 4\n    },\n    \"islands\": {\n      \"min\": 0,\n      \"max\": 30\n    },\n    \"landPercentageOfMap\": {\n      \"min\": 0,\n      \"max\": 100\n    },\n    \"caves\": {\n      \"min\": 0,\n      \"max\": 20\n    },\n    \"swamps\": {\n      \"min\": 0,\n      \"max\": 5\n    },\n    \"mountains\": {\n      \"min\": 0,\n      \"max\": 3\n    },\n    \"icebergs\": {\n      \"min\": 0,\n      \"max\": 25\n    },\n    \"iceLakes\": {\n      \"min\": 0,\n      \"max\": 5\n    },\n    \"rivers\": {\n      \"min\": 0,\n      \"max\": 20\n    },\n    \"waterWells\": {\n      \"min\": 0,\n      \"max\": 10\n    },\n    \"lakes\": {\n      \"min\": 0,\n      \"max\": 10\n    },\n    \"canyons\": {\n      \"min\": 0,\n      \"max\": 10\n    },\n    \"oases\": {\n      \"min\": 0,\n      \"max\": 10\n    },\n    \"buildableRocks\": {\n      \"min\": 0,\n      \"max\": 50\n    }\n  }\n}",
+        "additionalProperties": false,
+        "properties": {
+          "searchQuery": {
+            "$ref": "#/components/schemas/MapSearchQueryDTO"
+          }
+        }
+      },
+      "MapSearchQueryDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "size": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "biomes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BiomeFilterDTO"
+            }
+          },
+          "monuments": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "largeMonuments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/MonumentFilterDTO"
+            }
+          },
+          "gasStations": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "supermarkets": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "warehouses": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "lighthouses": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "islands": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "landPercentageOfMap": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "caves": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "swamps": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "mountains": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "icebergs": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "iceLakes": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "rivers": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "waterWells": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "lakes": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "canyons": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "oases": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          },
+          "buildableRocks": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          }
+        }
+      },
+      "MinMaxFilterDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "min": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "max": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "BiomeFilterDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/BiomeTypes"
+          },
+          "settings": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MinMaxFilterDTO"
+              }
+            ]
+          }
+        }
+      },
+      "BiomeTypes": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "Snow",
+          "Desert",
+          "Forest",
+          "Tundra",
+          "Jungle"
+        ],
+        "enum": [
+          2,
+          4,
+          8,
+          16,
+          32
+        ]
+      },
+      "MonumentFilterDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/MonumentTypes"
+          },
+          "selectionStatus": {
+            "$ref": "#/components/schemas/SelectionStatus"
+          },
+          "requiredBiomes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BiomeTypes"
+            }
+          },
+          "blockedBiomes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BiomeTypes"
+            }
+          }
+        }
+      },
+      "MonumentTypes": {
+        "type": "integer",
+        "description": "",
+        "x-enumNames": [
+          "NotImplemented",
+          "Gasstation",
+          "Supermarket",
+          "Warehouse",
+          "Lighthouse",
+          "Harbor_Small",
+          "Harbor_Large",
+          "Airfield",
+          "Junkyard",
+          "Launch_Site",
+          "Military_Tunnels",
+          "Powerplant",
+          "Trainyard",
+          "Water_Treatment",
+          "Sphere_Tank",
+          "Bandit_Town",
+          "Sewer_Branch",
+          "Satellite_Dish",
+          "Outpost",
+          "Excavator",
+          "Sulfur_Quarry",
+          "Stone_Quarry",
+          "Hqm_Quarry",
+          "Oilrig_Large",
+          "Oilrig_Small",
+          "Fishing_Village_A",
+          "Fishing_Village_B",
+          "Fishing_Village_C",
+          "Water_Well_A",
+          "Water_Well_B",
+          "Water_Well_C",
+          "Water_Well_D",
+          "Water_Well_E",
+          "Mountain_1",
+          "Mountain_2",
+          "Mountain_3",
+          "Mountain_4",
+          "Mountain_5",
+          "Swamp_A",
+          "Swamp_B",
+          "Swamp_C",
+          "Ice_Lake_1",
+          "Ice_Lake_2",
+          "Ice_Lake_3",
+          "Ice_Lake_4",
+          "Cave_Large_Hard",
+          "Cave_Large_Medium",
+          "Cave_Large_Sewers_Hard",
+          "Cave_Medium_Easy",
+          "Cave_Medium_Hard",
+          "Cave_Medium_Medium",
+          "Cave_Small_Easy",
+          "Cave_Small_Hard",
+          "Cave_Small_Medium",
+          "Iceberg_1",
+          "Iceberg_2",
+          "Iceberg_3",
+          "Iceberg_4",
+          "Iceberg_5",
+          "Powerline_A",
+          "Powerline_B",
+          "Powerline_C",
+          "Powerline_D",
+          "Power_Substation_Small_1",
+          "Power_Substation_Small_2",
+          "Power_Substation_Big_2",
+          "Power_Substation_Big_1",
+          "Stables_A",
+          "Stables_B",
+          "Tunnel_Entrance",
+          "Underwater_A",
+          "Underwater_B",
+          "Underwater_C",
+          "Underwater_D",
+          "Military_Base_A",
+          "Military_Base_B",
+          "Military_Base_C",
+          "Military_Base_D",
+          "Arctic_Research_Base_A",
+          "Nuclear_Missile_Silo",
+          "Ferry_Terminal_1",
+          "Tunnel_Entrance_Transition",
+          "Large_God_Rock",
+          "Medium_God_Rock",
+          "Tiny_God_Rock",
+          "Three_Wall_Rock",
+          "Anvil_Rock",
+          "Radtown",
+          "Lake_A",
+          "Lake_B",
+          "Lake_C",
+          "Canyon_A",
+          "Canyon_B",
+          "Canyon_C",
+          "Oasis_A",
+          "Oasis_B",
+          "Oasis_C",
+          "Jungle_Ruin_A",
+          "Jungle_Ruin_B",
+          "Jungle_Ruin_C",
+          "Jungle_Ruin_D",
+          "Jungle_Ruin_E",
+          "Jungle_Ziggurat_A",
+          "CustomMonument"
+        ],
+        "enum": [
+          0,
+          5,
+          10,
+          15,
+          20,
+          25,
+          30,
+          35,
+          40,
+          45,
+          50,
+          55,
+          60,
+          65,
+          70,
+          75,
+          80,
+          85,
+          90,
+          95,
+          100,
+          105,
+          110,
+          115,
+          120,
+          140,
+          145,
+          150,
+          155,
+          160,
+          165,
+          170,
+          175,
+          180,
+          185,
+          190,
+          195,
+          200,
+          205,
+          210,
+          215,
+          220,
+          225,
+          230,
+          235,
+          240,
+          245,
+          250,
+          255,
+          260,
+          265,
+          270,
+          275,
+          280,
+          285,
+          290,
+          295,
+          300,
+          305,
+          310,
+          315,
+          320,
+          325,
+          360,
+          365,
+          370,
+          375,
+          380,
+          385,
+          390,
+          395,
+          400,
+          405,
+          410,
+          415,
+          420,
+          425,
+          430,
+          435,
+          440,
+          445,
+          450,
+          455,
+          460,
+          465,
+          470,
+          475,
+          480,
+          485,
+          490,
+          495,
+          500,
+          505,
+          510,
+          515,
+          520,
+          525,
+          530,
+          535,
+          540,
+          545,
+          550,
+          555,
+          10000
+        ]
+      },
+      "SelectionStatus": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Wanted",
+          "NotWanted",
+          "NoPreference"
+        ],
+        "enum": [
+          "Wanted",
+          "NotWanted",
+          "NoPreference"
+        ]
+      },
+      "ServiceResponseOfMapGenerationStatsOverviewDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MapGenerationStatsOverviewDTO"
+              }
+            ]
+          }
+        }
+      },
+      "MapGenerationStatsOverviewDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "concurrent": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MapGenerationStats"
+              }
+            ]
+          },
+          "monthly": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MapGenerationStats"
+              }
+            ]
+          }
+        }
+      },
+      "MapGenerationStats": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allowed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "GetMapGenLimits": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceResponseOfPartialMapDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PartialMapDTO"
+              }
+            ]
+          }
+        }
+      },
+      "PartialMapDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "ServiceResponseOfMapStatusDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MapStatusDTO"
+              }
+            ]
+          }
+        }
+      },
+      "MapStatusDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mapId": {
+            "type": "string",
+            "nullable": true
+          },
+          "queuePosition": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "state": {
+            "$ref": "#/components/schemas/MapStates"
+          },
+          "currentStep": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastGeneratorPingUtc": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MapStates": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Active",
+          "InQueue",
+          "Generating",
+          "Processing",
+          "Uploading"
+        ],
+        "enum": [
+          "Active",
+          "InQueue",
+          "Generating",
+          "Processing",
+          "Uploading"
+        ]
+      },
+      "MapGenerationRequestDTO": {
+        "type": "object",
+        "example": {
+          "size": 2592,
+          "seed": 521428834,
+          "staging": false
+        },
+        "additionalProperties": false,
+        "properties": {
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "maximum": 6000.0,
+            "minimum": 1000.0
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0.0,
+            "exclusiveMinimum": true
+          },
+          "staging": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ServiceResponseOfMapAPIDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MapAPIDTO"
+              }
+            ]
+          }
+        }
+      },
+      "MapAPIDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "saveVersion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          },
+          "rawImageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "imageIconUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "isStaging": {
+            "type": "boolean"
+          },
+          "isCustomMap": {
+            "type": "boolean"
+          },
+          "canDownload": {
+            "type": "boolean"
+          },
+          "downloadUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "totalMonuments": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "monuments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/MonumentAPIDTO"
+            }
+          },
+          "landPercentageOfMap": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "biomePercentages": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Biomes"
+              }
+            ]
+          },
+          "islands": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "mountains": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "iceLakes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "rivers": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "lakes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "canyons": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "oases": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "buildableRocks": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "estimatedDeletionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MonumentAPIDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/MonumentTypes"
+          },
+          "coordinates": {
+            "$ref": "#/components/schemas/Coordinates"
+          },
+          "nameOverride": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Coordinates": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "x": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "y": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Biomes": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "s": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "d": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "f": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "t": {
+            "type": "number",
+            "format": "decimal"
+          },
+          "j": {
+            "type": "number",
+            "format": "decimal"
+          }
+        }
+      },
+      "QueryRequest": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ServiceResponseOfCustomMapSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CustomMapSettings"
+              }
+            ]
+          }
+        }
+      },
+      "CustomMapSettings": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "generateRingRoad": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SelectionStatus"
+              }
+            ]
+          },
+          "generateAboveGroundTrainTracks": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SelectionStatus"
+              }
+            ]
+          },
+          "removeSmallPowerLines": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "removeLargePowerLines": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "removeCarWrecks": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "removeRivers": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "allowBuildingOnRoads": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "modifyTiers": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "trySpawningOutpostInCenter": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "terrainConfiguration": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TerrainConfiguration"
+              }
+            ]
+          },
+          "oilRigConfigurations": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/OilRigConfiguration"
+            }
+          },
+          "safezones": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/PrefabCustomizableMonumentConfiguration"
+            }
+          },
+          "largeMonuments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/LargeMonumentConfiguration"
+            }
+          },
+          "smallMonuments": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "harbors": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "waterWells": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "caves": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "mountains": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "quarries": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "icebergs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "iceLakes": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "ruins": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/BasicMonumentConfiguration"
+            }
+          },
+          "fileName": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "webhook": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/WebhookSettingsDTO"
+              }
+            ]
+          },
+          "underwaterLabsConfiguration": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LabConfiguration"
+              }
+            ]
+          },
+          "lakesConfiguration": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LabConfiguration"
+              }
+            ]
+          },
+          "oasesConfiguration": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LabConfiguration"
+              }
+            ]
+          },
+          "canyonsConfiguration": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LabConfiguration"
+              }
+            ]
+          },
+          "blockedPrefabs": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "removeUndergroundTunnels": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "embedCargoShipPath": {
+            "type": "boolean",
+            "nullable": true
+          }
+        }
+      },
+      "TerrainConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "islandConfig": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IslandConfiguration"
+              }
+            ]
+          },
+          "mountainConfig": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MountainConfiguration"
+              }
+            ]
+          },
+          "tierConfig": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TiersConfiguration"
+              }
+            ]
+          },
+          "biomeConfig": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BiomesConfiguration"
+              }
+            ]
+          },
+          "flattenShoreAndBay": {
+            "type": "boolean",
+            "nullable": true
+          },
+          "biomeAxisAngle": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/BiomeAngle"
+              }
+            ]
+          },
+          "lootAxisAngle": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LootAngle"
+              }
+            ]
+          }
+        }
+      },
+      "IslandConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "intensity": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "MountainConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "reduceMountains": {
+            "type": "boolean"
+          }
+        }
+      },
+      "TiersConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "tier0Percentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "tier1Percentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "tier2Percentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          }
+        }
+      },
+      "BiomesConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "aridPercentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "temperatePercentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "tundraPercentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "arcticPercentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          },
+          "junglePercentage": {
+            "type": "number",
+            "format": "float",
+            "nullable": true
+          }
+        }
+      },
+      "BiomeAngle": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "TopSnowBottomDesert",
+          "LeftDesertRightSnow",
+          "TopDesertBottomSnow",
+          "LeftSnowRightDesert",
+          "Default"
+        ],
+        "enum": [
+          "TopSnowBottomDesert",
+          "LeftDesertRightSnow",
+          "TopDesertBottomSnow",
+          "LeftSnowRightDesert",
+          "Default"
+        ]
+      },
+      "LootAngle": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "TopTier2BottomTier0",
+          "LeftTier2RightTier0",
+          "TopTier0BottomTier2",
+          "LeftTier0RightTier2",
+          "Default"
+        ],
+        "enum": [
+          "TopTier2BottomTier0",
+          "LeftTier2RightTier0",
+          "TopTier0BottomTier2",
+          "LeftTier0RightTier2",
+          "Default"
+        ]
+      },
+      "OilRigConfiguration": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LargeMonumentConfiguration"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "biomePreference": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/BiomePreference"
+                  }
+                ]
+              },
+              "position": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/OilRigPosition"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "BiomePreference": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "biome": {
+            "$ref": "#/components/schemas/BiomeTypes"
+          }
+        }
+      },
+      "OilRigPosition": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "alignment": {
+            "$ref": "#/components/schemas/MonumentAlignment"
+          },
+          "position": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "MonumentAlignment": {
+        "type": "string",
+        "description": "",
+        "x-enumNames": [
+          "Top",
+          "Left",
+          "Right",
+          "Bottom"
+        ],
+        "enum": [
+          "Top",
+          "Left",
+          "Right",
+          "Bottom"
+        ]
+      },
+      "LargeMonumentConfiguration": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/BasicMonumentConfiguration"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "desired": {
+                "type": "boolean"
+              }
+            }
+          }
+        ]
+      },
+      "BasicMonumentConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/MonumentTypes"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "allowedToSetBiomes": {
+            "type": "boolean"
+          },
+          "biomePreferences": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/MonumentBiomePreference"
+            }
+          }
+        }
+      },
+      "MonumentBiomePreference": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "biomeType": {
+            "$ref": "#/components/schemas/BiomeTypes"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/SelectionStatus"
+          }
+        }
+      },
+      "PrefabCustomizableMonumentConfiguration": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/LargeMonumentConfiguration"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "customPrefab": {
+                "nullable": true,
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/CustomPrefab"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "CustomPrefab": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "WebhookSettingsDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "url": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "LabConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "minAmount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxAmount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "blocked": {
+            "type": "boolean"
+          },
+          "generate": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SelectionStatus"
+              }
+            ]
+          }
+        }
+      },
+      "MapGetByUrlRequest": {
+        "type": "object",
+        "additionalProperties": false
+      },
+      "ServiceResponseOfUploadedMapDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UploadedMapDTO"
+              }
+            ]
+          }
+        }
+      },
+      "UploadedMapDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "thumbnailUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "uploadedUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "state": {
+            "$ref": "#/components/schemas/MapStates"
+          },
+          "displayName": {
+            "type": "string",
+            "nullable": true
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "purchaseUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "downloadUrl": {
+            "type": "string",
+            "nullable": true
+          },
+          "note": {
+            "type": "string",
+            "nullable": true
+          },
+          "estimatedDeletionDate": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        }
+      },
+      "MapUploadNormalDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "map"
+        ],
+        "properties": {
+          "map": {
+            "type": "string",
+            "format": "binary",
+            "nullable": false
+          },
+          "note": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0,
+            "pattern": "^[A-Za-z0-9 _.()-]*$",
+            "nullable": true
+          },
+          "staging": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CreateApiCustomMapRequestDTO": {
+        "type": "object",
+        "example": "{\n  \"mapParameters\": {\n    \"size\": 3232,\n    \"seed\": 12332,\n    \"staging\": false\n  },\n  \"customMapSettings\": {\n    \"generateRingRoad\": \"NoPreference\",\n    \"generateAboveGroundTrainTracks\": \"NoPreference\",\n    \"removeSmallPowerLines\": false,\n    \"removeLargePowerLines\": false,\n    \"removeCarWrecks\": false,\n    \"removeRivers\": false,\n    \"allowBuildingOnRoads\": false,\n    \"modifyTiers\": false,\n    \"trySpawningOutpostInCenter\": false,\n    \"terrainConfiguration\": {\n      \"islandConfig\": {\n        \"enabled\": false,\n        \"intensity\": 5\n      },\n      \"mountainConfig\": {\n        \"reduceMountains\": false\n      },\n      \"tierConfig\": {\n        \"enabled\": false,\n        \"tier0Percentage\": 0.3,\n        \"tier1Percentage\": 0.3,\n        \"tier2Percentage\": 0.4\n      },\n      \"biomeConfig\": {\n        \"enabled\": false,\n        \"aridPercentage\": 0.4,\n        \"temperatePercentage\": 0.15,\n        \"tundraPercentage\": 0.15,\n        \"arcticPercentage\": 0.3,\n        \"junglePercentage\": 0.5\n      },\n      \"flattenShoreAndBay\": false,\n      \"biomeAxisAngle\": \"Default\",\n      \"lootAxisAngle\": \"Default\"\n    },\n    \"oilRigConfigurations\": [\n      {\n        \"biomePreference\": {\n          \"enabled\": false,\n          \"biome\": \"Snow\"\n        },\n        \"position\": {\n          \"enabled\": false,\n          \"alignment\": \"Top\",\n          \"position\": 0.5\n        },\n        \"desired\": false,\n        \"type\": \"Large Oilrig\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"biomePreference\": {\n          \"enabled\": false,\n          \"biome\": \"Desert\"\n        },\n        \"position\": {\n          \"enabled\": false,\n          \"alignment\": \"Bottom\",\n          \"position\": 0.5\n        },\n        \"desired\": false,\n        \"type\": \"Small Oilrig\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"safezones\": [\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Outpost\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Bandit Town\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Fishing Village A\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Fishing Village B\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Fishing Village C\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Ranch\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"customPrefab\": {\n          \"enabled\": false,\n          \"id\": \"default\"\n        },\n        \"desired\": false,\n        \"type\": \"Large Barn\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      }\n    ],\n    \"largeMonuments\": [\n      {\n        \"desired\": false,\n        \"type\": \"Excavator\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Airfield\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Junkyard\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Launch Site\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Military Tunnels\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Powerplant\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Radtown\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Trainyard\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Water Treatment\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Sphere Tank\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Satellite Dish\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Large Oilrig\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Small Oilrig\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Nuclear Missile Silo\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"desired\": false,\n        \"type\": \"Ziggurat\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      }\n    ],\n    \"smallMonuments\": [\n      {\n        \"type\": \"Gas Station\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Supermarket\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Warehouse\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Lighthouse\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Sewer Branch\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Swamp A\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Swamp B\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Swamp C\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Military Base A\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Military Base B\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Military Base C\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Military Base D\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Arctic Research Base A\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"harbors\": [\n      {\n        \"type\": \"Small Harbor\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Large Harbor\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Ferry Terminal\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      }\n    ],\n    \"waterWells\": [\n      {\n        \"type\": \"Water Well A\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Water Well B\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Water Well C\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Water Well D\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Water Well E\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"caves\": [\n      {\n        \"type\": \"Cave Large Hard\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Large Medium\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Large Sewers Hard\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Medium Easy\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Medium Hard\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Medium Medium\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Small Easy\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Small Hard\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Cave Small Medium\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"mountains\": [\n      {\n        \"type\": \"Mountain 1\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Mountain 2\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Mountain 3\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Mountain 4\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Mountain 5\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"quarries\": [\n      {\n        \"type\": \"Sulfur Quarry\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Stone Quarry\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      },\n      {\n        \"type\": \"Hqm Quarry\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": true,\n        \"biomePreferences\": [\n          {\n            \"biomeType\": \"Snow\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Forest\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Tundra\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Desert\",\n            \"selection\": \"NoPreference\"\n          },\n          {\n            \"biomeType\": \"Jungle\",\n            \"selection\": \"NoPreference\"\n          }\n        ]\n      }\n    ],\n    \"icebergs\": [\n      {\n        \"type\": \"Iceberg 1\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Iceberg 2\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Iceberg 3\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Iceberg 4\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Iceberg 5\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"iceLakes\": [\n      {\n        \"type\": \"Ice Lake 1\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ice Lake 2\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ice Lake 3\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ice Lake 4\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"ruins\": [\n      {\n        \"type\": \"Ruin A\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ruin B\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ruin C\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ruin D\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      },\n      {\n        \"type\": \"Ruin E\",\n        \"blocked\": false,\n        \"allowedToSetBiomes\": false,\n        \"biomePreferences\": null\n      }\n    ],\n    \"fileName\": {\n      \"0\": \"{Type}\",\n      \"1\": \"{_}\",\n      \"2\": \"{_}\",\n      \"3\": \"{Size}\",\n      \"4\": \"{_}\",\n      \"5\": \"{ShortId}\"\n    },\n    \"webhook\": {\n      \"enabled\": false,\n      \"url\": \"\"\n    },\n    \"underwaterLabsConfiguration\": {\n      \"minAmount\": 1,\n      \"maxAmount\": 1,\n      \"blocked\": false,\n      \"generate\": \"NoPreference\"\n    },\n    \"lakesConfiguration\": {\n      \"minAmount\": 2,\n      \"maxAmount\": 2,\n      \"blocked\": false,\n      \"generate\": \"NoPreference\"\n    },\n    \"oasesConfiguration\": {\n      \"minAmount\": 2,\n      \"maxAmount\": 2,\n      \"blocked\": false,\n      \"generate\": \"NoPreference\"\n    },\n    \"canyonsConfiguration\": {\n      \"minAmount\": 2,\n      \"maxAmount\": 2,\n      \"blocked\": false,\n      \"generate\": \"NoPreference\"\n    },\n    \"blockedPrefabs\": [],\n    \"removeUndergroundTunnels\": false,\n    \"embedCargoShipPath\": false\n  }\n}",
+        "additionalProperties": false,
+        "properties": {
+          "orgId": {
+            "type": "string",
+            "nullable": true
+          },
+          "mapParameters": {
+            "$ref": "#/components/schemas/MapGenerationRequestDTO"
+          },
+          "customMapSettings": {
+            "$ref": "#/components/schemas/CustomMapSettings"
+          }
+        }
+      },
+      "CreateApiCustomMapRequestFromConfigDTO": {
+        "type": "object",
+        "example": {
+          "mapParameters": {
+            "size": 3232,
+            "seed": 12332,
+            "staging": false
+          },
+          "configName": "My config name"
+        },
+        "additionalProperties": false,
+        "properties": {
+          "mapParameters": {
+            "$ref": "#/components/schemas/MapGenerationRequestDTO"
+          },
+          "configName": {
+            "type": "string",
+            "description": "Name of the config to use"
+          }
+        }
+      },
+      "ServiceResponseOfListOfCustomMapSettingsDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "meta": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MetaDTO"
+              }
+            ]
+          },
+          "data": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "$ref": "#/components/schemas/CustomMapSettingsDTO"
+            }
+          }
+        }
+      },
+      "CustomMapSettingsDTO": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "settings": {
+            "nullable": true,
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CustomMapSettings"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "APIKey": {
+        "type": "apiKey",
+        "name": "X-API-Key",
+        "in": "header"
+      }
+    }
+  }
+}

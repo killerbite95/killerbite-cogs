@@ -48,7 +48,7 @@ class MapInfo:
     total_monuments: int = 0
     biomes: Optional[Dict[str, float]] = None  # snow/desert/forest/tundra/jungle
     terrain: Dict[str, int] = field(default_factory=dict)  # islands/mountains/...
-    monument_names: List[str] = field(default_factory=list)  # named monuments, if any
+    monument_types: List[str] = field(default_factory=list)  # monument type names from API
     vote_count: int = 0
 
     @classmethod
@@ -83,10 +83,10 @@ class MapInfo:
         }
 
         monuments = resp.get("monuments") or []
-        monument_names = [
-            m.get("nameOverride")
+        monument_types = [
+            m.get("type")
             for m in monuments
-            if isinstance(m, dict) and m.get("nameOverride")
+            if isinstance(m, dict) and m.get("type")
         ]
 
         return cls(
@@ -101,7 +101,7 @@ class MapInfo:
             total_monuments=resp.get("totalMonuments") or 0,
             biomes=biomes,
             terrain=terrain,
-            monument_names=monument_names,
+            monument_types=monument_types,
             vote_count=0,
         )
 
@@ -149,7 +149,7 @@ class MapInfo:
             "total_monuments": self.total_monuments,
             "biomes": self.biomes,
             "terrain": self.terrain,
-            "monument_names": self.monument_names,
+            "monument_types": self.monument_types,
             "vote_count": self.vote_count,
         }
 
@@ -167,7 +167,7 @@ class MapInfo:
             total_monuments=data.get("total_monuments", 0),
             biomes=data.get("biomes"),
             terrain=data.get("terrain") or {},
-            monument_names=data.get("monument_names") or [],
+            monument_types=data.get("monument_types") or data.get("monument_names") or [],
             vote_count=data.get("vote_count", 0),
         )
 
