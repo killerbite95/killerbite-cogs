@@ -1,5 +1,6 @@
 """Data models for RustMaps Vote COG. By Killerbite95"""
 
+import re
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, List, Dict, Any
@@ -31,6 +32,46 @@ TERRAIN_LABELS = [
     ("ice_lakes", "🧊 Lagos de hielo"),
     ("buildable_rocks", "🪨 Rocas construibles"),
 ]
+
+# Monuments we consider "relevant" enough to surface, in importance order. Each
+# entry is (display_name, keywords). A map's monument is matched if its normalized
+# type contains any keyword, so this works whether the API returns the enum name
+# (e.g. "Launch_Site", "Oilrig_Large") or a friendly name (e.g. "Launch Site").
+# Everything else (Powerline, Substations, rocks, caves, tunnels...) is hidden.
+RELEVANT_MONUMENTS = [
+    ("Airfield", ("airfield",)),
+    ("Junkyard", ("junkyard",)),
+    ("Launch Site", ("launch site",)),
+    ("Military Tunnels", ("military tunnel",)),
+    ("Nuclear Missile Silo", ("missile silo",)),
+    ("Powerplant", ("powerplant", "power plant")),
+    ("Trainyard", ("trainyard", "train yard")),
+    ("Water Treatment", ("water treatment",)),
+    ("Sphere Tank", ("sphere", "dome")),
+    ("Bandit Town", ("bandit",)),
+    ("Sewer Branch", ("sewer branch",)),
+    ("Satellite Dish", ("satellite",)),
+    ("Outpost", ("outpost",)),
+    ("Excavator", ("excavator",)),
+    ("Ferry Terminal", ("ferry terminal",)),
+    ("Large Oilrig", ("oilrig large", "large oilrig", "oil rig large", "large oil rig")),
+    ("Small Oilrig", ("oilrig small", "small oilrig", "oil rig small", "small oil rig")),
+    ("Arctic Research Base", ("arctic research",)),
+    ("Radtown", ("radtown",)),
+    ("Military Base", ("military base",)),
+    # --- extras comunes ---
+    ("Harbor", ("harbor", "harbour")),
+    ("Lighthouse", ("lighthouse",)),
+    ("Fishing Village", ("fishing village",)),
+    ("Sulfur Quarry", ("sulfur quarry", "sulphur quarry")),
+    ("Stone Quarry", ("stone quarry",)),
+    ("HQM Quarry", ("hqm quarry",)),
+]
+
+
+def _normalize_monument(value: str) -> str:
+    """Lowercase, turn '_'/'-' into spaces and collapse whitespace for matching."""
+    return re.sub(r"\s+", " ", value.lower().replace("_", " ").replace("-", " ")).strip()
 
 
 @dataclass
@@ -135,6 +176,20 @@ class MapInfo:
             if self.terrain.get(key)
         ]
         return " · ".join(parts) if parts else None
+
+    def relevant_monuments_display(self, separator: str = " • ") -> Optional[str]:
+        """Only the relevant monuments present on the map, deduped and ordered.
+
+        Decorative prefabs (Powerline, Substations, rocks, caves...) are dropped.
+        """
+        if not self.monument_types:
+            return None
+        normalized = [_normalize_monument(str(t)) for t in self.monument_types if t]
+        found = []
+        for canonical, keywords in RELEVANT_MONUMENTS:
+            if any(kw in norm for norm in normalized for kw in keywords):
+                found.append(canonical)
+        return separator.join(found) if found else None
 
     def to_dict(self) -> Dict[str, Any]:
         return {

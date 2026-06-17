@@ -10,7 +10,6 @@ numbered buttons; each user has a configurable number of votes per session
 import asyncio
 import logging
 import re
-from collections import Counter
 from datetime import datetime
 from typing import Any, Dict, Optional, Tuple
 
@@ -169,15 +168,9 @@ class RustMapsVote(commands.Cog):
                 name="🗺️ Tierra firme", value=f"{map_info.land_percentage}%", inline=True
             )
 
-        if map_info.monument_types:
-            type_counts = Counter(map_info.monument_types)
-            sorted_types = sorted(type_counts.items(), key=lambda x: -x[1])
-            parts = [f"{name} x{n}" for name, n in sorted_types]
-            names = ", ".join(parts[:8])
-            if len(parts) > 8:
-                extra = sum(c for _, c in sorted_types[8:])
-                names += f" (+{extra} más)"
-            embed.add_field(name="📍 Monumentos", value=names, inline=False)
+        monuments = map_info.relevant_monuments_display()
+        if monuments:
+            embed.add_field(name="📍 Monumentos", value=monuments, inline=False)
 
         embed.add_field(
             name="🔗 Ver mapa completo",
