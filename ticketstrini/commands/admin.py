@@ -126,6 +126,20 @@ class AdminCommands(MixinMeta):
         )
         em.add_field(name=_("Log Channel"), value=step11, inline=False)
 
+        step12 = _(
+            "Optionally archive closed tickets to a category instead of deleting them.\n"
+            "The opener (and any added users) lose access; staff keep it. "
+            "Archived tickets get Reopen/Delete buttons.\n"
+        )
+        step12 += f"`{ctx.clean_prefix}tickets closedcategory " + _("<category>`")
+        em.add_field(name=_("Closed Tickets (Archive)"), value=step12, inline=False)
+
+        step13 = _(
+            "User commands now live under the `{prefix}ticket` group "
+            "(e.g. `{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."
+        ).format(prefix=ctx.clean_prefix)
+        em.add_field(name=_("User Commands"), value=step13, inline=False)
+
         tip = _(
             "Tip: you can create multiple support panels using the same message for a multi-button panel"
         )

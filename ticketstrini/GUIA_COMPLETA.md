@@ -28,9 +28,10 @@
 12. [Configuración Avanzada](#-configuración-avanzada)
 13. [Paneles Multi-Botón](#-paneles-multi-botón)
 14. [Comandos de Usuario](#-comandos-de-usuario)
-15. [Gestión de Tickets](#-gestión-de-tickets)
-16. [Solución de Problemas](#-solución-de-problemas)
-17. [Referencia Completa de Comandos](#-referencia-completa-de-comandos)
+15. [Tickets Cerrados: Archivar y Reabrir](#-tickets-cerrados-archivar-y-reabrir)
+16. [Gestión de Tickets](#-gestión-de-tickets)
+17. [Solución de Problemas](#-solución-de-problemas)
+18. [Referencia Completa de Comandos](#-referencia-completa-de-comandos)
 
 ---
 
@@ -64,6 +65,8 @@ El sistema soporta dos modos de operación:
 | ⏰ **Auto-cierre** | Cierra tickets inactivos automáticamente |
 | 📋 **Overview en Vivo** | Panel que muestra todos los tickets activos |
 | 🚫 **Blacklist** | Bloquea usuarios o roles de abrir tickets |
+| 🙋 **Reclamación visible** | Muestra quién reclamó el ticket en el embed y el topic del canal |
+| 🗄️ **Archivar y Reabrir** | Conserva los tickets cerrados en una categoría con botones de Reabrir/Eliminar |
 
 ---
 
@@ -686,34 +689,88 @@ Discord permite hasta 5 botones por fila (0-4 = 5 filas posibles):
 
 ## 👤 Comandos de Usuario
 
-Estos comandos pueden ser usados por los usuarios dentro de sus tickets:
+Estos comandos pueden ser usados dentro de los tickets.
+
+> ⚠️ **Cambio en v4.1.0**: Todos los comandos de usuario ahora son subcomandos del grupo `[p]ticket`
+> (antes eran sueltos: `[p]add`, `[p]close`, etc.). Esto evita conflictos con otros cogs que usan esos nombres.
 
 ### Añadir Usuario al Ticket
 ```
-[p]add @Usuario
-/add @Usuario
+[p]ticket add @Usuario
+/ticket add @Usuario
+```
+
+### Quitar Usuario del Ticket
+```
+[p]ticket remove @Usuario
 ```
 
 ### Renombrar el Ticket
 ```
-[p]renameticket nuevo-nombre
-/renameticket nuevo-nombre
+[p]ticket rename nuevo-nombre
+/ticket rename nuevo-nombre
 ```
 *Requiere que `selfrename` esté activado.*
 
 ### Cerrar el Ticket
 ```
-[p]close
-[p]close Problema resuelto, gracias!
-[p]close 1h
-[p]close 30m Cerrando en 30 minutos si no hay respuesta
-/close
+[p]ticket close
+[p]ticket close Problema resuelto, gracias!
+[p]ticket close 1h
+[p]ticket close 30m Cerrando en 30 minutos si no hay respuesta
+/ticket close
 ```
 
 **Formatos de tiempo aceptados:**
 - `1h` = 1 hora
 - `30m` = 30 minutos
 - `2d` = 2 días
+
+### Comandos de Staff (dentro del ticket)
+```
+[p]ticket claim                # Reclamar el ticket
+[p]ticket unclaim              # Liberar el ticket
+[p]ticket transfer @Staff      # Transferir a otro miembro del staff
+[p]ticket note <texto>         # Nota interna (solo staff)
+[p]ticket notes                # Ver las notas
+[p]ticket quickreply [nombre]  # Respuesta rápida (alias: qr)
+[p]ticket info                 # Ver detalles del ticket
+```
+
+Al **reclamar** un ticket, el responsable aparece en el embed inicial del ticket (campo "Reclamado por")
+y en la descripción (topic) del canal. Al liberar o transferir, se actualiza solo.
+
+---
+
+## 🗄️ Tickets Cerrados: Archivar y Reabrir
+
+Por defecto, al cerrar un ticket el canal se **elimina**. Si querés conservarlos como recuerdo
+(además de la transcripción), podés hacer que se **archiven** en una categoría en vez de borrarse.
+
+### Activar el archivado
+```
+[p]tickets closedcategory #Tickets-Cerrados
+```
+Para desactivarlo y volver a borrar al cerrar, ejecutá el comando sin categoría:
+```
+[p]tickets closedcategory
+```
+
+> El bot necesita los permisos **Gestionar Canales** y **Gestionar Permisos** en esa categoría.
+
+### Qué pasa al cerrar (con archivado activo)
+- El canal se **mueve** a la categoría de cerrados.
+- Se quita el acceso a **quien abrió el ticket y a los usuarios añadidos** con `[p]ticket add`.
+  Solo los roles de staff conservan acceso.
+- La **transcripción, el log y el DM** se generan igual que siempre.
+- El mensaje inicial del ticket cambia a un embed gris con dos botones (solo staff):
+
+| Botón | Acción |
+|-------|--------|
+| 🔓 **Reabrir** | Devuelve el canal a su categoría original, restaura el acceso al opener y a los usuarios que estaban añadidos, lo pone como **sin reclamar** y vuelven los botones de Cerrar/Reclamar (queda activo otra vez). |
+| 🗑️ **Eliminar** | Borra el canal de forma permanente (pide confirmación primero). |
+
+> Nota: al reabrir, el ticket vuelve a estar **sin reclamar**, aunque se hubiera cerrado reclamado.
 
 ---
 
@@ -852,7 +909,8 @@ El bot reinicializa automáticamente los paneles. Si no funciona:
 | `selfmanage` | Toggle usuarios añaden otros |
 | `noresponse <horas>` | Auto-cierre por inactividad |
 | `autoadd` | Auto-añadir roles a hilos |
-| `threadclose` | Toggle archivar vs eliminar |
+| `threadclose` | Toggle archivar vs eliminar (hilos) |
+| `closedcategory [categoría]` | Archivar tickets cerrados aquí en vez de borrarlos (sin arg = desactivar) |
 | `overview [canal]` | Panel de overview |
 | `overviewmention` | Toggle menciones en overview |
 | `altchannel <panel> <canal>` | Canal alternativo |
@@ -863,11 +921,19 @@ El bot reinicializa automáticamente los paneles. Si no funciona:
 
 ### Comandos de Usuario
 
+> Todos bajo el grupo `[p]ticket` (desde v4.1.0).
+
 | Comando | Descripción |
 |---------|-------------|
-| `[p]add <usuario>` | Añadir usuario al ticket |
-| `[p]renameticket <nombre>` | Renombrar ticket |
-| `[p]close [razón]` | Cerrar ticket |
+| `[p]ticket add <usuario>` | Añadir usuario al ticket |
+| `[p]ticket remove <usuario>` | Quitar usuario del ticket |
+| `[p]ticket rename <nombre>` | Renombrar ticket |
+| `[p]ticket close [razón]` | Cerrar ticket |
+| `[p]ticket claim` / `unclaim` | Reclamar / liberar ticket |
+| `[p]ticket transfer <@staff>` | Transferir ticket |
+| `[p]ticket note <texto>` / `notes` | Añadir / ver notas internas |
+| `[p]ticket quickreply [nombre]` (`qr`) | Respuesta rápida |
+| `[p]ticket info` | Ver detalles del ticket |
 | `[p]openfor <usuario> <panel>` | Abrir ticket para otro (MOD) |
 
 ---

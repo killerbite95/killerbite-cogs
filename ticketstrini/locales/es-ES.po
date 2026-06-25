@@ -1041,3 +1041,19 @@ msgstr "Este no es un ticket archivado."
 
 msgid "Ticket reopened."
 msgstr "Ticket reabierto."
+
+#: commands/admin.py - Setup guide (setuphelp) additions
+msgid "<category>"
+msgstr "<categoría>"
+
+msgid "Closed Tickets (Archive)"
+msgstr "Tickets Cerrados (Archivar)"
+
+msgid "Optionally archive closed tickets to a category instead of deleting them.\nThe opener (and any added users) lose access; staff keep it. Archived tickets get Reopen/Delete buttons.\n"
+msgstr "Opcionalmente archiva los tickets cerrados en una categoría en lugar de eliminarlos.\nQuien abrió el ticket (y los usuarios añadidos) pierden el acceso; el staff lo conserva. Los tickets archivados muestran botones de Reabrir/Eliminar.\n"
+
+msgid "User Commands"
+msgstr "Comandos de Usuario"
+
+msgid "User commands now live under the `{prefix}ticket` group (e.g. `{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."
+msgstr "Los comandos de usuario ahora están bajo el grupo `{prefix}ticket` (ej. `{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."

@@ -6,27 +6,42 @@ Sistema de tickets de soporte multi-panel con botones (Trini Edition)
 
 ---
 
-# [p]add (Hybrid Command)
+# [p]ticket (Hybrid Group)
+User ticket commands. All user actions are subcommands of this group (since v4.1.0) to avoid
+name conflicts with other cogs.<br/>
+ - Usage: `[p]ticket`
+ - Slash Usage: `/ticket`
+ - Checks: `server_only`
+## [p]ticket add
 Add a user to your ticket<br/>
- - Usage: `[p]add <user>`
- - Slash Usage: `/add <user>`
- - Checks: `server_only`
-# [p]renameticket (Hybrid Command)
+ - Usage: `[p]ticket add <user>` &nbsp;|&nbsp; Slash: `/ticket add <user>`
+## [p]ticket remove
+Remove a user from your ticket<br/>
+ - Usage: `[p]ticket remove <user>` &nbsp;|&nbsp; Slash: `/ticket remove <user>`
+## [p]ticket rename
 Rename your ticket channel<br/>
- - Usage: `[p]renameticket <new_name>`
- - Slash Usage: `/renameticket <new_name>`
- - Checks: `server_only`
-# [p]close (Hybrid Command)
+ - Usage: `[p]ticket rename <new_name>` &nbsp;|&nbsp; Slash: `/ticket rename <new_name>`
+## [p]ticket close
 Close your ticket<br/>
 
 **Examples**<br/>
-`[p]close` - closes ticket with no reason attached<br/>
-`[p]close thanks for helping!` - closes with reason "thanks for helping!"<br/>
-`[p]close 1h` - closes in 1 hour with no reason attached<br/>
-`[p]close 1m thanks for helping!` - closes in 1 minute with reason "thanks for helping!"<br/>
- - Usage: `[p]close [reason]`
- - Slash Usage: `/close [reason]`
- - Checks: `server_only`
+`[p]ticket close` - closes ticket with no reason attached<br/>
+`[p]ticket close thanks for helping!` - closes with reason "thanks for helping!"<br/>
+`[p]ticket close 1h` - closes in 1 hour with no reason attached<br/>
+`[p]ticket close 1m thanks for helping!` - closes in 1 minute with reason "thanks for helping!"<br/>
+ - Usage: `[p]ticket close [reason]` &nbsp;|&nbsp; Slash: `/ticket close [reason]`
+## [p]ticket claim / unclaim / transfer
+Claim, unclaim or transfer the current ticket (staff)<br/>
+ - Usage: `[p]ticket claim` · `[p]ticket unclaim` · `[p]ticket transfer <@staff>`
+## [p]ticket note / notes
+Add or view internal staff notes<br/>
+ - Usage: `[p]ticket note [content]` · `[p]ticket notes`
+## [p]ticket quickreply
+Send a quick reply template (alias: `qr`)<br/>
+ - Usage: `[p]ticket quickreply [name]`
+## [p]ticket info
+View information about this ticket<br/>
+ - Usage: `[p]ticket info`
 # [p]tickets
 Base support ticket settings<br/>
  - Usage: `[p]tickets`
@@ -247,6 +262,12 @@ Set a title for a ticket panel's modal<br/>
 ## [p]tickets threadclose
 (Toggle) Thread tickets being closed & archived instead of deleted<br/>
  - Usage: `[p]tickets threadclose`
+## [p]tickets closedcategory
+Archive closed tickets to a category instead of deleting them<br/>
+
+When set, closing a ticket moves its channel to this category and removes the opener (and any added users)
+so only staff keep access. Archived tickets show Reopen/Delete buttons. Run without a category to disable.<br/>
+ - Usage: `[p]tickets closedcategory [category]`
 # [p]openfor (Hybrid Command)
 Open a ticket for another user<br/>
  - Usage: `[p]openfor <user> <panel_name>`

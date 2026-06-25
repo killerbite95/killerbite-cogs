@@ -1,11 +1,14 @@
-# TicketsTrini v4.0.0
+# TicketsTrini v4.1.0
 
 Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 
 **Author**: [Killerbite95](https://github.com/killerbite95/killerbite-cogs)
 
-> ⚠️ **Nota sobre comandos**: El comando principal es `[p]ticketst` para evitar conflictos con otros cogs.
+> ⚠️ **Nota sobre comandos de administración**: El comando principal es `[p]ticketst` para evitar conflictos con otros cogs.
 > El alias `[p]tickets` también está disponible. En esta documentación usamos `[p]tickets` por brevedad.
+>
+> ⚠️ **Nota sobre comandos de usuario (v4.1.0)**: Todos los comandos de usuario ahora son subcomandos del grupo `[p]ticket`
+> (ej. `[p]ticket add`, `[p]ticket close`, `[p]ticket claim`). Esto evita conflictos de `add`/`remove`/`close` con otros cogs.
 
 ---
 
@@ -32,6 +35,37 @@ Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 | 🔐 **Audit Logging** | Track all ticket actions |
 | 🛡️ **Preflight Checks** | Verify panel configurations |
 | 💾 **Export/Import** | Backup and restore configurations |
+| 🗄️ **Archive & Reopen** | Keep closed tickets as a memento instead of deleting them |
+
+---
+
+## 🆕 What's New in v4.1.0
+
+### Command Group `[p]ticket`
+All user commands are now subcommands of `[p]ticket` to avoid name clashes with other cogs
+(`add`, `remove`, `close`, etc. were colliding). See [User Commands](#-user-commands).
+
+### Claim Visibility
+When a ticket is claimed, the claimer is now shown **on the ticket's opening embed** (a "Claimed by"
+field) and in the **channel topic** — across every claim path (button, command, or staff view).
+Unclaiming/transferring updates it automatically.
+
+### Archive on Close (instead of delete)
+Optionally keep closed tickets as a memento instead of deleting the channel:
+```
+[p]tickets closedcategory #Closed-Tickets   # enable: archive closed tickets here
+[p]tickets closedcategory                    # disable: go back to deleting on close
+```
+When enabled, closing a ticket:
+- Moves the channel to the configured category.
+- Removes the opener **and any added users** (only staff roles keep access).
+- Still generates the transcript / log / DM as usual.
+
+### Archived Ticket State (Reopen / Delete)
+An archived ticket's opening message switches to a greyed-out embed with two staff-only buttons:
+- **🔓 Reopen** — moves the channel back, restores access for the opener and previously-added users,
+  sets it back to **unclaimed**, and brings back the Close/Claim buttons (active again).
+- **🗑️ Delete** — permanently deletes the channel (asks for confirmation first).
 
 ---
 
@@ -39,9 +73,9 @@ Sistema de tickets de soporte multi-panel con botones para Red-DiscordBot.
 
 ### Claim System
 Staff can now claim tickets to indicate they're handling them:
-- `[p]claim` - Claim the current ticket
-- `[p]unclaim` - Release the ticket
-- `[p]transfer @staff` - Transfer to another staff member
+- `[p]ticket claim` - Claim the current ticket
+- `[p]ticket unclaim` - Release the ticket
+- `[p]ticket transfer @staff` - Transfer to another staff member
 
 ### Smart Auto-Close
 Different timeouts for different situations:
@@ -53,14 +87,14 @@ Different timeouts for different situations:
 Create template responses that staff can quickly send:
 ```
 [p]tickets quickreply add greeting Hello! How can I help you?
-[p]qr    # Use quick reply in ticket
+[p]ticket qr    # Use quick reply in ticket
 ```
 
 ### Internal Notes
 Staff can add private notes to tickets:
 ```
-[p]note Customer mentioned they're a VIP
-[p]notes   # View all notes
+[p]ticket note Customer mentioned they're a VIP
+[p]ticket notes   # View all notes
 ```
 
 ### Advanced Blacklist
@@ -257,6 +291,7 @@ Done! The button should now appear.
 | `[p]tickets overview [channel]` | Set overview channel |
 | `[p]tickets overviewmention` | Toggle channel mentions in overview |
 | `[p]tickets threadclose` | Archive threads instead of delete |
+| `[p]tickets closedcategory [category]` | Archive closed tickets here instead of deleting (no arg = disable) |
 | `[p]tickets cleanup` | Remove invalid tickets |
 | `[p]tickets getlink <message>` | Get transcript link |
 
@@ -264,19 +299,29 @@ Done! The button should now appear.
 
 ## 👤 User Commands
 
+> All user commands live under the `[p]ticket` group (run inside a ticket channel).
+
 | Command | Description |
 |---------|-------------|
-| `[p]add <user>` | Add user to your ticket |
-| `[p]renameticket <name>` | Rename your ticket |
-| `[p]close [reason]` | Close your ticket |
+| `[p]ticket add <user>` | Add user to your ticket |
+| `[p]ticket remove <user>` | Remove user from your ticket |
+| `[p]ticket rename <name>` | Rename your ticket |
+| `[p]ticket close [reason]` | Close your ticket |
+| `[p]ticket claim` | Claim the current ticket |
+| `[p]ticket unclaim` | Unclaim the current ticket |
+| `[p]ticket transfer <@staff>` | Transfer ticket to another staff |
+| `[p]ticket note [content]` | Add an internal note |
+| `[p]ticket notes` | View ticket notes |
+| `[p]ticket quickreply [name]` (alias `qr`) | Use a quick reply template |
+| `[p]ticket info` | View ticket details |
 | `[p]openfor <user> <panel>` | Open ticket for another user (Mod only) |
 
 ### Close Command Examples
 ```
-[p]close                          # Close immediately
-[p]close thanks for helping!      # Close with reason
-[p]close 1h                       # Close in 1 hour
-[p]close 1m thanks!               # Close in 1 minute with reason
+[p]ticket close                       # Close immediately
+[p]ticket close thanks for helping!   # Close with reason
+[p]ticket close 1h                    # Close in 1 hour
+[p]ticket close 1m thanks!            # Close in 1 minute with reason
 ```
 
 ---
@@ -464,6 +509,12 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 
 ## 📜 Version History
 
+### v4.1.0
+- **Command Group**: All user commands moved under `[p]ticket` to avoid conflicts with other cogs
+- **Claim Visibility**: Claimer shown on the ticket's opening embed and channel topic
+- **Archive on Close**: Optional — keep closed tickets as a memento in a configured category (`[p]tickets closedcategory`)
+- **Archived State**: Reopen/Delete buttons on archived tickets; reopening restores access and reactivates the ticket
+
 ### v4.0.0 (Major Update)
 - **Claim System**: Staff can claim/unclaim/transfer tickets
 - **Smart Auto-Close**: Different timeouts for user vs staff inactivity
@@ -487,19 +538,19 @@ This cog includes Red-Dashboard integration for web-based ticket management.
 
 ---
 
-## 📝 New Commands Reference (v4.0.0)
+## 📝 Staff Commands Reference
 
-### User Commands
+> Since v4.1.0 these live under the `[p]ticket` group (old top-level names like `[p]claim` no longer exist).
 
 | Command | Description |
 |---------|-------------|
-| `[p]claim` | Claim the current ticket |
-| `[p]unclaim` | Unclaim the current ticket |
-| `[p]transfer <@staff>` | Transfer ticket to another staff |
-| `[p]note [content]` | Add internal note |
-| `[p]notes` | View ticket notes |
-| `[p]quickreply [name]` | Use quick reply template |
-| `[p]ticketinfo` | View ticket details |
+| `[p]ticket claim` | Claim the current ticket |
+| `[p]ticket unclaim` | Unclaim the current ticket |
+| `[p]ticket transfer <@staff>` | Transfer ticket to another staff |
+| `[p]ticket note [content]` | Add internal note |
+| `[p]ticket notes` | View ticket notes |
+| `[p]ticket quickreply [name]` | Use quick reply template |
+| `[p]ticket info` | View ticket details |
 
 ### Anti-Spam Commands
 
