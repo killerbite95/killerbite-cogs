@@ -471,8 +471,11 @@ class RustMapsVote(commands.Cog):
         session.max_votes_per_user = await self.config.guild(ctx.guild).max_votes_per_user()
 
         # Post one embed per map for visual context...
+        map_embed_ids: list[int] = []
         for m in session.maps:
-            await channel.send(embed=self.build_vote_embed(m, len(session.maps)))
+            msg = await channel.send(embed=self.build_vote_embed(m, len(session.maps)))
+            map_embed_ids.append(msg.id)
+        session.map_embed_message_ids = map_embed_ids
 
         # ...then the single voting message holding all the buttons.
         view = VoteView(
@@ -496,7 +499,7 @@ class RustMapsVote(commands.Cog):
     @votemap.command(name="end")
     @checks.admin_or_permissions(administrator=True)
     async def end(self, ctx: commands.Context) -> None:
-        """Termina la votación y anuncia al ganador."""
+        """Termina la votación, limpia los mensajes anteriores y anuncia al ganador."""
         async with self._get_lock(ctx.guild.id):
             session = await self.load_session(ctx.guild)
             active = await self.config.guild(ctx.guild).vote_session_active()
@@ -507,13 +510,28 @@ class RustMapsVote(commands.Cog):
             session.ended_at = datetime.utcnow()
             embed = self.build_winner_embed(session)
 
-            # Disable the buttons on the original voting message.
-            await self._disable_voting_message(ctx.guild, session)
+            channel = ctx.guild.get_channel(session.channel_id) if session.channel_id else ctx.channel
+            if channel is None:
+                channel = ctx.channel
+
+            # Delete the individual map embeds.
+            for msg_id in session.map_embed_message_ids:
+                try:
+                    msg = await channel.fetch_message(msg_id)
+                    await msg.delete()
+                except (discord.NotFound, discord.HTTPException):
+                    pass
+
+            # Delete the voting message (buttons and status embed) instead of disabling it.
+            if session.voting_message_id:
+                try:
+                    msg = await channel.fetch_message(session.voting_message_id)
+                    await msg.delete()
+                except (discord.NotFound, discord.HTTPException):
+                    pass
+
             await self.clear_session(ctx.guild)
 
-        channel = ctx.guild.get_channel(session.channel_id) if session.channel_id else ctx.channel
-        if channel is None:
-            channel = ctx.channel
         await channel.send(embed=embed)
         if channel.id != ctx.channel.id:
             await ctx.send("✅ Votación finalizada.", ephemeral=True)

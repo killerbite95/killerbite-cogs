@@ -237,6 +237,7 @@ class VoteSession:
     ended_at: Optional[datetime] = None
     channel_id: Optional[int] = None
     voting_message_id: Optional[int] = None
+    map_embed_message_ids: List[int] = field(default_factory=list)
     max_votes_per_user: int = DEFAULT_MAX_VOTES_PER_USER
     # user_id (as str, since Config/JSON keys are strings) -> list of map_ids they voted for
     votes: Dict[str, List[int]] = field(default_factory=dict)
@@ -347,6 +348,7 @@ class VoteSession:
             "ended_at": self.ended_at.isoformat() if self.ended_at else None,
             "channel_id": self.channel_id,
             "voting_message_id": self.voting_message_id,
+            "map_embed_message_ids": list(self.map_embed_message_ids),
             "max_votes_per_user": self.max_votes_per_user,
             "votes": {k: list(v) for k, v in self.votes.items()},
         }
@@ -364,6 +366,7 @@ class VoteSession:
             ended_at=ended,
             channel_id=data.get("channel_id"),
             voting_message_id=data.get("voting_message_id"),
+            map_embed_message_ids=data.get("map_embed_message_ids", []),
             max_votes_per_user=data.get("max_votes_per_user", DEFAULT_MAX_VOTES_PER_USER),
             votes=votes,
         )
