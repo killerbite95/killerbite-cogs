@@ -1,5 +1,5 @@
 # Schema version for migrations
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 DEFAULT_GUILD = {
     # Settings
@@ -24,6 +24,7 @@ DEFAULT_GUILD = {
     "detailed_transcript": False,  # Save transcript to interactive html file
     "auto_add": False,  # Auto-add support/subroles to thread tickets
     "thread_close": True,  # Whether to close/lock the thread instead of deleting it
+    "closed_category": 0,  # Category to archive closed tickets under instead of deleting (0 = delete on close)
     "suspended_msg": None,  # If not None, user will be presented with this message when trying to open a ticket
     # Anti-spam settings
     "ticket_cooldown": 0,  # Cooldown in seconds between tickets per user (0 = disabled)

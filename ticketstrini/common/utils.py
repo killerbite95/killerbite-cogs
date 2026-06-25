@@ -139,7 +139,12 @@ async def migrate_schema(guild: discord.Guild, conf: dict, config: Config) -> di
                     panel["welcome_sections"] = None
                 if "fallback_mode" not in panel:
                     panel["fallback_mode"] = "none"
-        
+
+        # Migration to v3 - Archive closed tickets instead of deleting
+        if current_version < 3:
+            if "closed_category" not in data:
+                data["closed_category"] = 0
+
         data["schema_version"] = SCHEMA_VERSION
         return data
 
@@ -520,6 +525,51 @@ async def remove_from_blacklist(
 # Ticket Status & Claim Functions
 # ============================================================================
 
+async def update_claim_display(
+    guild: discord.Guild,
+    channel: Union[discord.TextChannel, discord.Thread],
+    ticket_data: dict,
+    claimer: Optional[discord.Member],
+) -> None:
+    """
+    Reflect the claim state on the ticket's opening message embed and channel topic.
+
+    Pass ``claimer=None`` to clear the claim (e.g. on unclaim).
+    """
+    field_name = _("Claimed by")
+
+    # Update the opening message embed (the first embed holds the ticket header)
+    message_id = ticket_data.get("message_id")
+    if message_id:
+        try:
+            msg = await channel.fetch_message(message_id)
+        except (discord.NotFound, discord.HTTPException):
+            msg = None
+
+        if msg and msg.embeds:
+            embeds = list(msg.embeds)
+            header = embeds[0]
+            # Drop any previous claim field so it doesn't duplicate
+            for index, existing in enumerate(header.fields):
+                if existing.name == field_name:
+                    header.remove_field(index)
+                    break
+            if claimer:
+                header.add_field(name=field_name, value=claimer.mention, inline=True)
+            embeds[0] = header
+            with suppress(discord.HTTPException):
+                await msg.edit(embeds=embeds)
+
+    # Update the channel description/topic (text channels only)
+    if isinstance(channel, discord.TextChannel):
+        if claimer:
+            topic = _("🙋 Claimed by {} ({})").format(claimer.display_name, claimer.id)
+        else:
+            topic = _("Unclaimed")
+        with suppress(discord.HTTPException, discord.Forbidden):
+            await channel.edit(topic=topic)
+
+
 async def claim_ticket(
     guild: discord.Guild,
     channel: Union[discord.TextChannel, discord.Thread],
@@ -578,7 +628,10 @@ async def claim_ticket(
         await update_stats_claim_time(guild, config, claim_time)
     except (ValueError, TypeError):
         pass
-    
+
+    # Reflect the claim on the ticket's opening embed and channel topic
+    await update_claim_display(guild, channel, ticket_data, staff)
+
     # Log the action
     await log_audit_action(
         guild=guild,
@@ -588,7 +641,7 @@ async def claim_ticket(
         ticket_channel=channel,
         panel_name=ticket_data.get("panel"),
     )
-    
+
     return True, _("Ticket claimed successfully!")
 
 
@@ -632,7 +685,10 @@ async def unclaim_ticket(
             opened[owner_id][str(channel.id)]["claimed_by"] = None
             opened[owner_id][str(channel.id)]["claimed_at"] = None
             opened[owner_id][str(channel.id)]["status"] = "open"
-    
+
+    # Clear the claim from the ticket's opening embed and channel topic
+    await update_claim_display(guild, channel, ticket_data, None)
+
     await log_audit_action(
         guild=guild,
         config=config,
@@ -686,7 +742,10 @@ async def transfer_ticket(
             opened[owner_id][str(channel.id)]["claimed_by"] = to_staff.id
             opened[owner_id][str(channel.id)]["claimed_at"] = now.isoformat()
             opened[owner_id][str(channel.id)]["status"] = "claimed"
-    
+
+    # Reflect the new claimer on the ticket's opening embed and channel topic
+    await update_claim_display(guild, channel, ticket_data, to_staff)
+
     await log_audit_action(
         guild=guild,
         config=config,
@@ -1002,6 +1061,39 @@ def get_ticket_owner(opened: dict, channel_id: str) -> Optional[str]:
             return uid
 
 
+async def archive_closed_channel(
+    guild: discord.Guild,
+    channel: discord.TextChannel,
+    closed_category: discord.CategoryChannel,
+) -> bool:
+    """
+    Archive a closed text-channel ticket instead of deleting it.
+
+    Moves the channel under ``closed_category`` and strips access from the
+    opener and any added members, leaving staff role overwrites intact so the
+    channel survives as a read-only memento for staff.
+    Returns True if the channel was archived, False if it should fall back to deletion.
+    """
+    # Move the channel under the archive category, keeping our current overwrites
+    try:
+        if channel.category_id != closed_category.id:
+            await channel.edit(category=closed_category, sync_permissions=False)
+    except discord.Forbidden:
+        log.warning(f"Missing permissions to archive ticket {channel.id} in {guild.name}")
+        return False
+    except discord.HTTPException as e:
+        log.warning(f"Failed to move closed ticket {channel.id} to archive category: {e}")
+        return False
+
+    # Strip the opener and any added users (Member overwrites), keep staff roles
+    for target in list(channel.overwrites.keys()):
+        if isinstance(target, discord.Member) and target.id != guild.me.id:
+            with suppress(discord.HTTPException):
+                await channel.set_permissions(target, overwrite=None)
+
+    return True
+
+
 async def close_ticket(
     bot: Red,
     member: Union[discord.Member, discord.User],
@@ -1270,11 +1362,29 @@ async def close_ticket(
             pass
 
     # Delete/close ticket channel
+    closed_category_id = conf.get("closed_category", 0)
+    closed_category = guild.get_channel(closed_category_id) if closed_category_id else None
+    if not isinstance(closed_category, discord.CategoryChannel):
+        closed_category = None
+
     if is_thread and conf["thread_close"]:
+        # Threads can't be moved to a category; archive + lock and remove the opener
+        # so the closed ticket stays as a private memento for staff.
+        if closed_category and isinstance(member, discord.Member):
+            with suppress(discord.HTTPException):
+                await channel.remove_user(member)
         try:
             await channel.edit(archived=True, locked=True)
         except Exception as e:
             log.error("Failed to archive thread ticket", exc_info=e)
+    elif closed_category and isinstance(channel, discord.TextChannel):
+        # Archive the channel under the closed-tickets category instead of deleting it
+        archived = await archive_closed_channel(guild, channel, closed_category)
+        if not archived:
+            try:
+                await channel.delete()
+            except Exception as e:
+                log.error("Failed to delete ticket channel after failed archive", exc_info=e)
     else:
         try:
             await channel.delete()

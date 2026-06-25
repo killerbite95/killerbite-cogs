@@ -754,7 +754,7 @@ class SupportButton(Button):
         prefix = (await self.view.bot.get_valid_prefixes(self.view.guild))[0]
         default_message = _("Welcome to your ticket channel ") + f"{user.display_name}!"
         if user_can_close:
-            default_message += _("\nYou or an admin can close this with the `{}close` command").format(prefix)
+            default_message += _("\nYou or an admin can close this with the `{}ticket close` command").format(prefix)
 
         messages = panel["ticket_messages"]
         params = {

@@ -1155,6 +1155,16 @@ class AdminCommands(MixinMeta):
             txt = _("Thread tickets will be deleted instead of closed/archived")
         embed.add_field(name=_("Thread Tickets"), value=txt, inline=False)
 
+        closed_category_id = conf.get("closed_category", 0)
+        closed_category = ctx.guild.get_channel(closed_category_id) if closed_category_id else None
+        if closed_category:
+            closed_txt = _(
+                "Closed tickets are archived under **{}** (opener loses access)"
+            ).format(closed_category.name)
+        else:
+            closed_txt = _("Closed tickets are deleted")
+        embed.add_field(name=_("Closed Tickets"), value=closed_txt, inline=False)
+
         embed.add_field(
             name=_("Thread Ticket Auto-Add"),
             value=_(
@@ -1549,6 +1559,43 @@ class AdminCommands(MixinMeta):
         else:
             await self.config.guild(ctx.guild).thread_close.set(True)
             await ctx.send(_("Closed ticket threads will be **Closed & Archived**"))
+
+    @tickets.command()
+    async def closedcategory(
+        self,
+        ctx: commands.Context,
+        *,
+        category: Optional[discord.CategoryChannel] = None,
+    ):
+        """
+        Set a category to archive closed tickets under instead of deleting them
+
+        When set, closing a ticket moves its channel to this category and removes
+        the opener (and any added users) so only staff keep access. The transcript,
+        log and DM still work as usual — this just keeps the channel as a memento.
+
+        Run without a category to disable archiving (tickets will be deleted on close again).
+        """
+        if not category:
+            await self.config.guild(ctx.guild).closed_category.set(0)
+            return await ctx.send(
+                _("Closed ticket archiving has been **Disabled**. Tickets will be deleted on close.")
+            )
+        if not category.permissions_for(ctx.me).manage_channels:
+            return await ctx.send(
+                _("I need the `Manage Channels` permission in that category to archive tickets there!")
+            )
+        if not category.permissions_for(ctx.me).manage_permissions:
+            return await ctx.send(
+                _("I need the `Manage Permissions` permission in that category to remove the opener's access!")
+            )
+        await self.config.guild(ctx.guild).closed_category.set(category.id)
+        await ctx.send(
+            _(
+                "Closed tickets will now be archived under **{}** instead of deleted. "
+                "The opener and any added users will lose access on close."
+            ).format(category.name)
+        )
 
     @tickets.command()
     async def selfrename(self, ctx: commands.Context):

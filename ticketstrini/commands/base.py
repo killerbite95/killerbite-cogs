@@ -27,7 +27,14 @@ log = logging.getLogger("red.vrt.tickets.base")
 
 
 class BaseCommands(MixinMeta):
-    @commands.hybrid_command(name="add", description="Add a user to your ticket")
+    @commands.hybrid_group(name="ticket", description="Ticket commands")
+    @commands.guild_only()
+    async def ticket(self, ctx: commands.Context):
+        """Manage your ticket (add/remove users, close, claim, notes...)"""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help()
+
+    @ticket.command(name="add", description="Add a user to your ticket")
     @app_commands.describe(user="The Discord user you want to add to your ticket")
     @commands.guild_only()
     async def add_user_to_ticket(self, ctx: commands.Context, *, user: discord.Member):
@@ -71,7 +78,7 @@ class BaseCommands(MixinMeta):
             return await ctx.send(txt)
         await ctx.send(f"**{user.name}** " + _("has been added to this ticket!"))
 
-    @commands.hybrid_command(name="remove", description="Remove a user from your ticket")
+    @ticket.command(name="remove", description="Remove a user from your ticket")
     @app_commands.describe(user="The Discord user you want to remove from your ticket")
     @commands.guild_only()
     async def remove_user_from_ticket(self, ctx: commands.Context, *, user: discord.Member):
@@ -118,7 +125,7 @@ class BaseCommands(MixinMeta):
             return await ctx.send(txt)
         await ctx.send(f"**{user.name}** " + _("has been removed from this ticket!"))
 
-    @commands.hybrid_command(name="renameticket", description="Rename your ticket")
+    @ticket.command(name="rename", description="Rename your ticket")
     @app_commands.describe(new_name="The new name for your ticket")
     @commands.guild_only()
     async def rename_ticket(self, ctx: commands.Context, *, new_name: str):
@@ -163,7 +170,7 @@ class BaseCommands(MixinMeta):
 
         await ctx.channel.edit(name=new_name)
 
-    @commands.hybrid_command(name="close", description="Close your ticket")
+    @ticket.command(name="close", description="Close your ticket")
     @app_commands.describe(reason="Reason for closing the ticket")
     @commands.guild_only()
     async def close_a_ticket(self, ctx: commands.Context, *, reason: Optional[str] = None):
@@ -171,10 +178,10 @@ class BaseCommands(MixinMeta):
         Close your ticket
 
         **Examples**
-        `[p]close` - closes ticket with no reason attached
-        `[p]close thanks for helping!` - closes with reason "thanks for helping!"
-        `[p]close 1h` - closes in 1 hour with no reason attached
-        `[p]close 1m thanks for helping!` - closes in 1 minute with reason "thanks for helping!"
+        `[p]ticket close` - closes ticket with no reason attached
+        `[p]ticket close thanks for helping!` - closes with reason "thanks for helping!"
+        `[p]ticket close 1h` - closes in 1 hour with no reason attached
+        `[p]ticket close 1m thanks for helping!` - closes in 1 minute with reason "thanks for helping!"
         """
         conf = await self.config.guild(ctx.guild).all()
         owner_id = get_ticket_owner(conf["opened"], str(ctx.channel.id))
@@ -240,7 +247,7 @@ class BaseCommands(MixinMeta):
     # Claim / Unclaim / Transfer Commands
     # ============================================================================
 
-    @commands.hybrid_command(name="claim", description="Claim this ticket")
+    @ticket.command(name="claim", description="Claim this ticket")
     @commands.guild_only()
     async def claim_cmd(self, ctx: commands.Context):
         """Claim this ticket as your own to handle"""
@@ -272,7 +279,7 @@ class BaseCommands(MixinMeta):
         
         await ctx.send(message)
 
-    @commands.hybrid_command(name="unclaim", description="Unclaim this ticket")
+    @ticket.command(name="unclaim", description="Unclaim this ticket")
     @commands.guild_only()
     async def unclaim_cmd(self, ctx: commands.Context):
         """Unclaim this ticket so others can claim it"""
@@ -292,7 +299,7 @@ class BaseCommands(MixinMeta):
         
         await ctx.send(message)
 
-    @commands.hybrid_command(name="transfer", description="Transfer this ticket to another staff member")
+    @ticket.command(name="transfer", description="Transfer this ticket to another staff member")
     @app_commands.describe(new_staff="The staff member to transfer the ticket to")
     @commands.guild_only()
     async def transfer_cmd(self, ctx: commands.Context, new_staff: discord.Member):
@@ -342,7 +349,7 @@ class BaseCommands(MixinMeta):
     # Notes Command
     # ============================================================================
 
-    @commands.hybrid_command(name="note", description="Add an internal note to this ticket")
+    @ticket.command(name="note", description="Add an internal note to this ticket")
     @app_commands.describe(note="The note to add (optional, will prompt if not provided)")
     @commands.guild_only()
     async def note_cmd(self, ctx: commands.Context, *, note: Optional[str] = None):
@@ -398,7 +405,7 @@ class BaseCommands(MixinMeta):
         else:
             await ctx.send(_("Failed to add note"))
 
-    @commands.hybrid_command(name="notes", description="View notes for this ticket")
+    @ticket.command(name="notes", description="View notes for this ticket")
     @commands.guild_only()
     async def notes_list(self, ctx: commands.Context):
         """View all internal notes for this ticket"""
@@ -451,7 +458,7 @@ class BaseCommands(MixinMeta):
     # Quick Reply Command
     # ============================================================================
 
-    @commands.hybrid_command(name="quickreply", aliases=["qr"], description="Send a quick reply template")
+    @ticket.command(name="quickreply", aliases=["qr"], description="Send a quick reply template")
     @app_commands.describe(template_name="Name of the quick reply template (optional)")
     @commands.guild_only()
     async def quick_reply_cmd(self, ctx: commands.Context, template_name: Optional[str] = None):
@@ -540,7 +547,7 @@ class BaseCommands(MixinMeta):
     # Ticket Info Command
     # ============================================================================
 
-    @commands.hybrid_command(name="ticketinfo", description="View information about this ticket")
+    @ticket.command(name="info", description="View information about this ticket")
     @commands.guild_only()
     async def ticket_info(self, ctx: commands.Context):
         """View detailed information about this ticket"""

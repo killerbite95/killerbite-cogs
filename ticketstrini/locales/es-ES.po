@@ -947,8 +947,8 @@ msgstr "Se ha producido un error al preparar tu ticket, por favor contacta a un 
 msgid "Welcome to your ticket channel "
 msgstr "Bienvenido a tu canal de ticket "
 
-msgid "\nYou or an admin can close this with the `{}close` command"
-msgstr "\nTú o un administrador pueden cerrar esto con el comando `{}close`"
+msgid "\nYou or an admin can close this with the `{}ticket close` command"
+msgstr "\nTú o un administrador pueden cerrar esto con el comando `{}ticket close`"
 
 msgid "Ticket form questions"
 msgstr "Preguntas del formulario de ticket"
@@ -970,3 +970,34 @@ msgstr "Has sido añadido al ticket **{}**"
 
 msgid "Enter a reason for closing this ticket"
 msgstr "Introduce un motivo para cerrar este ticket"
+
+# ============================================================================
+# v4.1.0 - Claim display & closed ticket archiving
+# ============================================================================
+
+#: common/utils.py - Claim display (embed field + channel topic)
+msgid "Claimed by"
+msgstr "Reclamado por"
+
+msgid "🙋 Claimed by {} ({})"
+msgstr "🙋 Reclamado por {} ({})"
+
+#: commands/admin.py - Closed ticket archiving (closedcategory command)
+msgid "Closed ticket archiving has been **Disabled**. Tickets will be deleted on close."
+msgstr "El archivado de tickets cerrados ha sido **Desactivado**. Los tickets se eliminarán al cerrarse."
+
+msgid "I need the `Manage Channels` permission in that category to archive tickets there!"
+msgstr "¡Necesito el permiso `Gestionar Canales` en esa categoría para archivar tickets allí!"
+
+msgid "I need the `Manage Permissions` permission in that category to remove the opener's access!"
+msgstr "¡Necesito el permiso `Gestionar Permisos` en esa categoría para quitarle el acceso a quien abrió el ticket!"
+
+msgid "Closed tickets will now be archived under **{}** instead of deleted. The opener and any added users will lose access on close."
+msgstr "Los tickets cerrados ahora se archivarán en **{}** en lugar de eliminarse. Quien abrió el ticket y los usuarios añadidos perderán el acceso al cerrarse."
+
+#: commands/admin.py - Closed ticket status in settings view
+msgid "Closed tickets are archived under **{}** (opener loses access)"
+msgstr "Los tickets cerrados se archivan en **{}** (quien lo abrió pierde el acceso)"
+
+msgid "Closed tickets are deleted"
+msgstr "Los tickets cerrados se eliminan"
