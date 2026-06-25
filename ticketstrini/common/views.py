@@ -18,6 +18,7 @@ from redbot.core.utils.mod import is_admin_or_superior
 from .utils import (
     can_close,
     close_ticket,
+    reopen_archived_ticket,
     update_active_overview,
     claim_ticket,
     unclaim_ticket,
@@ -407,6 +408,155 @@ class CloseView(View):
             closedby=interaction.user.name,
             config=self.config,
         )
+
+
+class ConfirmDeleteView(View):
+    """Ephemeral Yes/No confirmation for permanently deleting an archived ticket."""
+
+    def __init__(self):
+        super().__init__(timeout=30)
+        self.value = False
+
+    @discord.ui.button(label="Delete", style=ButtonStyle.danger, emoji="🗑️")
+    async def confirm(self, interaction: Interaction, button: Button):
+        self.value = True
+        with contextlib.suppress(discord.NotFound):
+            await interaction.response.edit_message(content=_("Deleting..."), view=None)
+        self.stop()
+
+    @discord.ui.button(label="Cancel", style=ButtonStyle.grey)
+    async def cancel(self, interaction: Interaction, button: Button):
+        self.value = False
+        with contextlib.suppress(discord.NotFound):
+            await interaction.response.edit_message(content=_("Cancelled."), view=None)
+        self.stop()
+
+
+class ArchivedView(View):
+    """Buttons shown on an archived (closed but kept) ticket: Reopen / Delete."""
+
+    def __init__(
+        self,
+        bot: Red,
+        config: Config,
+        owner_id: int,
+        channel: Union[discord.TextChannel, discord.Thread],
+    ):
+        super().__init__(timeout=None)
+        self.bot = bot
+        self.config = config
+        self.owner_id = owner_id
+        self.channel = channel
+        self._create_buttons()
+
+    def _create_buttons(self):
+        """Create buttons with proper labels for i18n support"""
+        self.clear_items()
+
+        reopen_btn = Button(
+            label=_("Reopen"),
+            style=ButtonStyle.green,
+            emoji="🔓",
+            custom_id=f"reopen_{self.channel.id}",
+            row=0,
+        )
+        reopen_btn.callback = self._reopen_callback
+        self.add_item(reopen_btn)
+
+        delete_btn = Button(
+            label=_("Delete"),
+            style=ButtonStyle.danger,
+            emoji="🗑️",
+            custom_id=f"delete_{self.channel.id}",
+            row=0,
+        )
+        delete_btn.callback = self._delete_callback
+        self.add_item(delete_btn)
+
+    async def _is_support_staff(self, user: discord.Member, conf: dict) -> bool:
+        """Check if user is support staff for this archived ticket"""
+        user_roles = [r.id for r in user.roles]
+        support_roles = [i[0] for i in conf.get("support_roles", [])]
+
+        entry = conf.get("archived", {}).get(str(self.channel.id))
+        if entry:
+            panel_name = entry.get("panel")
+            if panel_name and panel_name in conf.get("panels", {}):
+                support_roles.extend([i[0] for i in conf["panels"][panel_name].get("roles", [])])
+
+        if any(rid in support_roles for rid in user_roles):
+            return True
+        if user.id == user.guild.owner_id:
+            return True
+        if await is_admin_or_superior(self.bot, user):
+            return True
+        return False
+
+    async def _reopen_callback(self, interaction: Interaction):
+        if not interaction.guild:
+            return
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+
+        user = interaction.guild.get_member(interaction.user.id)
+        if not user:
+            return
+
+        conf = await self.config.guild(interaction.guild).all()
+        if not await self._is_support_staff(user, conf):
+            return await interaction.response.send_message(
+                _("Only support staff can reopen tickets."),
+                ephemeral=True,
+            )
+
+        await interaction.response.defer(ephemeral=True)
+        success, message = await reopen_archived_ticket(
+            self.bot, interaction.guild, self.channel, self.config
+        )
+        await interaction.followup.send(message, ephemeral=True)
+        if success:
+            self.stop()
+            with contextlib.suppress(discord.HTTPException):
+                await self.channel.send(
+                    _("🔓 This ticket has been reopened by {}.").format(user.mention),
+                    allowed_mentions=discord.AllowedMentions.none(),
+                )
+
+    async def _delete_callback(self, interaction: Interaction):
+        if not interaction.guild:
+            return
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
+
+        user = interaction.guild.get_member(interaction.user.id)
+        if not user:
+            return
+
+        conf = await self.config.guild(interaction.guild).all()
+        if not await self._is_support_staff(user, conf):
+            return await interaction.response.send_message(
+                _("Only support staff can delete tickets."),
+                ephemeral=True,
+            )
+
+        confirm_view = ConfirmDeleteView()
+        await interaction.response.send_message(
+            _("⚠️ Permanently delete this archived ticket channel? This cannot be undone."),
+            view=confirm_view,
+            ephemeral=True,
+        )
+        await confirm_view.wait()
+        if not confirm_view.value:
+            return
+
+        async with self.config.guild(interaction.guild).archived() as archived:
+            archived.pop(str(self.channel.id), None)
+
+        cog = self.bot.get_cog("TicketsTrini")
+        if cog is not None:
+            cog.ticket_channel_ids.discard(str(self.channel.id))
+
+        self.stop()
+        with contextlib.suppress(discord.HTTPException):
+            await self.channel.delete()
 
 
 class TicketModal(Modal):

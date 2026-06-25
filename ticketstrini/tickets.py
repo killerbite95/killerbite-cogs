@@ -26,7 +26,7 @@ from .common.utils import (
     update_last_message,
     escalate_ticket,
 )
-from .common.views import CloseView, LogView, PanelView, StaffActionsView
+from .common.views import ArchivedView, CloseView, LogView, PanelView, StaffActionsView
 from .i18n import _, set_contextual_locales_from_guild
 
 # ----------------- Agregamos la integración del Dashboard -----------------
@@ -263,6 +263,19 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                 logview = LogView(guild, ticket_channel, max_claims)
                 self.bot.add_view(logview, message_id=ticket_info["logmsg"])
                 self.view_cache[guild.id].append(logview)
+
+        # Refresh views for archived tickets (Reopen/Delete buttons)
+        for archived_channel_id, archived_info in data.get("archived", {}).items():
+            channel = guild.get_channel(int(archived_channel_id))
+            if not channel:
+                continue
+            message_id = archived_info.get("message_id")
+            owner_id = archived_info.get("owner_id")
+            if not message_id or owner_id is None:
+                continue
+            view = ArchivedView(self.bot, self.config, int(owner_id), channel)
+            self.bot.add_view(view, message_id=message_id)
+            self.view_cache[guild.id].append(view)
 
     @tasks.loop(minutes=20)
     async def auto_close(self):
@@ -599,6 +612,10 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         self.ticket_channel_ids.discard(str(channel.id))
         guild = channel.guild
         conf = await self.config.guild(guild).all()
+        # Clean up archived ticket entry if its channel was manually deleted
+        if str(channel.id) in conf.get("archived", {}):
+            async with self.config.guild(guild).archived() as archived:
+                archived.pop(str(channel.id), None)
         pruned = await prune_invalid_tickets(guild, conf, self.config)
         if pruned:
             log.info("Pruned old ticket channels")

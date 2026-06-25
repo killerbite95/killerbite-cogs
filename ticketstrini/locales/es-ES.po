@@ -1001,3 +1001,43 @@ msgstr "Los tickets cerrados se archivan en **{}** (quien lo abrió pierde el ac
 
 msgid "Closed tickets are deleted"
 msgstr "Los tickets cerrados se eliminan"
+
+#: common/views.py - Archived ticket state (Reopen/Delete buttons)
+msgid "Reopen"
+msgstr "Reabrir"
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "🔒 Archived — closed by {}"
+msgstr "🔒 Archivado — cerrado por {}"
+
+msgid "\nReason: {}"
+msgstr "\nMotivo: {}"
+
+msgid "Only support staff can reopen tickets."
+msgstr "Solo el personal de soporte puede reabrir tickets."
+
+msgid "Only support staff can delete tickets."
+msgstr "Solo el personal de soporte puede eliminar tickets."
+
+msgid "🔓 This ticket has been reopened by {}."
+msgstr "🔓 Este ticket ha sido reabierto por {}."
+
+msgid "⚠️ Permanently delete this archived ticket channel? This cannot be undone."
+msgstr "⚠️ ¿Eliminar permanentemente este canal de ticket archivado? Esta acción no se puede deshacer."
+
+msgid "Deleting..."
+msgstr "Eliminando..."
+
+msgid "Cancelled."
+msgstr "Cancelado."
+
+msgid "This is not an archived ticket."
+msgstr "Este no es un ticket archivado."
+
+msgid "Ticket reopened."
+msgstr "Ticket reabierto."

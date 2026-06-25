@@ -145,6 +145,11 @@ async def migrate_schema(guild: discord.Guild, conf: dict, config: Config) -> di
             if "closed_category" not in data:
                 data["closed_category"] = 0
 
+        # Migration to v4 - Persistent archived ticket store (reopen/delete state)
+        if current_version < 4:
+            if "archived" not in data:
+                data["archived"] = {}
+
         data["schema_version"] = SCHEMA_VERSION
         return data
 
@@ -1065,33 +1070,222 @@ async def archive_closed_channel(
     guild: discord.Guild,
     channel: discord.TextChannel,
     closed_category: discord.CategoryChannel,
-) -> bool:
+) -> Optional[Dict[str, Any]]:
     """
     Archive a closed text-channel ticket instead of deleting it.
 
     Moves the channel under ``closed_category`` and strips access from the
     opener and any added members, leaving staff role overwrites intact so the
-    channel survives as a read-only memento for staff.
-    Returns True if the channel was archived, False if it should fall back to deletion.
+    channel survives as a memento for staff.
+
+    Returns a metadata dict (``original_category`` id + ``removed_members`` ids)
+    needed to reopen the ticket later, or ``None`` if it should fall back to deletion.
     """
+    original_category_id = channel.category_id
+
     # Move the channel under the archive category, keeping our current overwrites
     try:
         if channel.category_id != closed_category.id:
             await channel.edit(category=closed_category, sync_permissions=False)
     except discord.Forbidden:
         log.warning(f"Missing permissions to archive ticket {channel.id} in {guild.name}")
-        return False
+        return None
     except discord.HTTPException as e:
         log.warning(f"Failed to move closed ticket {channel.id} to archive category: {e}")
-        return False
+        return None
 
-    # Strip the opener and any added users (Member overwrites), keep staff roles
+    # Strip the opener and any added users (Member overwrites), keep staff roles.
+    # Remember who we removed so the ticket can be fully restored on reopen.
+    removed_members = []
     for target in list(channel.overwrites.keys()):
         if isinstance(target, discord.Member) and target.id != guild.me.id:
+            removed_members.append(target.id)
             with suppress(discord.HTTPException):
                 await channel.set_permissions(target, overwrite=None)
 
-    return True
+    return {"original_category": original_category_id, "removed_members": removed_members}
+
+
+def _apply_archived_embed(
+    embed: discord.Embed,
+    guild: discord.Guild,
+    closedby: str,
+    reason: Optional[str],
+) -> discord.Embed:
+    """Mutate the ticket's opening embed to reflect the archived state."""
+    embed.color = discord.Color.dark_grey()
+
+    closer = closedby
+    if isinstance(closedby, str) and closedby.isdigit():
+        member = guild.get_member(int(closedby))
+        closer = member.display_name if member else closedby
+
+    value = _("🔒 Archived — closed by {}").format(closer)
+    if reason:
+        value += _("\nReason: {}").format(reason)
+
+    field_name = _("Status")
+    for index, existing in enumerate(embed.fields):
+        if existing.name == field_name:
+            embed.set_field_at(index, name=field_name, value=value, inline=False)
+            break
+    else:
+        embed.add_field(name=field_name, value=value, inline=False)
+    return embed
+
+
+def _restore_active_embed(embed: discord.Embed, original_color: Optional[int]) -> discord.Embed:
+    """Mutate an archived embed back to its active look (drop status & claim fields)."""
+    if original_color is not None:
+        embed.color = discord.Color(original_color)
+    for name in (_("Status"), _("Claimed by")):
+        for index, existing in enumerate(embed.fields):
+            if existing.name == name:
+                embed.remove_field(index)
+                break
+    return embed
+
+
+async def finalize_archived_ticket(
+    bot: Red,
+    guild: discord.Guild,
+    channel: discord.TextChannel,
+    ticket: dict,
+    owner: Union[discord.Member, discord.User],
+    reason: Optional[str],
+    closedby: str,
+    archive_meta: Dict[str, Any],
+    config: Config,
+) -> None:
+    """
+    Persist an archived ticket and swap its opening message to the archived state
+    (archived embed + Reopen/Delete buttons).
+    """
+    cid = str(channel.id)
+    message_id = ticket.get("message_id")
+
+    msg = None
+    if message_id:
+        try:
+            msg = await channel.fetch_message(message_id)
+        except (discord.NotFound, discord.HTTPException):
+            msg = None
+
+    original_color = None
+    if msg and msg.embeds and msg.embeds[0].color is not None:
+        original_color = msg.embeds[0].color.value
+
+    archived_entry = dict(ticket)
+    archived_entry.update(
+        {
+            "owner_id": str(owner.id),
+            "owner_name": getattr(owner, "name", str(owner.id)),
+            "closed_at": datetime.now().astimezone().isoformat(),
+            "closed_by": closedby,
+            "close_reason": reason,
+            "original_category": archive_meta.get("original_category"),
+            "removed_members": archive_meta.get("removed_members", []),
+            "original_color": original_color,
+        }
+    )
+
+    async with config.guild(guild).archived() as archived:
+        archived[cid] = archived_entry
+
+    if msg:
+        from .views import ArchivedView
+
+        embeds = list(msg.embeds) if msg.embeds else []
+        if embeds:
+            embeds[0] = _apply_archived_embed(embeds[0], guild, closedby, reason)
+        view = ArchivedView(bot, config, int(owner.id), channel)
+        with suppress(discord.HTTPException):
+            await msg.edit(embeds=embeds or None, view=view)
+        bot.add_view(view, message_id=message_id)
+
+
+async def reopen_archived_ticket(
+    bot: Red,
+    guild: discord.Guild,
+    channel: discord.TextChannel,
+    config: Config,
+) -> Tuple[bool, str]:
+    """
+    Reopen an archived ticket: restore access, move it back, mark it active again
+    (unclaimed) and swap the opening message back to the Close/Claim buttons.
+    """
+    cid = str(channel.id)
+    conf = await config.guild(guild).all()
+    entry = conf.get("archived", {}).get(cid)
+    if not entry:
+        return False, _("This is not an archived ticket.")
+
+    owner_id = entry.get("owner_id")
+
+    # Move the channel back to its original category
+    original_category_id = entry.get("original_category")
+    original_category = guild.get_channel(original_category_id) if original_category_id else None
+    if isinstance(original_category, discord.CategoryChannel) and channel.category_id != original_category.id:
+        with suppress(discord.HTTPException):
+            await channel.edit(category=original_category, sync_permissions=False)
+
+    # Restore access for the opener and any previously-added members
+    member_ids = {int(m) for m in entry.get("removed_members", [])}
+    if owner_id:
+        member_ids.add(int(owner_id))
+    for mid in member_ids:
+        member = guild.get_member(mid)
+        if not member:
+            continue
+        with suppress(discord.HTTPException):
+            await channel.set_permissions(member, read_messages=True, send_messages=True)
+
+    # Rebuild the active ticket entry (open + unclaimed). We keep the original
+    # logmsg id so a later close still posts a fresh transcript to the log channel
+    # (the stale id just fails to delete silently).
+    ticket_keys = [
+        "panel", "opened", "pfp", "logmsg", "answers", "has_response", "message_id",
+        "max_claims", "last_user_message", "last_staff_message", "close_warnings_sent",
+        "escalated", "escalation_level", "transferred_from", "notes", "summary",
+    ]
+    ticket_entry = {k: entry.get(k) for k in ticket_keys}
+    ticket_entry["status"] = "open"
+    ticket_entry["claimed_by"] = None
+    ticket_entry["claimed_at"] = None
+
+    async with config.guild(guild).all() as data:
+        data["archived"].pop(cid, None)
+        if owner_id not in data["opened"]:
+            data["opened"][owner_id] = {}
+        data["opened"][owner_id][cid] = ticket_entry
+        new_id = await update_active_overview(guild, data)
+        if new_id:
+            data["overview_msg"] = new_id
+
+    # Restore the opening message: active embed + Close/Claim buttons
+    message_id = entry.get("message_id")
+    if message_id:
+        try:
+            msg = await channel.fetch_message(message_id)
+        except (discord.NotFound, discord.HTTPException):
+            msg = None
+        if msg:
+            from .views import CloseView
+
+            embeds = list(msg.embeds) if msg.embeds else []
+            if embeds:
+                embeds[0] = _restore_active_embed(embeds[0], entry.get("original_color"))
+            view = CloseView(bot, config, int(owner_id), channel, claimed_by=None)
+            with suppress(discord.HTTPException):
+                await msg.edit(embeds=embeds or None, view=view)
+            bot.add_view(view, message_id=message_id)
+
+    # Re-register the channel for activity tracking
+    cog = bot.get_cog("TicketsTrini")
+    if cog is not None:
+        cog.ticket_channel_ids.add(cid)
+
+    return True, _("Ticket reopened.")
 
 
 async def close_ticket(
@@ -1379,12 +1573,17 @@ async def close_ticket(
             log.error("Failed to archive thread ticket", exc_info=e)
     elif closed_category and isinstance(channel, discord.TextChannel):
         # Archive the channel under the closed-tickets category instead of deleting it
-        archived = await archive_closed_channel(guild, channel, closed_category)
-        if not archived:
+        archive_meta = await archive_closed_channel(guild, channel, closed_category)
+        if archive_meta is None:
             try:
                 await channel.delete()
             except Exception as e:
                 log.error("Failed to delete ticket channel after failed archive", exc_info=e)
+        else:
+            # Persist the archived ticket and swap to Reopen/Delete buttons
+            await finalize_archived_ticket(
+                bot, guild, channel, ticket, member, reason, closedby, archive_meta, config
+            )
     else:
         try:
             await channel.delete()
