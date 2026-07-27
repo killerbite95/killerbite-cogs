@@ -66,6 +66,7 @@ class Honeypot(Cog):
             logs_channel=None,
             ping_role=None,
             honeypot_channel=None,
+            honeypot_embed_id=None,
             mute_role=None,
             ban_delete_message_days=3,
             moderated_count=0,
@@ -116,6 +117,64 @@ class Honeypot(Cog):
     async def cog_load(self) -> None:
         await super().cog_load()
         await self.settings.add_commands()
+
+    async def _update_honeypot_embed(self, guild: discord.Guild) -> None:
+        """Update the honeypot channel embed with new stats."""
+        config = self.config.guild(guild)
+        honeypot_channel_id = await config.honeypot_channel()
+        honeypot_embed_id = await config.honeypot_embed_id()
+        if honeypot_channel_id is None or honeypot_embed_id is None:
+            return
+        channel = guild.get_channel(honeypot_channel_id)
+        if channel is None:
+            return
+        try:
+            message = await channel.fetch_message(honeypot_embed_id)
+        except discord.HTTPException:
+            return
+        # Get new count
+        count = await config.moderated_count()
+        # Rebuild embed with same structure
+        embed = discord.Embed(
+            title=_("⚠️ DO NOT POST HERE! ⚠️"),
+            description=_(
+                "An action will be immediately taken against you if you send a message in this channel.",
+            ),
+            color=discord.Color.red(),
+        )
+        embed.add_field(
+            name=_("What not to do?"),
+            value=_("Do not send any messages in this channel."),
+            inline=False,
+        )
+        embed.add_field(
+            name=_("What WILL happen?"),
+            value=_("An action will be taken against you."),
+            inline=False,
+        )
+        embed.add_field(
+            name=_("🍯 Honeypot Statistics"),
+            value=_("**Server Stats:**\nTotal moderated in this server: **{count}**").format(
+                count=count
+            ),
+            inline=False,
+        )
+        embed.set_footer(text=guild.name, icon_url=guild.icon)
+        # Select image based on guild locale
+        guild_locale = await self.bot._config.guild(guild).locale()
+        if guild_locale and guild_locale.startswith("es"):
+            image_file = "no_postear_aqui.png"
+        else:
+            image_file = "do_not_post_here.png"
+        embed.set_image(url=f"attachment://{image_file}")
+        # Update view
+        view = HoneypotStatsView(cog=self, guild=guild)
+        await message.edit(
+            content=_("## ⚠️ WARNING ⚠️"),
+            embed=embed,
+            attachments=[discord.File(os.path.join(os.path.dirname(__file__), image_file))],
+            view=view,
+        )
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message) -> None:
@@ -193,6 +252,8 @@ class Honeypot(Cog):
                 )
                 # Increment moderated count
                 await self.config.guild(message.guild).moderated_count.inc()
+                # Update honeypot embed with new count
+                await self._update_honeypot_embed(message.guild)
             embed.add_field(
                 name=_("Action:"),
                 value=(
@@ -298,13 +359,14 @@ class Honeypot(Cog):
         embed.set_image(url=f"attachment://{image_file}")
         # Create view with stats button
         view = HoneypotStatsView(cog=self, guild=ctx.guild)
-        await honeypot_channel.send(
+        honeypot_msg = await honeypot_channel.send(
             content=_("## ⚠️ WARNING ⚠️"),
             embed=embed,
             files=[discord.File(os.path.join(os.path.dirname(__file__), image_file))],
             view=view,
         )
         await self.config.guild(ctx.guild).honeypot_channel.set(honeypot_channel.id)
+        await self.config.guild(ctx.guild).honeypot_embed_id.set(honeypot_msg.id)
         await ctx.send(
             _(
                 "The honeypot channel has been set to {honeypot_channel.mention} ({honeypot_channel.id}). You can now start attracting self bots/scammers!\n"
