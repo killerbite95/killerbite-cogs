@@ -1,0 +1,133 @@
+# Spanish translations for Honeypot
+# Copyright (C) 2025 Killerbite95
+# This file is distributed under the same license as the Honeypot package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Honeypot\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-05-31 01:00+0200\n"
+"PO-Revision-Date: 2025-05-31 01:00+0200\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: honeypot.py (cog docstring)
+msgid ""
+"Create a channel at the top of the server to attract self bots/scammers and "
+"notify/mute/kick/ban them immediately!"
+msgstr ""
+"Crea un canal en la parte superior del servidor para atraer selfbots/estafadores y "
+"notificar/mutear/expulsar/banearlos inmediatamente."
+
+#: honeypot.py (embed title)
+msgid "Honeypot — Self Bot/Scammer Detected!"
+msgstr "Honeypot — ¡Self Bot/Estafador Detectado!"
+
+#: honeypot.py (mute role error)
+msgid "**Failed:** The mute role is not set or doesn't exist anymore."
+msgstr "**Error:** El rol de mute no está configurado o ya no existe."
+
+#: honeypot.py (action error)
+msgid ""
+"**Failed:** An error occurred while trying to take action against the "
+"member:\n"
+msgstr ""
+"**Error:** Ocurrió un error al intentar tomar acción contra el "
+"miembro:\n"
+
+#: honeypot.py (action field)
+msgid "Action:"
+msgstr "Acción:"
+
+#: honeypot.py (mute success)
+msgid "The member has been muted."
+msgstr "El miembro ha sido muteado."
+
+#: honeypot.py (kick success)
+msgid "The member has been kicked."
+msgstr "El miembro ha sido expulsado."
+
+#: honeypot.py (ban success)
+msgid "The member has been banned."
+msgstr "El miembro ha sido baneado."
+
+#: honeypot.py (createchannel docstring)
+msgid "Create the honeypot channel."
+msgstr "Crea el canal honeypot."
+
+#: honeypot.py (channel exists error)
+msgid ""
+"The honeypot channel already exists: {honeypot_channel.mention} "
+"({honeypot_channel.id})."
+msgstr ""
+"El canal honeypot ya existe: {honeypot_channel.mention} "
+"({honeypot_channel.id})."
+
+#: honeypot.py (embed title)
+msgid "⚠️ DO NOT POST HERE! ⚠️"
+msgstr "⚠️ ¡NO publiques aquí! ⚠️"
+
+#: honeypot.py (embed description)
+msgid ""
+"An action will be immediately taken against you if you send a message in "
+"this channel."
+msgstr ""
+"Se tomará una acción inmediata contra ti si envías un mensaje en "
+"este canal."
+
+#: honeypot.py (embed field)
+msgid "What not to do?"
+msgstr "¿Qué no hacer?"
+
+#: honeypot.py (embed field value)
+msgid "Do not send any messages in this channel."
+msgstr "No envíes ningún mensaje en este canal."
+
+#: honeypot.py (embed field)
+msgid "What WILL happen?"
+msgstr "¿Qué SUCEDERÁ?"
+
+#: honeypot.py (embed field value)
+msgid "An action will be taken against you."
+msgstr "Se tomará una acción contra ti."
+
+#: honeypot.py (warning header)
+msgid "## ⚠️ WARNING ⚠️"
+msgstr "## ⚠️ ADVERTENCIA ⚠️"
+
+#: honeypot.py (success message)
+msgid ""
+"The honeypot channel has been set to {honeypot_channel.mention} "
+"({honeypot_channel.id}). You can now start attracting self bots/scammers!\n"
+"Please make sure to enable the cog and set the logs channel, the action to "
+"take, the role to ping (and the mute role) if you haven't already."
+msgstr ""
+"El canal honeypot ha sido configurado en {honeypot_channel.mention} "
+"({honeypot_channel.id}). ¡Ahora puedes empezar a atraer selfbots/estafadores!\n"
+"Asegúrate de activar el cog y configurar el canal de logs, la acción a "
+"tomar, el rol a mentionar (y el rol de mute) si no lo has hecho ya."
+
+#: honeypot.py (modlog reason)
+msgid "Self bot/scammer detected (message in the HoneyPot channel)."
+msgstr "Selfbot/estafador detectado (mensaje en el canal HoneyPot)."
+
+#: honeypot.py (stats embed title)
+msgid "🍯 Honeypot Statistics"
+msgstr "🍯 Estadísticas del Honeypot"
+
+#: honeypot.py (stats embed description)
+msgid ""
+"**Server Stats:**\n"
+"Total moderated in this server: **{count}**"
+msgstr ""
+"**Estadísticas del servidor:**\n"
+"Total moderados en este servidor: **{count}**"
+
+#: honeypot.py (stats button label)
+msgid "Honeypot Stats"
+msgstr "Estadísticas"
