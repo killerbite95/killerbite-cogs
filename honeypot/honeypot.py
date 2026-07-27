@@ -251,7 +251,8 @@ class Honeypot(Cog):
                     reason=reason,
                 )
                 # Increment moderated count
-                await self.config.guild(message.guild).moderated_count.inc()
+                current_count = await self.config.guild(message.guild).moderated_count()
+                await self.config.guild(message.guild).moderated_count.set(current_count + 1)
                 # Update honeypot embed with new count
                 await self._update_honeypot_embed(message.guild)
             embed.add_field(
