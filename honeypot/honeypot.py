@@ -374,3 +374,72 @@ class Honeypot(Cog):
                 "Please make sure to enable the cog and set the logs channel, the action to take, the role to ping (and the mute role) if you haven't already.",
             ).format(honeypot_channel=honeypot_channel),
         )
+
+    @commands.bot_has_guild_permissions(manage_messages=True)
+    @sethoneypot.command()
+    async def resend(self, ctx: commands.Context) -> None:
+        """Resend the honeypot embed (deletes the old one and sends a new one)."""
+        config = self.config.guild(ctx.guild)
+        honeypot_channel_id = await config.honeypot_channel()
+        if honeypot_channel_id is None:
+            raise commands.UserFeedbackCheckFailure(
+                _("The honeypot channel is not configured. Use `[p]sethoneypot createchannel` first."),
+            )
+        honeypot_channel = ctx.guild.get_channel(honeypot_channel_id)
+        if honeypot_channel is None:
+            raise commands.UserFeedbackCheckFailure(
+                _("The honeypot channel no longer exists. Use `[p]sethoneypot createchannel` to create a new one."),
+            )
+        # Delete old embed if exists
+        old_embed_id = await config.honeypot_embed_id()
+        if old_embed_id is not None:
+            try:
+                old_msg = await honeypot_channel.fetch_message(old_embed_id)
+                await old_msg.delete()
+            except discord.HTTPException:
+                pass
+        # Send new embed
+        count = await config.moderated_count()
+        embed = discord.Embed(
+            title=_("⚠️ DO NOT POST HERE! ⚠️"),
+            description=_(
+                "An action will be immediately taken against you if you send a message in this channel.",
+            ),
+            color=discord.Color.red(),
+        )
+        embed.add_field(
+            name=_("What not to do?"),
+            value=_("Do not send any messages in this channel."),
+            inline=False,
+        )
+        embed.add_field(
+            name=_("What WILL happen?"),
+            value=_("An action will be taken against you."),
+            inline=False,
+        )
+        embed.add_field(
+            name=_("🍯 Honeypot Statistics"),
+            value=_("**Server Stats:**\nTotal moderated in this server: **{count}**").format(
+                count=count
+            ),
+            inline=False,
+        )
+        embed.set_footer(text=ctx.guild.name, icon_url=ctx.guild.icon)
+        # Select image based on guild locale
+        guild_locale = await self.bot._config.guild(ctx.guild).locale()
+        if guild_locale and guild_locale.startswith("es"):
+            image_file = "no_postear_aqui.png"
+        else:
+            image_file = "do_not_post_here.png"
+        embed.set_image(url=f"attachment://{image_file}")
+        view = HoneypotStatsView(cog=self, guild=ctx.guild)
+        honeypot_msg = await honeypot_channel.send(
+            content=_("## ⚠️ WARNING ⚠️"),
+            embed=embed,
+            files=[discord.File(os.path.join(os.path.dirname(__file__), image_file))],
+            view=view,
+        )
+        await config.honeypot_embed_id.set(honeypot_msg.id)
+        await ctx.send(
+            _("✅ Honeypot embed has been resent to {channel}.").format(channel=honeypot_channel.mention),
+        )
