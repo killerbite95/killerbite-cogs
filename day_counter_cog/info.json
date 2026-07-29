@@ -1,7 +1,7 @@
 {
     "author": [
-    "Killerbite95"
-  ],
-    "end_user_data_statement": "Este cog almacena la ID de usuario.",
-    "description": "Cuenta de días desde uan fecha."
+        "Killerbite95"
+    ],
+    "end_user_data_statement": "Este cog almacena la fecha de inicio del contador por servidor.",
+    "description": "Cuenta de días desde una fecha."
 }
