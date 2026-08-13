@@ -143,7 +143,7 @@ class Honeypot(Cog):
         embed = discord.Embed(
             title=_("⚠️ DO NOT POST HERE! ⚠️"),
             description=_(
-                "An action will be immediately taken against you if you send a message in this channel.",
+                "An action will be immediately taken against you if you send a message in this channel."
             ),
             color=discord.Color.red(),
         )
@@ -280,17 +280,17 @@ class Honeypot(Cog):
             )
             if not getattr(me.guild_permissions, required_permission):
                 failed = _(
-                    "**Failed:** I'm missing the `{permission}` permission. Run `[p]sethoneypot diagnose` for details.",
+                    "**Failed:** I'm missing the `{permission}` permission. Run `[p]sethoneypot diagnose` for details."
                 ).format(permission=required_permission)
             elif me.top_role <= message.author.top_role:
                 failed = _(
-                    "**Failed:** My highest role (`{my_role}`) isn't above the member's highest role (`{their_role}`). Move my role higher in **Server Settings → Roles**.",
+                    "**Failed:** My highest role (`{my_role}`) isn't above the member's highest role (`{their_role}`). Move my role higher in **Server Settings → Roles**."
                 ).format(my_role=me.top_role.name, their_role=message.author.top_role.name)
             elif action == "mute" and mute_role is None:
                 failed = _("**Failed:** The mute role is not set or doesn't exist anymore.")
             elif action == "mute" and mute_role >= me.top_role:
                 failed = _(
-                    "**Failed:** The mute role (`{mute_role}`) isn't below my highest role (`{my_role}`), so I can't assign it.",
+                    "**Failed:** The mute role (`{mute_role}`) isn't below my highest role (`{my_role}`), so I can't assign it."
                 ).format(mute_role=mute_role.name, my_role=me.top_role.name)
             else:
                 try:
@@ -305,7 +305,7 @@ class Honeypot(Cog):
                         )
                 except discord.HTTPException as e:
                     failed = _(
-                        "**Failed:** An error occurred while trying to take action against the member:\n",
+                        "**Failed:** An error occurred while trying to take action against the member:\n"
                     ) + box(str(e), lang="py")
                 else:
                     # A modlog failure (unregistered case type, no modlog channel, ...) must never
@@ -394,7 +394,7 @@ class Honeypot(Cog):
         ) is not None:
             raise commands.UserFeedbackCheckFailure(
                 _(
-                    "The honeypot channel already exists: {honeypot_channel.mention} ({honeypot_channel.id}).",
+                    "The honeypot channel already exists: {honeypot_channel.mention} ({honeypot_channel.id})."
                 ).format(honeypot_channel=honeypot_channel),
             )
         honeypot_channel = await ctx.guild.create_text_channel(
@@ -423,7 +423,7 @@ class Honeypot(Cog):
         await ctx.send(
             _(
                 "The honeypot channel has been set to {honeypot_channel.mention} ({honeypot_channel.id}). You can now start attracting self bots/scammers!\n"
-                "Please make sure to enable the cog and set the logs channel, the action to take, the role to ping (and the mute role) if you haven't already.",
+                "Please make sure to enable the cog and set the logs channel, the action to take, the role to ping (and the mute role) if you haven't already."
             ).format(honeypot_channel=honeypot_channel),
         )
 

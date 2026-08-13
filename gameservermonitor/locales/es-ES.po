@@ -1,6 +1,3 @@
-# Spanish translations for GameServerMonitor
-# Copyright (C) 2025 Killerbite95
-# This file is distributed under the same license as the GameServerMonitor package.
 #
 msgid ""
 msgstr ""
@@ -16,366 +13,761 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: gameservermonitor.py (cog docstring)
-msgid "Monitors game servers and updates their status in Discord. By Killerbite95"
-msgstr "Monitoriza servidores de juegos y actualiza su estado en Discord. Por Killerbite95"
+#: gameservermonitor\gameservermonitor.py:52
+msgid ""
+"Monitoriza servidores de juegos y actualiza su estado en Discord. By "
+"Killerbite95"
+msgstr ""
+"Monitoriza servidores de juegos y actualiza su estado en Discord. By "
+"Killerbite95"
 
-#: gameservermonitor.py (error messages)
+#: gameservermonitor\gameservermonitor.py:348
+#: gameservermonitor\gameservermonitor.py:508
+#: gameservermonitor\gameservermonitor.py:598
+#: gameservermonitor\gameservermonitor.py:723
 msgid "Server not found."
 msgstr "Servidor no encontrado."
 
+#: gameservermonitor\gameservermonitor.py:353
+#: gameservermonitor\gameservermonitor.py:513
+#: gameservermonitor\gameservermonitor.py:728
 msgid "Invalid game data for this server."
 msgstr "Datos de juego no válidos para este servidor."
 
+#: gameservermonitor\gameservermonitor.py:382
+#: gameservermonitor\gameservermonitor.py:747
 msgid "**{server_name}** is offline or not responding."
 msgstr "**{server_name}** está offline o no responde."
 
-msgid "No history available for this server.\nHistory will be generated with the next updates."
-msgstr "No hay historial disponible para este servidor.\nEl historial se generará con las próximas actualizaciones."
-
-msgid "Unknown action: {action}"
-msgstr "Acción desconocida: {action}"
-
-#: gameservermonitor.py (embed titles)
-msgid "Players - {hostname}"
-msgstr "Jugadores - {hostname}"
-
-msgid "History - {display_name}"
-msgstr "Historial - {display_name}"
-
-msgid "Statistics - {hostname}"
-msgstr "Estadísticas - {hostname}"
-
-#: gameservermonitor.py (embed fields)
-msgid "Status"
-msgstr "Estado"
-
-msgid "Game"
-msgstr "Juego"
-
-msgid "Connect"
-msgstr "Conectar"
-
-msgid "IP"
-msgstr "IP"
-
+#: gameservermonitor\gameservermonitor.py:401
+#: gameservermonitor\gameservermonitor.py:767
+#: gameservermonitor\gameservermonitor.py:1192
 msgid "Version"
 msgstr "Versión"
 
-msgid "Current Map"
-msgstr "Mapa Actual"
-
+#: gameservermonitor\gameservermonitor.py:401 gameservermonitor\models.py:435
 msgid "Map"
 msgstr "Mapa"
 
+#: gameservermonitor\gameservermonitor.py:405
+msgid "Players - {hostname}"
+msgstr "Jugadores - {hostname}"
+
+#: gameservermonitor\gameservermonitor.py:406
+#: gameservermonitor\gameservermonitor.py:673
+#: gameservermonitor\gameservermonitor.py:781
+#: gameservermonitor\gameservermonitor.py:1175
+#: gameservermonitor\gameservermonitor.py:1237
+#: gameservermonitor\gameservermonitor.py:1251
+#: gameservermonitor\gameservermonitor.py:2027 gameservermonitor\models.py:401
+msgid "Game"
+msgstr "Juego"
+
+#: gameservermonitor\gameservermonitor.py:408
+#: gameservermonitor\gameservermonitor.py:793
+#: gameservermonitor\gameservermonitor.py:1198
+#: gameservermonitor\gameservermonitor.py:1490 gameservermonitor\models.py:406
 msgid "Players"
 msgstr "Jugadores"
 
-msgid "Player List"
-msgstr "Lista de Jugadores"
+#: gameservermonitor\gameservermonitor.py:420
+#: gameservermonitor\gameservermonitor.py:421
+#: gameservermonitor\gameservermonitor.py:571
+#: gameservermonitor\gameservermonitor.py:572
+#: gameservermonitor\gameservermonitor.py:696
+#: gameservermonitor\gameservermonitor.py:697
+#: gameservermonitor\gameservermonitor.py:810
+#: gameservermonitor\gameservermonitor.py:811
+#: gameservermonitor\gameservermonitor.py:1182
+#: gameservermonitor\gameservermonitor.py:1183
+#: gameservermonitor\gameservermonitor.py:1262
+#: gameservermonitor\gameservermonitor.py:1263
+msgid "Connect"
+msgstr "Conectar"
 
-msgid "Ping"
-msgstr "Ping"
-
-msgid "Period Statistics"
-msgstr "Estadísticas del Período"
-
-msgid "Activity Graph"
-msgstr "Gráfico de Actividad"
-
-msgid "Peak"
-msgstr "Pico"
-
-msgid "Average"
-msgstr "Promedio"
-
-msgid "Uptime"
-msgstr "Tiempo activo"
-
-msgid "players"
-msgstr "jugadores"
-
-msgid "Last {hours} hours"
-msgstr "Últimas {hours} horas"
-
-#: gameservermonitor.py (player list)
+#: gameservermonitor\gameservermonitor.py:428
 msgid "Name"
 msgstr "Nombre"
 
+#: gameservermonitor\gameservermonitor.py:428
 msgid "Score"
 msgstr "Puntos"
 
+#: gameservermonitor\gameservermonitor.py:428
 msgid "Time"
 msgstr "Tiempo"
 
+#: gameservermonitor\gameservermonitor.py:449
+#: gameservermonitor\gameservermonitor.py:451
+#: gameservermonitor\gameservermonitor.py:466
+#: gameservermonitor\gameservermonitor.py:472
+#: gameservermonitor\gameservermonitor.py:478
+msgid "Player List"
+msgstr "Lista de Jugadores"
+
+#: gameservermonitor\gameservermonitor.py:459
 msgid "... and {count} more players"
 msgstr "... y {count} jugadores más"
 
+#: gameservermonitor\gameservermonitor.py:467
 msgid "The Minecraft server does not expose the full player list."
 msgstr "El servidor de Minecraft no expone la lista completa de jugadores."
 
+#: gameservermonitor\gameservermonitor.py:473
 msgid "Could not retrieve the player list."
 msgstr "No se pudo obtener la lista de jugadores."
 
+#: gameservermonitor\gameservermonitor.py:479
 msgid "No players connected."
 msgstr "No hay jugadores conectados."
 
-#: gameservermonitor.py (stats embed)
-msgid "Current Status"
-msgstr "Estado Actual"
+#: gameservermonitor\gameservermonitor.py:484
+#: gameservermonitor\gameservermonitor.py:800
+#: gameservermonitor\gameservermonitor.py:1206
+msgid "Ping"
+msgstr "Ping"
 
-msgid "Total Queries"
-msgstr "Consultas Totales"
+#: gameservermonitor\gameservermonitor.py:613
+msgid ""
+"No history available for this server.\n"
+"History will be generated with the next updates."
+msgstr ""
+"No hay historial disponible para este servidor.\n"
+"El historial se generará con las próximas actualizaciones."
 
-msgid "Successful Queries"
-msgstr "Consultas Exitosas"
+#: gameservermonitor\gameservermonitor.py:672
+msgid "History - {display_name}"
+msgstr "Historial - {display_name}"
 
-msgid "Last Online"
-msgstr "Último Online"
+#: gameservermonitor\gameservermonitor.py:673
+#: gameservermonitor\gameservermonitor.py:678
+msgid "Period Statistics"
+msgstr "Estadísticas del Período"
 
-msgid "Last Offline"
-msgstr "Último Offline"
+#: gameservermonitor\gameservermonitor.py:673
+msgid "Last {hours} hours"
+msgstr "Últimas {hours} horas"
 
-#: models.py (server status)
-msgid "Online"
-msgstr "En línea"
+#: gameservermonitor\gameservermonitor.py:679 gameservermonitor\models.py:582
+msgid "Peak"
+msgstr "Pico"
 
-msgid "Offline"
-msgstr "Desconectado"
+#: gameservermonitor\gameservermonitor.py:679
+#: gameservermonitor\gameservermonitor.py:680
+msgid "players"
+msgstr "jugadores"
 
-msgid "Maintenance"
-msgstr "Mantenimiento"
+#: gameservermonitor\gameservermonitor.py:680 gameservermonitor\models.py:582
+msgid "Average"
+msgstr "Promedio"
 
+#: gameservermonitor\gameservermonitor.py:681
+#: gameservermonitor\gameservermonitor.py:2039 gameservermonitor\models.py:412
+msgid "Uptime"
+msgstr "Tiempo activo"
+
+#: gameservermonitor\gameservermonitor.py:686
+msgid "Activity Graph"
+msgstr "Gráfico de Actividad"
+
+#: gameservermonitor\gameservermonitor.py:749
+#: gameservermonitor\gameservermonitor.py:1174
+#: gameservermonitor\gameservermonitor.py:2025 gameservermonitor\models.py:54
+#: gameservermonitor\models.py:56
 msgid "Unknown"
 msgstr "Desconocido"
 
-#: models.py (game names)
-msgid "Counter-Strike 2"
-msgstr "Counter-Strike 2"
+#: gameservermonitor\gameservermonitor.py:769
+#: gameservermonitor\gameservermonitor.py:1194
+msgid "Current Map"
+msgstr "Mapa Actual"
 
-msgid "Counter-Strike: Source"
-msgstr "Counter-Strike: Source"
+#: gameservermonitor\gameservermonitor.py:939
+msgid "Su canal ya no existe"
+msgstr "Su canal ya no existe"
 
-msgid "Garry's Mod"
-msgstr "Garry's Mod"
+#: gameservermonitor\gameservermonitor.py:953
+msgid "Sin responder desde hace {duration}"
+msgstr "Sin responder desde hace {duration}"
 
-msgid "Rust"
-msgstr "Rust"
+#: gameservermonitor\gameservermonitor.py:961
+msgid "Nunca respondió desde que se añadió"
+msgstr "Nunca respondió desde que se añadió"
 
-msgid "Minecraft"
-msgstr "Minecraft"
+#: gameservermonitor\gameservermonitor.py:1021
+msgid "canal eliminado"
+msgstr "canal eliminado"
 
-msgid "DayZ"
-msgstr "DayZ"
+#: gameservermonitor\gameservermonitor.py:1029
+msgid "*... y {count} servidor(es) más.*"
+msgstr "*... y {count} servidor(es) más.*"
 
-#: models.py (history graph)
-msgid "```\nNo history data available.\n```"
-msgstr "```\nNo hay datos de historial disponibles.\n```"
+#: gameservermonitor\gameservermonitor.py:1036
+msgid ""
+"{count} servidor(es) llevan más de **{days}** día(s) sin responder.\n"
+"\n"
+msgstr ""
+"{count} servidor(es) llevan más de **{days}** día(s) sin responder.\n"
+"\n"
 
-msgid "Player history"
-msgstr "Historial de jugadores"
+#: gameservermonitor\gameservermonitor.py:1168
+#: gameservermonitor\gameservermonitor.py:1249
+msgid "Status"
+msgstr "Estado"
 
-msgid "Now"
-msgstr "Ahora"
+#: gameservermonitor\gameservermonitor.py:1188
+#: gameservermonitor\gameservermonitor.py:1255
+msgid "IP"
+msgstr "IP"
 
-#: views.py (button labels)
+#: gameservermonitor\gameservermonitor.py:1249 gameservermonitor\models.py:52
+msgid "Offline"
+msgstr "Desconectado"
+
+#: gameservermonitor\gameservermonitor.py:1491
 msgid "Stats"
 msgstr "Estadísticas"
 
+#: gameservermonitor\gameservermonitor.py:1492
 msgid "History"
 msgstr "Historial"
 
-#: views.py (cooldown)
-msgid "Please wait **{seconds:.1f}s** before using this button again."
-msgstr "Por favor espera **{seconds:.1f}s** antes de usar este botón de nuevo."
+#: gameservermonitor\gameservermonitor.py:1576
+msgid ""
+"\n"
+"        Sets the timezone for status updates.\n"
+"        \n"
+"        Example: `[p]settimezone Europe/Madrid`\n"
+"        "
+msgstr ""
+"\n"
+"        Establece la zona horaria de las actualizaciones de estado.\n"
+"\n"
+"        Ejemplo: `[p]settimezone Europe/Madrid`\n"
+"        "
 
-#: views.py (errors)
-msgid "The GameServerMonitor module is not available."
-msgstr "El módulo GameServerMonitor no está disponible."
-
-msgid "This command only works in servers."
-msgstr "Este comando solo funciona en servidores."
-
-msgid "Server not found (ID: `{server_id}`).\nThe server may have been deleted."
-msgstr "Servidor no encontrado (ID: `{server_id}`).\nEs posible que el servidor haya sido eliminado."
-
-msgid "An error occurred while processing the request."
-msgstr "Ocurrió un error al procesar la solicitud."
-
-#: gameservermonitor.py (commands - timezone)
+#: gameservermonitor\gameservermonitor.py:1584
 msgid "❌ La zona horaria '{}' no es válida."
 msgstr "❌ La zona horaria '{}' no es válida."
 
+#: gameservermonitor\gameservermonitor.py:1588
 msgid "✅ Zona horaria establecida en **{}**"
 msgstr "✅ Zona horaria establecida en **{}**"
 
-#: gameservermonitor.py (commands - public ip)
+#: gameservermonitor\gameservermonitor.py:1593
+msgid ""
+"\n"
+"        Sets the public IP to replace private IPs in embeds.\n"
+"        \n"
+"        Use without arguments to disable replacement.\n"
+"        \n"
+"        Example: `[p]setpublicip 123.45.67.89`\n"
+"        "
+msgstr ""
+"\n"
+"        Establece la IP pública que reemplaza a las IPs privadas en los embeds.\n"
+"\n"
+"        Úsalo sin argumentos para desactivar el reemplazo.\n"
+"\n"
+"        Ejemplo: `[p]setpublicip 123.45.67.89`\n"
+"        "
+
+#: gameservermonitor\gameservermonitor.py:1602
 msgid "✅ Reemplazo de IP pública desactivado."
 msgstr "✅ Reemplazo de IP pública desactivado."
 
-msgid "✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas."
-msgstr "✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas."
+#: gameservermonitor\gameservermonitor.py:1606
+msgid ""
+"✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas."
+msgstr ""
+"✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas."
 
-#: gameservermonitor.py (commands - connect url)
+#: gameservermonitor\gameservermonitor.py:1612
+msgid ""
+"\n"
+"        Sets the connection URL template.\n"
+"        \n"
+"        Use `{ip}` as placeholder for the server IP:port.\n"
+"        \n"
+"        Example: `[p]setconnecturl https://mysite.com/connect?server={ip}`\n"
+"        "
+msgstr ""
+"\n"
+"        Establece la plantilla de URL de conexión.\n"
+"\n"
+"        Usa `{ip}` como marcador para la IP:puerto del servidor.\n"
+"\n"
+"        Ejemplo: `[p]setconnecturl https://misitio.com/connect?server={ip}`\n"
+"        "
+
+#: gameservermonitor\gameservermonitor.py:1620
 msgid "❌ La URL debe contener `{ip}` como placeholder."
 msgstr "❌ La URL debe contener `{ip}` como placeholder."
 
+#: gameservermonitor\gameservermonitor.py:1624
 msgid "✅ URL de conexión establecida: {}"
 msgstr "✅ URL de conexión establecida: {}"
 
-#: gameservermonitor.py (commands - refresh)
+#: gameservermonitor\gameservermonitor.py:1629
+msgid ""
+"\n"
+"        Sets the refresh interval in seconds.\n"
+"        \n"
+"        Minimum: 10 seconds\n"
+"        \n"
+"        Example: `[p]refreshtime 120`\n"
+"        "
+msgstr ""
+"\n"
+"        Establece el intervalo de actualización en segundos.\n"
+"\n"
+"        Mínimo: 10 segundos\n"
+"\n"
+"        Ejemplo: `[p]refreshtime 120`\n"
+"        "
+
+#: gameservermonitor\gameservermonitor.py:1637
 msgid "❌ El tiempo debe ser al menos 10 segundos."
 msgstr "❌ El tiempo debe ser al menos 10 segundos."
 
+#: gameservermonitor\gameservermonitor.py:1642
 msgid "✅ Tiempo de actualización establecido en **{}** segundos."
 msgstr "✅ Tiempo de actualización establecido en **{}** segundos."
 
-#: gameservermonitor.py (commands - debug)
+#: gameservermonitor\gameservermonitor.py:1647
+msgid ""
+"\n"
+"        Enables or disables debug mode.\n"
+"        \n"
+"        Example: `[p]gameservermonitordebug true`\n"
+"        "
+msgstr ""
+"\n"
+"        Activa o desactiva el modo debug.\n"
+"\n"
+"        Ejemplo: `[p]gameservermonitordebug true`\n"
+"        "
+
+#: gameservermonitor\gameservermonitor.py:1653
 msgid "activado"
 msgstr "activado"
 
+#: gameservermonitor\gameservermonitor.py:1653
 msgid "desactivado"
 msgstr "desactivado"
 
+#: gameservermonitor\gameservermonitor.py:1654
 msgid "✅ Modo debug {}."
 msgstr "✅ Modo debug {}."
 
-#: gameservermonitor.py (commands - addserver)
+#: gameservermonitor\gameservermonitor.py:1670
+msgid ""
+"\n"
+"        Adds a server to monitor its status.\n"
+"\n"
+"        **General usage:**\n"
+"        `[p]addserver <ip[:port]> <game> [#channel] [domain]`\n"
+"\n"
+"        **Source games with a separate query port (e.g. Rust with +queryport):**\n"
+"        `[p]addserver <ip:game_port> <game> <game_port> <query_port> [#channel] [domain]`\n"
+"        The A2S query is sent to `query_port`; players still connect to `game_port`.\n"
+"\n"
+"        **DayZ usage (separate ports):**\n"
+"        `[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]`\n"
+"\n"
+"        **Supported games:** cs2, css, gmod, rust, minecraft, dayz, valheim, ark, tf2, l4d2, 7dtd, palworld\n"
+"        "
+msgstr ""
+"\n"
+"        Añade un servidor para monitorizar su estado.\n"
+"\n"
+"        **Uso general:**\n"
+"        `[p]addserver <ip[:puerto]> <juego> [#canal] [dominio]`\n"
+"\n"
+"        **Juegos Source con puerto de query separado (ej. Rust con +queryport):**\n"
+"        `[p]addserver <ip:puerto_juego> <juego> <puerto_juego> <puerto_query> [#canal] [dominio]`\n"
+"        La query A2S se envía a `puerto_query`; los jugadores siguen conectándose a `puerto_juego`.\n"
+"\n"
+"        **Uso DayZ (puertos separados):**\n"
+"        `[p]addserver <ip> dayz <puerto_juego> <puerto_query> [#canal] [dominio]`\n"
+"\n"
+"        **Juegos soportados:** cs2, css, gmod, rust, minecraft, dayz, valheim, ark, tf2, l4d2, 7dtd, palworld\n"
+"        "
+
+#: gameservermonitor\gameservermonitor.py:1691
 msgid "❌ Juego '{}' no soportado. Disponibles: {}"
 msgstr "❌ Juego '{}' no soportado. Disponibles: {}"
 
+#: gameservermonitor\gameservermonitor.py:1699
 msgid "❌ Faltan permisos en {}: {}"
 msgstr "❌ Faltan permisos en {}: {}"
 
-msgid "❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\nOpcionalmente `query_port` (por defecto: game_port + 24714)."
-msgstr "❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\nOpcionalmente `query_port` (por defecto: game_port + 24714)."
+#: gameservermonitor\gameservermonitor.py:1709
+msgid ""
+"❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\n"
+"Ejemplo: `{}addserver 1.2.3.4 dayz 2302 27016 #canal`"
+msgstr ""
+"❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\n"
+"Ejemplo: `{}addserver 1.2.3.4 dayz 2302 27016 #canal`"
 
+#: gameservermonitor\gameservermonitor.py:1715
+#: gameservermonitor\gameservermonitor.py:1777
 msgid "❌ Puerto de juego inválido (1-65535)."
 msgstr "❌ Puerto de juego inválido (1-65535)."
 
+#: gameservermonitor\gameservermonitor.py:1719
+#: gameservermonitor\gameservermonitor.py:1774
 msgid "❌ Puerto de query inválido (1-65535)."
 msgstr "❌ Puerto de query inválido (1-65535)."
 
+#: gameservermonitor\gameservermonitor.py:1726
+#: gameservermonitor\gameservermonitor.py:1783
 msgid "❌ El servidor **{}** ya está siendo monitoreado."
 msgstr "❌ El servidor **{}** ya está siendo monitoreado."
 
-msgid "✅ Servidor **{}** (DayZ) añadido en {}.\nPuertos → juego: **{}**"
-msgstr "✅ Servidor **{}** (DayZ) añadido en {}.\nPuertos → juego: **{}**"
+#: gameservermonitor\gameservermonitor.py:1744
+msgid ""
+"✅ Servidor **{}** (DayZ) añadido en {}.\n"
+"Puertos → juego: **{}**"
+msgstr ""
+"✅ Servidor **{}** (DayZ) añadido en {}.\n"
+"Puertos → juego: **{}**"
 
+#: gameservermonitor\gameservermonitor.py:1747
 msgid ", query: **{}**"
 msgstr ", query: **{}**"
 
-msgid "\nDominio: {}"
-msgstr "\nDominio: {}"
+#: gameservermonitor\gameservermonitor.py:1749
+#: gameservermonitor\gameservermonitor.py:1808
+msgid ""
+"\n"
+"Dominio: {}"
+msgstr ""
+"\n"
+"Dominio: {}"
 
+#: gameservermonitor\gameservermonitor.py:1764
+msgid ""
+"❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por "
+"defecto)."
+msgstr ""
+"❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por "
+"defecto)."
+
+#: gameservermonitor\gameservermonitor.py:1802
 msgid "✅ Servidor **{}** ({}) añadido en {}."
 msgstr "✅ Servidor **{}** ({}) añadido en {}."
 
-msgid "❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por defecto)."
-msgstr "❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por defecto)."
+#: gameservermonitor\gameservermonitor.py:1806
+msgid ""
+"\n"
+"Puerto de query: **{}**"
+msgstr ""
+"\n"
+"Puerto de query: **{}**"
 
-#: gameservermonitor.py (commands - removeserver)
-msgid "❌ Formato: `ip:puerto`"
-msgstr "❌ Formato: `ip:puerto`"
+#: gameservermonitor\gameservermonitor.py:1821
+msgid ""
+"\n"
+"        Removes a server from monitoring.\n"
+"        \n"
+"        Accepts `ip:port` or the short server_id.\n"
+"        \n"
+"        Example: `[p]removeserver 192.168.1.1:27015`\n"
+"        "
+msgstr ""
+"\n"
+"        Elimina un servidor del monitoreo.\n"
+"\n"
+"        Acepta `ip:puerto` o el server_id corto.\n"
+"\n"
+"        Ejemplo: `[p]removeserver 192.168.1.1:27015`\n"
+"        "
 
-msgid "❌ Servidor **{}** no encontrado."
-msgstr "❌ Servidor **{}** no encontrado."
+#: gameservermonitor\gameservermonitor.py:1833
+msgid "❌ Formato: `ip:puerto` o `server_id`"
+msgstr "❌ Formato: `ip:puerto` o `server_id`"
 
+#: gameservermonitor\gameservermonitor.py:1838
 msgid "❌ No se encontró servidor con clave **{}**."
 msgstr "❌ No se encontró servidor con clave **{}**."
 
+#: gameservermonitor\gameservermonitor.py:1846
 msgid "✅ Servidor **{}** eliminado del monitoreo."
 msgstr "✅ Servidor **{}** eliminado del monitoreo."
 
-#: gameservermonitor.py (commands - refresh)
-msgid "✅ Actualización forzada completada."
-msgstr "✅ Actualización forzada completada."
+#: gameservermonitor\gameservermonitor.py:1855
+msgid ""
+"\n"
+"        Lists servers that stopped responding, without removing anything.\n"
+"\n"
+"        A server is listed when its channel was deleted, when it never\n"
+"        responded since it was added, or when its last successful query is\n"
+"        older than `days` days (default: 7).\n"
+"\n"
+"        Example: `[p]deadservers 14`\n"
+"        "
+msgstr ""
+"\n"
+"        Lista los servidores que dejaron de responder, sin eliminar nada.\n"
+"\n"
+"        Un servidor aparece si su canal fue eliminado, si nunca respondió\n"
+"        desde que se añadió, o si su última query exitosa es más antigua\n"
+"        que `days` días (por defecto: 7).\n"
+"\n"
+"        Ejemplo: `[p]deadservers 14`\n"
+"        "
 
-msgid "❌ No hay servidores monitoreados en este canal."
-msgstr "❌ No hay servidores monitoreados en este canal."
+#: gameservermonitor\gameservermonitor.py:1866
+#: gameservermonitor\gameservermonitor.py:1911
+msgid "❌ Los días deben ser al menos 1."
+msgstr "❌ Los días deben ser al menos 1."
 
-#: gameservermonitor.py (commands - listservers)
-msgid "📋 Servidores Monitorizados"
-msgstr "📋 Servidores Monitorizados"
+#: gameservermonitor\gameservermonitor.py:1872
+#: gameservermonitor\gameservermonitor.py:1917
+msgid "✅ Ningún servidor lleva más de **{days}** día(s) sin responder."
+msgstr "✅ Ningún servidor lleva más de **{days}** día(s) sin responder."
 
-msgid "📋 No hay servidores siendo monitoreados."
-msgstr "📋 No hay servidores siendo monitoreados."
+#: gameservermonitor\gameservermonitor.py:1879
+msgid "💀 Servidores sin responder"
+msgstr "💀 Servidores sin responder"
 
-msgid "No hay servidores configurados."
-msgstr "No hay servidores configurados."
+#: gameservermonitor\gameservermonitor.py:1884
+msgid "Usa `{prefix}purgeservers {days}` para eliminarlos."
+msgstr "Usa `{prefix}purgeservers {days}` para eliminarlos."
 
-#: gameservermonitor.py (version command)
-msgid "🎮 GameServerMonitor v{}"
-msgstr "🎮 GameServerMonitor v{}"
+#: gameservermonitor\gameservermonitor.py:1898
+msgid ""
+"\n"
+"        Removes servers that stopped responding, after confirmation.\n"
+"\n"
+"        Stops the monitor from querying servers that no longer exist, which is\n"
+"        what floods the logs with timeouts. Deletes their status embed and their\n"
+"        player history too.\n"
+"\n"
+"        Use `[p]deadservers` first for a dry run.\n"
+"\n"
+"        Example: `[p]purgeservers 14`\n"
+"        "
+msgstr ""
+"\n"
+"        Elimina los servidores que dejaron de responder, tras confirmación.\n"
+"\n"
+"        Evita que el monitor siga consultando servidores que ya no existen,\n"
+"        que es lo que llena los logs de timeouts. Elimina también su embed\n"
+"        de estado y su historial de jugadores.\n"
+"\n"
+"        Usa `[p]deadservers` primero para ver la lista sin borrar nada.\n"
+"\n"
+"        Ejemplo: `[p]purgeservers 14`\n"
+"        "
 
-msgid "🎮 **GameServerMonitor** v{version} by {author}"
-msgstr "🎮 **GameServerMonitor** v{version} por {author}"
+#: gameservermonitor\gameservermonitor.py:1924
+msgid "🧹 Purgar servidores muertos"
+msgstr "🧹 Purgar servidores muertos"
 
-msgid "Autor"
-msgstr "Autor"
+#: gameservermonitor\gameservermonitor.py:1929
+msgid ""
+"⚠️ Se eliminarán del monitoreo junto con su embed de estado y su historial "
+"de jugadores. Esta acción no se puede deshacer."
+msgstr ""
+"⚠️ Se eliminarán del monitoreo junto con su embed de estado y su historial "
+"de jugadores. Esta acción no se puede deshacer."
 
-msgid "Versión"
-msgstr "Versión"
+#: gameservermonitor\gameservermonitor.py:1937
+msgid "Purgar {count}"
+msgstr "Purgar {count}"
 
-msgid "Juegos Soportados"
-msgstr "Juegos Soportados"
+#: gameservermonitor\gameservermonitor.py:1938
+msgid "Cancelar"
+msgstr "Cancelar"
 
-#: gameservermonitor.py (list_servers embed)
-msgid "Channel"
-msgstr "Canal"
+#: gameservermonitor\gameservermonitor.py:1943
+msgid "❌ Purga cancelada. No se eliminó nada."
+msgstr "❌ Purga cancelada. No se eliminó nada."
 
-msgid "Ports"
-msgstr "Puertos"
+#: gameservermonitor\gameservermonitor.py:1949
+msgid "✅ Los servidores volvieron a responder. No se eliminó nada."
+msgstr "✅ Los servidores volvieron a responder. No se eliminó nada."
 
-msgid "Domain"
-msgstr "Dominio"
+#: gameservermonitor\gameservermonitor.py:1965
+msgid "✅ **{count}** servidor(es) eliminados del monitoreo."
+msgstr "✅ **{count}** servidor(es) eliminados del monitoreo."
 
-#: gameservermonitor.py (command docstrings)
-msgid "Sets the timezone for status updates.\n\nExample: `[p]settimezone Europe/Madrid`"
-msgstr "Establece la zona horaria para las actualizaciones.\n\nEjemplo: `[p]settimezone Europe/Madrid`"
-
-msgid "Sets the public IP to replace private IPs in embeds.\n\nUse without arguments to disable replacement.\n\nExample: `[p]setpublicip 123.45.67.89`"
-msgstr "Establece la IP pública para reemplazar IPs privadas.\n\nUsa sin argumentos para desactivar el reemplazo.\n\nEjemplo: `[p]setpublicip 123.45.67.89`"
-
-msgid "Sets the connection URL template.\n\nUse `{ip}` as placeholder for the server IP:port.\n\nExample: `[p]setconnecturl https://mysite.com/connect?server={ip}`"
-msgstr "Establece la plantilla de URL de conexión.\n\nUsa `{ip}` como placeholder para la IP:puerto del servidor.\n\nEjemplo: `[p]setconnecturl https://mysite.com/connect?server={ip}`"
-
-msgid "Sets the refresh interval in seconds.\n\nMinimum: 10 seconds\n\nExample: `[p]refreshtime 120`"
-msgstr "Establece el tiempo de actualización en segundos.\n\nMínimo: 10 segundos\n\nEjemplo: `[p]refreshtime 120`"
-
-msgid "Enables or disables debug mode.\n\nExample: `[p]gameservermonitordebug true`"
-msgstr "Activa o desactiva el modo debug.\n\nEjemplo: `[p]gameservermonitordebug true`"
-
-msgid "Adds a server to monitor its status.\n\n**General usage:**\n`[p]addserver <ip[:port]> <game> [#channel] [domain]`\n\n**DayZ usage (separate ports):**\n`[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]`\n\n**Supported games:** cs2, css, gmod, rust, minecraft, dayz"
-msgstr "Añade un servidor para monitorear su estado.\n\n**Uso general:**\n`[p]addserver <ip[:puerto]> <juego> [#canal] [dominio]`\n\n**Uso DayZ (puertos separados):**\n`[p]addserver <ip> dayz <game_port> <query_port> [#canal] [dominio]`\n\n**Juegos soportados:** cs2, css, gmod, rust, minecraft, dayz"
-
-msgid "Removes a server from monitoring.\n\nPass exactly the listed key (e.g. `ip:port`).\n\nExample: `[p]removeserver 192.168.1.1:27015`"
-msgstr "Elimina el monitoreo de un servidor.\n\nPasa exactamente la clave listada (ej. `ip:puerto`).\n\nEjemplo: `[p]removeserver 192.168.1.1:27015`"
-
+#: gameservermonitor\gameservermonitor.py:1972
 msgid "Forces a status update in the current channel."
 msgstr "Fuerza una actualización de estado en el canal actual."
 
+#: gameservermonitor\gameservermonitor.py:1994
+msgid "✅ Actualización forzada completada."
+msgstr "✅ Actualización forzada completada."
+
+#: gameservermonitor\gameservermonitor.py:1996
+msgid "❌ No hay servidores monitoreados en este canal."
+msgstr "❌ No hay servidores monitoreados en este canal."
+
+#: gameservermonitor\gameservermonitor.py:2000
 msgid "Shows the current GameServerMonitor cog version."
 msgstr "Muestra la versión actual del cog GameServerMonitor."
 
+#: gameservermonitor\gameservermonitor.py:2001
+msgid "🎮 **GameServerMonitor** v{version} by {author}"
+msgstr "🎮 **GameServerMonitor** v{version} por {author}"
+
+#: gameservermonitor\gameservermonitor.py:2008
 msgid "Lists all monitored servers."
 msgstr "Lista todos los servidores monitoreados."
 
-msgid "Shows detailed server statistics.\n\nYou can use the real IP, public IP, or server_id.\n\n**Example:** `[p]serverstats 192.168.1.1:27015`"
-msgstr "Muestra estadísticas detalladas de un servidor.\n\nPuedes usar la IP real, IP pública, o server_id.\n\n**Ejemplo:** `[p]serverstats 192.168.1.1:27015`"
+#: gameservermonitor\gameservermonitor.py:2012
+msgid "📋 No hay servidores siendo monitoreados."
+msgstr "📋 No hay servidores siendo monitoreados."
 
-msgid "Shows the player history of a server with an ASCII graph.\n\n**Examples:**\n`[p]gsmhistory 192.168.1.1:27015` - Last 24 hours\n`[p]gsmhistory 192.168.1.1:27015 12` - Last 12 hours"
-msgstr "Muestra el historial de jugadores de un servidor con gráfico ASCII.\n\n**Ejemplos:**\n`[p]gsmhistory 192.168.1.1:27015` - Últimas 24 horas\n`[p]gsmhistory 192.168.1.1:27015 12` - Últimas 12 horas"
+#: gameservermonitor\gameservermonitor.py:2016
+msgid "📋 Servidores Monitoreados"
+msgstr "📋 Servidores Monitoreados"
 
-msgid "Shows the list of players connected to a server.\n\nDisplays name, score and connection time.\n\n**Example:** `[p]gsmplayers 192.168.1.1:27015`"
-msgstr "Muestra la lista de jugadores conectados a un servidor.\n\nMuestra nombre, puntuación y tiempo conectado.\n\n**Ejemplo:** `[p]gsmplayers 192.168.1.1:27015`"
+#: gameservermonitor\gameservermonitor.py:2027
+msgid "Channel"
+msgstr "Canal"
 
-msgid "Shows the current map of a server.\n\nFor Minecraft servers, shows the version instead.\n\n**Example:** `[p]gsmmap 192.168.1.1:27015`"
-msgstr "Muestra el mapa actual de un servidor.\n\nPara servidores de Minecraft, muestra la versión en su lugar.\n\n**Ejemplo:** `[p]gsmmap 192.168.1.1:27015`"
+#: gameservermonitor\gameservermonitor.py:2030
+msgid "Ports"
+msgstr "Puertos"
 
-#: gameservermonitor.py (slash command descriptions)
-msgid "Server to query (IP:port or select from the list)"
-msgstr "Servidor a consultar (IP:puerto o selecciona de la lista)"
+#: gameservermonitor\gameservermonitor.py:2033
+msgid "Domain"
+msgstr "Dominio"
 
-msgid "Hours of history to show (default: 24, max: 168)"
-msgstr "Horas de historial a mostrar (por defecto: 24, máximo: 168)"
+#: gameservermonitor\gameservermonitor.py:2068
+#: gameservermonitor\gameservermonitor.py:2123
+#: gameservermonitor\gameservermonitor.py:2176
+#: gameservermonitor\gameservermonitor.py:2229
+msgid "❌ Servidor **{}** no encontrado."
+msgstr "❌ Servidor **{}** no encontrado."
+
+#: gameservermonitor\models.py:51
+msgid "Online"
+msgstr "En línea"
+
+#: gameservermonitor\models.py:53
+msgid "Maintenance"
+msgstr "Mantenimiento"
+
+#: gameservermonitor\models.py:78
+msgid "Counter-Strike 2"
+msgstr "Counter-Strike 2"
+
+#: gameservermonitor\models.py:79
+msgid "Counter-Strike: Source"
+msgstr "Counter-Strike: Source"
+
+#: gameservermonitor\models.py:80
+msgid "Garry's Mod"
+msgstr "Garry's Mod"
+
+#: gameservermonitor\models.py:81
+msgid "Rust"
+msgstr "Rust"
+
+#: gameservermonitor\models.py:82
+msgid "Minecraft"
+msgstr "Minecraft"
+
+#: gameservermonitor\models.py:83
+msgid "DayZ"
+msgstr "DayZ"
+
+#: gameservermonitor\models.py:84
+msgid "Valheim"
+msgstr "Valheim"
+
+#: gameservermonitor\models.py:85
+msgid "ARK: Survival Evolved"
+msgstr "ARK: Survival Evolved"
+
+#: gameservermonitor\models.py:86
+msgid "Team Fortress 2"
+msgstr "Team Fortress 2"
+
+#: gameservermonitor\models.py:87
+msgid "Left 4 Dead 2"
+msgstr "Left 4 Dead 2"
+
+#: gameservermonitor\models.py:88
+msgid "7 Days to Die"
+msgstr "7 Days to Die"
+
+#: gameservermonitor\models.py:89
+msgid "Palworld"
+msgstr "Palworld"
+
+#: gameservermonitor\models.py:391
+msgid "Statistics - {hostname}"
+msgstr "Estadísticas - {hostname}"
+
+#: gameservermonitor\models.py:396
+msgid "Current Status"
+msgstr "Estado Actual"
+
+#: gameservermonitor\models.py:417
+msgid "Total Queries"
+msgstr "Consultas Totales"
+
+#: gameservermonitor\models.py:422
+msgid "Successful Queries"
+msgstr "Consultas Exitosas"
+
+#: gameservermonitor\models.py:429
+msgid "Last Online"
+msgstr "Último Online"
+
+#: gameservermonitor\models.py:433
+msgid "Last Offline"
+msgstr "Último Offline"
+
+#: gameservermonitor\models.py:518
+msgid ""
+"```\n"
+"No history data available.\n"
+"```"
+msgstr ""
+"```\n"
+"No hay datos de historial disponibles.\n"
+"```"
+
+#: gameservermonitor\models.py:576
+msgid "Player history"
+msgstr "Historial de jugadores"
+
+#: gameservermonitor\models.py:581
+msgid "Now"
+msgstr "Ahora"
+
+#: gameservermonitor\views.py:216
+msgid "Please wait **{seconds:.1f}s** before using this button again."
+msgstr ""
+"Por favor espera **{seconds:.1f}s** antes de usar este botón de nuevo."
+
+#: gameservermonitor\views.py:235
+msgid "The GameServerMonitor module is not available."
+msgstr "El módulo GameServerMonitor no está disponible."
+
+#: gameservermonitor\views.py:244
+msgid "This command only works in servers."
+msgstr "Este comando solo funciona en servidores."
+
+#: gameservermonitor\views.py:252
+msgid ""
+"Server not found (ID: `{server_id}`).\n"
+"The server may have been deleted."
+msgstr ""
+"Servidor no encontrado (ID: `{server_id}`).\n"
+"Es posible que el servidor haya sido eliminado."
+
+#: gameservermonitor\views.py:273
+msgid "Unknown action: {action}"
+msgstr "Acción desconocida: {action}"
+
+#: gameservermonitor\views.py:297
+msgid "An error occurred while processing the request."
+msgstr "Ocurrió un error al procesar la solicitud."
