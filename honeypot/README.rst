@@ -22,7 +22,7 @@ Crea un canal en la parte superior del servidor para atraer selfbots/estafadores
 Comandos:
 ---------
 
-Aquí están todos los comandos incluidos en este cog (11):
+Aquí están todos los comandos incluidos en este cog (13):
 
 * ``[p]sethoneypot``
  Configura los ajustes del honeypot. Solo el dueño del servidor puede usar este comando por razones de seguridad.
@@ -35,6 +35,9 @@ Aquí están todos los comandos incluidos en este cog (11):
 
 * ``[p]sethoneypot createchannel``
  Crea el canal honeypot.
+
+* ``[p]sethoneypot diagnose``
+ Revisa la configuración y reporta todo lo que impide que el honeypot funcione (permisos, jerarquía de roles, intents, modlog). Alias: ``check``, ``debug``.
 
 * ``[p]sethoneypot enabled <activar>``
  Activa o desactiva el cog.
@@ -50,6 +53,9 @@ Aquí están todos los comandos incluidos en este cog (11):
 
 * ``[p]sethoneypot pingrole <role>``
  El rol a mencionar cuando se detecta un selfbot/estafador.
+
+* ``[p]sethoneypot resend``
+ Reenvía el embed de aviso del honeypot (borra el antiguo y envía uno nuevo).
 
 * ``[p]sethoneypot resetsetting <ajuste>``
  Resetea un ajuste.
