@@ -13,6 +13,7 @@ from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator, cog_i18n
+from redbot.core.utils.views import ConfirmView
 import contextlib
 import datetime
 import ipaddress
@@ -38,6 +39,9 @@ from .views import ServerActionsView, setup_persistent_views, create_server_view
 
 # Configuración de logging
 logger = logging.getLogger("red.killerbite95.gameservermonitor")
+
+# Días sin responder tras los que un servidor se considera muerto por defecto.
+DEAD_SERVER_DEFAULT_DAYS = 7
 
 # Internacionalización
 _ = Translator("GameServerMonitor", __file__)
@@ -877,9 +881,170 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         
         return choices[:25]  # Discord limita a 25 opciones
     
+    # ==================== Detección de servidores muertos ====================
+
+    @staticmethod
+    def _format_duration(delta: datetime.timedelta) -> str:
+        """Formatea una duración de forma compacta ('12d 4h' o '4h')."""
+        days = delta.days
+        hours = delta.seconds // 3600
+        if days:
+            return f"{days}d {hours}h"
+        if hours:
+            return f"{hours}h"
+        return f"{delta.seconds // 60}m"
+
+    async def _find_dead_servers(
+        self,
+        guild: discord.Guild,
+        days: int
+    ) -> List[Dict[str, Any]]:
+        """
+        Busca servidores que llevan demasiado tiempo sin responder.
+
+        Un servidor es candidato si su canal ya no existe, si nunca respondió
+        desde que se añadió, o si su última query exitosa es más antigua que
+        `days` días.
+
+        Args:
+            guild: Guild de Discord
+            days: Días sin responder a partir de los que se considera muerto
+
+        Returns:
+            Lista de candidatos, los más muertos primero
+        """
+        servers = await self.config.guild(guild).servers()
+        refresh_time = await self.config.guild(guild).refresh_time() or 60
+        threshold = datetime.timedelta(days=days)
+        now = datetime.datetime.utcnow()
+        candidates: List[Dict[str, Any]] = []
+
+        for server_key, data in servers.items():
+            server_data = ServerData.from_dict(server_key, data)
+            game_name = server_data.game.display_name if server_data.game else data.get("game", "N/A")
+            display = data.get("last_hostname") or server_data.domain or server_key
+            channel = self.bot.get_channel(server_data.channel_id)
+
+            candidate = {
+                "server_key": server_key,
+                "display": display,
+                "game": game_name,
+                "channel": channel,
+                "channel_id": server_data.channel_id,
+                "message_id": server_data.message_id,
+            }
+
+            # El canal desapareció: el monitor falla en cada ciclo sin remedio posible.
+            if channel is None:
+                candidate["reason"] = _("Su canal ya no existe")
+                candidate["offline_for"] = None
+                candidate["sort"] = datetime.timedelta.max
+                candidates.append(candidate)
+                continue
+
+            if server_data.last_online is not None:
+                # Dato autoritativo: la última vez que respondió de verdad.
+                last_online = server_data.last_online
+                if last_online.tzinfo is not None:
+                    last_online = last_online.astimezone(
+                        datetime.timezone.utc
+                    ).replace(tzinfo=None)
+                offline_for = now - last_online
+                reason = _("Sin responder desde hace {duration}").format(
+                    duration=self._format_duration(offline_for)
+                )
+            elif server_data.total_queries > 0:
+                # Nunca respondió: aproximamos el tiempo por el número de intentos.
+                offline_for = datetime.timedelta(
+                    seconds=server_data.total_queries * refresh_time
+                )
+                reason = _("Nunca respondió desde que se añadió")
+            else:
+                # Recién añadido y aún sin consultar: no es candidato.
+                continue
+
+            if offline_for < threshold:
+                continue
+
+            candidate["reason"] = reason
+            candidate["offline_for"] = offline_for
+            candidate["sort"] = offline_for
+            candidates.append(candidate)
+
+        candidates.sort(key=lambda c: c["sort"], reverse=True)
+        return candidates
+
+    async def _delete_server_message(
+        self,
+        channel_id: Optional[int],
+        message_id: Optional[int]
+    ) -> None:
+        """Borra el embed de estado de un servidor, ignorando cualquier fallo."""
+        if not channel_id or not message_id:
+            return
+        channel = self.bot.get_channel(channel_id)
+        if channel is None:
+            return
+        try:
+            msg = await channel.fetch_message(message_id)
+            await msg.delete()
+        except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+            pass
+
+    async def _forget_servers(
+        self,
+        guild: discord.Guild,
+        server_keys: List[str]
+    ) -> None:
+        """Elimina servidores de la config junto con su historial de jugadores."""
+        async with self.config.guild(guild).servers() as servers:
+            for server_key in server_keys:
+                servers.pop(server_key, None)
+        async with self.config.guild(guild).player_history() as history:
+            for server_key in server_keys:
+                history.pop(server_key, None)
+        for server_key in server_keys:
+            self._recently_updated.pop(f"{guild.id}:{server_key}", None)
+
+    def _build_dead_servers_embed(
+        self,
+        candidates: List[Dict[str, Any]],
+        days: int,
+        title: str,
+        color: discord.Color
+    ) -> discord.Embed:
+        """Construye el embed con el listado de servidores muertos."""
+        lines: List[str] = []
+        shown = candidates[:20]
+        for candidate in shown:
+            channel = candidate["channel"]
+            channel_text = channel.mention if channel else _("canal eliminado")
+            lines.append(
+                f"**{candidate['display'][:60]}**\n"
+                f"`{candidate['server_key']}` · {candidate['game']} · {channel_text}\n"
+                f"⤷ {candidate['reason']}"
+            )
+        if len(candidates) > len(shown):
+            lines.append(
+                _("*... y {count} servidor(es) más.*").format(
+                    count=len(candidates) - len(shown)
+                )
+            )
+
+        embed = discord.Embed(
+            title=title,
+            description=_(
+                "{count} servidor(es) llevan más de **{days}** día(s) sin responder.\n\n"
+            ).format(count=len(candidates), days=days) + "\n\n".join(lines),
+            color=color
+        )
+        embed.description = embed.description[:4096]
+        embed.set_footer(text=f"GSM v{self.__version__} by Killerbite95")
+        return embed
+
     async def _get_public_ip(
-        self, 
-        guild: discord.Guild, 
+        self,
+        guild: discord.Guild,
         original_ip: str
     ) -> str:
         """
@@ -1668,24 +1833,140 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await ctx.send(_("❌ Formato: `ip:puerto` o `server_id`"))
             return
         
-        async with self.config.guild(ctx.guild).servers() as servers:
-            if server_key in servers:
-                # Intentar eliminar el mensaje embed del canal
-                msg_id = servers[server_key].get("message_id")
-                ch_id = servers[server_key].get("channel_id")
-                if msg_id and ch_id:
-                    channel = self.bot.get_channel(ch_id)
-                    if channel:
-                        try:
-                            msg = await channel.fetch_message(msg_id)
-                            await msg.delete()
-                        except (discord.NotFound, discord.Forbidden, discord.HTTPException):
-                            pass
-                del servers[server_key]
-                await ctx.send(_("✅ Servidor **{}** eliminado del monitoreo.").format(server_key))
-            else:
-                await ctx.send(_("❌ No se encontró servidor con clave **{}**.").format(server_key))
-    
+        servers = await self.config.guild(ctx.guild).servers()
+        if server_key not in servers:
+            await ctx.send(_("❌ No se encontró servidor con clave **{}**.").format(server_key))
+            return
+
+        await self._delete_server_message(
+            servers[server_key].get("channel_id"),
+            servers[server_key].get("message_id")
+        )
+        await self._forget_servers(ctx.guild, [server_key])
+        await ctx.send(_("✅ Servidor **{}** eliminado del monitoreo.").format(server_key))
+
+    @commands.command(name="deadservers", aliases=["serversmuertos"])
+    @checks.admin_or_permissions(administrator=True)
+    async def dead_servers(
+        self,
+        ctx: commands.Context,
+        days: Optional[int] = None
+    ) -> None:
+        """
+        Lists servers that stopped responding, without removing anything.
+
+        A server is listed when its channel was deleted, when it never
+        responded since it was added, or when its last successful query is
+        older than `days` days (default: 7).
+
+        Example: `[p]deadservers 14`
+        """
+        days = days if days is not None else DEAD_SERVER_DEFAULT_DAYS
+        if days < 1:
+            await ctx.send(_("❌ Los días deben ser al menos 1."))
+            return
+
+        candidates = await self._find_dead_servers(ctx.guild, days)
+        if not candidates:
+            await ctx.send(
+                _("✅ Ningún servidor lleva más de **{days}** día(s) sin responder.").format(days=days)
+            )
+            return
+
+        embed = self._build_dead_servers_embed(
+            candidates,
+            days,
+            title=_("💀 Servidores sin responder"),
+            color=discord.Color.orange()
+        )
+        embed.add_field(
+            name="​",
+            value=_("Usa `{prefix}purgeservers {days}` para eliminarlos.").format(
+                prefix=ctx.clean_prefix, days=days
+            ),
+            inline=False
+        )
+        await ctx.send(embed=embed)
+
+    @commands.command(name="purgeservers", aliases=["purgedeadservers", "limpiarservers"])
+    @checks.admin_or_permissions(administrator=True)
+    async def purge_servers(
+        self,
+        ctx: commands.Context,
+        days: Optional[int] = None
+    ) -> None:
+        """
+        Removes servers that stopped responding, after confirmation.
+
+        Stops the monitor from querying servers that no longer exist, which is
+        what floods the logs with timeouts. Deletes their status embed and their
+        player history too.
+
+        Use `[p]deadservers` first for a dry run.
+
+        Example: `[p]purgeservers 14`
+        """
+        days = days if days is not None else DEAD_SERVER_DEFAULT_DAYS
+        if days < 1:
+            await ctx.send(_("❌ Los días deben ser al menos 1."))
+            return
+
+        candidates = await self._find_dead_servers(ctx.guild, days)
+        if not candidates:
+            await ctx.send(
+                _("✅ Ningún servidor lleva más de **{days}** día(s) sin responder.").format(days=days)
+            )
+            return
+
+        embed = self._build_dead_servers_embed(
+            candidates,
+            days,
+            title=_("🧹 Purgar servidores muertos"),
+            color=discord.Color.red()
+        )
+        embed.add_field(
+            name="​",
+            value=_(
+                "⚠️ Se eliminarán del monitoreo junto con su embed de estado y su historial de jugadores. Esta acción no se puede deshacer."
+            ),
+            inline=False
+        )
+
+        view = ConfirmView(ctx.author, disable_buttons=True)
+        view.confirm_button.style = discord.ButtonStyle.red
+        view.confirm_button.label = _("Purgar {count}").format(count=len(candidates))
+        view.dismiss_button.label = _("Cancelar")
+        view.message = await ctx.send(embed=embed, view=view)
+        await view.wait()
+
+        if not view.result:
+            await ctx.send(_("❌ Purga cancelada. No se eliminó nada."))
+            return
+
+        # Volver a calcular: el estado pudo cambiar mientras se confirmaba.
+        candidates = await self._find_dead_servers(ctx.guild, days)
+        if not candidates:
+            await ctx.send(_("✅ Los servidores volvieron a responder. No se eliminó nada."))
+            return
+
+        async with ctx.typing():
+            for candidate in candidates:
+                await self._delete_server_message(
+                    candidate["channel_id"], candidate["message_id"]
+                )
+            server_keys = [candidate["server_key"] for candidate in candidates]
+            await self._forget_servers(ctx.guild, server_keys)
+
+        logger.info(
+            "Purgados %d servidores muertos en %s (%s): %s",
+            len(server_keys), ctx.guild.name, ctx.guild.id, ", ".join(server_keys)
+        )
+        await ctx.send(
+            _("✅ **{count}** servidor(es) eliminados del monitoreo.").format(
+                count=len(server_keys)
+            )
+        )
+
     @commands.command(name="forcestatus", aliases=["forzarstatus"])
     async def force_status(self, ctx: commands.Context) -> None:
         """Forces a status update in the current channel."""
