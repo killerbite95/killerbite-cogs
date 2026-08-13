@@ -56,6 +56,8 @@
 | `[p]addserver <ip:port> <game> [#channel] [domain]` | Adds a server to monitor. If no channel specified, uses current channel. |
 | `[p]addserver <ip> dayz <game_port> <query_port> [#channel] [domain]` | Special syntax for DayZ servers that require separate ports. |
 | `[p]removeserver <ip:port>` | Removes a server from monitoring. |
+| `[p]deadservers [days]` | Lists servers that stopped responding, without removing anything. Defaults to 7 days. |
+| `[p]purgeservers [days]` | Removes every server that stopped responding, after confirmation. Defaults to 7 days. |
 
 #### Information Commands (Everyone)
 
@@ -247,6 +249,8 @@ The bot needs these permissions in the channel:
 | `[p]addserver <ip:puerto> <juego> [#canal] [dominio]` | Añade un servidor para monitorizar. Si no se especifica canal, usa el canal actual. |
 | `[p]addserver <ip> dayz <puerto_juego> <puerto_query> [#canal] [dominio]` | Sintaxis especial para servidores DayZ que requieren puertos separados. |
 | `[p]removeserver <ip:puerto>` | Elimina un servidor del monitoreo. |
+| `[p]deadservers [días]` | Lista los servidores que dejaron de responder, sin eliminar nada. Por defecto 7 días. |
+| `[p]purgeservers [días]` | Elimina todos los servidores que dejaron de responder, con confirmación. Por defecto 7 días. |
 
 #### Comandos de Información (Todos)
 

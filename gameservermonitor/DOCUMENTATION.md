@@ -266,6 +266,8 @@ default_guild = {
 |---------|----------|-------------|
 | `[p]addserver <ip> <juego> [...]` | Admin | Añade servidor |
 | `[p]removeserver <clave>` | Admin | Elimina servidor |
+| `[p]deadservers [días]` | Admin | Lista servidores sin responder (solo lectura) |
+| `[p]purgeservers [días]` | Admin | Elimina los servidores sin responder, con confirmación |
 | `[p]listaserver` | Todos | Lista servidores |
 | `[p]forzarstatus` | Todos | Fuerza actualización |
 | `[p]serverstats <clave>` | Todos | Estadísticas del servidor |
