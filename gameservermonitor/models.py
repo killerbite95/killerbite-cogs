@@ -142,8 +142,8 @@ class GameType(Enum):
             GameType.CSS: "https://cdn.cloudflare.steamstatic.com/steam/apps/240/header.jpg",
             GameType.GMOD: "https://cdn.cloudflare.steamstatic.com/steam/apps/4000/header.jpg",
             GameType.RUST: "https://cdn.cloudflare.steamstatic.com/steam/apps/252490/header.jpg",
-            # Minecraft has no Steam app: id 10 is Counter-Strike. Use the wiki cover art.
-            GameType.MINECRAFT: "https://minecraft.wiki/images/Minecraft.png",
+            # Minecraft has no Steam app: id 10 is Counter-Strike. Self-hosted icon instead.
+            GameType.MINECRAFT: "https://i.imgur.com/NlVVaB5.png",
             GameType.DAYZ: "https://cdn.cloudflare.steamstatic.com/steam/apps/221100/header.jpg",
             GameType.VALHEIM: "https://cdn.cloudflare.steamstatic.com/steam/apps/892970/header.jpg",
             GameType.ARK: "https://cdn.cloudflare.steamstatic.com/steam/apps/346110/header.jpg",
