@@ -771,11 +771,15 @@ class TriniBackups(commands.Cog):
         if snap is None:
             return await ctx.send("El archivo del backup no existe.")
         fp = io.BytesIO(json.dumps(snap, indent=1, ensure_ascii=False).encode("utf-8"))
-        await ctx.send(
-            "⚠️ Incluye estructura y configuracion de La Trini. Compartelo con cuidado.",
-            file=discord.File(fp, filename=f"trini-backup-{ctx.guild.id}-{meta['id']}.json"),
-            ephemeral=True,
-        )
+        text = "⚠️ Incluye estructura y configuracion de La Trini. Compartelo con cuidado."
+        file = discord.File(fp, filename=f"trini-backup-{ctx.guild.id}-{meta['id']}.json")
+        if ctx.interaction is not None:
+            return await ctx.send(text, file=file, ephemeral=True)
+        try:
+            await ctx.author.send(text, file=file)
+            await ctx.send("📬 Te he enviado el backup por mensaje privado.")
+        except discord.HTTPException:
+            await ctx.send("No puedo enviarte mensajes privados. Activalos o usa la version slash del comando.")
 
     @backup.command(name="status")
     async def backup_status(self, ctx: commands.Context):

@@ -30,7 +30,7 @@ class PelicanError(Exception):
     @property
     def friendly(self) -> str:
         return {
-            401: "La clave API no es valida o ha sido revocada. Vuelve a vincular con `alienhost link`.",
+            401: "La clave API no es valida o ha sido revocada. Vuelve a vincular tu cuenta (`alienhost link`).",
             403: "Tu clave API no tiene permiso para esto (o la IP del bot no esta permitida en la clave).",
             404: "No encontrado en el panel.",
             409: "El servidor esta ocupado o en un estado que no permite la accion.",

@@ -3,7 +3,7 @@
     "name": "TriniEvents",
     "short": "Eventos de comunidad con inscripciones, reservas, recordatorios, roles/canales temporales y estadisticas.",
     "description": "Gestor de actividades para La Trini: formulario de creacion, botones Participar / Cancelar plaza / Recordarme / Check-in, lista de espera con promocion automatica, recordatorios por DM (24h, 1h, 15m configurables), rol y canales temporales, eventos recurrentes y clonables, publicacion de torneos ArenCup (sin gestionar brackets) y estadisticas de asistencia, cancelaciones y no-shows.",
-    "install_msg": "TriniEvents instalado.\n\nConfigura la zona horaria con `[p]event settings timezone Europe/Madrid` y crea un evento con `/event create`.",
+    "install_msg": "TriniEvents instalado.\n\nConfigura la zona horaria con `[p]event settings timezone Europe/Madrid` y crea un evento con `[p]event create`.",
     "end_user_data_statement": "Este cog guarda los IDs de los usuarios inscritos, en reserva, que piden recordatorio, que cancelan o hacen check-in en cada evento, para gestionar plazas y estadisticas.",
     "min_bot_version": "3.5.0",
     "min_python_version": [3, 10, 0],

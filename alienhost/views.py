@@ -46,7 +46,7 @@ class OpenModalView(discord.ui.View):
     @discord.ui.button(label="Conectar cuenta", emoji="🔗", style=discord.ButtonStyle.blurple)
     async def open(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.author.id:
-            return await interaction.response.send_message("Este boton no es para ti. Usa `alienhost link`.", ephemeral=True)
+            return await interaction.response.send_message("Este boton no es para ti. Usa el comando `alienhost link`.", ephemeral=True)
         await interaction.response.send_modal(self.factory())
 
 
@@ -212,3 +212,31 @@ class AlertsView(OwnerView):
             await self.cog.save_alerts(interaction.user, self.identifier, self.name, self.state)
             await interaction.response.edit_message(embed=self.embed(), view=self)
         return callback
+
+
+class PrivateReplyView(discord.ui.View):
+    """Con comandos de prefijo: muestra la respuesta como mensaje efimero solo al autor."""
+
+    def __init__(self, owner_id: int, payload: Dict[str, Any]):
+        super().__init__(timeout=300)
+        self.owner_id = owner_id
+        self.payload = payload
+        self.message: Optional[discord.Message] = None
+
+    @discord.ui.button(label="Ver en privado", emoji="🔒", style=discord.ButtonStyle.blurple)
+    async def show(self, interaction: discord.Interaction, button: discord.ui.Button):
+        if interaction.user.id != self.owner_id:
+            return await interaction.response.send_message("Esto no es para ti.", ephemeral=True)
+        await interaction.response.send_message(ephemeral=True, **self.payload)
+        self.stop()
+        try:
+            await interaction.message.delete()
+        except discord.HTTPException:
+            pass
+
+    async def on_timeout(self) -> None:
+        if self.message is not None:
+            try:
+                await self.message.delete()
+            except discord.HTTPException:
+                pass

@@ -4,14 +4,16 @@ Capa defensiva encima del servidor. No es otro automod ni logger: audita permiso
 
 > Necesita **View Audit Log** (atribuye cada accion con `on_audit_log_entry_create`), ademas de Manage Roles/Webhooks/Channels y Kick para poder revertir.
 
+> Prefijo de ejemplo `!` (el de La Trini). Todos los comandos son hibridos: tambien funcionan como `/` si activas los slash con `[p]slash enablecog <cog>` y `[p]slash sync`.
+
 ## Inicio rapido
 ```
-/security config logchannel #seguridad
-/security config alertrole @Staff
-/security audit
-/security protectedrole add @Administrador
-/security watch enable
-/security antinuke enable
+!security config logchannel #seguridad
+!security config alertrole @Staff
+!security audit
+!security protectedrole add @Administrador
+!security watch enable
+!security antinuke enable
 ```
 
 ## Modulos

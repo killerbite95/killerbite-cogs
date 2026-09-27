@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import re
 import time
 from collections import defaultdict, deque
 from typing import Any, Deque, Dict, List, Optional, Tuple
@@ -35,6 +36,7 @@ from .views import (
     OpenModalView,
     ServerPanel,
     ServerSelectView,
+    PrivateReplyView,
     has_perm,
 )
 
@@ -59,6 +61,7 @@ CONFIRM_SIGNALS = {"restart", "stop", "kill"}
 POWER_COOLDOWN = 10
 POWER_PER_HOUR = 20
 SUSTAIN = 600  # 10 minutos
+KEY_LEAK_RE = re.compile(r"\b(pacc|papp|ptlc|ptla)_[A-Za-z0-9]{20,}")
 
 
 def fmt_bytes(value: Optional[float]) -> str:
@@ -116,6 +119,7 @@ class AlienHost(commands.Cog):
         self._server_cache: Dict[int, Tuple[float, List[Dict[str, Any]]]] = {}
         self._alert_state: Dict[Tuple[int, str], Dict[str, Any]] = {}
         self._polls = 0
+        self.p = "!"
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
@@ -128,6 +132,54 @@ class AlienHost(commands.Cog):
     async def cog_load(self) -> None:
         self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
         self.alert_loop.start()
+        try:
+            prefixes = await self.bot.get_valid_prefixes()
+            self.p = next((x for x in prefixes if not x.startswith("<@")), self.p)
+        except Exception:
+            pass
+
+    async def _private(self, ctx: commands.Context, **kwargs: Any) -> None:
+        """Envia datos de la cuenta solo al autor.
+
+        Con slash es un mensaje efimero; con prefijo en un servidor se publica un
+        boton que muestra el contenido en privado (asi nada queda en el canal).
+        """
+        if ctx.interaction is not None:
+            await ctx.send(ephemeral=True, **kwargs)
+        elif ctx.guild is None:
+            await ctx.send(**kwargs)
+        else:
+            view = PrivateReplyView(ctx.author.id, kwargs)
+            view.message = await ctx.send(
+                f"🔒 {ctx.author.mention}, pulsa para verlo en privado.",
+                view=view,
+                allowed_mentions=discord.AllowedMentions(users=[ctx.author]),
+            )
+
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message) -> None:
+        """Red de seguridad: si alguien pega una clave de Pelican en un canal, se borra."""
+        if message.guild is None or message.author.bot or not KEY_LEAK_RE.search(message.content or ""):
+            return
+        await self._handle_leak(message)
+
+    async def _handle_leak(self, message: discord.Message) -> None:
+        deleted = False
+        try:
+            await message.delete()
+            deleted = True
+        except discord.HTTPException:
+            pass
+        text = (
+            f"⚠️ {message.author.mention}, has pegado una clave API de Pelican en el chat"
+            + (" y la he borrado." if deleted else " y **no he podido borrarla**.")
+            + f" Por seguridad **eliminala en el panel** (Perfil → Claves API), crea otra y vinculala con `{self.p}alienhost link` (formulario privado)."
+        )
+        try:
+            await message.channel.send(text, delete_after=30, allowed_mentions=discord.AllowedMentions(users=[message.author]))
+        except discord.HTTPException:
+            pass
+        await self._audit(message.guild, message.author, "key_leak", f"en #{getattr(message.channel, 'name', '?')} · borrado={deleted}")
 
     async def cog_unload(self) -> None:
         self.alert_loop.cancel()
@@ -193,7 +245,7 @@ class AlienHost(commands.Cog):
             description=(
                 f"Usuario del panel: **{account.get('username', '?')}**\nPanel: `{panel}`\n\n"
                 "La clave se ha guardado **cifrada** y no aparecera en ningun mensaje.\n"
-                "Prueba ahora `alienhost servers`."
+                f"Prueba ahora `{self.p}alienhost servers`."
             ),
         )
         if not account.get("2fa_enabled"):
@@ -258,7 +310,7 @@ class AlienHost(commands.Cog):
             return cached[1]
         client = await self.client_for(user)
         if client is None:
-            raise PelicanError(0, "No tienes cuenta vinculada. Usa `alienhost link`.")
+            raise PelicanError(0, f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`.")
         servers = await client.servers()
         self._server_cache[user.id] = (time.time(), servers)
         return servers
@@ -266,7 +318,7 @@ class AlienHost(commands.Cog):
     async def server_embed(self, user: discord.abc.User, identifier: str) -> Tuple[discord.Embed, Optional[List[str]]]:
         client = await self.client_for(user)
         if client is None:
-            return discord.Embed(description="No tienes cuenta vinculada. Usa `alienhost link`.", color=discord.Color.red()), None
+            return discord.Embed(description=f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`.", color=discord.Color.red()), None
         try:
             server, res = await asyncio.gather(client.server(identifier), client.resources(identifier))
         except PelicanError as exc:
@@ -337,7 +389,7 @@ class AlienHost(commands.Cog):
             return f"⏳ {limited}"
         client = await self.client_for(user)
         if client is None:
-            return "No tienes cuenta vinculada. Usa `alienhost link`."
+            return f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`."
         try:
             await client.power(identifier, signal)
         except PelicanError as exc:
@@ -528,7 +580,7 @@ class AlienHost(commands.Cog):
             if not data["require_trusted"]:
                 findings[-1]["severity"] = "warning"
         if admin_configured and not data["log_channel"]:
-            findings.append({"severity": "info", "title": "AlienHost sin canal de auditoria", "detail": "`alienhost set logchannel #canal`", "penalty": 1, "category": "alienhost"})
+            findings.append({"severity": "info", "title": "AlienHost sin canal de auditoria", "detail": f"`{self.p}alienhost set logchannel #canal`", "penalty": 1, "category": "alienhost"})
         return findings
 
     async def trini_export(self, guild: discord.Guild) -> Dict[str, Any]:
@@ -582,7 +634,7 @@ class AlienHost(commands.Cog):
         partial = [s for s in servers if q in s.get("name", "").lower()]
         found = exact or partial
         if len(found) != 1:
-            await ctx.send("Servidor no encontrado o ambiguo. Usa `alienhost servers`.", ephemeral=True)
+            await ctx.send(f"Servidor no encontrado o ambiguo. Usa `{self.p}alienhost servers`.", ephemeral=True)
             return None
         return found[0]
 
@@ -611,7 +663,7 @@ class AlienHost(commands.Cog):
         await self._audit(ctx.guild, ctx.author, "unlink", panel or "-")
         await ctx.send(
             "🔓 Cuenta desvinculada y clave eliminada del bot."
-            + (f"\nRecuerda borrar tambien la clave en {panel}/profile (Claves API)." if panel else ""),
+            + (f"\nRecuerda borrar tambien la clave en {panel} (Perfil → Claves API)." if panel else ""),
             ephemeral=True,
         )
 
@@ -620,7 +672,7 @@ class AlienHost(commands.Cog):
         """Ver el estado de tu vinculacion."""
         data = await self.config.user(ctx.author).all()
         if not data["api_key"]:
-            return await ctx.send("No tienes cuenta vinculada. Usa `alienhost link`.", ephemeral=True)
+            return await ctx.send(f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`.", ephemeral=True)
         client = await self.client_for(ctx.author)
         status = "🟢 clave valida"
         if client is None:
@@ -636,7 +688,7 @@ class AlienHost(commands.Cog):
         embed.add_field(name="Estado", value=status, inline=False)
         embed.add_field(name="Vinculada", value=f"<t:{data['linked_at']}:R>" if data["linked_at"] else "?", inline=True)
         embed.add_field(name="Alertas activas", value=str(len(data["alerts"])), inline=True)
-        await ctx.send(embed=embed, ephemeral=True)
+        await self._private(ctx, embed=embed)
 
     @alienhost.command(name="servers")
     async def ah_servers(self, ctx: commands.Context):
@@ -668,7 +720,7 @@ class AlienHost(commands.Cog):
         embed = discord.Embed(title="🖥 Tus servidores de AlienHost", description="\n".join(lines), color=COLOR)
         if len(servers) > 25:
             embed.set_footer(text=f"Mostrando 25 de {len(servers)}")
-        await ctx.send(embed=embed, view=ServerSelectView(self, ctx.author.id, servers, ctx.guild.id if ctx.guild else None), ephemeral=True)
+        await self._private(ctx, embed=embed, view=ServerSelectView(self, ctx.author.id, servers, ctx.guild.id if ctx.guild else None))
 
     @alienhost.command(name="server")
     async def ah_server(self, ctx: commands.Context, *, server: str):
@@ -678,10 +730,10 @@ class AlienHost(commands.Cog):
         if s is None:
             return
         embed, perms = await self.server_embed(ctx.author, s["uuid"])
-        kwargs: Dict[str, Any] = {"embed": embed, "ephemeral": True}
+        kwargs: Dict[str, Any] = {"embed": embed}
         if perms is not None:
             kwargs["view"] = ServerPanel(self, ctx.author.id, s["uuid"], perms, ctx.guild.id if ctx.guild else None)
-        await ctx.send(**kwargs)
+        await self._private(ctx, **kwargs)
 
     @alienhost.command(name="power")
     async def ah_power(self, ctx: commands.Context, server: str, signal: str):
@@ -713,10 +765,10 @@ class AlienHost(commands.Cog):
         if s is None:
             return
         embed, view = await self.backups_panel(ctx.author, s["uuid"], ctx.guild.id if ctx.guild else None)
-        kwargs: Dict[str, Any] = {"embed": embed, "ephemeral": True}
+        kwargs: Dict[str, Any] = {"embed": embed}
         if view is not None:
             kwargs["view"] = view
-        await ctx.send(**kwargs)
+        await self._private(ctx, **kwargs)
 
     @alienhost.command(name="alerts")
     async def ah_alerts(self, ctx: commands.Context, *, server: Optional[str] = None):
@@ -724,18 +776,18 @@ class AlienHost(commands.Cog):
         if server is None:
             alerts = await self.config.user(ctx.author).alerts()
             if not alerts:
-                return await ctx.send("No tienes alertas. Usa `alienhost alerts <servidor>`.", ephemeral=True)
+                return await ctx.send(f"No tienes alertas. Usa `{self.p}alienhost alerts <servidor>`.", ephemeral=True)
             lines = [
                 f"**{a.get('name', ident)}** · " + ", ".join(ALERT_KINDS[k] for k in ALERT_KINDS if a.get(k))
                 for ident, a in alerts.items()
             ]
-            return await ctx.send(embed=discord.Embed(title="🔔 Tus alertas", description="\n".join(lines), color=COLOR), ephemeral=True)
+            return await self._private(ctx, embed=discord.Embed(title="🔔 Tus alertas", description="\n".join(lines), color=COLOR))
         s = await self._resolve_server(ctx, server)
         if s is None:
             return
         current = (await self.config.user(ctx.author).alerts()).get(s["uuid"], {})
         view = AlertsView(self, ctx.author.id, s["uuid"], s.get("name", s["identifier"]), current)
-        await ctx.send(embed=view.embed(), view=view, ephemeral=True)
+        await self._private(ctx, embed=view.embed(), view=view)
 
     @ah_server.autocomplete("server")
     @ah_power.autocomplete("server")
@@ -758,7 +810,7 @@ class AlienHost(commands.Cog):
             return None
         client = await self.admin_client()
         if client is None:
-            await ctx.send("No hay clave de administracion. El owner debe usar `alienhost admin setkey`.", ephemeral=True)
+            await ctx.send(f"No hay clave de administracion. El owner debe usar `{self.p}alienhost admin setkey`.", ephemeral=True)
         return client
 
     @ah_admin.command(name="setkey")
@@ -799,7 +851,7 @@ class AlienHost(commands.Cog):
             )
         embed = discord.Embed(title="🛰 Nodos de AlienHost", description="\n".join(lines)[:4000] or "Sin nodos", color=COLOR)
         embed.set_footer(text=f"{len(nodes)} nodos · {len(servers)} servidores (primeros 100)")
-        await ctx.send(embed=embed, ephemeral=True)
+        await self._private(ctx, embed=embed)
 
     @ah_admin.command(name="incidents")
     async def ah_admin_incidents(self, ctx: commands.Context):
@@ -819,7 +871,7 @@ class AlienHost(commands.Cog):
                 lines.append(f"⛔ **{s.get('name')}** (`{s.get('identifier')}`) suspendido")
             elif status in ("install_failed", "reinstall_failed", "restoring_backup"):
                 lines.append(f"🔧 **{s.get('name')}** (`{s.get('identifier')}`) · {status}")
-        await ctx.send(embed=discord.Embed(title="🚧 Incidencias", description="\n".join(lines)[:4000] or "🟢 Sin incidencias", color=COLOR), ephemeral=True)
+        await self._private(ctx, embed=discord.Embed(title="🚧 Incidencias", description="\n".join(lines)[:4000] or "🟢 Sin incidencias", color=COLOR))
 
     @ah_admin.command(name="server")
     async def ah_admin_server(self, ctx: commands.Context, server_id: str):
@@ -848,7 +900,7 @@ class AlienHost(commands.Cog):
         embed.add_field(name="Nodo", value=node.get("name", s.get("node")), inline=True)
         embed.add_field(name="Cliente", value=f"{owner.get('username', '?')} ({owner.get('email', '?')})", inline=False)
         embed.add_field(name="Limites", value=f"CPU {limits.get('cpu')}% · RAM {limits.get('memory')} MB · Disco {limits.get('disk')} MB", inline=False)
-        await ctx.send(embed=embed, ephemeral=True)
+        await self._private(ctx, embed=embed)
 
     @ah_admin.command(name="user")
     async def ah_admin_user(self, ctx: commands.Context, *, query: str):
@@ -878,7 +930,7 @@ class AlienHost(commands.Cog):
         embed.add_field(name="2FA", value="✅" if u.get("2fa") or u.get("2fa_enabled") else "❌", inline=True)
         embed.add_field(name="Admin", value="✅" if u.get("root_admin") else "❌", inline=True)
         embed.add_field(name=f"Servidores ({len(servers)})", value="\n".join(f"• {s.get('name')} (`{s.get('identifier')}`)" for s in servers[:15]) or "—", inline=False)
-        await ctx.send(embed=embed, ephemeral=True)
+        await self._private(ctx, embed=embed)
 
     # ------------------------------------------------------------------
     # Ajustes
@@ -959,4 +1011,4 @@ class AlienHost(commands.Cog):
             embed.add_field(name="Rol admin", value=(f"<@&{g['admin_role']}>" if g["admin_role"] else "—") + (" (+Trusted)" if g["require_trusted"] else ""), inline=True)
         linked = sum(1 for d in (await self.config.all_users()).values() if d.get("api_key"))
         embed.add_field(name="Cuentas vinculadas", value=str(linked), inline=True)
-        await ctx.send(embed=embed, ephemeral=True, allowed_mentions=discord.AllowedMentions.none())
+        await self._private(ctx, embed=embed, allowed_mentions=discord.AllowedMentions.none())

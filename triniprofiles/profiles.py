@@ -782,12 +782,17 @@ class TriniProfiles(commands.Cog):
         fp = io.BytesIO(json.dumps(payload, indent=2, ensure_ascii=False).encode("utf-8"))
         name = f"trini-profile-{ctx.guild.id}-{time.strftime('%Y%m%d-%H%M')}.json"
         await self._log(ctx.guild, ctx.author, "profile_export", name)
-        await ctx.send(
+        text = (
             f"📤 Exportados **{len(payload['cogs'])}** cogs y **{sum(1 for v in payload['modules'].values() if v)}** modulos.\n"
-            "⚠️ El archivo contiene configuracion del servidor, compartelo con cuidado.",
-            file=discord.File(fp, filename=name),
-            ephemeral=True,
+            "⚠️ El archivo contiene configuracion del servidor, compartelo con cuidado."
         )
+        if ctx.interaction is not None:
+            return await ctx.send(text, file=discord.File(fp, filename=name), ephemeral=True)
+        try:
+            await ctx.author.send(text, file=discord.File(fp, filename=name))
+            await ctx.send("📬 Te he enviado el export por mensaje privado.")
+        except discord.HTTPException:
+            await ctx.send("No puedo enviarte mensajes privados. Activalos o usa la version slash del comando.")
 
     @profile.command(name="import")
     async def profile_import(self, ctx: commands.Context, file: Optional[discord.Attachment] = None):
