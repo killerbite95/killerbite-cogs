@@ -29,6 +29,7 @@ from .api import PelicanClient, PelicanError, normalize_panel
 from .vault import Vault
 from .views import (
     ALERT_KINDS,
+    AdminServerBrowseView,
     AlertsView,
     BackupsView,
     ConfirmView,
@@ -117,6 +118,8 @@ class AlienHost(commands.Cog):
         self.session: Optional[aiohttp.ClientSession] = None
         self._power_log: Dict[int, Deque[float]] = defaultdict(deque)
         self._server_cache: Dict[int, Tuple[float, List[Dict[str, Any]]]] = {}
+        # Listado completo del panel (``type=admin-all``) por administrador.
+        self._admin_servers_cache: Dict[int, Tuple[float, List[Dict[str, Any]]]] = {}
         self._alert_state: Dict[Tuple[int, str], Dict[str, Any]] = {}
         self._polls = 0
         self.p = "!"
@@ -128,6 +131,7 @@ class AlienHost(commands.Cog):
     async def red_delete_data_for_user(self, *, requester, user_id: int) -> None:
         await self.config.user_from_id(user_id).clear()
         self._server_cache.pop(user_id, None)
+        self._admin_servers_cache.pop(user_id, None)
 
     async def cog_load(self) -> None:
         self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
@@ -238,6 +242,7 @@ class AlienHost(commands.Cog):
             data["account"] = {"uuid": account.get("uuid"), "username": account.get("username"), "2fa": bool(account.get("2fa_enabled"))}
             data["linked_at"] = int(time.time())
         self._server_cache.pop(interaction.user.id, None)
+        self._admin_servers_cache.pop(interaction.user.id, None)
         await self._audit(interaction.guild, interaction.user, "link", panel)
         embed = discord.Embed(
             title="✅ Cuenta de AlienHost vinculada",
@@ -315,6 +320,30 @@ class AlienHost(commands.Cog):
         self._server_cache[user.id] = (time.time(), servers)
         return servers
 
+    async def fetch_states(self, user: discord.abc.User, uuids: List[str]) -> Dict[str, Optional[str]]:
+        """Estado actual (running/offline/...) de varios servidores, 5 en paralelo."""
+        client = await self.client_for(user)
+        if client is None:
+            return {u: None for u in uuids}
+        sem = asyncio.Semaphore(5)
+
+        async def one(uuid: str) -> Tuple[str, Optional[str]]:
+            async with sem:
+                try:
+                    return uuid, (await client.resources(uuid)).get("current_state")
+                except PelicanError:
+                    return uuid, None
+
+        return dict(await asyncio.gather(*(one(u) for u in uuids)))
+
+    def _cached_name(self, user_id: int, uuid: str) -> str:
+        """Nombre de un servidor ya listado (propio o via `admin servers`), o su UUID."""
+        for cache in (self._server_cache, self._admin_servers_cache):
+            for s in (cache.get(user_id) or (0, []))[1]:
+                if s.get("uuid") == uuid:
+                    return s.get("name", uuid)
+        return uuid
+
     async def server_embed(self, user: discord.abc.User, identifier: str) -> Tuple[discord.Embed, Optional[List[str]]]:
         client = await self.client_for(user)
         if client is None:
@@ -365,10 +394,7 @@ class AlienHost(commands.Cog):
         return None
 
     async def power_flow(self, interaction: discord.Interaction, identifier: str, signal: str) -> None:
-        name = identifier
-        for s in (self._server_cache.get(interaction.user.id) or (0, []))[1]:
-            if s.get("uuid") == identifier:
-                name = s.get("name", identifier)
+        name = self._cached_name(interaction.user.id, identifier)
         if signal in CONFIRM_SIGNALS:
             view = ConfirmView(interaction.user.id, {"restart": "Reiniciar", "stop": "Detener", "kill": "Forzar kill"}[signal])
             warn = " Puede provocar perdida de datos no guardados." if signal == "kill" else ""
@@ -449,10 +475,7 @@ class AlienHost(commands.Cog):
     async def alerts_flow(self, interaction: discord.Interaction, identifier: str) -> None:
         alerts = await self.config.user(interaction.user).alerts()
         current = alerts.get(identifier, {})
-        name = current.get("name") or identifier
-        for s in (self._server_cache.get(interaction.user.id) or (0, []))[1]:
-            if s.get("uuid") == identifier:
-                name = s.get("name", identifier)
+        name = current.get("name") or self._cached_name(interaction.user.id, identifier)
         view = AlertsView(self, interaction.user.id, identifier, name, current)
         await interaction.response.send_message(embed=view.embed(), view=view, ephemeral=True)
 
@@ -658,6 +681,7 @@ class AlienHost(commands.Cog):
         panel = await self.config.user(ctx.author).panel()
         await self.config.user(ctx.author).clear()
         self._server_cache.pop(ctx.author.id, None)
+        self._admin_servers_cache.pop(ctx.author.id, None)
         for key in [k for k in self._alert_state if k[0] == ctx.author.id]:
             self._alert_state.pop(key, None)
         await self._audit(ctx.guild, ctx.author, "unlink", panel or "-")
@@ -802,16 +826,44 @@ class AlienHost(commands.Cog):
 
     @alienhost.group(name="admin")
     async def ah_admin(self, ctx: commands.Context):
-        """Administracion interna de AlienHost (clave de aplicacion)."""
+        """Administracion interna de AlienHost."""
 
-    async def _admin_ctx(self, ctx: commands.Context) -> Optional[PelicanClient]:
+    async def _require_infra_admin(self, ctx: commands.Context) -> bool:
         if not await self._is_infra_admin(ctx):
             await ctx.send("🔒 Solo administradores de AlienHost (rol configurado + Trusted Admin en Trini Security).", ephemeral=True)
+            return False
+        return True
+
+    async def _admin_ctx(self, ctx: commands.Context) -> Optional[PelicanClient]:
+        """Cliente con la clave de APLICACION (`papp_`): nodos, incidencias, buscar clientes."""
+        if not await self._require_infra_admin(ctx):
             return None
         client = await self.admin_client()
         if client is None:
             await ctx.send(f"No hay clave de administracion. El owner debe usar `{self.p}alienhost admin setkey`.", ephemeral=True)
         return client
+
+    async def _admin_servers(self, user: discord.abc.User, *, fresh: bool = False) -> List[Dict[str, Any]]:
+        """Todos los servidores del panel, vistos con la clave de CLIENTE del propio ``user``.
+
+        Requiere que la cuenta vinculada de ``user`` (`alienhost link`) sea
+        ``root_admin`` en el panel: solo entonces Pelican permite pedir
+        ``type=admin-all``. No usa la clave de aplicacion.
+        """
+        cached = self._admin_servers_cache.get(user.id)
+        if cached and not fresh and time.time() - cached[0] < 60:
+            return cached[1]
+        client = await self.client_for(user)
+        if client is None:
+            raise PelicanError(0, f"No tienes cuenta vinculada. Usa `{self.p}alienhost link` con una cuenta de administrador del panel.")
+        try:
+            servers = await client.servers(admin_all=True)
+        except PelicanError as exc:
+            if exc.status == 403:
+                raise PelicanError(403, "Tu cuenta vinculada en AlienHost no es administradora (root admin) del panel, asi que no puede ver todos los servidores.") from exc
+            raise
+        self._admin_servers_cache[user.id] = (time.time(), servers)
+        return servers
 
     @ah_admin.command(name="setkey")
     @commands.is_owner()
@@ -873,34 +925,27 @@ class AlienHost(commands.Cog):
                 lines.append(f"🔧 **{s.get('name')}** (`{s.get('identifier')}`) · {status}")
         await self._private(ctx, embed=discord.Embed(title="🚧 Incidencias", description="\n".join(lines)[:4000] or "🟢 Sin incidencias", color=COLOR))
 
-    @ah_admin.command(name="server")
-    async def ah_admin_server(self, ctx: commands.Context, server_id: str):
-        """Ficha de un servidor (ID numerico o identificador)."""
-        client = await self._admin_ctx(ctx)
-        if client is None:
+    @ah_admin.command(name="servers")
+    async def ah_admin_servers(self, ctx: commands.Context, *, query: Optional[str] = None):
+        """Ver y administrar TODOS los servidores del panel (25 por pagina, con buscador).
+
+        Usa tu propia cuenta vinculada con `alienhost link`, que debe ser
+        administradora (root admin) del panel. Opcionalmente filtra por nombre,
+        identificador, UUID o nodo.
+        """
+        if not await self._require_infra_admin(ctx):
             return
         await ctx.defer(ephemeral=True)
         try:
-            if server_id.isdigit():
-                s = await client.app_get("servers", server_id, {"include": "user,node"})
-            else:
-                found = await client.app_list("servers", {"filter[uuid]": server_id}) or await client.app_list("servers", {"filter[name]": server_id})
-                if not found:
-                    return await ctx.send("Servidor no encontrado.", ephemeral=True)
-                s = await client.app_get("servers", found[0]["id"], {"include": "user,node"})
+            servers = await self._admin_servers(ctx.author, fresh=True)
         except PelicanError as exc:
-            return await ctx.send(f"❌ {exc.friendly}", ephemeral=True)
-        rel = s.get("relationships", {})
-        owner = rel.get("user", {}).get("attributes", {})
-        node = rel.get("node", {}).get("attributes", {})
-        limits = s.get("limits", {})
-        embed = discord.Embed(title=f"🖥 {s.get('name')}", color=COLOR)
-        embed.add_field(name="ID", value=f"{s.get('id')} · `{s.get('identifier')}`", inline=True)
-        embed.add_field(name="Estado", value=s.get("status") or ("suspendido" if s.get("suspended") else "ok"), inline=True)
-        embed.add_field(name="Nodo", value=node.get("name", s.get("node")), inline=True)
-        embed.add_field(name="Cliente", value=f"{owner.get('username', '?')} ({owner.get('email', '?')})", inline=False)
-        embed.add_field(name="Limites", value=f"CPU {limits.get('cpu')}% · RAM {limits.get('memory')} MB · Disco {limits.get('disk')} MB", inline=False)
-        await self._private(ctx, embed=embed)
+            return await ctx.send(f"❌ {exc.friendly if exc.status not in (0, 403) else exc.message}", ephemeral=True)
+        if not servers:
+            return await ctx.send("El panel no tiene servidores.", ephemeral=True)
+        view = AdminServerBrowseView(self, ctx.author.id, servers, ctx.guild.id if ctx.guild else None, query=(query or "").strip())
+        embed = await view.render(ctx.author)
+        await self._audit(ctx.guild, ctx.author, "admin:servers", f"{len(servers)} servidores" + (f" · filtro {query}" if query else ""))
+        await self._private(ctx, embed=embed, view=view)
 
     @ah_admin.command(name="user")
     async def ah_admin_user(self, ctx: commands.Context, *, query: str):

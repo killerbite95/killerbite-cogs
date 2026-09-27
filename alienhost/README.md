@@ -23,7 +23,10 @@ Solo se aceptan paneles de la lista permitida (`!alienhost set panels list`), ev
 | `!alienhost backups <srv>` | Ultimos backups y boton para crear uno (sin descargas desde Discord). |
 | `!alienhost alerts [srv]` | Alertas por DM: offline, RAM > 90 % 10 min, CPU > 95 % 10 min, backup fallido, reinicio. |
 | `!alienhost account` · `unlink` | Estado de la vinculacion / borrar la clave. |
-| `!alienhost admin setkey` (owner) · `nodes` · `incidents` · `server` · `user` | Administracion con clave de aplicacion (`papp_`), tambien pedida en formulario. Requiere rol configurado (+ Trusted Admin de TriniSecurity si `require_trusted`). |
+| `!alienhost admin servers [busqueda]` | **Todos** los servidores del panel, 25 por pagina con ◀ ▶ y 🔍 buscador (nombre, identificador, UUID o nodo). Al elegir uno se abre el mismo panel que `!alienhost servers` (Iniciar/Reiniciar/Detener/Kill, Backups, Alertas). Usa **tu propia** cuenta vinculada con `!alienhost link`, que debe ser root admin del panel. |
+| `!alienhost admin setkey` (owner) · `nodes` · `incidents` · `user` | Administracion con clave de aplicacion (`papp_`), tambien pedida en formulario. |
+
+Todo `!alienhost admin …` requiere el rol configurado (+ Trusted Admin de TriniSecurity si `require_trusted`).
 | `!alienhost set panels/pollinterval/logchannel/adminrole/show` | Configuracion. Las acciones se registran en el canal de auditoria. |
 
 Usa la Client API de Pelican: `GET /api/client`, `/servers/{uuid}`, `/resources`, `POST /power`, `GET|POST /backups`, `GET /account`. No se expone la consola.
@@ -47,13 +50,13 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor p
 | `!alienhost servers` | Listar tus servidores. | Todos (cuenta vinculada) |
 | `!alienhost unlink` | Desvincular tu cuenta y borrar la clave guardada. | Todos (cuenta vinculada) |
 
-### `!alienhost admin` — Administracion interna de AlienHost (clave de aplicacion).
+### `!alienhost admin` — Administracion interna de AlienHost.
 
 | Comando | Descripcion | Permiso |
 |---|---|---|
 | `!alienhost admin incidents` | Servidores suspendidos, con instalacion fallida o nodos en mantenimiento. | Admin de AlienHost |
 | `!alienhost admin nodes` | Estado de los nodos. | Admin de AlienHost |
-| `!alienhost admin server <server_id>` | Ficha de un servidor (ID numerico o identificador). | Admin de AlienHost |
+| `!alienhost admin servers [query]` | Ver y administrar TODOS los servidores del panel (25 por pagina, con buscador). Usa tu propia cuenta vinculada con `alienhost link`, que debe ser administradora (root admin) del panel. Opcionalmente filtra por nombre, identificador, UUID o nodo. | Admin de AlienHost (+ cuenta root admin en el panel) |
 | `!alienhost admin setkey` | (Owner) Guardar la clave de aplicacion (papp_) mediante formulario privado. | Owner del bot |
 | `!alienhost admin user <query>` | Buscar un cliente por email o usuario (o mencion de Discord vinculada). | Admin de AlienHost |
 

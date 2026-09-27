@@ -93,11 +93,21 @@ class PelicanClient:
     async def account(self) -> Dict[str, Any]:
         return (await self.request("GET", "/api/client/account")).get("attributes", {})
 
-    async def servers(self) -> List[Dict[str, Any]]:
+    async def servers(self, *, admin_all: bool = False) -> List[Dict[str, Any]]:
+        """Servidores visibles con esta clave.
+
+        Con ``admin_all=True`` pide ``type=admin-all``: en Pelican (como en
+        Pterodactyl) esto devuelve TODOS los servidores del panel en vez de
+        solo los del propio usuario, pero unicamente si la clave pertenece a
+        una cuenta con ``root_admin``. Si no lo es, Pelican responde 403.
+        """
         out: List[Dict[str, Any]] = []
         page = 1
-        while page <= 10:
-            data = await self.request("GET", "/api/client", params={"page": page, "per_page": 50})
+        extra = {"type": "admin-all"} if admin_all else {}
+        # Un panel grande (cientos de servidores) cabe en pocas paginas de 50;
+        # el limite de 20 (1000 servidores) es solo una salvaguarda.
+        while page <= 20:
+            data = await self.request("GET", "/api/client", params={"page": page, "per_page": 50, **extra})
             out += [s.get("attributes", {}) for s in data.get("data", [])]
             pag = data.get("meta", {}).get("pagination", {})
             if pag.get("current_page", 1) >= pag.get("total_pages", 1):

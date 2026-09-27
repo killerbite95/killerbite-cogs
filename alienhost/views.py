@@ -240,3 +240,173 @@ class PrivateReplyView(discord.ui.View):
                 await self.message.delete()
             except discord.HTTPException:
                 pass
+
+
+class SearchModal(discord.ui.Modal):
+    def __init__(self, on_submit: Callable[[discord.Interaction, str], Awaitable[None]], current: str = ""):
+        super().__init__(title="Buscar servidor", timeout=300)
+        self._cb = on_submit
+        self.query = discord.ui.TextInput(
+            label="Nombre, identificador, UUID o nodo",
+            placeholder="Vacio = quitar filtro",
+            default=current or None,
+            required=False,
+            max_length=100,
+        )
+        self.add_item(self.query)
+
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        await self._cb(interaction, (self.query.value or "").strip())
+
+
+class AdminServerBrowseView(OwnerView):
+    """Navegador paginado de TODOS los servidores del panel (`alienhost admin servers`).
+
+    Muestra 25 por pagina (el maximo de un desplegable de Discord), con
+    anterior/siguiente y un buscador. Al elegir uno se abre el mismo panel que
+    `alienhost servers` (power, backups, alertas), usando la clave del admin.
+    """
+
+    PAGE_SIZE = 25
+    STATE_ICON = {"running": "🟢", "starting": "🟡", "stopping": "🟠", "offline": "🔴"}
+
+    def __init__(self, cog: "AlienHost", owner_id: int, servers: List[Dict[str, Any]], guild_id: Optional[int], query: str = ""):
+        super().__init__(owner_id, timeout=600)
+        self.cog = cog
+        self.guild_id = guild_id
+        self.all_servers = sorted(servers, key=lambda s: (s.get("node") or "", (s.get("name") or "").lower()))
+        self.page = 0
+        self._states: Dict[str, Optional[str]] = {}
+        self.apply_filter(query)
+
+    # ---- datos ----
+
+    def apply_filter(self, query: str) -> None:
+        self.query = query
+        q = query.lower()
+        if not q:
+            self.filtered = self.all_servers
+        else:
+            self.filtered = [
+                s for s in self.all_servers
+                if any(q in str(s.get(k) or "").lower() for k in ("name", "identifier", "uuid", "node"))
+            ]
+        self.page = 0
+
+    @property
+    def total_pages(self) -> int:
+        return max(1, -(-len(self.filtered) // self.PAGE_SIZE))
+
+    def current_chunk(self) -> List[Dict[str, Any]]:
+        start = self.page * self.PAGE_SIZE
+        return self.filtered[start:start + self.PAGE_SIZE]
+
+    # ---- render ----
+
+    async def render(self, user: discord.abc.User) -> discord.Embed:
+        chunk = self.current_chunk()
+        missing = [s["uuid"] for s in chunk if s["uuid"] not in self._states]
+        if missing:
+            self._states.update(await self.cog.fetch_states(user, missing))
+        lines = []
+        for s in chunk:
+            status = s.get("status")
+            if status == "suspended" or s.get("is_suspended"):
+                icon = "⛔"
+            elif status in ("installing", "install_failed", "reinstall_failed", "restoring_backup"):
+                icon = "🔧"
+            else:
+                icon = self.STATE_ICON.get(self._states.get(s["uuid"]), "⚪")
+            lines.append(f"{icon} **{s.get('name', '?')}** · {s.get('node', '?')} · `{s.get('identifier', '?')}`")
+        embed = discord.Embed(
+            title="🖥 Todos los servidores del panel",
+            description="\n".join(lines) or "Ningun servidor coincide con la busqueda.",
+            color=discord.Color.from_rgb(124, 92, 255),
+        )
+        footer = f"{len(self.filtered)} servidor(es)"
+        if self.query:
+            footer += f" de {len(self.all_servers)} · filtro: {self.query}"
+        footer += f" · pagina {self.page + 1}/{self.total_pages}"
+        embed.set_footer(text=footer)
+        self._build_items()
+        return embed
+
+    def _build_items(self) -> None:
+        self.clear_items()
+        chunk = self.current_chunk()
+        start = self.page * self.PAGE_SIZE
+        select = discord.ui.Select(
+            placeholder=f"Administrar servidor ({start + 1}-{start + len(chunk)})" if chunk else "Sin resultados",
+            options=[
+                discord.SelectOption(
+                    label=(s.get("name") or s.get("identifier") or "?")[:100],
+                    value=s["uuid"],
+                    description=f"{s.get('node', '')} · {s.get('identifier', '')}"[:100],
+                )
+                for s in chunk
+            ] or [discord.SelectOption(label="—", value="none")],
+            disabled=not chunk,
+            row=0,
+        )
+        select.callback = self._select
+        self.add_item(select)
+        for label, cb, disabled in (
+            ("◀ Anterior", self._prev, self.page <= 0),
+            ("Siguiente ▶", self._next, self.page >= self.total_pages - 1),
+        ):
+            btn = discord.ui.Button(label=label, style=discord.ButtonStyle.grey, disabled=disabled, row=1)
+            btn.callback = cb
+            self.add_item(btn)
+        search = discord.ui.Button(label="Buscar", emoji="🔍", style=discord.ButtonStyle.blurple, row=1)
+        search.callback = self._open_search
+        self.add_item(search)
+        refresh = discord.ui.Button(label="Actualizar", emoji="🔃", style=discord.ButtonStyle.grey, row=1)
+        refresh.callback = self._refresh
+        self.add_item(refresh)
+
+    async def _rerender(self, interaction: discord.Interaction) -> None:
+        if not interaction.response.is_done():
+            await interaction.response.defer()
+        embed = await self.render(interaction.user)
+        await interaction.edit_original_response(embed=embed, view=self)
+
+    # ---- callbacks ----
+
+    async def _select(self, interaction: discord.Interaction) -> None:
+        uuid = interaction.data["values"][0]
+        if uuid == "none":
+            return await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True, thinking=True)
+        embed, perms = await self.cog.server_embed(interaction.user, uuid)
+        kwargs: Dict[str, Any] = {"embed": embed, "ephemeral": True}
+        if perms is not None:
+            kwargs["view"] = ServerPanel(self.cog, interaction.user.id, uuid, perms, self.guild_id)
+        await interaction.followup.send(**kwargs)
+
+    async def _prev(self, interaction: discord.Interaction) -> None:
+        self.page = max(0, self.page - 1)
+        await self._rerender(interaction)
+
+    async def _next(self, interaction: discord.Interaction) -> None:
+        self.page = min(self.total_pages - 1, self.page + 1)
+        await self._rerender(interaction)
+
+    async def _open_search(self, interaction: discord.Interaction) -> None:
+        await interaction.response.send_modal(SearchModal(self._on_search, self.query))
+
+    async def _on_search(self, interaction: discord.Interaction, query: str) -> None:
+        self.apply_filter(query)
+        await self._rerender(interaction)
+
+    async def _refresh(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer()
+        try:
+            servers = await self.cog._admin_servers(interaction.user, fresh=True)
+        except Exception as exc:  # PelicanError u otros: se informa sin romper la vista
+            return await interaction.followup.send(f"❌ {getattr(exc, 'message', exc)}", ephemeral=True)
+        self.all_servers = sorted(servers, key=lambda s: (s.get("node") or "", (s.get("name") or "").lower()))
+        self._states.clear()
+        page = self.page
+        self.apply_filter(self.query)
+        self.page = min(page, self.total_pages - 1)
+        await self._rerender(interaction)
