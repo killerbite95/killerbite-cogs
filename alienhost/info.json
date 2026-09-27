@@ -1,0 +1,15 @@
+{
+    "author": ["Killerbite95"],
+    "name": "AlienHost",
+    "short": "Controla tus servidores de AlienHost (Pelican) desde Discord con tu clave API de cliente.",
+    "description": "Cada usuario vincula su cuenta con la URL del panel y una clave API de su area cliente de Pelican (pedidas siempre en un formulario privado y guardadas cifradas). Permite listar servidores, ver estado/CPU/RAM/disco/uptime, iniciar/reiniciar/detener/kill con confirmacion y rate limit, ver y crear backups, y recibir alertas por DM (offline, RAM, CPU, backup fallido, reinicio). Incluye comandos de administracion con clave de aplicacion y registro de acciones.",
+    "install_msg": "AlienHost instalado.\n\nCada usuario puede vincularse con `/alienhost link` (la clave se introduce en un formulario privado, nunca en el chat).\nPaneles permitidos: `[p]alienhost set panels list`.",
+    "end_user_data_statement": "Este cog guarda, por usuario, la URL del panel, la clave API de Pelican cifrada, el nombre de usuario del panel y las preferencias de alertas. Usa `[p]alienhost unlink` para borrarlo.",
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 10, 0],
+    "requirements": ["cryptography"],
+    "tags": ["trini", "alienhost", "pelican", "pterodactyl", "hosting", "gameservers"],
+    "type": "COG",
+    "hidden": false,
+    "disabled": false
+}

@@ -1,0 +1,16 @@
+{
+    "author": ["Killerbite95"],
+    "name": "TriniBackups",
+    "short": "Snapshots estructurales, diff, backups programados y restauracion segura para La Trini.",
+    "description": "Guarda roles, categorias, canales, foros, overwrites, bots y la configuracion de los modulos Trini. Permite comparar backups con el estado actual o entre si (diff), programar backups diarios/semanales con retencion GFS (7 diarios, 4 semanales, 6 mensuales) y restaurar de forma segura con previsualizacion: solo crea y modifica, nunca elimina. Integrado con TriniSecurity (backup previo en incidentes y lockdown).",
+    "install_msg": "TriniBackups instalado.\n\nCrea tu primer snapshot con `[p]backup create` y programa backups con `[p]backup schedule daily`.",
+    "end_user_data_statement": "Este cog guarda la estructura del servidor (roles, canales, permisos, IDs de bots y de miembros con overwrites) en archivos locales del bot.",
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 10, 0],
+    "requirements": [],
+    "permissions": ["manage_roles", "manage_channels"],
+    "tags": ["trini", "backup", "snapshot", "diff", "restore"],
+    "type": "COG",
+    "hidden": false,
+    "disabled": false
+}

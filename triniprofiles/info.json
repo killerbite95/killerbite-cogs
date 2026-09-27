@@ -1,0 +1,15 @@
+{
+    "author": ["Killerbite95"],
+    "name": "TriniProfiles",
+    "short": "Configuracion por perfiles para La Trini (setup, modulos, dependencias y presets).",
+    "description": "Asistente /trini setup con perfiles predefinidos (Gaming, Esports, Roleplay, Hosting, General, Personalizado), activacion/desactivacion de modulos con dependencias, sincronizacion con enablecog/disablecog de Red, presets reutilizables entre servidores y export/import de configuracion con re-mapeo de canales y roles.",
+    "install_msg": "TriniProfiles instalado.\n\nEmpieza con `[p]trini setup` y ajusta con `[p]trini modules`.",
+    "end_user_data_statement": "Este cog guarda la configuracion de modulos por servidor y el ID de los usuarios que realizan cambios de configuracion (historial).",
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 10, 0],
+    "requirements": [],
+    "tags": ["trini", "profiles", "setup", "configuration", "modules", "presets"],
+    "type": "COG",
+    "hidden": false,
+    "disabled": false
+}

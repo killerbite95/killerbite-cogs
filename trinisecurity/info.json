@@ -1,0 +1,16 @@
+{
+    "author": ["Killerbite95"],
+    "name": "TriniSecurity",
+    "short": "Capa defensiva de La Trini: auditoria, roles protegidos, anti-nuke, lockdown e incidentes.",
+    "description": "Security Audit con Health Score explicado, auditorias de usuario/rol/canal/bot/webhooks/invites, modelo de autoridad (Owner / Extra Owners / Trusted Admins), Protected Roles con whitelist temporal, whitelists por tipo, Security Watch, Anti-Nuke con thresholds, risk score y quarantine, Emergency Lockdown, Security Timeline, Incident Reconstruction con informes, digest semanal y Settings Audit. Se integra con TriniBackups y TriniProfiles.",
+    "install_msg": "TriniSecurity instalado.\n\nPasos recomendados:\n1. `[p]security config logchannel #seguridad`\n2. `[p]security audit`\n3. `[p]security protectedrole add @Admin`\n4. `[p]security watch enable` y `[p]security antinuke enable`\n\nEl bot necesita el permiso **View Audit Log**.",
+    "end_user_data_statement": "Este cog guarda IDs de usuarios en el timeline de seguridad, incidentes, whitelists, lista de autoridad y quarantine (con los roles retirados) para proteger el servidor.",
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 10, 0],
+    "requirements": [],
+    "permissions": ["view_audit_log", "manage_roles", "manage_channels", "manage_webhooks", "manage_guild", "kick_members"],
+    "tags": ["trini", "security", "antinuke", "audit", "protection", "lockdown", "incident"],
+    "type": "COG",
+    "hidden": false,
+    "disabled": false
+}

@@ -15,6 +15,7 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | Cog | Description |
 |-----|-------------|
 | **adv_check** | Advanced user verification system |
+| **alienhost** | AlienHost (Pelican) integration: link your client API key via private modal and manage your servers, backups and alerts |
 | **apiv2** | REST API server embedded in the bot for external integrations |
 | **autonick** | Automatically manages user nicknames |
 | **autoprune** | Automatic ban pruning system |
@@ -26,7 +27,15 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | **maptrack** | Tracks map changes in game servers |
 | **suggestions** | Complete suggestion system with buttons, voting, and staff management |
 | **ticketstrini** | Multi-panel support ticket system with buttons (Trini Edition) |
+| **trinibackups** | Structural snapshots, diff, scheduled backups and safe (non-destructive) restore |
+| **trinievents** | Community events with RSVP, waitlist, reminders, temp roles/channels, ArenCup and stats |
+| **triniprofiles** | Profile-based setup for La Trini: modules, dependencies, presets and export/import |
+| **trinisecurity** | Security audit, authority model, protected roles, anti-nuke, lockdown and incident reconstruction |
 | **trickortreat** | Trick or Treat candy game with shop, streaks, events, and more |
+
+## La Trini platform
+
+`triniprofiles` → `trinisecurity` → `trinibackups` → `trinievents` → `alienhost` work together: Profiles prepares the server, Security audits and protects it, Backups stores comparable states (linked to Security incidents), Events drives community activity and AlienHost connects Discord with real infrastructure. See [docs/la_trini_roadmap_modulos.md](docs/la_trini_roadmap_modulos.md).
 
 ## Support
 
