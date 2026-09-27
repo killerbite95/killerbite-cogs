@@ -8,12 +8,27 @@ Configuracion por perfiles de La Trini. Un perfil es una **plantilla inicial**, 
 
 | Comando | Descripcion |
 |---|---|
-| `!trini setup` | Asistente: Gaming, Esports/Torneos, Roleplay, Hosting/Soporte, General o Personalizado. Previsualiza y aplica (`Aplicar`, `+ recomendados` o `exacto`). |
+| `!trini setup` | Asistente: Gaming, Esports/Torneos, Roleplay, Hosting/Soporte, General, Todo activado o Personalizado. Previsualiza y aplica (`Aplicar`, `+ recomendados` o `exacto`). |
 | `!trini modules` | Panel para activar/desactivar modulos por categoria. |
 | `!trini enable <modulo>` / `disable` | Activa (con sus dependencias) o desactiva (si nada depende de el). |
 | `!trini status` · `securitylevel` · `syncred` · `log` | Estado, nivel de seguridad recomendado, sincronizacion con `enablecog/disablecog` de Red e historial. |
 | `!profile save/apply/list/delete <nombre>` | Presets reutilizables entre servidores. |
 | `!profile export` / `import` | JSON con modulos y configuracion de los cogs activos. Canales y roles se re-mapean por nombre al importar en otro servidor. |
+
+## Catalogo de modulos
+
+El catalogo (`triniprofiles/registry.py`) cubre ~70 modulos, agrupados por su origen:
+
+- **Trini** (`profiles`, `security`, `backups`, `events`, `alienhost`) y **killerbite-cogs** (`apiv2`, `gameservermonitor`, `tickets`, `suggestions`, `giveaways`, `honeypot`, `autonick`, `colacoins`, `adv_check`, `autoprune`, `blackjack`, `day_counter`, `listroles`, `maptrack`, `rustmaps`, `trickortreat`): nombre de clase conocido con certeza.
+- **Red** (`mod`, `warnings`, `reports`, `modlog`, `mutes`, `filter`, `cleanup`, `admin`, `alias`, `customcom`, `general`, `trivia`, `image`, `audio`, `streams`, `economy`, `downloader`, `permissions`): vienen de serie con Red-DiscordBot.
+- **Terceros** (`captcha`→`advancedcaptcha`, `welcome`, `rolesbuttons`, `autoroom`, `youtube`, `assistant`, etc.): no conocemos el nombre exacto de su clase, asi que **no se adivina**. Cada uno guarda su `package` (la carpeta/extension real) y se resuelve buscando, entre los cogs realmente cargados, cual viene de ese paquete — funciona sin importar como se llame su clase.
+- **Conceptuales** (`applications`, `forms`, `status`, `incidents`, `arencup`): categorias del roadmap para las que aun no hay un cog concreto asignado; se muestran siempre como no cargadas hasta que edites `registry.py` con el paquete real que uses.
+
+`!trini status` y `!trini modules` marcan cada modulo con 🟢 activo y cargado, 🟠 activo pero no encontrado en el bot, ⚫ desactivado, y `_terceros_` cuando su clase no esta verificada. Si un modulo aparece como no cargado, el mensaje indica exactamente como conseguirlo segun su origen (instalar de killerbite-cogs, cargarlo porque ya viene con Red, o instalar el repo de terceros correspondiente).
+
+## Perfil "Todo activado"
+
+`all_on` (🟢) es un preset predefinido que marca **todos los modulos no-core como ON**. Pensado para probar el bot entero o para servidores que quieren tenerlo todo disponible desde el primer dia; aparece junto al resto en `!trini setup` y `!profile list`. Como con cualquier perfil, es solo el punto de partida: despues ajustas con `!trini modules`.
 
 ## Integracion
 - Al aplicar un perfil emite `trini_profile_applied`; TriniSecurity activa Watch (nivel `high`) o Watch + Anti-Nuke (`strict`).

@@ -27,7 +27,9 @@ from .registry import (
     RECOMMENDED,
     ProfileInfo,
     dependents_of,
+    resolve_cog,
     resolve_dependencies,
+    resolve_qualified_name,
 )
 
 log = logging.getLogger("red.killerbite95.triniprofiles")
@@ -35,6 +37,24 @@ log = logging.getLogger("red.killerbite95.triniprofiles")
 EXPORT_VERSION = 1
 MAX_HISTORY = 200
 COLOR = discord.Color.from_rgb(88, 101, 242)
+
+
+def _join_capped(lines: List[str], limit: int = 1024) -> str:
+    """Une ``lines`` con saltos de linea sin superar ``limit``, cortando por
+    lineas completas (nunca a mitad de una) y avisando cuantas faltan."""
+    out: List[str] = []
+    used = 0
+    for i, line in enumerate(lines):
+        extra = len(line) + (1 if out else 0)
+        remaining = len(lines) - i
+        marker = f"… y {remaining} mas" if remaining else ""
+        if used + extra + (len(marker) + 1 if marker else 0) > limit:
+            if marker:
+                out.append(marker)
+            break
+        out.append(line)
+        used += extra
+    return "\n".join(out) or "—"
 
 
 class AuthorView(discord.ui.View):
@@ -312,18 +332,19 @@ class TriniProfiles(commands.Cog):
         if not await self.config.guild(guild).sync_red():
             return
         info = MODULES.get(key)
-        if info is None or info.core or info.cog == self.qualified_name:
+        if info is None or info.core or info.key == "profiles":
             return
         cache = getattr(self.bot, "_disabled_cog_cache", None)
         if cache is None:
             return
+        name = resolve_qualified_name(self.bot, info)
         try:
             if enabled:
-                await cache.enable_cog_in_guild(info.cog, guild.id)
+                await cache.enable_cog_in_guild(name, guild.id)
             else:
-                await cache.disable_cog_in_guild(info.cog, guild.id)
+                await cache.disable_cog_in_guild(name, guild.id)
         except Exception:
-            log.exception("No se pudo sincronizar %s con Red en %s", info.cog, guild.id)
+            log.exception("No se pudo sincronizar %s con Red en %s", name, guild.id)
 
     async def set_module(
         self, guild: discord.Guild, key: str, enabled: bool, *, actor: Optional[discord.abc.User]
@@ -352,7 +373,7 @@ class TriniProfiles(commands.Cog):
         names = humanize_list([MODULES[k].name for k in changed])
         await self._log(guild, actor, "module_enable" if enabled else "module_disable", names)
         msg = f"{'🟢 Activado' if enabled else '⚫ Desactivado'}: **{names}**."
-        missing = [MODULES[k] for k in changed if enabled and self.bot.get_cog(MODULES[k].cog) is None]
+        missing = [MODULES[k] for k in changed if enabled and resolve_cog(self.bot, MODULES[k]) is None]
         if missing:
             msg += "\n⚠️ No cargado en el bot: " + humanize_list(
                 [f"{m.name}" + (f" (`{m.package}`)" if m.package else "") for m in missing]
@@ -421,23 +442,23 @@ class TriniProfiles(commands.Cog):
         if enabled:
             embed.add_field(
                 name="Activados",
-                value="\n".join(f"{MODULES[k].emoji} {MODULES[k].name}" for k in sorted(enabled) if k in MODULES)[:1024],
+                value=_join_capped([f"{MODULES[k].emoji} {MODULES[k].name}" for k in sorted(enabled) if k in MODULES]),
                 inline=True,
             )
         if disabled:
             embed.add_field(
                 name="Desactivados",
-                value="\n".join(f"{MODULES[k].emoji} {MODULES[k].name}" for k in sorted(disabled) if k in MODULES)[:1024],
+                value=_join_capped([f"{MODULES[k].emoji} {MODULES[k].name}" for k in sorted(disabled) if k in MODULES]),
                 inline=True,
             )
-        missing = [MODULES[k] for k in wanted if k in MODULES and self.bot.get_cog(MODULES[k].cog) is None]
+        missing = [MODULES[k] for k in wanted if k in MODULES and resolve_cog(self.bot, MODULES[k]) is None]
         if missing:
             embed.add_field(
                 name="⚠️ No cargados en el bot",
-                value="\n".join(
-                    f"• {m.name}" + (f" — `cog install killerbite-cogs {m.package}`" if m.package else "")
+                value=_join_capped([
+                    f"• {m.name}" + (f" — {hint}" if (hint := m.install_hint()) else "")
                     for m in missing
-                )[:1024],
+                ]),
                 inline=False,
             )
         embed.add_field(
@@ -460,11 +481,11 @@ class TriniProfiles(commands.Cog):
             info = MODULES.get(key)
             if info is None:
                 continue
-            loaded = self.bot.get_cog(info.cog) is not None
+            loaded = resolve_cog(self.bot, info) is not None
             lines.append(
                 f"{info.emoji} **{info.name}** — {LEVEL_LABELS[level]}{'' if loaded else ' · _no cargado_'}"
             )
-        embed.add_field(name="Modulos", value="\n".join(lines)[:1024] or "—", inline=False)
+        embed.add_field(name="Modulos", value=_join_capped(lines), inline=False)
         deps = resolve_dependencies([k for k, lvl in profile.modules.items() if lvl != OPTIONAL])
         if deps:
             embed.add_field(
@@ -498,13 +519,14 @@ class TriniProfiles(commands.Cog):
         by_cat: Dict[str, List[str]] = {}
         for info in MODULES.values():
             enabled = info.core or states.get(info.key, False)
-            loaded = self.bot.get_cog(info.cog) is not None
+            loaded = resolve_cog(self.bot, info) is not None
             icon = "🟢" if enabled and loaded else ("🟠" if enabled else "⚫")
             deps = f" ← {', '.join(info.depends)}" if info.depends else ""
-            by_cat.setdefault(info.category, []).append(f"{icon} {info.emoji} {info.name}{deps}")
+            tp = " · _terceros_" if info.third_party and not loaded else ""
+            by_cat.setdefault(info.category, []).append(f"{icon} {info.emoji} {info.name}{deps}{tp}")
         for cat, lines in by_cat.items():
-            embed.add_field(name=cat, value="\n".join(lines)[:1024], inline=True)
-        embed.set_footer(text="🟢 activo · 🟠 activo pero no cargado · ⚫ desactivado")
+            embed.add_field(name=cat, value=_join_capped(lines), inline=True)
+        embed.set_footer(text="🟢 activo · 🟠 activo pero no cargado · ⚫ desactivado · _terceros_: revisa el paquete si no coincide")
         return embed
 
     # ------------------------------------------------------------------
@@ -516,14 +538,14 @@ class TriniProfiles(commands.Cog):
         cogs: Dict[str, Any] = {}
         for key, enabled in data["modules"].items():
             info = MODULES.get(key)
-            if not enabled or info is None or info.cog == self.qualified_name:
+            if not enabled or info is None or info.key == "profiles":
                 continue
-            cog = self.bot.get_cog(info.cog)
+            cog = resolve_cog(self.bot, info)
             if cog is None:
                 continue
             exported = await export_cog(cog, guild)
             if exported is not None:
-                cogs[info.cog] = exported
+                cogs[cog.qualified_name] = exported
         payload: Dict[str, Any] = {
             "format": "trini-profile",
             "version": EXPORT_VERSION,
@@ -753,10 +775,10 @@ class TriniProfiles(commands.Cog):
         if presets:
             embed.add_field(
                 name="Presets guardados",
-                value="\n".join(
+                value=_join_capped([
                     f"• **{p['name']}** · {sum(1 for v in p['modules'].values() if v)} modulos · <t:{p['created_at']}:d>"
                     for p in presets.values()
-                )[:1024],
+                ]),
                 inline=False,
             )
         await ctx.send(embed=embed)
