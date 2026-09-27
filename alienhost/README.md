@@ -19,7 +19,7 @@ Solo se aceptan paneles de la lista permitida (`!alienhost set panels list`), ev
 | Comando | Descripcion |
 |---|---|
 | `!alienhost servers` | Lista con estado y selector → panel con Iniciar/Reiniciar/Detener/Kill, Backups, Actualizar, Alertas. |
-| `!alienhost server <srv>` · `power <srv> <start/stop/restart/kill>` | Stop/restart/kill piden confirmacion. Limite: 1 accion/10 s y 20/hora por usuario. |
+| `!alienhost server <srv>` · `power <srv> <start/stop/restart/kill>` | Stop/restart/kill piden confirmacion. Limite: 1 accion/10 s y 20/hora por usuario (sin limite para los admins de AlienHost). |
 | `!alienhost backups <srv>` | Ultimos backups y boton para crear uno (sin descargas desde Discord). |
 | `!alienhost alerts [srv]` | Alertas por DM: offline, RAM > 90 % 10 min, CPU > 95 % 10 min, backup fallido, reinicio. |
 | `!alienhost account` · `unlink` | Estado de la vinculacion / borrar la clave. |

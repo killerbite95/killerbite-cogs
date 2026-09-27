@@ -381,9 +381,12 @@ class AlienHost(commands.Cog):
         embed.set_footer(text=f"{server.get('identifier', identifier)} · {client.panel}")
         return embed, perms
 
-    async def _check_power_rate(self, user_id: int) -> Optional[str]:
+    async def _check_power_rate(self, user: discord.abc.User, guild: Optional[discord.Guild]) -> Optional[str]:
+        """Limite de acciones (power/backups) por usuario. Los admins de AlienHost no tienen limite."""
+        if await self._is_infra_admin_user(user, guild):
+            return None
         now = time.time()
-        log_ = self._power_log[user_id]
+        log_ = self._power_log[user.id]
         while log_ and now - log_[0] > 3600:
             log_.popleft()
         if log_ and now - log_[-1] < POWER_COOLDOWN:
@@ -410,7 +413,7 @@ class AlienHost(commands.Cog):
         await send(msg, ephemeral=True)
 
     async def do_power(self, user: discord.abc.User, guild: Optional[discord.Guild], identifier: str, name: str, signal: str) -> str:
-        limited = await self._check_power_rate(user.id)
+        limited = await self._check_power_rate(user, guild)
         if limited:
             return f"⏳ {limited}"
         client = await self.client_for(user)
@@ -454,7 +457,7 @@ class AlienHost(commands.Cog):
         return embed, BackupsView(self, user.id, identifier, guild_id, can_create)
 
     async def create_backup_action(self, user: discord.abc.User, identifier: str, guild_id: Optional[int]) -> str:
-        limited = await self._check_power_rate(user.id)
+        limited = await self._check_power_rate(user, self.bot.get_guild(guild_id) if guild_id else None)
         if limited:
             return f"⏳ {limited}"
         client = await self.client_for(user)
@@ -616,17 +619,21 @@ class AlienHost(commands.Cog):
         return []
 
     async def _is_infra_admin(self, ctx: commands.Context) -> bool:
-        if await self.bot.is_owner(ctx.author):
+        return await self._is_infra_admin_user(ctx.author, ctx.guild)
+
+    async def _is_infra_admin_user(self, user: discord.abc.User, guild: Optional[discord.Guild]) -> bool:
+        """Owner del bot, o miembro con el rol de admin de AlienHost (+ Trusted Admin si se exige)."""
+        if await self.bot.is_owner(user):
             return True
-        if ctx.guild is None:
+        if guild is None or not isinstance(user, discord.Member):
             return False
-        data = await self.config.guild(ctx.guild).all()
-        role = ctx.guild.get_role(data["admin_role"]) if data["admin_role"] else None
-        if role is None or role not in ctx.author.roles:
+        data = await self.config.guild(guild).all()
+        role = guild.get_role(data["admin_role"]) if data["admin_role"] else None
+        if role is None or role not in user.roles:
             return False
         if data["require_trusted"]:
             security = self.bot.get_cog("TriniSecurity")
-            if security is None or not await security.is_trusted(ctx.author):
+            if security is None or not await security.is_trusted(user):
                 return False
         return True
 
