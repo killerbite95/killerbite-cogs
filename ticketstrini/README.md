@@ -6,6 +6,29 @@ Sistema de tickets de soporte multi-panel con botones (Trini Edition)
 
 > **Copiar la configuracion a otro servidor con La Trini:** `[p]profile export` / `[p]profile import` (TriniProfiles) copian paneles, roles y ajustes, pero no los tickets abiertos, el archivo ni las estadisticas. En otro servidor, vuelve a publicar cada panel y enlazalo con `[p]ticketst panelmessage <panel> <mensaje>`. Ver [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md).
 
+## Puesta en marcha paso a paso
+
+Prefijo `!` como ejemplo (`ticketst` tambien responde como `tset` o `tickets`).
+
+1. **Instala y carga**: `!repo add killerbite-cogs https://github.com/killerbite95/killerbite-cogs` → `!cog install killerbite-cogs ticketstrini` → `!load ticketstrini`.
+2. **Crea un panel** (cada panel = un tipo de ticket, p. ej. soporte, reportes, compras): `!ticketst addpanel soporte`.
+3. **Categoria donde se abren los tickets**: `!ticketst category soporte <categoria>`. El bot necesita en ella *Gestionar canales*, *Gestionar permisos*, *Adjuntar archivos*, *Ver canal* y *Leer historial*.
+4. **Canal del panel**: `!ticketst channel soporte #abrir-ticket`.
+5. **Mensaje del panel**: en `#abrir-ticket` ejecuta `!ticketst embed "Soporte" Pulsa el boton para abrir un ticket` (o usa el asistente `!ticketst embedwizard`). El mensaje debe ser del bot.
+6. **Enlaza el mensaje**: en ese mismo canal, `!ticketst panelmessage soporte <id_del_mensaje>`. A partir de aqui el boton ya funciona.
+7. **Rol de staff**: `!ticketst supportrole @Staff` (repite para cada rol; añade `true` al final para que se le mencione al abrir).
+8. **Personaliza (opcional)**:
+   - Boton: `!ticketst buttontext soporte Abrir ticket`, `!ticketst buttoncolor soporte green`, `!ticketst buttonemoji soporte 🎫`.
+   - Hilos en vez de canales: `!ticketst usethreads soporte`.
+   - Mensaje de bienvenida dentro del ticket: `!ticketst addmessage soporte`.
+   - Nombre de los canales: `!ticketst ticketname soporte <formato>`; logs: `!ticketst logchannel soporte #logs-tickets`.
+   - Archivar en vez de borrar al cerrar: `!ticketst closedcategory <categoria>`.
+   - Transcripciones: `!ticketst transcripts`.
+9. **Varios botones en un mismo mensaje**: crea otro panel (`!ticketst addpanel reportes`), configura su categoria y enlazalo al **mismo** mensaje con `panelmessage`.
+10. **Comprueba**: `!ticketst preflight` (detecta permisos o datos que faltan) y `!ticketst view` (resumen). La guia en Discord esta en `!ticketst setuphelp`.
+
+Los usuarios usan el grupo `!ticket` (`!ticket close`, `!ticket add @user`, `!ticket claim`...).
+
 ---
 
 # [p]ticket (Hybrid Group)
