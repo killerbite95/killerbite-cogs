@@ -81,6 +81,14 @@ def _ow_state(allow: Optional[discord.Permissions], deny: Optional[discord.Permi
 STATE_ICON = {True: "✅", False: "❌", None: "➖"}
 
 
+def _target_label(target: Any, fallback_id: Optional[int]) -> str:
+    """Nombre legible de un usuario del audit log (puede ser solo un ``discord.Object``)."""
+    if isinstance(target, (discord.User, discord.Member)):
+        return f"{target} ({target.id})"
+    tid = getattr(target, "id", None) or fallback_id
+    return f"<@{tid}>" if tid else "?"
+
+
 class EngineMixin:
     """Mixin con el procesamiento de eventos. Requiere los atributos de TriniSecurity."""
 
@@ -93,6 +101,10 @@ class EngineMixin:
         # guild_id -> actor_id -> expires
         self._restricted: Dict[int, Dict[int, float]] = defaultdict(dict)
         self._locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
+        # Serializa las quarantines por servidor: durante un nuke llegan muchos
+        # eventos a la vez y dos quarantines simultaneas del mismo usuario
+        # sobrescribirian la lista de roles guardados con una vacia.
+        self._q_locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
         self._alert_times: Dict[int, Deque[float]] = defaultdict(deque)
         self._alert_muted_notice: Dict[int, float] = {}
 
@@ -337,6 +349,13 @@ class EngineMixin:
         points = 0
         revert: Revert = None
         force_revert = False
+        # Las alertas se envian al final, DESPUES de intentar revertir, para que
+        # "Accion" refleje lo que de verdad ha pasado (y no lo que se intento).
+        alerts: List[Dict[str, Any]] = []
+
+        def alert(title: str, *, from_revert: bool = False, **kw: Any) -> None:
+            kw.setdefault("actor_id", actor_id)
+            alerts.append({"title": title, "from_revert": from_revert, **kw})
 
         if action == A.channel_delete:
             etype = "channel_delete"
@@ -360,9 +379,12 @@ class EngineMixin:
                 detail = f"nombre: {before.name} → {after.name}"
 
         elif action in (A.overwrite_create, A.overwrite_update, A.overwrite_delete):
-            etype, target_name, detail, severity, points, revert, alert = await self._handle_overwrite(entry, ctx)
-            if alert:
-                await self._watch_alert(guild, ctx, alert[0], actor_id=actor_id, target=target_name, changes=alert[1], risk=alert[2], critical=severity == "critical")
+            etype, target_name, detail, severity, points, revert, ow_alert = await self._handle_overwrite(entry, ctx)
+            if lockdown and severity == "critical" and revert is not None and level not in ("owner", "extra_owner", "trusted_admin"):
+                force_revert = True
+            if ow_alert:
+                alert(ow_alert[0], target=target_name, changes=ow_alert[1], risk=ow_alert[2],
+                      critical=severity == "critical", from_revert=force_revert)
 
         elif action == A.role_create:
             perms = getattr(after, "permissions", None) or discord.Permissions.none()
@@ -381,15 +403,15 @@ class EngineMixin:
                     await role.delete(reason="Trini Security: accion bloqueada")
                     return f"Rol {target_name} eliminado."
             if etype != "role_create":
-                if lockdown and not high_trust and level != "trusted_admin":
+                if lockdown and not high_trust and level != "trusted_admin" and revert is not None:
                     force_revert = True
-                await self._watch_alert(
-                    guild, ctx, "Rol administrativo creado", actor_id=actor_id, target=target_name,
-                    changes=[detail], critical=severity == "critical", health_delta=True,
-                )
+                alert("Rol administrativo creado", target=target_name, changes=[detail],
+                      critical=severity == "critical", health_delta=True, from_revert=force_revert)
 
         elif action == A.role_update:
-            etype, target_name, detail, severity, points, revert, force_revert = await self._handle_role_update(entry, ctx, level)
+            etype, target_name, detail, severity, points, revert, force_revert, sub_alert = await self._handle_role_update(entry, ctx, level)
+            if sub_alert:
+                alert(**sub_alert)
 
         elif action == A.role_delete:
             etype = "role_delete"
@@ -398,14 +420,14 @@ class EngineMixin:
             if str(target_id) in ctx.protected:
                 severity = "critical"
                 points += scores["protected_role_violation"] if level not in ("owner", "extra_owner") else 0
-                await self._watch_alert(
-                    guild, ctx, "Rol protegido eliminado", actor_id=actor_id, target=target_name,
-                    risk=["Usa `backup restore` para recuperarlo si no era intencionado."], critical=True,
-                    action_taken="Registrado. Un rol eliminado no se puede revertir automaticamente.",
-                )
+                alert("Rol protegido eliminado", target=target_name,
+                      risk=["Usa `backup restore` para recuperarlo si no era intencionado."], critical=True,
+                      action_taken="Registrado. Un rol eliminado no se puede revertir automaticamente.")
 
         elif action == A.member_role_update:
-            etype, target_name, detail, severity, points, revert, force_revert = await self._handle_member_roles(entry, ctx, level)
+            etype, target_name, detail, severity, points, revert, force_revert, sub_alert = await self._handle_member_roles(entry, ctx, level)
+            if sub_alert:
+                alert(**sub_alert)
 
         elif action == A.webhook_create:
             etype = "webhook_create"
@@ -427,10 +449,7 @@ class EngineMixin:
             if lockdown and not high_trust:
                 force_revert = True
             if not whitelisted:
-                await self._watch_alert(
-                    guild, ctx, "Nuevo webhook", actor_id=actor_id, target=f"{target_name} {detail}",
-                    action_taken="Webhook eliminado (lockdown)." if force_revert else "",
-                )
+                alert("Nuevo webhook", target=f"{target_name} {detail}", from_revert=force_revert)
 
         elif action == A.webhook_delete:
             etype = "webhook_delete"
@@ -443,37 +462,36 @@ class EngineMixin:
             points, severity = scores["bot_add"], "warning"
             whitelisted = target_id in ctx.whitelists.get("bots", [])
             policy_kick = (ctx.antinuke.get("enabled") and ctx.antinuke.get("bot_policy") == "kick") or lockdown
-            if not whitelisted and not high_trust and policy_kick and bot_member is not None:
+            if not whitelisted and not high_trust and policy_kick and target_id:
                 force_revert = True
+                bot_id = target_id
 
                 async def revert() -> str:
-                    await bot_member.kick(reason="Trini Security: bot no autorizado")
+                    # Aunque el bot aun no este en la cache se puede expulsar por ID.
+                    await guild.kick(discord.Object(bot_id), reason="Trini Security: bot no autorizado")
                     return "Bot expulsado automaticamente."
             if not whitelisted:
-                await self._watch_alert(
-                    guild, ctx, "Bot no autorizado" if not high_trust else "Nuevo bot",
-                    actor_id=actor_id, target=f"{bot_member.mention if bot_member else target_id} ({target_name})",
-                    risk=["No esta en la whitelist de bots (`security whitelist add bots`)."],
-                    action_taken="Bot expulsado automaticamente." if force_revert else "",
-                    critical=force_revert,
-                )
+                alert("Bot no autorizado" if not high_trust else "Nuevo bot",
+                      target=f"<@{target_id}> ({target_name})",
+                      risk=["No esta en la whitelist de bots (`security whitelist add bots`)."],
+                      critical=force_revert, from_revert=force_revert)
             else:
                 severity, points = "info", 0
 
         elif action == A.ban:
             etype, points, severity = "ban", scores["ban"], "warning"
-            target_name = str(entry.target or target_id)
+            target_name = _target_label(entry.target, target_id)
         elif action == A.unban:
             etype = "unban"
-            target_name = str(entry.target or target_id)
+            target_name = _target_label(entry.target, target_id)
         elif action == A.kick:
             etype, points, severity = "kick", scores["kick"], "warning"
-            target_name = str(entry.target or target_id)
+            target_name = _target_label(entry.target, target_id)
         elif action == A.member_prune:
             etype, points, severity = "prune", scores["prune"], "critical"
             removed = getattr(entry.extra, "members_removed", "?")
             detail = f"{removed} miembros expulsados"
-            await self._watch_alert(guild, ctx, "Prune de miembros", actor_id=actor_id, target=detail, critical=True)
+            alert("Prune de miembros", target=detail, critical=True)
 
         elif action == A.invite_create:
             etype = "invite_create"
@@ -491,10 +509,7 @@ class EngineMixin:
                     return "Invitacion eliminada (lockdown)."
             if permanent and code not in ctx.whitelists.get("invites", []):
                 severity = "warning"
-                await self._watch_alert(
-                    guild, ctx, "Invitacion permanente creada", actor_id=actor_id, target=target_name,
-                    action_taken="Invitacion eliminada (lockdown)." if force_revert else "",
-                )
+                alert("Invitacion permanente creada", target=target_name, from_revert=force_revert)
 
         elif action == A.guild_update:
             etype = "guild_update"
@@ -506,9 +521,12 @@ class EngineMixin:
             detail = "; ".join(changes)
             if any(c.startswith(("2FA", "Verificacion", "Owner", "Vanity")) for c in changes):
                 severity = "warning"
-                await self._watch_alert(guild, ctx, "Cambio de configuracion del servidor", actor_id=actor_id, target=guild.name, changes=changes)
+                alert("Cambio de configuracion del servidor", target=guild.name, changes=changes)
 
         if etype is None:
+            for a in alerts:
+                a.pop("from_revert", None)
+                await self._watch_alert(guild, ctx, a.pop("title"), **a)
             return
 
         event = await self.record_event(
@@ -517,9 +535,17 @@ class EngineMixin:
         )
 
         restricted = self._restricted[guild.id].get(actor_id, 0) > time.time()
+        revert_result: Optional[str] = None
         if force_revert or (restricted and points > 0 and revert is not None):
-            await self._do_revert(guild, revert, event, reason="lockdown" if force_revert else "usuario restringido")
+            reason = "lockdown" if (force_revert and lockdown) else ("proteccion" if force_revert else "usuario restringido")
+            revert_result = await self._do_revert(guild, revert, event, reason=reason)
             revert = None
+
+        for a in alerts:
+            from_revert = a.pop("from_revert", False)
+            if revert_result and (from_revert or not a.get("action_taken")):
+                a["action_taken"] = revert_result
+            await self._watch_alert(guild, ctx, a.pop("title"), **a)
 
         if points > 0 and ctx.antinuke.get("enabled") and not self._antinuke_immune(guild, actor_id, level, ctx):
             await self._escalate(guild, actor_id, event, ctx, revert)
@@ -638,35 +664,37 @@ class EngineMixin:
             severity = "warning"
 
         force = False
-        action_taken = ""
         if protected and level not in ("owner", "extra_owner") and level not in ctx.protected[str(role.id)].get("allowed", []):
             severity = "critical"
             points += scores["protected_role_violation"]
             etype = "protected_role_violation"
             force = revert is not None
-            action_taken = "Cambio revertido: rol protegido." if force else ""
         elif lockdown and etype != "role_update" and level not in ("owner", "extra_owner", "trusted_admin"):
             force = revert is not None
-            action_taken = "Cambio revertido (lockdown)." if force else ""
 
+        sub_alert = None
         if etype != "role_update" or (severity != "info" and changes):
             risk = []
             if role is not None and ("manage_roles" in added or "administrator" in added):
                 can = [r.mention for r in guild.roles if r < role and not r.is_default() and not r.managed]
                 if can:
                     risk.append("Este rol ahora puede modificar:\n" + "\n".join(f"• {r}" for r in can[:10]) + (f"\n• … y {len(can) - 10} mas" if len(can) > 10 else ""))
-            await self._watch_alert(
-                guild, ctx,
-                "Cambio critico" if severity == "critical" else "Cambio de permisos",
-                actor_id=entry.user_id, target=target_name, changes=changes, risk=risk,
-                action_taken=action_taken, critical=severity == "critical", health_delta=True,
-            )
-        return etype, target_name, detail, severity, points, revert, force
+            sub_alert = {
+                "title": "Cambio critico" if severity == "critical" else "Cambio de permisos",
+                "target": target_name, "changes": changes, "risk": risk,
+                "critical": severity == "critical", "health_delta": True, "from_revert": force,
+            }
+        return etype, target_name, detail, severity, points, revert, force, sub_alert
 
     async def _handle_member_roles(self, entry: discord.AuditLogEntry, ctx: Ctx, level: str):
         guild = entry.guild
         target_id = getattr(entry.target, "id", 0)
         member = guild.get_member(target_id)
+        if member is None and target_id:
+            try:
+                member = await guild.fetch_member(target_id)
+            except discord.HTTPException:
+                member = None
         added = [guild.get_role(r.id) for r in (getattr(entry.after, "roles", None) or [])]
         removed = [guild.get_role(r.id) for r in (getattr(entry.before, "roles", None) or [])]
         added = [r for r in added if r is not None]
@@ -701,7 +729,7 @@ class EngineMixin:
                 f"A:\n{member.mention}\n\n**Accion:**\n{taken}\n\n**Motivo:**\n{violations[0][1]}"
             )
             await self._send_log(guild, embed, ping=True, critical=True)
-            return etype, target_name, detail, severity, points, None, False
+            return etype, target_name, detail, severity, points, None, False, None
 
         admin_added = [r for r in added if r.permissions.administrator]
         dangerous_added = [r for r in added if granted(r.permissions, ADMIN_PERMS)]
@@ -713,7 +741,7 @@ class EngineMixin:
         elif protected_removed or any(str(r.id) in ctx.protected for r in added):
             etype, severity = "member_role_update", "warning"
         else:
-            return None, target_name, "", "info", 0, None, False
+            return None, target_name, "", "info", 0, None, False, None
 
         detail = " ".join([f"+{r.name}" for r in added] + [f"-{r.name}" for r in removed])
         roles_to_revert = dangerous_added
@@ -723,21 +751,19 @@ class EngineMixin:
                 return f"Roles retirados a {member}."
         if ctx.lockdown.get("active") and dangerous_added and level not in ("owner", "extra_owner", "trusted_admin"):
             force = revert is not None
+        sub_alert = None
         if etype in ("admin_grant", "dangerous_permission"):
-            await self._watch_alert(
-                guild, ctx,
-                "Administrator otorgado" if admin_added else "Roles administrativos asignados",
-                actor_id=entry.user_id, target=target_name,
-                changes=[f"+ {r.mention}" for r in dangerous_added],
-                action_taken="Asignacion revertida (lockdown)." if force else "",
-                critical=bool(admin_added), health_delta=False,
-            )
+            sub_alert = {
+                "title": "Administrator otorgado" if admin_added else "Roles administrativos asignados",
+                "target": target_name, "changes": [f"+ {r.mention}" for r in dangerous_added],
+                "critical": bool(admin_added), "from_revert": force,
+            }
         elif protected_removed:
-            await self._watch_alert(
-                guild, ctx, "Rol protegido retirado", actor_id=entry.user_id, target=target_name,
-                changes=[f"- {r.mention}" for r in protected_removed],
-            )
-        return etype, target_name, detail, severity, points, revert, force
+            sub_alert = {
+                "title": "Rol protegido retirado", "target": target_name,
+                "changes": [f"- {r.mention}" for r in protected_removed],
+            }
+        return etype, target_name, detail, severity, points, revert, force, sub_alert
 
     @commands.Cog.listener()
     async def on_guild_role_update(self, before: discord.Role, after: discord.Role) -> None:
@@ -1021,6 +1047,14 @@ class EngineMixin:
     async def quarantine_member(
         self, guild: discord.Guild, member: discord.Member, *, reason: str, by: Optional[discord.abc.User]
     ) -> Tuple[bool, str]:
+        async with self._q_locks[guild.id]:
+            if str(member.id) in await self.config.guild(guild).quarantined():
+                return False, f"{member.mention} ya estaba en quarantine."
+            return await self._quarantine_member_locked(guild, member, reason=reason, by=by)
+
+    async def _quarantine_member_locked(
+        self, guild: discord.Guild, member: discord.Member, *, reason: str, by: Optional[discord.abc.User]
+    ) -> Tuple[bool, str]:
         me = guild.me
         if member.id == guild.owner_id:
             return False, "No se puede poner en quarantine al Owner."
@@ -1063,8 +1097,9 @@ class EngineMixin:
         return True, f"Quarantine aplicada a {member.mention}: {len(dangerous)} rol(es) retirados."
 
     async def release_quarantine(self, guild: discord.Guild, user_id: int, by: discord.abc.User) -> Tuple[bool, str]:
-        async with self.config.guild(guild).quarantined() as q:
-            data = q.pop(str(user_id), None)
+        async with self._q_locks[guild.id]:
+            async with self.config.guild(guild).quarantined() as q:
+                data = q.pop(str(user_id), None)
         if data is None:
             return False, "Ese usuario no esta en quarantine."
         member = guild.get_member(user_id)

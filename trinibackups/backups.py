@@ -177,6 +177,15 @@ class TriniBackups(commands.Cog):
     async def red_delete_data_for_user(self, **kwargs) -> None:
         return
 
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        # Los slash de discord.py NO heredan los checks del grupo en los
+        # subcomandos (con prefijo si). Este cog_check se ejecuta en ambos casos.
+        if ctx.guild is None:
+            return False
+        if await ctx.bot.is_owner(ctx.author) or await ctx.bot.is_admin(ctx.author):
+            return True
+        return ctx.author.guild_permissions.administrator
+
     async def cog_load(self) -> None:
         self.schedule_loop.start()
 

@@ -24,7 +24,16 @@ El catalogo (`triniprofiles/registry.py`) cubre ~70 modulos, agrupados por su or
 - **Terceros** (`captcha`→`advancedcaptcha`, `welcome`, `rolesbuttons`, `autoroom`, `youtube`, `assistant`, etc.): no conocemos el nombre exacto de su clase, asi que **no se adivina**. Cada uno guarda su `package` (la carpeta/extension real) y se resuelve buscando, entre los cogs realmente cargados, cual viene de ese paquete — funciona sin importar como se llame su clase.
 - **Conceptuales** (`applications`, `forms`, `status`, `incidents`, `arencup`): categorias del roadmap para las que aun no hay un cog concreto asignado; se muestran siempre como no cargadas hasta que edites `registry.py` con el paquete real que uses.
 
-`!trini status` y `!trini modules` marcan cada modulo con 🟢 activo y cargado, 🟠 activo pero no encontrado en el bot, ⚫ desactivado, y `_terceros_` cuando su clase no esta verificada. Si un modulo aparece como no cargado, el mensaje indica exactamente como conseguirlo segun su origen (instalar de killerbite-cogs, cargarlo porque ya viene con Red, o instalar el repo de terceros correspondiente).
+`!trini status` y `!trini modules` muestran el **estado real** de cada modulo en el servidor, preguntando a Red (no solo al apunte de Profiles):
+
+| Icono | Significado |
+|---|---|
+| 🟢 | Cargado y habilitado en este servidor: sus comandos funcionan. |
+| 🔴 | Cargado pero desactivado en este servidor (`disablecog`, por Profiles o a mano). |
+| 🟠 | Activado en Profiles pero el cog no esta cargado en el bot. |
+| ⚫ | No cargado. |
+
+Aplicar un perfil vuelve a habilitar en Red todos sus modulos, aunque alguien los hubiera desactivado a mano con `disablecog`. Si un modulo aparece como no cargado, el mensaje indica como conseguirlo segun su origen (instalar de killerbite-cogs, cargarlo porque ya viene con Red, o instalar el repo de terceros correspondiente).
 
 ## Perfil "Todo activado"
 

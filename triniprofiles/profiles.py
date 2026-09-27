@@ -39,6 +39,20 @@ MAX_HISTORY = 200
 COLOR = discord.Color.from_rgb(88, 101, 242)
 
 
+# Estado real de cada modulo en un servidor (ver ``TriniProfiles.effective_states``).
+STATE_ON = "on"            # cargado y habilitado en este servidor: funciona
+STATE_OFF = "off"          # cargado pero desactivado en este servidor (disablecog)
+STATE_MISSING_ON = "missing_on"  # Profiles lo quiere activo, pero el cog no esta cargado
+STATE_MISSING = "missing"  # no cargado y sin activar en Profiles
+STATE_ICON = {STATE_ON: "🟢", STATE_OFF: "🔴", STATE_MISSING_ON: "🟠", STATE_MISSING: "⚫"}
+STATE_LEGEND = "🟢 funcionando · 🔴 desactivado en este servidor · 🟠 activado pero no cargado · ⚫ no cargado"
+
+
+def _clean_name(name: str) -> str:
+    """Normaliza el nombre de un preset (sin comillas ni espacios sobrantes)."""
+    return name.strip().strip('"').strip("'").strip()[:60]
+
+
 def _join_capped(lines: List[str], limit: int = 1024) -> str:
     """Une ``lines`` con saltos de linea sin superar ``limit``, cortando por
     lineas completas (nunca a mitad de una) y avisando cuantas faltan."""
@@ -169,17 +183,18 @@ class ConfirmView(AuthorView):
 
 
 class ModuleToggleSelect(discord.ui.Select):
-    def __init__(self, view: "ModulesView", category: str, states: Dict[str, bool]):
+    def __init__(self, view: "ModulesView", category: str, effective: Dict[str, str]):
         options = []
         for info in MODULES.values():
             if info.category != category or info.core:
                 continue
-            enabled = states.get(info.key, False)
+            state = effective.get(info.key, STATE_MISSING)
+            active = state in (STATE_ON, STATE_MISSING_ON)
             options.append(
                 discord.SelectOption(
-                    label=f"{'Desactivar' if enabled else 'Activar'} {info.name}",
+                    label=f"{'Desactivar' if active else 'Activar'} {info.name}"[:100],
                     value=info.key,
-                    emoji="🟢" if enabled else "⚫",
+                    emoji=STATE_ICON[state],
                     description=info.description[:100],
                 )
             )
@@ -190,7 +205,8 @@ class ModuleToggleSelect(discord.ui.Select):
         key = self.values[0]
         cog = self.modules_view.cog
         states = await cog.config.guild(interaction.guild).modules()
-        enable = not states.get(key, False)
+        effective = await cog.effective_states(interaction.guild, states)
+        enable = effective.get(key) not in (STATE_ON, STATE_MISSING_ON)
         if enable:
             deps = [d for d in resolve_dependencies([key]) if not states.get(d, False)]
             if deps:
@@ -227,6 +243,7 @@ class ModulesView(AuthorView):
     async def build(self) -> discord.Embed:
         self.clear_items()
         states = await self.cog.config.guild(self.ctx.guild).modules()
+        effective = await self.cog.effective_states(self.ctx.guild, states)
         categories = sorted({m.category for m in MODULES.values() if not m.core})
         if self.category is None:
             self.category = categories[0]
@@ -245,8 +262,8 @@ class ModulesView(AuthorView):
 
         cat_select.callback = cat_callback
         self.add_item(cat_select)
-        self.add_item(ModuleToggleSelect(self, self.category, states))
-        return await self.cog.build_modules_embed(self.ctx.guild, states)
+        self.add_item(ModuleToggleSelect(self, self.category, effective))
+        return await self.cog.build_modules_embed(self.ctx.guild, states, effective)
 
     async def refresh(self) -> None:
         embed = await self.build()
@@ -283,6 +300,15 @@ class TriniProfiles(commands.Cog):
     async def red_delete_data_for_user(self, **kwargs) -> None:
         return
 
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        # Los slash de discord.py NO heredan los checks del grupo en los
+        # subcomandos (con prefijo si). Este cog_check se ejecuta en ambos casos.
+        if ctx.guild is None:
+            return False
+        if await ctx.bot.is_owner(ctx.author) or await ctx.bot.is_admin(ctx.author):
+            return True
+        return ctx.author.guild_permissions.manage_guild
+
     # ------------------------------------------------------------------
     # API publica para otros cogs
     # ------------------------------------------------------------------
@@ -295,6 +321,29 @@ class TriniProfiles(commands.Cog):
             "modules": {k: v for k, v in data["modules"].items() if v},
             "hints": list(PROFILES[data["profile"]].protected_role_hints) if data["profile"] in PROFILES else [],
         }
+
+    async def effective_states(self, guild: discord.Guild, states: Optional[Dict[str, bool]] = None) -> Dict[str, str]:
+        """Estado REAL de cada modulo en ``guild``.
+
+        Para los cogs cargados se pregunta a Red si estan desactivados en el
+        servidor (``disablecog``), que es lo que decide si sus comandos
+        funcionan. El apunte de Profiles solo cuenta para los cogs que no
+        estan cargados (si "quieres" tenerlos activos o no).
+        """
+        if states is None:
+            states = await self.config.guild(guild).modules()
+        out: Dict[str, str] = {}
+        for info in MODULES.values():
+            wanted = info.core or bool(states.get(info.key, False))
+            cog = resolve_cog(self.bot, info)
+            if cog is None:
+                out[info.key] = STATE_MISSING_ON if wanted else STATE_MISSING
+            elif info.core:
+                out[info.key] = STATE_ON
+            else:
+                disabled = await self.bot.cog_disabled_in_guild(cog, guild)
+                out[info.key] = STATE_OFF if disabled else STATE_ON
+        return out
 
     async def is_module_enabled(self, guild: discord.Guild, key: str) -> bool:
         return bool((await self.config.guild(guild).modules()).get(key, False))
@@ -353,6 +402,8 @@ class TriniProfiles(commands.Cog):
         if info is None:
             return False, f"Modulo desconocido: `{key}`."
         if info.core:
+            if enabled:
+                return True, f"**{info.name}** es un modulo base: siempre esta activo."
             return False, f"**{info.name}** es un modulo base y no se puede desactivar."
         async with self.config.guild(guild).modules() as states:
             if enabled:
@@ -378,6 +429,8 @@ class TriniProfiles(commands.Cog):
             msg += "\n⚠️ No cargado en el bot: " + humanize_list(
                 [f"{m.name}" + (f" (`{m.package}`)" if m.package else "") for m in missing]
             )
+        if not await self.config.guild(guild).sync_red():
+            msg += "\nℹ️ La sincronizacion con Red esta desactivada (`trini syncred`): esto solo cambia el apunte de Profiles."
         return True, msg
 
     async def apply_profile(
@@ -418,7 +471,9 @@ class TriniProfiles(commands.Cog):
                     if value and key not in wanted and (info is None or not info.core):
                         states[key] = False
                         disabled.append(key)
-        for key in enabled:
+        # Se sincronizan TODOS los deseados (no solo los que cambian de apunte):
+        # asi se corrige tambien un ``disablecog`` hecho a mano fuera de Profiles.
+        for key in wanted:
             await self._sync_red(guild, key, True)
         for key in disabled:
             await self._sync_red(guild, key, False)
@@ -505,8 +560,12 @@ class TriniProfiles(commands.Cog):
         )
         return embed
 
-    async def build_modules_embed(self, guild: discord.Guild, states: Dict[str, bool]) -> discord.Embed:
+    async def build_modules_embed(
+        self, guild: discord.Guild, states: Dict[str, bool], effective: Optional[Dict[str, str]] = None
+    ) -> discord.Embed:
         data = await self.config.guild(guild).all()
+        if effective is None:
+            effective = await self.effective_states(guild, states)
         profile = PROFILES.get(data["profile"])
         embed = discord.Embed(
             title="🧩 Modulos de La Trini",
@@ -517,16 +576,17 @@ class TriniProfiles(commands.Cog):
             + f"\nSincronizar con Red (`enablecog`/`disablecog`): **{'si' if data['sync_red'] else 'no'}**",
         )
         by_cat: Dict[str, List[str]] = {}
+        counts: Dict[str, int] = {}
         for info in MODULES.values():
-            enabled = info.core or states.get(info.key, False)
-            loaded = resolve_cog(self.bot, info) is not None
-            icon = "🟢" if enabled and loaded else ("🟠" if enabled else "⚫")
+            state = effective.get(info.key, STATE_MISSING)
+            counts[state] = counts.get(state, 0) + 1
             deps = f" ← {', '.join(info.depends)}" if info.depends else ""
-            tp = " · _terceros_" if info.third_party and not loaded else ""
-            by_cat.setdefault(info.category, []).append(f"{icon} {info.emoji} {info.name}{deps}{tp}")
+            by_cat.setdefault(info.category, []).append(f"{STATE_ICON[state]} {info.emoji} {info.name}{deps}")
         for cat, lines in by_cat.items():
-            embed.add_field(name=cat, value=_join_capped(lines), inline=True)
-        embed.set_footer(text="🟢 activo · 🟠 activo pero no cargado · ⚫ desactivado · _terceros_: revisa el paquete si no coincide")
+            embed.add_field(name=cat, value=_join_capped(lines, 700), inline=True)
+        summary = " · ".join(f"{STATE_ICON[k]} {counts[k]}" for k in (STATE_ON, STATE_OFF, STATE_MISSING_ON, STATE_MISSING) if counts.get(k))
+        embed.description += f"\n{summary}"
+        embed.set_footer(text=STATE_LEGEND)
         return embed
 
     # ------------------------------------------------------------------
@@ -564,7 +624,7 @@ class TriniProfiles(commands.Cog):
         self, guild: discord.Guild, payload: Dict[str, Any], actor: discord.abc.User
     ) -> List[str]:
         warnings: List[str] = []
-        same_guild = payload.get("source_guild", {}).get("id") == guild.id
+        same_guild = (payload.get("source_guild") or {}).get("id") == guild.id
         profile = PROFILES.get(payload.get("profile") or "custom", PROFILES["custom"])
         await self.apply_profile(
             guild,
@@ -588,7 +648,7 @@ class TriniProfiles(commands.Cog):
             except Exception as exc:
                 log.exception("Error importando %s", cog_name)
                 warnings.append(f"{cog_name}: error al importar ({exc}).")
-        await self._log(guild, actor, "profile_import", f"desde {payload.get('source_guild', {}).get('name', '?')}")
+        await self._log(guild, actor, "profile_import", f"desde {(payload.get('source_guild') or {}).get('name', '?')}")
         return warnings
 
     # ------------------------------------------------------------------
@@ -663,7 +723,7 @@ class TriniProfiles(commands.Cog):
         """Resumen del perfil del servidor."""
         data = await self.config.guild(ctx.guild).all()
         embed = await self.build_modules_embed(ctx.guild, data["modules"])
-        embed.title = f"📋 Estado de La Trini en {ctx.guild.name}"
+        embed.title = f"📋 Estado de La Trini en {ctx.guild.name}"[:256]
         embed.add_field(name="Nivel de seguridad", value=f"`{data['security_level']}`", inline=False)
         if data["applied_at"]:
             embed.add_field(name="Perfil aplicado", value=f"<t:{data['applied_at']}:R>", inline=False)
@@ -715,7 +775,9 @@ class TriniProfiles(commands.Cog):
     @profile.command(name="save")
     async def profile_save(self, ctx: commands.Context, *, name: str):
         """Guardar la configuracion actual como preset reutilizable."""
-        name = name.strip().strip('"')[:60]
+        name = _clean_name(name)
+        if not name:
+            return await ctx.send("Indica un nombre para el preset.")
         data = await self.config.guild(ctx.guild).all()
         async with self.config.presets() as presets:
             existing = presets.get(name.lower())
@@ -738,7 +800,7 @@ class TriniProfiles(commands.Cog):
     async def profile_apply(self, ctx: commands.Context, *, name: str):
         """Aplicar un preset guardado."""
         presets = await self.config.presets()
-        preset = presets.get(name.strip().strip('"').lower())
+        preset = presets.get(_clean_name(name).lower())
         if preset is None:
             return await ctx.send("No existe ese preset. Mira `profile list`.")
         view = ConfirmView(ctx.author, confirm_label="Aplicar")
@@ -786,6 +848,7 @@ class TriniProfiles(commands.Cog):
     @profile.command(name="delete")
     async def profile_delete(self, ctx: commands.Context, *, name: str):
         """Eliminar un preset guardado."""
+        name = _clean_name(name)
         async with self.config.presets() as presets:
             preset = presets.get(name.lower())
             if preset is None:
@@ -829,9 +892,11 @@ class TriniProfiles(commands.Cog):
             payload = json.loads(await file.read())
         except (ValueError, discord.HTTPException):
             return await ctx.send("No es un JSON valido.")
-        if payload.get("format") != "trini-profile":
+        if not isinstance(payload, dict) or payload.get("format") != "trini-profile":
             return await ctx.send("El archivo no es un export de Trini Profiles.")
-        source = payload.get("source_guild", {})
+        if not isinstance(payload.get("modules", {}), dict) or not isinstance(payload.get("cogs", {}), dict):
+            return await ctx.send("El archivo esta dañado (modulos o cogs con formato incorrecto).")
+        source = payload.get("source_guild") or {}
         active = [MODULES[k].name for k, v in payload.get("modules", {}).items() if v and k in MODULES]
         view = ConfirmView(ctx.author, confirm_label="Importar")
         msg = await ctx.send(

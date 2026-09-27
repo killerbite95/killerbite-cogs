@@ -22,7 +22,7 @@ from redbot.core import Config, commands
 from redbot.core.bot import Red
 
 from .audit import AuditReport, run_guild_audit
-from .commands import CommandsMixin
+from .commands import CommandsMixin, is_security_staff
 from .constants import (
     DEFAULT_LEVELS,
     DEFAULT_SCORES,
@@ -100,6 +100,11 @@ class TriniSecurity(CommandsMixin, EngineMixin, commands.Cog):
                     if e.get("target") == user_id:
                         e["target"] = None
                         e["target_name"] = "usuario eliminado"
+
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        # Los slash de discord.py NO heredan los checks del grupo en los
+        # subcomandos (con prefijo si). Este cog_check se ejecuta en ambos casos.
+        return await is_security_staff(ctx)
 
     async def cog_load(self) -> None:
         self.bot.add_dynamic_items(*DYNAMIC_ITEMS)

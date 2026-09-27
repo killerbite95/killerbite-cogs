@@ -104,6 +104,17 @@ class TriniEvents(commands.Cog):
                         if user_id in ev.get(key, []):
                             ev[key] = [u for u in ev[key] if u != user_id]
 
+    async def cog_check(self, ctx: commands.Context) -> bool:
+        # Los slash de discord.py NO heredan los checks del grupo en los
+        # subcomandos: sin esto, cualquiera podria usar `/event settings ...`.
+        if ctx.guild is None:
+            return False
+        if ctx.command is not None and ctx.command.qualified_name.startswith("event settings"):
+            if await ctx.bot.is_owner(ctx.author) or await ctx.bot.is_admin(ctx.author):
+                return True
+            return ctx.author.guild_permissions.manage_guild
+        return True
+
     async def cog_load(self) -> None:
         self.bot.add_dynamic_items(EventButton)
         self.event_loop.start()
@@ -136,8 +147,8 @@ class TriniEvents(commands.Cog):
     # Render
     # ------------------------------------------------------------------
 
-    def _checkin_open(self, event: Dict[str, Any], settings: Dict[str, Any]) -> bool:
-        now = time.time()
+    def _checkin_open(self, event: Dict[str, Any], settings: Dict[str, Any], now: Optional[float] = None) -> bool:
+        now = time.time() if now is None else now
         end = event["start"] + event["duration"] * 60
         return event["status"] in ("scheduled", "ongoing") and event["start"] - settings["checkin_open"] * 60 <= now <= end
 
@@ -599,7 +610,7 @@ class TriniEvents(commands.Cog):
                 actions.append("remind")
             if snapshot["kind"] != "arencup" and not snapshot["role"]["assigned"] and now >= snapshot["start"] - settings["role_lead"] * 60 and now < end:
                 actions.append("prepare")
-            if not snapshot.get("checkin_shown") and self._checkin_open(snapshot, settings):
+            if not snapshot.get("checkin_shown") and self._checkin_open(snapshot, settings, now):
                 actions.append("checkin")
             if snapshot["status"] == "scheduled" and now >= snapshot["start"]:
                 actions.append("start")
