@@ -6,15 +6,19 @@ Capa defensiva encima del servidor. No es otro automod ni logger: audita permiso
 
 > Prefijo de ejemplo `!` (el de La Trini). Todos los comandos son hibridos: tambien funcionan como `/` si activas los slash con `[p]slash enablecog <cog>` y `[p]slash sync`.
 
-## Inicio rapido
-```
-!security config logchannel #seguridad
-!security config alertrole @Staff
-!security audit
-!security protectedrole add @Administrador
-!security watch enable
-!security antinuke enable
-```
+## Puesta en marcha paso a paso
+
+1. Da al bot **View Audit Log**, Manage Roles, Manage Channels, Manage Webhooks, Kick Members y Manage Server, y sube su rol por encima de los roles a proteger.
+2. Canal y rol de alertas: `!security config logchannel #seguridad` y `!security config alertrole @Staff`.
+3. Primera revision: `!security audit` y `!security health`. Corrige primero los 🔴.
+4. Autoridad: `!security authority add @usuario extra_owner` (solo Owner) y `!security authority add @usuario trusted_admin`.
+5. Roles criticos: `!security protectedrole add @Administrador` (repite con cada rol importante).
+6. Bots legitimos a la whitelist **antes** de Anti-Nuke: `!security whitelist add bots @MiBot`.
+7. Activa la vigilancia: `!security watch enable` y `!security antinuke enable`.
+8. (Opcional) Resumen semanal: `!security digest enable #seguridad`.
+9. En una emergencia: `!security lockdown enable` → `!security timeline 15m` → `!security incident list` → `!security lockdown disable`.
+
+> Tutorial completo de todos los modulos: [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md)
 
 ## Modulos
 | Area | Comandos |

@@ -35,7 +35,7 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 
 ## La Trini platform
 
-`triniprofiles` → `trinisecurity` → `trinibackups` → `trinievents` → `alienhost` work together: Profiles prepares the server, Security audits and protects it, Backups stores comparable states (linked to Security incidents), Events drives community activity and AlienHost connects Discord with real infrastructure. See [docs/la_trini_roadmap_modulos.md](docs/la_trini_roadmap_modulos.md).
+`triniprofiles` → `trinisecurity` → `trinibackups` → `trinievents` → `alienhost` work together: Profiles prepares the server, Security audits and protects it, Backups stores comparable states (linked to Security incidents), Events drives community activity and AlienHost connects Discord with real infrastructure. **Step-by-step setup guide (Spanish): [docs/GUIA_LA_TRINI.md](docs/GUIA_LA_TRINI.md).** Roadmap: [docs/la_trini_roadmap_modulos.md](docs/la_trini_roadmap_modulos.md).
 
 ## Support
 

@@ -4,6 +4,16 @@ Configuracion por perfiles de La Trini. Un perfil es una **plantilla inicial**, 
 
 > Prefijo de ejemplo `!` (el de La Trini). Todos los comandos son hibridos: tambien funcionan como `/` si activas los slash con `[p]slash enablecog <cog>` y `[p]slash sync`.
 
+## Puesta en marcha paso a paso
+
+1. Mira el estado real de cada modulo: `!trini status`.
+2. (Opcional) Aplica una plantilla: `!trini setup` → elige el tipo de servidor → **Aplicar** / **+ recomendados** / **exacto**.
+3. Ajusta a mano: `!trini modules` (o `!trini enable <modulo>` / `!trini disable <modulo>`).
+4. (Opcional) Guarda la seleccion de modulos: `!profile save <nombre>` y aplicala en otro servidor con `!profile apply <nombre>`.
+5. Para copiar tambien la configuracion de los cogs a otro servidor: `!profile export` en el origen y `!profile import` (adjuntando el JSON) en el destino.
+
+> Tutorial completo de todos los modulos: [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md)
+
 ## Comandos
 
 | Comando | Descripcion |

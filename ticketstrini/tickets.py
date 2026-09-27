@@ -74,6 +74,45 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
     async def cog_load(self) -> None:
         asyncio.create_task(self._startup())
 
+    # ------------------------------------------------------------------
+    # Protocolo de La Trini (TriniProfiles export/import y TriniBackups)
+    # ------------------------------------------------------------------
+
+    # Datos de funcionamiento que NO son configuracion: nunca se exportan ni se pisan.
+    _TRINI_RUNTIME_KEYS = ("opened", "archived", "user_cooldowns", "overview_msg", "stats")
+
+    async def trini_export(self, guild: discord.Guild) -> dict:
+        """Configuracion de tickets (paneles, roles, ajustes...) sin tickets abiertos ni estadisticas."""
+        conf = await self.config.guild(guild).all()
+        return {k: v for k, v in conf.items() if k not in self._TRINI_RUNTIME_KEYS}
+
+    async def trini_import(self, guild: discord.Guild, data: dict, *, same_guild: bool) -> t.List[str]:
+        warnings: t.List[str] = []
+        data = {k: v for k, v in data.items() if k not in self._TRINI_RUNTIME_KEYS}
+        if not same_guild:
+            # La lista negra son usuarios de otra comunidad: no se arrastra.
+            data.pop("blacklist", None)
+            data.pop("blacklist_advanced", None)
+            # Los mensajes de los paneles pertenecen al otro servidor.
+            panels = data.get("panels") or {}
+            for panel in panels.values():
+                panel["message_id"] = 0
+                panel["ticket_num"] = 1
+            if panels:
+                warnings.append(
+                    "Tickets: vuelve a publicar cada panel y enlazalo con "
+                    "`[p]ticketst panelmessage <panel> <mensaje>` (" + ", ".join(sorted(panels)) + ")."
+                )
+        async with self.config.guild(guild).all() as current:
+            for key, value in data.items():
+                if key in current:
+                    current[key] = value
+        try:
+            await self.initialize(guild)
+        except Exception as exc:
+            log.error("No se pudieron refrescar los paneles tras importar", exc_info=exc)
+        return warnings
+
     async def cog_unload(self) -> None:
         self.auto_close.cancel()
         self.escalation_check.cancel()

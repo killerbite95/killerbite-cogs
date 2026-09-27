@@ -4,6 +4,8 @@ Sistema de tickets de soporte multi-panel con botones (Trini Edition)
 
 **Author**: [Killerbite95](https://github.com/killerbite95/killerbite-cogs)
 
+> **Copiar la configuracion a otro servidor con La Trini:** `[p]profile export` / `[p]profile import` (TriniProfiles) copian paneles, roles y ajustes, pero no los tickets abiertos, el archivo ni las estadisticas. En otro servidor, vuelve a publicar cada panel y enlazalo con `[p]ticketst panelmessage <panel> <mensaje>`. Ver [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md).
+
 ---
 
 # [p]ticket (Hybrid Group)

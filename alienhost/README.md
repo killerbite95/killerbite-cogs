@@ -4,6 +4,19 @@ Controla tus servidores de AlienHost (Pelican) desde Discord usando **tu propia 
 
 > Prefijo de ejemplo `!` (el de La Trini). Todos los comandos son hibridos: tambien funcionan como `/` si activas los slash con `[p]slash enablecog <cog>` y `[p]slash sync`.
 
+## Puesta en marcha paso a paso
+
+**Owner del bot (una vez):** `!pipinstall cryptography`, carga el cog y revisa el panel permitido con `!alienhost set panels list` (por defecto `https://pelican.alienhost.es`). Opcional: `!alienhost admin setkey` con la clave de aplicacion `papp_` para `nodes`, `incidents` y `user`.
+
+**Admins de cada Discord:** `!alienhost set logchannel #alienhost-logs` y `!alienhost set adminrole @Staff true`.
+
+**Cada usuario:**
+1. En el panel: **Perfil → Claves API → Crear** (opcional: limitala a la IP del bot).
+2. En Discord: `!alienhost link` → **Conectar cuenta** → pega la URL y la clave en el formulario privado.
+3. Usa `!ah servers` para ver y controlar tus servidores, y `!ah alerts <servidor>` para los avisos por DM.
+
+> Tutorial completo de todos los modulos: [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md)
+
 ## Vincular
 1. En el panel (`https://pelican.alienhost.es`) ve a **Perfil → Claves API → Crear** (puedes limitarla a la IP del bot).
 2. En Discord: `!alienhost link` → pulsa **Conectar cuenta** y se abre un **formulario privado** (modal) con la URL del panel y la clave. Nunca se escriben en el chat.

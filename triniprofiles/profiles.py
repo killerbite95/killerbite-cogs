@@ -593,12 +593,23 @@ class TriniProfiles(commands.Cog):
     # Export / import
     # ------------------------------------------------------------------
 
+    async def active_modules(self, guild: discord.Guild) -> Dict[str, bool]:
+        """Modulos activos segun el estado REAL (no solo el apunte de Profiles).
+
+        Asi un servidor que nunca paso por `trini setup` exporta/guarda igualmente
+        todo lo que tiene funcionando.
+        """
+        effective = await self.effective_states(guild)
+        return {k: st in (STATE_ON, STATE_MISSING_ON) for k, st in effective.items() if not MODULES[k].core}
+
     async def build_export(self, guild: discord.Guild) -> Dict[str, Any]:
         data = await self.config.guild(guild).all()
+        modules = await self.active_modules(guild)
         cogs: Dict[str, Any] = {}
-        for key, enabled in data["modules"].items():
+        raw_cogs: List[str] = []
+        for key, enabled in modules.items():
             info = MODULES.get(key)
-            if not enabled or info is None or info.key == "profiles":
+            if not enabled or info is None:
                 continue
             cog = resolve_cog(self.bot, info)
             if cog is None:
@@ -606,6 +617,8 @@ class TriniProfiles(commands.Cog):
             exported = await export_cog(cog, guild)
             if exported is not None:
                 cogs[cog.qualified_name] = exported
+                if not hasattr(cog, "trini_export"):
+                    raw_cogs.append(cog.qualified_name)
         payload: Dict[str, Any] = {
             "format": "trini-profile",
             "version": EXPORT_VERSION,
@@ -613,9 +626,11 @@ class TriniProfiles(commands.Cog):
             "source_guild": {"id": guild.id, "name": guild.name},
             "profile": data["profile"],
             "security_level": data["security_level"],
-            "modules": {k: v for k, v in data["modules"].items() if k in MODULES},
-            "dependencies": {k: list(MODULES[k].depends) for k, v in data["modules"].items() if v and k in MODULES and MODULES[k].depends},
+            "modules": modules,
+            "dependencies": {k: list(MODULES[k].depends) for k, v in modules.items() if v and MODULES[k].depends},
             "cogs": cogs,
+            # Cogs sin soporte Trini: se copia su configuracion completa tal cual.
+            "raw_cogs": raw_cogs,
         }
         payload["references"] = collect_references(cogs, guild)
         return payload
@@ -779,6 +794,7 @@ class TriniProfiles(commands.Cog):
         if not name:
             return await ctx.send("Indica un nombre para el preset.")
         data = await self.config.guild(ctx.guild).all()
+        data["modules"] = await self.active_modules(ctx.guild)
         async with self.config.presets() as presets:
             existing = presets.get(name.lower())
             if existing and existing["owner_guild"] != ctx.guild.id and not await self.bot.is_owner(ctx.author):
@@ -910,6 +926,12 @@ class TriniProfiles(commands.Cog):
                     f"**Configuracion de cogs:** {humanize_list(list(payload.get('cogs', {}).keys())) or '-'}\n\n"
                     "Los canales y roles se re-mapean por nombre si el servidor es distinto.\n"
                     "La configuracion actual de esos cogs se sobrescribira."
+                    + (
+                        "\n\n⚠️ **Copia completa (sin soporte Trini):** "
+                        + humanize_list(payload.get("raw_cogs") or [])
+                        + ". Puede incluir datos de funcionamiento del servidor de origen."
+                        if payload.get("raw_cogs") else ""
+                    )
                 ),
             ),
             view=view,

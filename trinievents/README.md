@@ -4,6 +4,18 @@ Gestor de actividades: inscripciones, reservas, recordatorios y logistica. No ge
 
 > Prefijo de ejemplo `!` (el de La Trini). Todos los comandos son hibridos: tambien funcionan como `/` si activas los slash con `[p]slash enablecog <cog>` y `[p]slash sync`.
 
+## Puesta en marcha paso a paso
+
+1. Zona horaria y canal: `!event settings timezone Europe/Madrid` y `!event settings channel #eventos`.
+2. Recordatorios por DM: `!event settings reminders 1440,60,15`.
+3. (Opcional) Staff: `!event settings staffrole @Staff true`.
+4. (Opcional) Rol para inscritos: `!event settings participantrole @Participante` o `!event settings autorole true`.
+5. (Opcional) Canales por evento: `!event settings tempchannels true delete`.
+6. Crea el primer evento: `!event create` → **Abrir formulario** → nombre, fecha (`viernes 22:00`), plazas, duracion y descripcion.
+7. Revisa todo con `!event settings show` y `!event list`.
+
+> Tutorial completo de todos los modulos: [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md)
+
 | Comando | Descripcion |
 |---|---|
 | `!event create [canal] [rol_requerido] [tipo]` | Formulario: nombre, fecha, plazas, duracion, descripcion. Botones ✅ Participar · ❌ Cancelar plaza · 🔔 Recordarme · ✋ Check-in. |

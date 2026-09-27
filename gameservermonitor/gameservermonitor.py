@@ -102,6 +102,41 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # Iniciar tarea de monitoreo
         self.server_monitor.start()
     
+
+    # ------------------------------------------------------------------
+    # Protocolo de La Trini: TriniProfiles (export/import) y TriniBackups
+    # ------------------------------------------------------------------
+
+    # Datos de funcionamiento (no son configuracion): ni se exportan ni se pisan.
+    _TRINI_RUNTIME_KEYS = ('player_history',)
+    # Configuracion que solo tiene sentido en el mismo servidor.
+    _TRINI_LOCAL_KEYS = ()
+
+    async def trini_export(self, guild):
+        conf = await self.config.guild(guild).all()
+        return {k: v for k, v in conf.items() if k not in self._TRINI_RUNTIME_KEYS}
+
+    async def trini_import(self, guild, data, *, same_guild):
+        skip = set(self._TRINI_RUNTIME_KEYS)
+        if not same_guild:
+            skip |= set(self._TRINI_LOCAL_KEYS)
+        data = {k: v for k, v in data.items() if k not in skip}
+        if not same_guild:
+            # Los mensajes publicados y los contadores son del otro servidor:
+            # el monitor creara mensajes nuevos en el siguiente refresco.
+            for server in (data.get("servers") or {}).values():
+                server["message_id"] = None
+                for counter in ("total_queries", "successful_queries"):
+                    server[counter] = 0
+                for stamp in ("last_online", "last_offline", "last_status"):
+                    server[stamp] = None
+        group = self.config.guild(guild)
+        current = await group.all()
+        for key, value in data.items():
+            if key in current:
+                await group.set_raw(key, value=value)
+        return []
+
     async def cog_load(self) -> None:
         """Se ejecuta cuando el cog se carga."""
         # Registrar en Dashboard si ya está cargado

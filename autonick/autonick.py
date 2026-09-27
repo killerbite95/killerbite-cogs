@@ -42,6 +42,32 @@ class AutoNick(DashboardIntegration, commands.Cog):
         # Diccionario para rastrear el cooldown por usuario: {user_id: timestamp}
         self.cooldowns = {}
 
+
+    # ------------------------------------------------------------------
+    # Protocolo de La Trini: TriniProfiles (export/import) y TriniBackups
+    # ------------------------------------------------------------------
+
+    # Datos de funcionamiento (no son configuracion): ni se exportan ni se pisan.
+    _TRINI_RUNTIME_KEYS = ()
+    # Configuracion que solo tiene sentido en el mismo servidor.
+    _TRINI_LOCAL_KEYS = ()
+
+    async def trini_export(self, guild):
+        conf = await self.config.guild(guild).all()
+        return {k: v for k, v in conf.items() if k not in self._TRINI_RUNTIME_KEYS}
+
+    async def trini_import(self, guild, data, *, same_guild):
+        skip = set(self._TRINI_RUNTIME_KEYS)
+        if not same_guild:
+            skip |= set(self._TRINI_LOCAL_KEYS)
+        data = {k: v for k, v in data.items() if k not in skip}
+        group = self.config.guild(guild)
+        current = await group.all()
+        for key, value in data.items():
+            if key in current:
+                await group.set_raw(key, value=value)
+        return []
+
     async def get_forbidden_names(self) -> List[str]:
         """Obtiene la lista actual de palabras prohibidas."""
         return await self.config.forbidden_names()

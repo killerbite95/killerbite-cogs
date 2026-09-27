@@ -4,6 +4,16 @@ Snapshots estructurales comparables. No promete restaurar todo Discord: guarda e
 
 > Prefijo de ejemplo `!` (el de La Trini). Todos los comandos son hibridos: tambien funcionan como `/` si activas los slash con `[p]slash enablecog <cog>` y `[p]slash sync`.
 
+## Puesta en marcha paso a paso
+
+1. Da al bot Manage Roles y Manage Channels, con su rol por encima de los roles que quieras poder restaurar.
+2. Primer backup: `!backup create Estado inicial`.
+3. Backups automaticos: `!backup schedule daily 4` (04:00 UTC) y `!backup retention 7 4 6`.
+4. Comprueba cambios cuando quieras: `!backup diff` (ultimo backup vs ahora).
+5. Si algo sale mal: `!backup list` → `!backup restore <id>` → elige que restaurar en los botones → **Continuar**. Nunca borra nada.
+
+> Tutorial completo de todos los modulos: [docs/GUIA_LA_TRINI.md](../docs/GUIA_LA_TRINI.md)
+
 | Comando | Descripcion |
 |---|---|
 | `!backup create [nombre]` | Roles, categorias, canales, foros, overwrites, bots y configuracion de modulos Trini. |
