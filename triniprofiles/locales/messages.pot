@@ -1,0 +1,919 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 12:03+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: i18n_strings.py:11
+msgid ""
+"🟢 running · 🔴 disabled in this server · 🟠 enabled but not loaded · ⚫ not "
+"loaded"
+msgstr ""
+
+#: i18n_strings.py:12
+msgid "Apply"
+msgstr ""
+
+#: i18n_strings.py:13
+msgid "Apply + recommended"
+msgstr ""
+
+#: i18n_strings.py:14
+msgid "Apply exact"
+msgstr ""
+
+#: i18n_strings.py:15
+msgid "Cancel"
+msgstr ""
+
+#: i18n_strings.py:16
+msgid "Continue"
+msgstr ""
+
+#: i18n_strings.py:17
+msgid "General La Trini settings."
+msgstr ""
+
+#: i18n_strings.py:18
+msgid "Custom presets and settings export/import."
+msgstr ""
+
+#: i18n_strings.py:19
+msgid "✅ enabled"
+msgstr ""
+
+#: i18n_strings.py:20
+msgid "⭐ recommended"
+msgstr ""
+
+#: i18n_strings.py:21
+msgid "➖ optional"
+msgstr ""
+
+#: i18n_strings.py:22
+msgid "Gaming Community"
+msgstr ""
+
+#: i18n_strings.py:23
+msgid "Gaming community with game servers, streams and social activity."
+msgstr ""
+
+#: i18n_strings.py:24
+msgid "Esports / Tournaments"
+msgstr ""
+
+#: i18n_strings.py:25
+msgid "Tournament server (ArenCup): staff, referees, casters and teams."
+msgstr ""
+
+#: i18n_strings.py:26
+msgid "Roleplay"
+msgstr ""
+
+#: i18n_strings.py:27
+msgid "Roleplay server with applications, forms and moderation."
+msgstr ""
+
+#: i18n_strings.py:28
+msgid "Hosting / Support"
+msgstr ""
+
+#: i18n_strings.py:29
+msgid "AlienHost support server: customers, tickets and infrastructure."
+msgstr ""
+
+#: i18n_strings.py:30
+msgid "General Community"
+msgstr ""
+
+#: i18n_strings.py:31
+msgid "General community with the basics properly set up."
+msgstr ""
+
+#: i18n_strings.py:32
+msgid "Custom"
+msgstr ""
+
+#: i18n_strings.py:33
+msgid "No template: manually enable what you need with `trini modules`."
+msgstr ""
+
+#: i18n_strings.py:34
+msgid "Everything enabled"
+msgstr ""
+
+#: i18n_strings.py:35
+msgid ""
+"Enables every module La Trini knows about (including loaded third-party "
+"ones). Meant for trying the whole bot or for servers that want everything "
+"available from day one; you can fine-tune later with `trini modules`."
+msgstr ""
+
+#: i18n_strings.py:36
+msgid "Server profiles and modules."
+msgstr ""
+
+#: i18n_strings.py:37
+msgid "Platform"
+msgstr ""
+
+#: i18n_strings.py:38
+msgid "Audit, protected roles, anti-nuke and incidents."
+msgstr ""
+
+#: i18n_strings.py:39
+msgid "Structural snapshots, diff and safe restore."
+msgstr ""
+
+#: i18n_strings.py:40
+msgid "Events with sign-ups, waitlists and reminders."
+msgstr ""
+
+#: i18n_strings.py:41
+msgid "AlienHost (Pelican) servers from Discord."
+msgstr ""
+
+#: i18n_strings.py:42
+msgid "Infrastructure"
+msgstr ""
+
+#: i18n_strings.py:43
+msgid "Embedded REST API for external integrations."
+msgstr ""
+
+#: i18n_strings.py:44
+msgid "Public game server monitoring."
+msgstr ""
+
+#: i18n_strings.py:45
+msgid "Gaming"
+msgstr ""
+
+#: i18n_strings.py:46
+msgid "Support ticket system."
+msgstr ""
+
+#: i18n_strings.py:47
+msgid "Support"
+msgstr ""
+
+#: i18n_strings.py:48
+msgid "Suggestions with voting."
+msgstr ""
+
+#: i18n_strings.py:49
+msgid "Community"
+msgstr ""
+
+#: i18n_strings.py:50
+msgid "Giveaways."
+msgstr ""
+
+#: i18n_strings.py:51
+msgid "Trap channel against selfbots and scams."
+msgstr ""
+
+#: i18n_strings.py:52
+msgid "Moderation"
+msgstr ""
+
+#: i18n_strings.py:53
+msgid "Automatic nickname management."
+msgstr ""
+
+#: i18n_strings.py:54
+msgid "Virtual currency with leaderboard."
+msgstr ""
+
+#: i18n_strings.py:55
+msgid "Advanced user verification with an interactive UI."
+msgstr ""
+
+#: i18n_strings.py:56
+msgid "Clears the credits of users still banned after N days."
+msgstr ""
+
+#: i18n_strings.py:57
+msgid "Blackjack card game."
+msgstr ""
+
+#: i18n_strings.py:58
+msgid "Day counter since/until an event."
+msgstr ""
+
+#: i18n_strings.py:59
+msgid "Lists the server roles with name and ID."
+msgstr ""
+
+#: i18n_strings.py:60
+msgid "Utility"
+msgstr ""
+
+#: i18n_strings.py:61
+msgid "Obsolete: use GameServerMonitor's !gsmalerts."
+msgstr ""
+
+#: i18n_strings.py:62
+msgid "Rust map votes with buttons."
+msgstr ""
+
+#: i18n_strings.py:63
+msgid "Candy game with shop, streaks and events."
+msgstr ""
+
+#: i18n_strings.py:64
+msgid "Basic Red moderation (text ban/kick/mute)."
+msgstr ""
+
+#: i18n_strings.py:65
+msgid "Red's warning system."
+msgstr ""
+
+#: i18n_strings.py:66
+msgid "Red's user reports."
+msgstr ""
+
+#: i18n_strings.py:67
+msgid "Red's moderation action log."
+msgstr ""
+
+#: i18n_strings.py:68
+msgid "Red's mute (timeout) system."
+msgstr ""
+
+#: i18n_strings.py:69
+msgid "Red's word filter."
+msgstr ""
+
+#: i18n_strings.py:70
+msgid "Red bulk message deletion."
+msgstr ""
+
+#: i18n_strings.py:71
+msgid "Red's low-level admin commands."
+msgstr ""
+
+#: i18n_strings.py:72
+msgid "Red's command shortcuts/aliases."
+msgstr ""
+
+#: i18n_strings.py:73
+msgid "Per-server custom commands."
+msgstr ""
+
+#: i18n_strings.py:74
+msgid "Red's general commands (8ball, choose, etc)."
+msgstr ""
+
+#: i18n_strings.py:75
+msgid "Trivia game."
+msgstr ""
+
+#: i18n_strings.py:76
+msgid "Image/GIF search."
+msgstr ""
+
+#: i18n_strings.py:77
+msgid "Music playback."
+msgstr ""
+
+#: i18n_strings.py:78
+msgid "Stream alerts (Twitch/YouTube/etc)."
+msgstr ""
+
+#: i18n_strings.py:79
+msgid "Red's economy (currency)."
+msgstr ""
+
+#: i18n_strings.py:80
+msgid "Cog repository manager. Required to install everything else."
+msgstr ""
+
+#: i18n_strings.py:81
+msgid "Red's custom permission rules."
+msgstr ""
+
+#: i18n_strings.py:82
+msgid "Captcha verification for new members."
+msgstr ""
+
+#: i18n_strings.py:83
+msgid ""
+"Automatically suppresses GifV embeds (avoids videos that freeze clients)."
+msgstr ""
+
+#: i18n_strings.py:84
+msgid "Deletes messages with disallowed links and warns the user."
+msgstr ""
+
+#: i18n_strings.py:85
+msgid "Extended server change log (messages, roles, channels, members...)."
+msgstr ""
+
+#: i18n_strings.py:86
+msgid "Deletes ALL messages in a channel."
+msgstr ""
+
+#: i18n_strings.py:87
+msgid "Announces member joins, leaves and bans."
+msgstr ""
+
+#: i18n_strings.py:88
+msgid "Self-assignable roles with buttons."
+msgstr ""
+
+#: i18n_strings.py:89
+msgid "Reaction roles, mass assignment and autoroles."
+msgstr ""
+
+#: i18n_strings.py:90
+msgid "Syncs roles with each other (having one gives or removes another)."
+msgstr ""
+
+#: i18n_strings.py:91
+msgid "Truly exclusive roles: having one removes the others."
+msgstr ""
+
+#: i18n_strings.py:92
+msgid "Automatic voice rooms."
+msgstr ""
+
+#: i18n_strings.py:93
+msgid "New YouTube video alerts."
+msgstr ""
+
+#: i18n_strings.py:94
+msgid "Extra features for Red's economy."
+msgstr ""
+
+#: i18n_strings.py:95
+msgid "Text battle royale minigame."
+msgstr ""
+
+#: i18n_strings.py:96
+msgid "Reminds you to bump on Disboard."
+msgstr ""
+
+#: i18n_strings.py:97
+msgid "Keeps a message pinned at the bottom of the channel."
+msgstr ""
+
+#: i18n_strings.py:98
+msgid "AI assistant (ChatGPT/OpenAI) for the server."
+msgstr ""
+
+#: i18n_strings.py:99
+msgid "AI"
+msgstr ""
+
+#: i18n_strings.py:100
+msgid "Extra functions for Assistant."
+msgstr ""
+
+#: i18n_strings.py:101
+msgid "Shows user avatars and banners."
+msgstr ""
+
+#: i18n_strings.py:102
+msgid "Makes the bot send or repeat messages/embeds."
+msgstr ""
+
+#: i18n_strings.py:103
+msgid "Reusable snippets/tags by command."
+msgstr ""
+
+#: i18n_strings.py:104
+msgid "Shows the time in different time zones in voice channels."
+msgstr ""
+
+#: i18n_strings.py:105
+msgid "Adds link buttons to messages."
+msgstr ""
+
+#: i18n_strings.py:106
+msgid "Create and edit embeds with an interactive wizard."
+msgstr ""
+
+#: i18n_strings.py:107
+msgid "Create, send and save embeds (also from the dashboard)."
+msgstr ""
+
+#: i18n_strings.py:108
+msgid "Forms (modals) with buttons for users."
+msgstr ""
+
+#: i18n_strings.py:109
+msgid "Easter minigame: hunt eggs, work, gift and steal."
+msgstr ""
+
+#: i18n_strings.py:110
+msgid "La Trini's custom phrases."
+msgstr ""
+
+#: i18n_strings.py:111
+msgid "Reminders by DM or channel, command and message scheduler."
+msgstr ""
+
+#: i18n_strings.py:112
+msgid "Web admin panel for the bot."
+msgstr ""
+
+#: i18n_strings.py:113
+msgid "Staff/whitelist applications. Install the cog you use for this."
+msgstr ""
+
+#: i18n_strings.py:114
+msgid "Forms. Install the cog you use for this."
+msgstr ""
+
+#: i18n_strings.py:115
+msgid "Service status pages. Install the cog you use for this."
+msgstr ""
+
+#: i18n_strings.py:116
+msgid "Incident communication. Install the cog you use for this."
+msgstr ""
+
+#: i18n_strings.py:117
+msgid "ArenCup tournament integration. Install the cog you use for this."
+msgstr ""
+
+#: i18n_strings.py:118
+msgid "Esports"
+msgstr ""
+
+#: i18n_strings.py:119
+msgid ""
+"RoleUtils: reaction roles are tied to messages and aren't copied; create "
+"them again."
+msgstr ""
+
+#: i18n_strings.py:120
+msgid ""
+"RolesButtons: buttons are tied to messages; create them again in this "
+"server."
+msgstr ""
+
+#: i18n_strings.py:121
+msgid ""
+"UrlButtons: buttons are tied to messages; create them again in this server."
+msgstr ""
+
+#: i18n_strings.py:122
+msgid ""
+"DiscordModals: forms are tied to messages; create them again in this server."
+msgstr ""
+
+#: i18n_strings.py:123
+msgid ""
+"YouTube: subscriptions are global to the bot and aren't copied; subscribe "
+"the channels again."
+msgstr ""
+
+#: portable.py:272
+msgid "{qualified_name}: doesn't support import."
+msgstr ""
+
+#: profiles.py:73
+msgid "… and {remaining} more"
+msgstr ""
+
+#: profiles.py:94
+msgid "Only whoever ran the command can use these controls."
+msgstr ""
+
+#: profiles.py:117
+msgid "How is this Discord used?"
+msgstr ""
+
+#: profiles.py:141
+msgid "Pick a profile first."
+msgstr ""
+
+#: profiles.py:172
+msgid "Setup cancelled."
+msgstr ""
+
+#: profiles.py:204
+msgid "Disable {name}"
+msgstr ""
+
+#: profiles.py:204
+msgid "Enable {name}"
+msgstr ""
+
+#: profiles.py:210
+msgid "{category}: enable / disable"
+msgstr ""
+
+#: profiles.py:225
+msgid ""
+"**{name}** requires {names}.\n"
+"{names} will be enabled automatically."
+msgstr ""
+
+#: profiles.py:231 profiles.py:725 profiles.py:839 profiles.py:943
+msgid "Cancelled."
+msgstr ""
+
+#: profiles.py:260
+msgid "Category"
+msgstr ""
+
+#: profiles.py:288
+#, docstring
+msgid ""
+"La Trini profile-based setup: templates, modules, dependencies and presets."
+msgstr ""
+
+#: profiles.py:308
+msgid ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+
+#: profiles.py:413
+msgid "Unknown module: `{key}`."
+msgstr ""
+
+#: profiles.py:416
+msgid "**{info_name}** is a core module: it's always enabled."
+msgstr ""
+
+#: profiles.py:417
+msgid "**{info_name}** is a core module and can't be disabled."
+msgstr ""
+
+#: profiles.py:429
+msgid ""
+"**{info_name}** can't be disabled.\n"
+"\n"
+"Active dependents:\n"
+"{names}"
+msgstr ""
+
+#: profiles.py:436
+msgid "🟢 Enabled"
+msgstr ""
+
+#: profiles.py:436
+msgid "⚫ Disabled"
+msgstr ""
+
+#: profiles.py:439
+msgid ""
+"\n"
+"⚠️ Not loaded in the bot: "
+msgstr ""
+
+#: profiles.py:443
+msgid ""
+"\n"
+"ℹ️ Red sync is disabled (`trini syncred`): this only changes Profiles' record."
+msgstr ""
+
+#: profiles.py:498
+msgid ", exact"
+msgstr ""
+
+#: profiles.py:503
+msgid "{emoji} Profile applied: {profile_name}"
+msgstr ""
+
+#: profiles.py:505
+msgid ""
+"A profile only sets up the base. You can change any module with `trini "
+"modules`."
+msgstr ""
+
+#: profiles.py:509
+msgid "Enabled"
+msgstr ""
+
+#: profiles.py:515
+msgid "Disabled"
+msgstr ""
+
+#: profiles.py:522
+msgid "⚠️ Not loaded in the bot"
+msgstr ""
+
+#: profiles.py:530
+msgid "🔐 Security level"
+msgstr ""
+
+#: profiles.py:535
+msgid "Recommended next step: security audit"
+msgstr ""
+
+#: profiles.py:551
+msgid " · _not loaded_"
+msgstr ""
+
+#: profiles.py:553
+msgid "Modules"
+msgstr ""
+
+#: profiles.py:557
+msgid "Automatic dependencies"
+msgstr ""
+
+#: profiles.py:561
+msgid "Recommended security"
+msgstr ""
+
+#: profiles.py:564
+msgid "Roles to protect"
+msgstr ""
+
+#: profiles.py:569
+msgid ""
+"Apply: enables what's selected · +recommended: includes ⭐ · exact: also "
+"disables the rest"
+msgstr ""
+
+#: profiles.py:581
+msgid "🧩 La Trini modules"
+msgstr ""
+
+#: profiles.py:584
+msgid "Profile: **{emoji} {profile_name}**"
+msgstr ""
+
+#: profiles.py:584
+msgid "Profile: _not set up_ (`trini setup`)"
+msgstr ""
+
+#: profiles.py:586
+msgid ""
+"\n"
+"Sync with Red (`enablecog`/`disablecog`): **{value}**"
+msgstr ""
+
+#: profiles.py:665
+msgid "References not found: "
+msgstr ""
+
+#: profiles.py:669
+msgid "{cog_name}: not loaded, skipped."
+msgstr ""
+
+#: profiles.py:675
+msgid "{cog_name}: import error ({exc})."
+msgstr ""
+
+#: profiles.py:676
+msgid "from {get}"
+msgstr ""
+
+#: profiles.py:691
+#, docstring
+msgid "Setup wizard: choose how this Discord is used."
+msgstr ""
+
+#: profiles.py:693
+msgid "⚙️ La Trini setup"
+msgstr ""
+
+#: profiles.py:694
+msgid ""
+"How is this Discord used?\n"
+"\n"
+msgstr ""
+
+#: profiles.py:700
+msgid "Current profile: {name}"
+msgstr ""
+
+#: profiles.py:706
+#, docstring
+msgid "View and enable/disable modules."
+msgstr ""
+
+#: profiles.py:713
+#, docstring
+msgid "Enable a module (and its dependencies)."
+msgstr ""
+
+#: profiles.py:720
+msgid ""
+"**{name}** requires {names}.\n"
+"\n"
+"{names} will be enabled automatically."
+msgstr ""
+
+#: profiles.py:732
+#, docstring
+msgid "Disable a module (if nothing depends on it)."
+msgstr ""
+
+#: profiles.py:748
+#, docstring
+msgid "Server profile summary."
+msgstr ""
+
+#: profiles.py:751
+msgid "📋 La Trini status in {guild}"
+msgstr ""
+
+#: profiles.py:752
+msgid "Security level"
+msgstr ""
+
+#: profiles.py:754
+msgid "Profile applied"
+msgstr ""
+
+#: profiles.py:759
+#, docstring
+msgid "Recommended security level: standard, high or strict."
+msgstr ""
+
+#: profiles.py:762
+msgid "Valid levels: `standard`, `high`, `strict`."
+msgstr ""
+
+#: profiles.py:765
+msgid "Security level: `{level}`."
+msgstr ""
+
+#: profiles.py:769
+#, docstring
+msgid "Sync modules with Red's `enablecog`/`disablecog` in this server."
+msgstr ""
+
+#: profiles.py:772
+msgid "Red sync: **{value}**."
+msgstr ""
+
+#: profiles.py:776
+#, docstring
+msgid "Profiles settings change history."
+msgstr ""
+
+#: profiles.py:779
+msgid "No changes recorded."
+msgstr ""
+
+#: profiles.py:786
+msgid "📜 Profiles · history"
+msgstr ""
+
+#: profiles.py:802
+#, docstring
+msgid "Save the current setup as a reusable preset."
+msgstr ""
+
+#: profiles.py:805
+msgid "Give the preset a name."
+msgstr ""
+
+#: profiles.py:811
+msgid "A preset with that name already exists, created in another server."
+msgstr ""
+
+#: profiles.py:823
+msgid "💾 Preset **{name}** saved ({count} active modules)."
+msgstr ""
+
+#: profiles.py:827
+#, docstring
+msgid "Apply a saved preset."
+msgstr ""
+
+#: profiles.py:831
+msgid "That preset doesn't exist. See `profile list`."
+msgstr ""
+
+#: profiles.py:835
+msgid ""
+"**{name}** will be applied:\n"
+"{value}"
+msgstr ""
+
+#: profiles.py:850
+msgid "💾 Preset applied: {name}"
+msgstr ""
+
+#: profiles.py:855
+#, docstring
+msgid "List presets and built-in profiles."
+msgstr ""
+
+#: profiles.py:857
+msgid "💾 Profiles and presets"
+msgstr ""
+
+#: profiles.py:859
+msgid "Built-in"
+msgstr ""
+
+#: profiles.py:865
+msgid "Saved presets"
+msgstr ""
+
+#: profiles.py:867
+msgid "• **{name}** · {value} modules · <t:{created_at}:d>"
+msgstr ""
+
+#: profiles.py:876
+#, docstring
+msgid "Delete a saved preset."
+msgstr ""
+
+#: profiles.py:881
+msgid "That preset doesn't exist."
+msgstr ""
+
+#: profiles.py:883
+msgid "It can only be deleted from the server that created it."
+msgstr ""
+
+#: profiles.py:886
+msgid "🗑 Preset **{name}** deleted."
+msgstr ""
+
+#: profiles.py:890
+#, docstring
+msgid "Export modules and active cog settings to JSON."
+msgstr ""
+
+#: profiles.py:896
+msgid ""
+"🏠 Server: **{escape_markdown}** (`{guild_id}`)\n"
+"🕒 {format_dt}\n"
+"📤 Exported **{count}** cogs and **{value}** modules.\n"
+"⚠️ The file contains server settings, share it carefully."
+msgstr ""
+
+#: profiles.py:901
+msgid "📬 I've sent you the export by DM."
+msgstr ""
+
+#: profiles.py:903
+msgid "I can't DM you. Enable DMs or use the slash version of the command."
+msgstr ""
+
+#: profiles.py:907
+#, docstring
+msgid "Import a JSON generated with `profile export`."
+msgstr ""
+
+#: profiles.py:911
+msgid "Attach the exported JSON file."
+msgstr ""
+
+#: profiles.py:913
+msgid "The file is too large."
+msgstr ""
+
+#: profiles.py:917
+msgid "It isn't valid JSON."
+msgstr ""
+
+#: profiles.py:919
+msgid "The file isn't a Trini Profiles export."
+msgstr ""
+
+#: profiles.py:921
+msgid "The file is corrupted (modules or cogs with an invalid format)."
+msgstr ""
+
+#: profiles.py:927
+msgid "📥 Import settings"
+msgstr ""
+
+#: profiles.py:930
+msgid ""
+"Source: **{get}** (`{get2}`)\n"
+"Profile: `{get3}` · Security: `{get4}`\n"
+"\n"
+"**Modules:** {value}\n"
+"**Cog settings:** {value2}\n"
+"\n"
+"Channels and roles are re-mapped by name if the server is different.\n"
+"The current settings of those cogs will be overwritten."
+msgstr ""
+
+#: profiles.py:932
+msgid ""
+"\n"
+"\n"
+"⚠️ **Full copy (no Trini support):** "
+msgstr ""
+
+#: profiles.py:934
+msgid ". It may include runtime data from the source server."
+msgstr ""
+
+#: profiles.py:946
+msgid "✅ Import completed."
+msgstr ""

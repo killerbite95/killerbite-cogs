@@ -20,6 +20,11 @@ from dataclasses import dataclass
 from typing import Dict, Tuple
 
 
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
+
+
 @dataclass(frozen=True)
 class Adapter:
     runtime: Tuple[str, ...] = ()
@@ -51,22 +56,22 @@ ADAPTERS: Dict[str, Adapter] = {
     # RoleUtils: roles "sticky" por rol; los reaction roles dependen de mensajes.
     "RoleUtils": Adapter(
         role=True,
-        note="RoleUtils: los reaction roles van ligados a mensajes y no se copian; vuelve a crearlos.",
+        note=N_("RoleUtils: reaction roles are tied to messages and aren't copied; create them again."),
     ),
     "RolesButtons": Adapter(
         local=("roles_buttons", "modes"),
-        note="RolesButtons: los botones van ligados a mensajes; vuelve a crearlos en este servidor.",
+        note=N_("RolesButtons: buttons are tied to messages; create them again in this server."),
     ),
     "UrlButtons": Adapter(
         local=("url_buttons",),
-        note="UrlButtons: los botones van ligados a mensajes; vuelve a crearlos en este servidor.",
+        note=N_("UrlButtons: buttons are tied to messages; create them again in this server."),
     ),
     "DiscordModals": Adapter(
         local=("modals",),
-        note="DiscordModals: los formularios van ligados a mensajes; vuelve a crearlos en este servidor.",
+        note=N_("DiscordModals: forms are tied to messages; create them again in this server."),
     ),
     "YouTube": Adapter(
-        note="YouTube: las suscripciones son globales del bot y no se copian; vuelve a suscribir los canales.",
+        note=N_("YouTube: subscriptions are global to the bot and aren't copied; subscribe the channels again."),
     ),
 }
 

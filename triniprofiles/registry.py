@@ -25,6 +25,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
+from redbot.core.i18n import Translator
+
+_ = Translator("TriniProfiles", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
+
 
 #: De donde sale el cog, para saber como se instala/carga y que tan segura
 #: es su descripcion:
@@ -76,7 +85,7 @@ class ModuleInfo:
         if not self.package or self.source is None:
             return None
         template = INSTALL_HINTS.get(self.source)
-        return template.format(package=self.package) if template else None
+        return _(template).format(package=self.package) if template else None
 
 
 def resolve_cog(bot: Any, info: "ModuleInfo") -> Optional[Any]:
@@ -117,92 +126,92 @@ MODULES: Dict[str, ModuleInfo] = {
     m.key: m
     for m in [
         # ================= Plataforma Trini =================
-        ModuleInfo("profiles", "Profiles", "TriniProfiles", "Perfiles y modulos del servidor.", "Plataforma", "⚙️", core=True, package="triniprofiles", source=SOURCE_TRINI),
-        ModuleInfo("security", "Trini Security", "TriniSecurity", "Auditoria, roles protegidos, anti-nuke e incidentes.", "Plataforma", "🔐", package="trinisecurity", source=SOURCE_TRINI),
-        ModuleInfo("backups", "Trini Backups", "TriniBackups", "Snapshots estructurales, diff y restauracion segura.", "Plataforma", "📦", package="trinibackups", source=SOURCE_TRINI),
-        ModuleInfo("events", "Trini Events", "TriniEvents", "Eventos con inscripciones, reservas y recordatorios.", "Plataforma", "📅", package="trinievents", source=SOURCE_TRINI),
-        ModuleInfo("alienhost", "AlienHost Integration", "AlienHost", "Servidores de AlienHost (Pelican) desde Discord.", "Infraestructura", "🖥", package="alienhost", source=SOURCE_TRINI),
+        ModuleInfo("profiles", "Profiles", "TriniProfiles", N_("Server profiles and modules."), N_("Platform"), "⚙️", core=True, package="triniprofiles", source=SOURCE_TRINI),
+        ModuleInfo("security", "Trini Security", "TriniSecurity", N_("Audit, protected roles, anti-nuke and incidents."), N_("Platform"), "🔐", package="trinisecurity", source=SOURCE_TRINI),
+        ModuleInfo("backups", "Trini Backups", "TriniBackups", N_("Structural snapshots, diff and safe restore."), N_("Platform"), "📦", package="trinibackups", source=SOURCE_TRINI),
+        ModuleInfo("events", "Trini Events", "TriniEvents", N_("Events with sign-ups, waitlists and reminders."), N_("Platform"), "📅", package="trinievents", source=SOURCE_TRINI),
+        ModuleInfo("alienhost", "AlienHost Integration", "AlienHost", N_("AlienHost (Pelican) servers from Discord."), N_("Infrastructure"), "🖥", package="alienhost", source=SOURCE_TRINI),
 
         # ================= killerbite-cogs =================
-        ModuleInfo("apiv2", "APIv2", "APIv2", "API REST embebida para integraciones externas.", "Infraestructura", "🔌", package="apiv2"),
-        ModuleInfo("gameservermonitor", "GameServerMonitor", "GameServerMonitor", "Monitorizacion de servidores de juego publicos.", "Gaming", "🎮", package="gameservermonitor"),
-        ModuleInfo("tickets", "TicketsTrini", "TicketsTrini", "Sistema de tickets de soporte.", "Soporte", "🎫", package="ticketstrini"),
-        ModuleInfo("suggestions", "Suggestions", "SimpleSuggestions", "Sugerencias con votacion.", "Comunidad", "💡", package="suggestions"),
-        ModuleInfo("giveaways", "Giveaways", "Giveaways", "Sorteos.", "Comunidad", "🎁", package="giveaways"),
-        ModuleInfo("honeypot", "Honeypot", "Honeypot", "Canal trampa contra selfbots y scams.", "Moderacion", "🍯", package="honeypot"),
-        ModuleInfo("autonick", "AutoNick", "AutoNick", "Gestion automatica de apodos.", "Comunidad", "🏷", package="autonick"),
-        ModuleInfo("colacoins", "ColaCoins", "ColaCoins", "Moneda virtual con clasificacion.", "Comunidad", "🪙", package="colacoins"),
-        ModuleInfo("adv_check", "Advanced Check", "Check", "Verificacion avanzada de usuarios con UI interactiva.", "Moderacion", "🔍", package="adv_check"),
-        ModuleInfo("autoprune", "AutoPrune", "PruneBans", "Borra los creditos de los usuarios que siguen baneados pasados N dias.", "Comunidad", "🧹", package="autoprune"),
-        ModuleInfo("blackjack", "Blackjack", "Blackjack", "Juego de cartas Blackjack.", "Comunidad", "🃏", package="blackjack"),
-        ModuleInfo("day_counter", "Day Counter", "DayCounter", "Contador de dias desde/hasta un evento.", "Comunidad", "📆", package="day_counter_cog"),
-        ModuleInfo("listroles", "List Roles", "ListRoles", "Lista los roles del servidor con nombre e ID.", "Utilidad", "📋", package="listroles"),
-        ModuleInfo("maptrack", "Map Track", "MapTrack", "Obsoleto: usa !gsmalerts de GameServerMonitor.", "Gaming", "🗺", package="maptrack"),
-        ModuleInfo("rustmaps", "RustMaps Vote", "RustMapsVote", "Votaciones de mapas de Rust con botones.", "Gaming", "🗳", package="rustmaps_vote"),
-        ModuleInfo("trickortreat", "Trick or Treat", "TrickOrTreatV2", "Juego de caramelos con tienda, rachas y eventos.", "Comunidad", "🍬", package="trickortreat"),
+        ModuleInfo("apiv2", "APIv2", "APIv2", N_("Embedded REST API for external integrations."), N_("Infrastructure"), "🔌", package="apiv2"),
+        ModuleInfo("gameservermonitor", "GameServerMonitor", "GameServerMonitor", N_("Public game server monitoring."), N_("Gaming"), "🎮", package="gameservermonitor"),
+        ModuleInfo("tickets", "TicketsTrini", "TicketsTrini", N_("Support ticket system."), N_("Support"), "🎫", package="ticketstrini"),
+        ModuleInfo("suggestions", "Suggestions", "SimpleSuggestions", N_("Suggestions with voting."), N_("Community"), "💡", package="suggestions"),
+        ModuleInfo("giveaways", "Giveaways", "Giveaways", N_("Giveaways."), N_("Community"), "🎁", package="giveaways"),
+        ModuleInfo("honeypot", "Honeypot", "Honeypot", N_("Trap channel against selfbots and scams."), N_("Moderation"), "🍯", package="honeypot"),
+        ModuleInfo("autonick", "AutoNick", "AutoNick", N_("Automatic nickname management."), N_("Community"), "🏷", package="autonick"),
+        ModuleInfo("colacoins", "ColaCoins", "ColaCoins", N_("Virtual currency with leaderboard."), N_("Community"), "🪙", package="colacoins"),
+        ModuleInfo("adv_check", "Advanced Check", "Check", N_("Advanced user verification with an interactive UI."), N_("Moderation"), "🔍", package="adv_check"),
+        ModuleInfo("autoprune", "AutoPrune", "PruneBans", N_("Clears the credits of users still banned after N days."), N_("Community"), "🧹", package="autoprune"),
+        ModuleInfo("blackjack", "Blackjack", "Blackjack", N_("Blackjack card game."), N_("Community"), "🃏", package="blackjack"),
+        ModuleInfo("day_counter", "Day Counter", "DayCounter", N_("Day counter since/until an event."), N_("Community"), "📆", package="day_counter_cog"),
+        ModuleInfo("listroles", "List Roles", "ListRoles", N_("Lists the server roles with name and ID."), N_("Utility"), "📋", package="listroles"),
+        ModuleInfo("maptrack", "Map Track", "MapTrack", N_("Obsolete: use GameServerMonitor's !gsmalerts."), N_("Gaming"), "🗺", package="maptrack"),
+        ModuleInfo("rustmaps", "RustMaps Vote", "RustMapsVote", N_("Rust map votes with buttons."), N_("Gaming"), "🗳", package="rustmaps_vote"),
+        ModuleInfo("trickortreat", "Trick or Treat", "TrickOrTreatV2", N_("Candy game with shop, streaks and events."), N_("Community"), "🍬", package="trickortreat"),
 
         # ================= Cogs de serie de Red =================
         # Nombre de clase conocido con certeza (viene con Red-DiscordBot).
-        ModuleInfo("moderation", "Moderation", "Mod", "Moderacion basica de Red (ban/kick/mute por texto).", "Moderacion", "🛡", package="mod", source=SOURCE_RED),
-        ModuleInfo("warnings", "Warnings", "Warnings", "Sistema de avisos de Red.", "Moderacion", "⚠️", package="warnings", source=SOURCE_RED),
-        ModuleInfo("reports", "Reports", "Reports", "Reportes de usuarios de Red.", "Moderacion", "📣", package="reports", source=SOURCE_RED),
-        ModuleInfo("modlog", "ModLog", "ModLog", "Registro de acciones de moderacion de Red.", "Moderacion", "📕", package="modlog", source=SOURCE_RED),
-        ModuleInfo("mutes", "Mutes", "Mutes", "Sistema de silencios (timeout) de Red.", "Moderacion", "🔇", package="mutes", source=SOURCE_RED),
-        ModuleInfo("filter", "Filter", "Filter", "Filtro de palabras de Red.", "Moderacion", "🚫", package="filter", source=SOURCE_RED),
-        ModuleInfo("cleanup", "Cleanup", "Cleanup", "Borrado masivo de mensajes de Red.", "Moderacion", "🧽", package="cleanup", source=SOURCE_RED),
-        ModuleInfo("admin", "Admin", "Admin", "Comandos de administracion de bajo nivel de Red.", "Infraestructura", "🛠", package="admin", source=SOURCE_RED),
-        ModuleInfo("alias", "Alias", "Alias", "Atajos/alias de comandos de Red.", "Utilidad", "🔗", package="alias", source=SOURCE_RED),
-        ModuleInfo("customcom", "Custom Commands", "CustomCommands", "Comandos personalizados por servidor.", "Utilidad", "🧩", package="customcom", source=SOURCE_RED),
-        ModuleInfo("general", "General", "General", "Comandos generales de Red (8ball, choose, etc).", "Utilidad", "🎲", package="general", source=SOURCE_RED),
-        ModuleInfo("trivia", "Trivia", "Trivia", "Juego de preguntas y respuestas.", "Comunidad", "❓", package="trivia", source=SOURCE_RED),
-        ModuleInfo("image", "Image", "Image", "Busqueda de imagenes/GIFs.", "Comunidad", "🖼", package="image", source=SOURCE_RED),
-        ModuleInfo("audio", "Audio", "Audio", "Reproduccion de musica.", "Comunidad", "🎵", package="audio", source=SOURCE_RED),
-        ModuleInfo("streams", "Streams", "Streams", "Avisos de directos (Twitch/YouTube/etc).", "Comunidad", "📺", package="streams", source=SOURCE_RED),
-        ModuleInfo("economy", "Economy", "Economy", "Economia (moneda) de Red.", "Comunidad", "💰", package="economy", source=SOURCE_RED),
-        ModuleInfo("downloader", "Downloader", "Downloader", "Gestor de repositorios de cogs. Necesario para instalar el resto.", "Infraestructura", "📥", package="downloader", core=True, source=SOURCE_RED),
-        ModuleInfo("permissions", "Permissions", "Permissions", "Reglas de permisos personalizadas de Red.", "Infraestructura", "🔑", package="permissions", core=True, source=SOURCE_RED),
+        ModuleInfo("moderation", "Moderation", "Mod", N_("Basic Red moderation (text ban/kick/mute)."), N_("Moderation"), "🛡", package="mod", source=SOURCE_RED),
+        ModuleInfo("warnings", "Warnings", "Warnings", N_("Red's warning system."), N_("Moderation"), "⚠️", package="warnings", source=SOURCE_RED),
+        ModuleInfo("reports", "Reports", "Reports", N_("Red's user reports."), N_("Moderation"), "📣", package="reports", source=SOURCE_RED),
+        ModuleInfo("modlog", "ModLog", "ModLog", N_("Red's moderation action log."), N_("Moderation"), "📕", package="modlog", source=SOURCE_RED),
+        ModuleInfo("mutes", "Mutes", "Mutes", N_("Red's mute (timeout) system."), N_("Moderation"), "🔇", package="mutes", source=SOURCE_RED),
+        ModuleInfo("filter", "Filter", "Filter", N_("Red's word filter."), N_("Moderation"), "🚫", package="filter", source=SOURCE_RED),
+        ModuleInfo("cleanup", "Cleanup", "Cleanup", N_("Red bulk message deletion."), N_("Moderation"), "🧽", package="cleanup", source=SOURCE_RED),
+        ModuleInfo("admin", "Admin", "Admin", N_("Red's low-level admin commands."), N_("Infrastructure"), "🛠", package="admin", source=SOURCE_RED),
+        ModuleInfo("alias", "Alias", "Alias", N_("Red's command shortcuts/aliases."), N_("Utility"), "🔗", package="alias", source=SOURCE_RED),
+        ModuleInfo("customcom", "Custom Commands", "CustomCommands", N_("Per-server custom commands."), N_("Utility"), "🧩", package="customcom", source=SOURCE_RED),
+        ModuleInfo("general", "General", "General", N_("Red's general commands (8ball, choose, etc)."), N_("Utility"), "🎲", package="general", source=SOURCE_RED),
+        ModuleInfo("trivia", "Trivia", "Trivia", N_("Trivia game."), N_("Community"), "❓", package="trivia", source=SOURCE_RED),
+        ModuleInfo("image", "Image", "Image", N_("Image/GIF search."), N_("Community"), "🖼", package="image", source=SOURCE_RED),
+        ModuleInfo("audio", "Audio", "Audio", N_("Music playback."), N_("Community"), "🎵", package="audio", source=SOURCE_RED),
+        ModuleInfo("streams", "Streams", "Streams", N_("Stream alerts (Twitch/YouTube/etc)."), N_("Community"), "📺", package="streams", source=SOURCE_RED),
+        ModuleInfo("economy", "Economy", "Economy", N_("Red's economy (currency)."), N_("Community"), "💰", package="economy", source=SOURCE_RED),
+        ModuleInfo("downloader", "Downloader", "Downloader", N_("Cog repository manager. Required to install everything else."), N_("Infrastructure"), "📥", package="downloader", core=True, source=SOURCE_RED),
+        ModuleInfo("permissions", "Permissions", "Permissions", N_("Red's custom permission rules."), N_("Infrastructure"), "🔑", package="permissions", core=True, source=SOURCE_RED),
 
         # ================= Terceros (nombre de clase no verificado) =================
         # ``cog=None``: se resuelven solo por el paquete con el que se cargan.
-        ModuleInfo("captcha", "Captcha", "Captcha", "Verificacion de nuevos miembros con captcha.", "Moderacion", "🤖", package="captcha", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("antigifv", "AntiGifV", "AntiGifV", "Suprime automaticamente los embeds GifV (evita videos que bloquean clientes).", "Moderacion", "🎬", package="antigifv", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("linkwarner", "Link Warner", "LinkWarner", "Borra mensajes con enlaces no permitidos y avisa al usuario.", "Moderacion", "🔗", package="linkwarner", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("extendedmodlog", "Extended ModLog", "ExtendedModLog", "Registro ampliado de cambios del servidor (mensajes, roles, canales, miembros...).", "Moderacion", "📚", package="extendedmodlog", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("clearchannel", "Clear Channel", "ClearChannel", "Borra TODOS los mensajes de un canal.", "Moderacion", "🗑", package="clearchannel", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("welcome", "Welcome", "Welcome", "Anuncia entradas, salidas y baneos de miembros.", "Comunidad", "👋", package="welcome", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("rolesbuttons", "RolesButtons", "RolesButtons", "Roles asignables por botones.", "Comunidad", "🔘", package="rolesbuttons", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("roleutils", "Role Utils", "RoleUtils", "Reaction roles, asignacion masiva y autoroles.", "Comunidad", "🎛", package="roleutils", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("rolesyncer", "Role Syncer", "RoleSyncer", "Sincroniza roles entre si (tener uno da o quita otro).", "Comunidad", "🔃", package="rolesyncer", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("exclusiveroles", "Exclusive Roles", "ExclusiveRoles", "Roles realmente exclusivos: tener uno quita los otros.", "Comunidad", "🚧", package="exclusiveroles", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("autoroom", "AutoRoom", "AutoRoom", "Salas de voz automaticas.", "Comunidad", "🔊", package="autoroom", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("youtube", "YouTube", "YouTube", "Avisos de nuevos videos de YouTube.", "Comunidad", "▶️", package="youtube", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("extendedeconomy", "Extended Economy", "ExtendedEconomy", "Funciones extra para la economia de Red.", "Comunidad", "💹", package="extendedeconomy", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("battleroyale", "Battle Royale", "BattleRoyale", "Minijuego de battle royale por texto.", "Comunidad", "⚔️", package="battleroyale", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("disboardreminder", "Disboard Reminder", "DisboardReminder", "Recuerda hacer bump en Disboard.", "Comunidad", "⏰", package="disboardreminder", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("sticky", "Sticky", "Sticky", "Mantiene un mensaje fijado al final del canal.", "Comunidad", "📌", package="sticky", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("assistant", "Assistant", "Assistant", "Asistente de IA (ChatGPT/OpenAI) para el servidor.", "IA", "🤖", package="assistant", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("assistantutils", "Assistant Utils", "AssistantUtils", "Funciones extra para Assistant.", "IA", "🧠", package="assistantutils", source=SOURCE_THIRD_PARTY, depends=("assistant",)),
-        ModuleInfo("avatar", "Avatar", "Avatar", "Muestra avatares y banners de usuarios.", "Utilidad", "🖼", package="avatar", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("say", "Say", "Say", "Hace que el bot envie o repita mensajes/embeds.", "Utilidad", "💬", package="say", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("tags", "Tags", "Tags", "Snippets/tags reutilizables por comando.", "Utilidad", "🏷️", package="tags", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("timechannel", "Time Channel", "TimeChannel", "Muestra la hora de distintas zonas horarias en canales de voz.", "Utilidad", "🕒", package="timechannel", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("urlbuttons", "URL Buttons", "UrlButtons", "Añade botones con enlaces a los mensajes.", "Utilidad", "🔘", package="urlbuttons", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("embedcreator", "Embed Creator", "EmbedCreator", "Crear y editar embeds con un asistente interactivo.", "Utilidad", "🖌", package="embedcreator", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("embedutils", "Embed Utils", "EmbedUtils", "Crear, enviar y guardar embeds (tambien desde el dashboard).", "Utilidad", "🧾", package="embedutils", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("discordmodals", "Discord Modals", "DiscordModals", "Formularios (modals) con botones para los usuarios.", "Utilidad", "📝", package="discordmodals", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("easterhunt", "Easter Hunt", "EasterHunt", "Minijuego de Pascua: buscar huevos, trabajar, regalar y robar.", "Comunidad", "🥚", package="easterhunt", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("frases", "Frases", "TriniFrases", "Frases personalizadas de La Trini.", "Comunidad", "💬", package="frases", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("reminders", "Reminders", "Reminders", "Recordatorios por DM o canal, programador de comandos y mensajes.", "Utilidad", "⏰", package="reminders", source=SOURCE_THIRD_PARTY),
-        ModuleInfo("dashboard", "Dashboard", "Dashboard", "Panel web de administracion del bot.", "Infraestructura", "🖥️", package="dashboard", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("captcha", "Captcha", "Captcha", N_("Captcha verification for new members."), N_("Moderation"), "🤖", package="captcha", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("antigifv", "AntiGifV", "AntiGifV", N_("Automatically suppresses GifV embeds (avoids videos that freeze clients)."), N_("Moderation"), "🎬", package="antigifv", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("linkwarner", "Link Warner", "LinkWarner", N_("Deletes messages with disallowed links and warns the user."), N_("Moderation"), "🔗", package="linkwarner", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("extendedmodlog", "Extended ModLog", "ExtendedModLog", N_("Extended server change log (messages, roles, channels, members...)."), N_("Moderation"), "📚", package="extendedmodlog", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("clearchannel", "Clear Channel", "ClearChannel", N_("Deletes ALL messages in a channel."), N_("Moderation"), "🗑", package="clearchannel", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("welcome", "Welcome", "Welcome", N_("Announces member joins, leaves and bans."), N_("Community"), "👋", package="welcome", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("rolesbuttons", "RolesButtons", "RolesButtons", N_("Self-assignable roles with buttons."), N_("Community"), "🔘", package="rolesbuttons", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("roleutils", "Role Utils", "RoleUtils", N_("Reaction roles, mass assignment and autoroles."), N_("Community"), "🎛", package="roleutils", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("rolesyncer", "Role Syncer", "RoleSyncer", N_("Syncs roles with each other (having one gives or removes another)."), N_("Community"), "🔃", package="rolesyncer", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("exclusiveroles", "Exclusive Roles", "ExclusiveRoles", N_("Truly exclusive roles: having one removes the others."), N_("Community"), "🚧", package="exclusiveroles", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("autoroom", "AutoRoom", "AutoRoom", N_("Automatic voice rooms."), N_("Community"), "🔊", package="autoroom", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("youtube", "YouTube", "YouTube", N_("New YouTube video alerts."), N_("Community"), "▶️", package="youtube", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("extendedeconomy", "Extended Economy", "ExtendedEconomy", N_("Extra features for Red's economy."), N_("Community"), "💹", package="extendedeconomy", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("battleroyale", "Battle Royale", "BattleRoyale", N_("Text battle royale minigame."), N_("Community"), "⚔️", package="battleroyale", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("disboardreminder", "Disboard Reminder", "DisboardReminder", N_("Reminds you to bump on Disboard."), N_("Community"), "⏰", package="disboardreminder", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("sticky", "Sticky", "Sticky", N_("Keeps a message pinned at the bottom of the channel."), N_("Community"), "📌", package="sticky", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("assistant", "Assistant", "Assistant", N_("AI assistant (ChatGPT/OpenAI) for the server."), N_("AI"), "🤖", package="assistant", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("assistantutils", "Assistant Utils", "AssistantUtils", N_("Extra functions for Assistant."), N_("AI"), "🧠", package="assistantutils", source=SOURCE_THIRD_PARTY, depends=("assistant",)),
+        ModuleInfo("avatar", "Avatar", "Avatar", N_("Shows user avatars and banners."), N_("Utility"), "🖼", package="avatar", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("say", "Say", "Say", N_("Makes the bot send or repeat messages/embeds."), N_("Utility"), "💬", package="say", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("tags", "Tags", "Tags", N_("Reusable snippets/tags by command."), N_("Utility"), "🏷️", package="tags", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("timechannel", "Time Channel", "TimeChannel", N_("Shows the time in different time zones in voice channels."), N_("Utility"), "🕒", package="timechannel", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("urlbuttons", "URL Buttons", "UrlButtons", N_("Adds link buttons to messages."), N_("Utility"), "🔘", package="urlbuttons", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("embedcreator", "Embed Creator", "EmbedCreator", N_("Create and edit embeds with an interactive wizard."), N_("Utility"), "🖌", package="embedcreator", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("embedutils", "Embed Utils", "EmbedUtils", N_("Create, send and save embeds (also from the dashboard)."), N_("Utility"), "🧾", package="embedutils", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("discordmodals", "Discord Modals", "DiscordModals", N_("Forms (modals) with buttons for users."), N_("Utility"), "📝", package="discordmodals", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("easterhunt", "Easter Hunt", "EasterHunt", N_("Easter minigame: hunt eggs, work, gift and steal."), N_("Community"), "🥚", package="easterhunt", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("frases", "Frases", "TriniFrases", N_("La Trini's custom phrases."), N_("Community"), "💬", package="frases", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("reminders", "Reminders", "Reminders", N_("Reminders by DM or channel, command and message scheduler."), N_("Utility"), "⏰", package="reminders", source=SOURCE_THIRD_PARTY),
+        ModuleInfo("dashboard", "Dashboard", "Dashboard", N_("Web admin panel for the bot."), N_("Infrastructure"), "🖥️", package="dashboard", source=SOURCE_THIRD_PARTY),
 
         # ================= Conceptuales del roadmap (aun sin cog instalado) =================
         # Sin ``package``: no se pueden resolver hasta que instales un cog real
         # para cubrir esta funcion y actualices esta entrada con su paquete.
-        ModuleInfo("applications", "Applications", None, "Solicitudes de staff/whitelist. Instala el cog que uses para esto.", "Soporte", "📝", source=None),
-        ModuleInfo("forms", "Forms", None, "Formularios. Instala el cog que uses para esto.", "Soporte", "📋", source=None),
-        ModuleInfo("status", "Status", None, "Paginas de estado de servicios. Instala el cog que uses para esto.", "Infraestructura", "🟢", source=None),
-        ModuleInfo("incidents", "Incidents", None, "Comunicacion de incidencias. Instala el cog que uses para esto.", "Infraestructura", "🚧", source=None),
-        ModuleInfo("arencup", "ArenCup", None, "Integracion de torneos ArenCup. Instala el cog que uses para esto.", "Esports", "🏆", source=None),
+        ModuleInfo("applications", "Applications", None, N_("Staff/whitelist applications. Install the cog you use for this."), N_("Support"), "📝", source=None),
+        ModuleInfo("forms", "Forms", None, N_("Forms. Install the cog you use for this."), N_("Support"), "📋", source=None),
+        ModuleInfo("status", "Status", None, N_("Service status pages. Install the cog you use for this."), N_("Infrastructure"), "🟢", source=None),
+        ModuleInfo("incidents", "Incidents", None, N_("Incident communication. Install the cog you use for this."), N_("Infrastructure"), "🚧", source=None),
+        ModuleInfo("arencup", "ArenCup", None, N_("ArenCup tournament integration. Install the cog you use for this."), N_("Esports"), "🏆", source=None),
     ]
 }
 
@@ -212,9 +221,9 @@ RECOMMENDED = "recommended"
 OPTIONAL = "optional"
 
 LEVEL_LABELS = {
-    ON: "✅ activado",
-    RECOMMENDED: "⭐ recomendado",
-    OPTIONAL: "➖ opcional",
+    ON: N_("✅ enabled"),
+    RECOMMENDED: N_("⭐ recommended"),
+    OPTIONAL: N_("➖ optional"),
 }
 
 
@@ -234,9 +243,9 @@ class ProfileInfo:
 _PREDEFINED_PROFILES = [
     ProfileInfo(
         "gaming",
-        "Comunidad Gaming",
+        N_("Gaming Community"),
         "🎮",
-        "Comunidad de jugadores con servidores de juego, directos y actividad social.",
+        N_("Gaming community with game servers, streams and social activity."),
         {
             "gameservermonitor": ON,
             "autoroom": ON,
@@ -256,9 +265,9 @@ _PREDEFINED_PROFILES = [
     ),
     ProfileInfo(
         "esports",
-        "Esports / Torneos",
+        N_("Esports / Tournaments"),
         "🏆",
-        "Servidor de torneos (ArenCup): staff, arbitros, casters y equipos.",
+        N_("Tournament server (ArenCup): staff, referees, casters and teams."),
         {
             "moderation": ON,
             "tickets": ON,
@@ -278,9 +287,9 @@ _PREDEFINED_PROFILES = [
     ),
     ProfileInfo(
         "roleplay",
-        "Roleplay",
+        N_("Roleplay"),
         "🎭",
-        "Servidor de rol con solicitudes, formularios y moderacion.",
+        N_("Roleplay server with applications, forms and moderation."),
         {
             "moderation": ON,
             "warnings": ON,
@@ -301,9 +310,9 @@ _PREDEFINED_PROFILES = [
     ),
     ProfileInfo(
         "hosting",
-        "Hosting / Soporte",
+        N_("Hosting / Support"),
         "🖥",
-        "Servidor de soporte de AlienHost: clientes, tickets e infraestructura.",
+        N_("AlienHost support server: customers, tickets and infrastructure."),
         {
             "tickets": ON,
             "alienhost": ON,
@@ -323,9 +332,9 @@ _PREDEFINED_PROFILES = [
     ),
     ProfileInfo(
         "general",
-        "Comunidad General",
+        N_("General Community"),
         "🌐",
-        "Comunidad generalista con lo basico bien configurado.",
+        N_("General community with the basics properly set up."),
         {
             "moderation": ON,
             "welcome": ON,
@@ -340,20 +349,17 @@ _PREDEFINED_PROFILES = [
     ),
     ProfileInfo(
         "custom",
-        "Personalizado",
+        N_("Custom"),
         "⚙️",
-        "Sin plantilla: activa manualmente lo que necesites con `trini modules`.",
+        N_("No template: manually enable what you need with `trini modules`."),
         {"security": RECOMMENDED, "backups": RECOMMENDED},
         security_level="standard",
     ),
     ProfileInfo(
         "all_on",
-        "Todo activado",
+        N_("Everything enabled"),
         "🟢",
-        "Activa todos los modulos que La Trini conoce (incluidos los de terceros que "
-        "tengas cargados). Pensado para probar el bot entero o para servidores que "
-        "quieren tenerlo todo disponible desde el primer dia; despues puedes afinar "
-        "con `trini modules`.",
+        N_("Enables every module La Trini knows about (including loaded third-party ones). Meant for trying the whole bot or for servers that want everything available from day one; you can fine-tune later with `trini modules`."),
         {key: ON for key, info in MODULES.items() if not info.core},
         security_level="strict",
     ),

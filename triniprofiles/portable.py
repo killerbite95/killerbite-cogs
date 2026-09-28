@@ -22,6 +22,9 @@ import discord
 from redbot.core import Config, commands
 
 from .third_party import get_adapter
+from redbot.core.i18n import Translator
+
+_ = Translator("TriniProfiles", __file__)
 
 log = logging.getLogger("red.killerbite95.triniprofiles.portable")
 
@@ -253,7 +256,7 @@ async def _import_raw(
             if str(sub_id).isdigit() and guild.get_channel(int(sub_id)) is None:
                 continue
             await config.custom(group_name, str(guild.id), str(sub_id)).set(values)
-    return [adapter.note] if adapter.note and not same_guild else []
+    return [_(adapter.note)] if adapter.note and not same_guild else []
 
 
 async def import_cog(
@@ -266,4 +269,4 @@ async def import_cog(
     config = find_config(cog)
     if config is not None:
         return await _import_raw(cog, config, guild, data, same_guild=same_guild)
-    return [f"{cog.qualified_name}: no soporta importacion."]
+    return [_("{qualified_name}: doesn't support import.").format(qualified_name=cog.qualified_name)]

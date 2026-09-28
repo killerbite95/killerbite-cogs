@@ -9,6 +9,9 @@ import typing
 
 from redbot.core import commands
 from redbot.core.bot import Red
+from redbot.core.i18n import Translator
+
+_ = Translator("TriniProfiles", __file__)
 
 
 def dashboard_page(*args, **kwargs):
@@ -105,11 +108,11 @@ class DashboardIntegration:
         categories: typing.Dict[str, typing.List[typing.Dict[str, typing.Any]]] = {}
         for info in sorted(MODULES.values(), key=lambda m: (m.category, m.name)):
             state = states.get(info.key, "missing")
-            categories.setdefault(info.category, []).append({
+            categories.setdefault(_(info.category), []).append({
                 "key": info.key,
-                "name": info.name,
+                "name": _(info.name),
                 "emoji": info.emoji,
-                "description": info.description,
+                "description": _(info.description),
                 "icon": STATE_ICON.get(state, "⚫"),
                 "wanted": info.core or bool(data["modules"].get(info.key)),
                 "core": info.core,
@@ -185,11 +188,11 @@ class DashboardIntegration:
             "web_content": {
                 "source": source,
                 "categories": categories,
-                "profile": profile.name if profile else (data["profile"] or ""),
+                "profile": _(profile.name) if profile else (data["profile"] or ""),
                 "security_level": data["security_level"],
                 "sync_red": data["sync_red"],
                 "on_count": on_count,
-                "legend": STATE_LEGEND,
+                "legend": _(STATE_LEGEND),
                 "history": history,
             },
         }

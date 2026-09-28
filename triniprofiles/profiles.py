@@ -32,6 +32,14 @@ from .registry import (
     resolve_dependencies,
     resolve_qualified_name,
 )
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("TriniProfiles", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
 
 log = logging.getLogger("red.killerbite95.triniprofiles")
 
@@ -46,7 +54,7 @@ STATE_OFF = "off"          # cargado pero desactivado en este servidor (disablec
 STATE_MISSING_ON = "missing_on"  # Profiles lo quiere activo, pero el cog no esta cargado
 STATE_MISSING = "missing"  # no cargado y sin activar en Profiles
 STATE_ICON = {STATE_ON: "🟢", STATE_OFF: "🔴", STATE_MISSING_ON: "🟠", STATE_MISSING: "⚫"}
-STATE_LEGEND = "🟢 funcionando · 🔴 desactivado en este servidor · 🟠 activado pero no cargado · ⚫ no cargado"
+STATE_LEGEND = N_("🟢 running · 🔴 disabled in this server · 🟠 enabled but not loaded · ⚫ not loaded")
 
 
 def _clean_name(name: str) -> str:
@@ -62,7 +70,7 @@ def _join_capped(lines: List[str], limit: int = 1024) -> str:
     for i, line in enumerate(lines):
         extra = len(line) + (1 if out else 0)
         remaining = len(lines) - i
-        marker = f"… y {remaining} mas" if remaining else ""
+        marker = _("… and {remaining} more").format(remaining=remaining) if remaining else ""
         if used + extra + (len(marker) + 1 if marker else 0) > limit:
             if marker:
                 out.append(marker)
@@ -81,9 +89,10 @@ class AuthorView(discord.ui.View):
         self.message: Optional[discord.Message] = None
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
         if interaction.user.id != self.author.id:
             await interaction.response.send_message(
-                "Solo quien ejecuto el comando puede usar estos controles.", ephemeral=True
+                _("Only whoever ran the command can use these controls."), ephemeral=True
             )
             return False
         return True
@@ -102,12 +111,17 @@ class ProfileSelect(discord.ui.Select):
     def __init__(self, view: "SetupView"):
         options = [
             discord.SelectOption(
-                label=p.name, value=p.key, emoji=p.emoji, description=p.description[:100]
+                label=_(p.name), value=p.key, emoji=p.emoji, description=_(p.description)[:100]
             )
             for p in PROFILES.values()
         ]
-        super().__init__(placeholder="¿Como se utiliza este Discord?", options=options)
+        super().__init__(placeholder=_("How is this Discord used?"), options=options)
         self.setup_view = view
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def callback(self, interaction: discord.Interaction) -> None:
         self.setup_view.selected = self.values[0]
@@ -127,10 +141,15 @@ class SetupView(AuthorView):
         self.ctx = ctx
         self.selected: Optional[str] = None
         self.add_item(ProfileSelect(self))
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def _apply(self, interaction: discord.Interaction, *, recommended: bool, exact: bool):
         if self.selected is None:
-            return await interaction.response.send_message("Elige un perfil primero.", ephemeral=True)
+            return await interaction.response.send_message(_("Pick a profile first."), ephemeral=True)
         await interaction.response.defer()
         result = await self.cog.apply_profile(
             interaction.guild,
@@ -144,24 +163,24 @@ class SetupView(AuthorView):
             item.disabled = True
         await interaction.edit_original_response(embed=result, view=self)
 
-    @discord.ui.button(label="Aplicar", style=discord.ButtonStyle.green, emoji="✅", disabled=True, row=1)
+    @discord.ui.button(label=_("Apply"), style=discord.ButtonStyle.green, emoji="✅", disabled=True, row=1)
     async def apply_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self._apply(interaction, recommended=False, exact=False)
 
-    @discord.ui.button(label="Aplicar + recomendados", style=discord.ButtonStyle.blurple, emoji="⭐", disabled=True, row=1)
+    @discord.ui.button(label=_("Apply + recommended"), style=discord.ButtonStyle.blurple, emoji="⭐", disabled=True, row=1)
     async def apply_rec_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self._apply(interaction, recommended=True, exact=False)
 
-    @discord.ui.button(label="Aplicar exacto", style=discord.ButtonStyle.grey, emoji="🧹", disabled=True, row=1)
+    @discord.ui.button(label=_("Apply exact"), style=discord.ButtonStyle.grey, emoji="🧹", disabled=True, row=1)
     async def apply_exact_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self._apply(interaction, recommended=True, exact=True)
 
-    @discord.ui.button(label="Cancelar", style=discord.ButtonStyle.red, custom_id="cancel", row=1)
+    @discord.ui.button(label=_("Cancel"), style=discord.ButtonStyle.red, custom_id="cancel", row=1)
     async def cancel_btn(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.stop()
         for item in self.children:
             item.disabled = True
-        await interaction.response.edit_message(content="Setup cancelado.", view=self)
+        await interaction.response.edit_message(content=_("Setup cancelled."), view=self)
 
 
 class ConfirmView(AuthorView):
@@ -169,14 +188,19 @@ class ConfirmView(AuthorView):
         super().__init__(author, timeout=60)
         self.value: Optional[bool] = None
         self.confirm.label = confirm_label
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
-    @discord.ui.button(label="Continuar", style=discord.ButtonStyle.green)
+    @discord.ui.button(label=_("Continue"), style=discord.ButtonStyle.green)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
         self.stop()
         await interaction.response.defer()
 
-    @discord.ui.button(label="Cancelar", style=discord.ButtonStyle.red)
+    @discord.ui.button(label=_("Cancel"), style=discord.ButtonStyle.red)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
         self.stop()
@@ -193,14 +217,19 @@ class ModuleToggleSelect(discord.ui.Select):
             active = state in (STATE_ON, STATE_MISSING_ON)
             options.append(
                 discord.SelectOption(
-                    label=f"{'Desactivar' if active else 'Activar'} {info.name}"[:100],
+                    label=(_("Disable {name}") if active else _("Enable {name}")).format(name=_(info.name))[:100],
                     value=info.key,
                     emoji=STATE_ICON[state],
-                    description=info.description[:100],
+                    description=_(info.description)[:100],
                 )
             )
-        super().__init__(placeholder=f"{category}: activar / desactivar", options=options[:25])
+        super().__init__(placeholder=_("{category}: enable / disable").format(category=_(category)), options=options[:25])
         self.modules_view = view
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def callback(self, interaction: discord.Interaction) -> None:
         key = self.values[0]
@@ -214,13 +243,13 @@ class ModuleToggleSelect(discord.ui.Select):
                 names = humanize_list([MODULES[d].name for d in deps])
                 confirm = ConfirmView(interaction.user)
                 await interaction.response.send_message(
-                    f"**{MODULES[key].name}** requiere {names}.\n{names} se activara automaticamente.",
+                    _("**{name}** requires {names}.\n{names} will be enabled automatically.").format(name=MODULES[key].name, names=names),
                     view=confirm,
                     ephemeral=True,
                 )
                 await confirm.wait()
                 if not confirm.value:
-                    return await interaction.edit_original_response(content="Cancelado.", view=None)
+                    return await interaction.edit_original_response(content=_("Cancelled."), view=None)
                 ok, msg = await cog.set_module(interaction.guild, key, True, actor=interaction.user)
                 await interaction.edit_original_response(content=msg, view=None)
             else:
@@ -240,6 +269,11 @@ class ModulesView(AuthorView):
         self.cog = cog
         self.ctx = ctx
         self.category: Optional[str] = None
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def build(self) -> discord.Embed:
         self.clear_items()
@@ -249,9 +283,9 @@ class ModulesView(AuthorView):
         if self.category is None:
             self.category = categories[0]
         cat_select = discord.ui.Select(
-            placeholder="Categoria",
+            placeholder=_("Category"),
             options=[
-                discord.SelectOption(label=c, value=c, default=(c == self.category))
+                discord.SelectOption(label=_(c), value=c, default=(c == self.category))
                 for c in categories
             ],
         )
@@ -275,8 +309,9 @@ class ModulesView(AuthorView):
                 pass
 
 
+@cog_i18n(_)
 class TriniProfiles(DashboardIntegration, commands.Cog):
-    """Configuracion por perfiles de La Trini: plantillas, modulos, dependencias y presets."""
+    """La Trini profile-based setup: templates, modules, dependencies and presets."""
 
     __author__ = "Killerbite95"
     __version__ = "1.0.0"
@@ -296,7 +331,7 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
-        return f"{pre}\n\nVersion: {self.__version__}"
+        return _("{pre}\n\nVersion: {version}").format(pre=pre, version=self.__version__)
 
     async def red_delete_data_for_user(self, **kwargs) -> None:
         return
@@ -401,11 +436,11 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
     ) -> tuple:
         info = MODULES.get(key)
         if info is None:
-            return False, f"Modulo desconocido: `{key}`."
+            return False, _("Unknown module: `{key}`.").format(key=key)
         if info.core:
             if enabled:
-                return True, f"**{info.name}** es un modulo base: siempre esta activo."
-            return False, f"**{info.name}** es un modulo base y no se puede desactivar."
+                return True, _("**{info_name}** is a core module: it's always enabled.").format(info_name=_(info.name))
+            return False, _("**{info_name}** is a core module and can't be disabled.").format(info_name=_(info.name))
         async with self.config.guild(guild).modules() as states:
             if enabled:
                 to_enable = [key] + [d for d in resolve_dependencies([key]) if not states.get(d, False)]
@@ -417,21 +452,21 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
                 blockers = dependents_of(key, active)
                 if blockers:
                     names = "\n".join(f"• {MODULES[b].name}" for b in blockers if b in MODULES)
-                    return False, f"No se puede desactivar **{info.name}**.\n\nDependencias activas:\n{names}"
+                    return False, _("**{info_name}** can't be disabled.\n\nActive dependents:\n{names}").format(info_name=info.name, names=names)
                 states[key] = False
                 changed = [key]
         for k in changed:
             await self._sync_red(guild, k, enabled)
         names = humanize_list([MODULES[k].name for k in changed])
         await self._log(guild, actor, "module_enable" if enabled else "module_disable", names)
-        msg = f"{'🟢 Activado' if enabled else '⚫ Desactivado'}: **{names}**."
+        msg = f"{_('🟢 Enabled') if enabled else _('⚫ Disabled')}: **{names}**."
         missing = [MODULES[k] for k in changed if enabled and resolve_cog(self.bot, MODULES[k]) is None]
         if missing:
-            msg += "\n⚠️ No cargado en el bot: " + humanize_list(
+            msg += _("\n⚠️ Not loaded in the bot: ") + humanize_list(
                 [f"{m.name}" + (f" (`{m.package}`)" if m.package else "") for m in missing]
             )
         if not await self.config.guild(guild).sync_red():
-            msg += "\nℹ️ La sincronizacion con Red esta desactivada (`trini syncred`): esto solo cambia el apunte de Profiles."
+            msg += _("\nℹ️ Red sync is disabled (`trini syncred`): this only changes Profiles' record.")
         return True, msg
 
     async def apply_profile(
@@ -486,31 +521,31 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
             guild,
             actor,
             "profile_apply",
-            f"{profile.key} (+{len(enabled)} / -{len(disabled)}{', exacto' if exact else ''})",
+            f"{profile.key} (+{len(enabled)} / -{len(disabled)}{_(', exact') if exact else ''})",
         )
         self.bot.dispatch("trini_profile_applied", guild, profile.key, actor)
 
         embed = discord.Embed(
-            title=f"{profile.emoji} Perfil aplicado: {profile.name}",
+            title=_("{emoji} Profile applied: {profile_name}").format(emoji=profile.emoji, profile_name=_(profile.name)),
             color=discord.Color.green(),
-            description="Un perfil solo prepara la base. Puedes cambiar cualquier modulo con `trini modules`.",
+            description=_("A profile only sets up the base. You can change any module with `trini modules`."),
         )
         if enabled:
             embed.add_field(
-                name="Activados",
+                name=_("Enabled"),
                 value=_join_capped([f"{MODULES[k].emoji} {MODULES[k].name}" for k in sorted(enabled) if k in MODULES]),
                 inline=True,
             )
         if disabled:
             embed.add_field(
-                name="Desactivados",
+                name=_("Disabled"),
                 value=_join_capped([f"{MODULES[k].emoji} {MODULES[k].name}" for k in sorted(disabled) if k in MODULES]),
                 inline=True,
             )
         missing = [MODULES[k] for k in wanted if k in MODULES and resolve_cog(self.bot, MODULES[k]) is None]
         if missing:
             embed.add_field(
-                name="⚠️ No cargados en el bot",
+                name=_("⚠️ Not loaded in the bot"),
                 value=_join_capped([
                     f"• {m.name}" + (f" — {hint}" if (hint := m.install_hint()) else "")
                     for m in missing
@@ -518,18 +553,18 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
                 inline=False,
             )
         embed.add_field(
-            name="🔐 Nivel de seguridad",
+            name=_("🔐 Security level"),
             value=f"`{security_level or profile.security_level}`",
             inline=False,
         )
         if self.bot.get_cog("TriniSecurity") is not None:
-            embed.set_footer(text="Siguiente paso recomendado: security audit")
+            embed.set_footer(text=_("Recommended next step: security audit"))
         return embed
 
     async def build_profile_preview(self, guild: discord.Guild, profile: ProfileInfo) -> discord.Embed:
         embed = discord.Embed(
-            title=f"{profile.emoji} {profile.name}",
-            description=profile.description,
+            title=f"{profile.emoji} {_(profile.name)}",
+            description=_(profile.description),
             color=COLOR,
         )
         lines = []
@@ -539,25 +574,25 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
                 continue
             loaded = resolve_cog(self.bot, info) is not None
             lines.append(
-                f"{info.emoji} **{info.name}** — {LEVEL_LABELS[level]}{'' if loaded else ' · _no cargado_'}"
+                f"{info.emoji} **{_(info.name)}** — {_(LEVEL_LABELS[level])}{'' if loaded else _(' · _not loaded_')}"
             )
-        embed.add_field(name="Modulos", value=_join_capped(lines), inline=False)
+        embed.add_field(name=_("Modules"), value=_join_capped(lines), inline=False)
         deps = resolve_dependencies([k for k, lvl in profile.modules.items() if lvl != OPTIONAL])
         if deps:
             embed.add_field(
-                name="Dependencias automaticas",
+                name=_("Automatic dependencies"),
                 value=humanize_list([MODULES[d].name for d in deps]),
                 inline=False,
             )
-        embed.add_field(name="Seguridad recomendada", value=f"`{profile.security_level}`", inline=True)
+        embed.add_field(name=_("Recommended security"), value=f"`{profile.security_level}`", inline=True)
         if profile.protected_role_hints:
             embed.add_field(
-                name="Roles a proteger",
+                name=_("Roles to protect"),
                 value=", ".join(profile.protected_role_hints),
                 inline=True,
             )
         embed.set_footer(
-            text="Aplicar: activa lo marcado · +recomendados: incluye ⭐ · exacto: ademas desactiva el resto"
+            text=_("Apply: enables what's selected · +recommended: includes ⭐ · exact: also disables the rest")
         )
         return embed
 
@@ -569,12 +604,12 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
             effective = await self.effective_states(guild, states)
         profile = PROFILES.get(data["profile"])
         embed = discord.Embed(
-            title="🧩 Modulos de La Trini",
+            title=_("🧩 La Trini modules"),
             color=COLOR,
             description=(
-                f"Perfil: **{profile.emoji} {profile.name}**" if profile else "Perfil: _sin configurar_ (`trini setup`)"
+                _("Profile: **{emoji} {profile_name}**").format(emoji=profile.emoji, profile_name=_(profile.name)) if profile else _("Profile: _not set up_ (`trini setup`)")
             )
-            + f"\nSincronizar con Red (`enablecog`/`disablecog`): **{'si' if data['sync_red'] else 'no'}**",
+            + _("\nSync with Red (`enablecog`/`disablecog`): **{value}**").format(value='si' if data['sync_red'] else 'no'),
         )
         by_cat: Dict[str, List[str]] = {}
         counts: Dict[str, int] = {}
@@ -582,12 +617,12 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
             state = effective.get(info.key, STATE_MISSING)
             counts[state] = counts.get(state, 0) + 1
             deps = f" ← {', '.join(info.depends)}" if info.depends else ""
-            by_cat.setdefault(info.category, []).append(f"{STATE_ICON[state]} {info.emoji} {info.name}{deps}")
+            by_cat.setdefault(info.category, []).append(f"{STATE_ICON[state]} {info.emoji} {_(info.name)}{deps}")
         for cat, lines in by_cat.items():
-            embed.add_field(name=cat, value=_join_capped(lines, 700), inline=True)
+            embed.add_field(name=_(cat), value=_join_capped(lines, 700), inline=True)
         summary = " · ".join(f"{STATE_ICON[k]} {counts[k]}" for k in (STATE_ON, STATE_OFF, STATE_MISSING_ON, STATE_MISSING) if counts.get(k))
         embed.description += f"\n{summary}"
-        embed.set_footer(text=STATE_LEGEND)
+        embed.set_footer(text=_(STATE_LEGEND))
         return embed
 
     # ------------------------------------------------------------------
@@ -653,18 +688,18 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
         )
         cogs_data, missing = remap_references(payload.get("cogs", {}), payload.get("references", {}), guild)
         if missing and not same_guild:
-            warnings.append("Referencias no encontradas: " + ", ".join(missing[:20]))
+            warnings.append(_("References not found: ") + ", ".join(missing[:20]))
         for cog_name, data in cogs_data.items():
             cog = self.bot.get_cog(cog_name)
             if cog is None:
-                warnings.append(f"{cog_name}: no esta cargado, se omite.")
+                warnings.append(_("{cog_name}: not loaded, skipped.").format(cog_name=cog_name))
                 continue
             try:
                 warnings.extend(await import_cog(cog, guild, data, same_guild=same_guild))
             except Exception as exc:
                 log.exception("Error importando %s", cog_name)
-                warnings.append(f"{cog_name}: error al importar ({exc}).")
-        await self._log(guild, actor, "profile_import", f"desde {(payload.get('source_guild') or {}).get('name', '?')}")
+                warnings.append(_("{cog_name}: import error ({exc}).").format(cog_name=cog_name, exc=exc))
+        await self._log(guild, actor, "profile_import", _("from {get}").format(get=(payload.get('source_guild') or {}).get('name', '?')))
         return warnings
 
     # ------------------------------------------------------------------
@@ -675,52 +710,52 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
     @commands.guild_only()
     @commands.admin_or_permissions(manage_guild=True)
     async def trini(self, ctx: commands.Context):
-        """Configuracion general de La Trini."""
+        """General La Trini settings."""
 
     @trini.command(name="setup")
     async def trini_setup(self, ctx: commands.Context):
-        """Asistente inicial: elige como se utiliza este Discord."""
+        """Setup wizard: choose how this Discord is used."""
         embed = discord.Embed(
-            title="⚙️ Setup de La Trini",
-            description="¿Como se utiliza este Discord?\n\n"
-            + "\n".join(f"{p.emoji} **{p.name}** — {p.description}" for p in PROFILES.values()),
+            title=_("⚙️ La Trini setup"),
+            description=_("How is this Discord used?\n\n")
+            + "\n".join(f"{p.emoji} **{_(p.name)}** — {_(p.description)}" for p in PROFILES.values()),
             color=COLOR,
         )
         current = await self.config.guild(ctx.guild).profile()
         if current in PROFILES:
-            embed.set_footer(text=f"Perfil actual: {PROFILES[current].name}")
+            embed.set_footer(text=_("Current profile: {name}").format(name=_(PROFILES[current].name)))
         view = SetupView(self, ctx)
         view.message = await ctx.send(embed=embed, view=view)
 
     @trini.command(name="modules")
     async def trini_modules(self, ctx: commands.Context):
-        """Ver y activar/desactivar modulos."""
+        """View and enable/disable modules."""
         view = ModulesView(self, ctx)
         embed = await view.build()
         view.message = await ctx.send(embed=embed, view=view)
 
     @trini.command(name="enable")
     async def trini_enable(self, ctx: commands.Context, module: str):
-        """Activar un modulo (y sus dependencias)."""
+        """Enable a module (and its dependencies)."""
         module = module.lower()
         deps = [d for d in resolve_dependencies([module]) if not (await self.config.guild(ctx.guild).modules()).get(d)]
         if module in MODULES and deps:
             view = ConfirmView(ctx.author)
             names = humanize_list([MODULES[d].name for d in deps])
             msg = await ctx.send(
-                f"**{MODULES[module].name}** requiere {names}.\n\n{names} se activara automaticamente.",
+                _("**{name}** requires {names}.\n\n{names} will be enabled automatically.").format(name=MODULES[module].name, names=names),
                 view=view,
             )
             await view.wait()
             if not view.value:
-                return await msg.edit(content="Cancelado.", view=None)
+                return await msg.edit(content=_("Cancelled."), view=None)
             await msg.delete()
         ok, text = await self.set_module(ctx.guild, module, True, actor=ctx.author)
         await ctx.send(text)
 
     @trini.command(name="disable")
     async def trini_disable(self, ctx: commands.Context, module: str):
-        """Desactivar un modulo (si nada depende de el)."""
+        """Disable a module (if nothing depends on it)."""
         ok, text = await self.set_module(ctx.guild, module.lower(), False, actor=ctx.author)
         await ctx.send(text)
 
@@ -736,45 +771,45 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
 
     @trini.command(name="status")
     async def trini_status(self, ctx: commands.Context):
-        """Resumen del perfil del servidor."""
+        """Server profile summary."""
         data = await self.config.guild(ctx.guild).all()
         embed = await self.build_modules_embed(ctx.guild, data["modules"])
-        embed.title = f"📋 Estado de La Trini en {ctx.guild.name}"[:256]
-        embed.add_field(name="Nivel de seguridad", value=f"`{data['security_level']}`", inline=False)
+        embed.title = _("📋 La Trini status in {guild}").format(guild=ctx.guild.name)[:256]
+        embed.add_field(name=_("Security level"), value=f"`{data['security_level']}`", inline=False)
         if data["applied_at"]:
-            embed.add_field(name="Perfil aplicado", value=f"<t:{data['applied_at']}:R>", inline=False)
+            embed.add_field(name=_("Profile applied"), value=f"<t:{data['applied_at']}:R>", inline=False)
         await ctx.send(embed=embed)
 
     @trini.command(name="securitylevel")
     async def trini_securitylevel(self, ctx: commands.Context, level: str):
-        """Nivel de seguridad recomendado: standard, high o strict."""
+        """Recommended security level: standard, high or strict."""
         level = level.lower()
         if level not in ("standard", "high", "strict"):
-            return await ctx.send("Niveles validos: `standard`, `high`, `strict`.")
+            return await ctx.send(_("Valid levels: `standard`, `high`, `strict`."))
         await self.config.guild(ctx.guild).security_level.set(level)
         await self._log(ctx.guild, ctx.author, "security_level", level)
-        await ctx.send(f"Nivel de seguridad: `{level}`.")
+        await ctx.send(_("Security level: `{level}`.").format(level=level))
 
     @trini.command(name="syncred")
     async def trini_syncred(self, ctx: commands.Context, enabled: bool):
-        """Sincronizar modulos con `enablecog`/`disablecog` de Red en este servidor."""
+        """Sync modules with Red's `enablecog`/`disablecog` in this server."""
         await self.config.guild(ctx.guild).sync_red.set(enabled)
         await self._log(ctx.guild, ctx.author, "sync_red", str(enabled))
-        await ctx.send(f"Sincronizacion con Red: **{'activada' if enabled else 'desactivada'}**.")
+        await ctx.send(_("Red sync: **{value}**.").format(value='activada' if enabled else 'desactivada'))
 
     @trini.command(name="log")
     async def trini_log(self, ctx: commands.Context):
-        """Historial de cambios de configuracion de Profiles."""
+        """Profiles settings change history."""
         history = await self.config.guild(ctx.guild).history()
         if not history:
-            return await ctx.send("Sin cambios registrados.")
+            return await ctx.send(_("No changes recorded."))
         lines = []
         for h in reversed(history[-40:]):
             who = f"<@{h['actor']}>" if h.get("actor") else "sistema"
             lines.append(f"<t:{h['ts']}:f> · {who} · `{h['action']}` {h['detail']}")
         for page in pagify("\n".join(lines), page_length=3900):
             await ctx.send(
-                embed=discord.Embed(title="📜 Profiles · historial", description=page, color=COLOR),
+                embed=discord.Embed(title=_("📜 Profiles · history"), description=page, color=COLOR),
                 allowed_mentions=discord.AllowedMentions.none(),
             )
 
@@ -786,20 +821,20 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
     @commands.guild_only()
     @commands.admin_or_permissions(manage_guild=True)
     async def profile(self, ctx: commands.Context):
-        """Presets personalizados y export/import de configuracion."""
+        """Custom presets and settings export/import."""
 
     @profile.command(name="save")
     async def profile_save(self, ctx: commands.Context, *, name: str):
-        """Guardar la configuracion actual como preset reutilizable."""
+        """Save the current setup as a reusable preset."""
         name = _clean_name(name)
         if not name:
-            return await ctx.send("Indica un nombre para el preset.")
+            return await ctx.send(_("Give the preset a name."))
         data = await self.config.guild(ctx.guild).all()
         data["modules"] = await self.active_modules(ctx.guild)
         async with self.config.presets() as presets:
             existing = presets.get(name.lower())
             if existing and existing["owner_guild"] != ctx.guild.id and not await self.bot.is_owner(ctx.author):
-                return await ctx.send("Ya existe un preset con ese nombre creado en otro servidor.")
+                return await ctx.send(_("A preset with that name already exists, created in another server."))
             presets[name.lower()] = {
                 "name": name,
                 "profile": data["profile"],
@@ -811,23 +846,23 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
             }
         await self._log(ctx.guild, ctx.author, "preset_save", name)
         active = [MODULES[k].name for k, v in data["modules"].items() if v and k in MODULES]
-        await ctx.send(f"💾 Preset **{name}** guardado ({len(active)} modulos activos).")
+        await ctx.send(_("💾 Preset **{name}** saved ({count} active modules).").format(name=name, count=len(active)))
 
     @profile.command(name="apply")
     async def profile_apply(self, ctx: commands.Context, *, name: str):
-        """Aplicar un preset guardado."""
+        """Apply a saved preset."""
         presets = await self.config.presets()
         preset = presets.get(_clean_name(name).lower())
         if preset is None:
-            return await ctx.send("No existe ese preset. Mira `profile list`.")
+            return await ctx.send(_("That preset doesn't exist. See `profile list`."))
         view = ConfirmView(ctx.author, confirm_label="Aplicar")
         active = [MODULES[k].name for k, v in preset["modules"].items() if v and k in MODULES]
         msg = await ctx.send(
-            f"Se aplicara **{preset['name']}**:\n{box(humanize_list(active) or '-')}", view=view
+            _("**{name}** will be applied:\n{value}").format(name=preset['name'], value=box(humanize_list(active) or '-')), view=view
         )
         await view.wait()
         if not view.value:
-            return await msg.edit(content="Cancelado.", view=None)
+            return await msg.edit(content=_("Cancelled."), view=None)
         profile = PROFILES.get(preset.get("profile") or "custom", PROFILES["custom"])
         embed = await self.apply_profile(
             ctx.guild,
@@ -838,24 +873,24 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
             modules_override=preset["modules"],
             security_level=preset.get("security_level"),
         )
-        embed.title = f"💾 Preset aplicado: {preset['name']}"
+        embed.title = _("💾 Preset applied: {name}").format(name=preset['name'])
         await msg.edit(content=None, embed=embed, view=None)
 
     @profile.command(name="list")
     async def profile_list(self, ctx: commands.Context):
-        """Listar presets y perfiles predefinidos."""
+        """List presets and built-in profiles."""
         presets = await self.config.presets()
-        embed = discord.Embed(title="💾 Perfiles y presets", color=COLOR)
+        embed = discord.Embed(title=_("💾 Profiles and presets"), color=COLOR)
         embed.add_field(
-            name="Predefinidos",
-            value="\n".join(f"{p.emoji} `{p.key}` {p.name}" for p in PROFILES.values()),
+            name=_("Built-in"),
+            value="\n".join(f"{p.emoji} `{p.key}` {_(p.name)}" for p in PROFILES.values()),
             inline=False,
         )
         if presets:
             embed.add_field(
-                name="Presets guardados",
+                name=_("Saved presets"),
                 value=_join_capped([
-                    f"• **{p['name']}** · {sum(1 for v in p['modules'].values() if v)} modulos · <t:{p['created_at']}:d>"
+                    _("• **{name}** · {value} modules · <t:{created_at}:d>").format(name=p['name'], value=sum(1 for v in p['modules'].values() if v), created_at=p['created_at'])
                     for p in presets.values()
                 ]),
                 inline=False,
@@ -864,75 +899,65 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
 
     @profile.command(name="delete")
     async def profile_delete(self, ctx: commands.Context, *, name: str):
-        """Eliminar un preset guardado."""
+        """Delete a saved preset."""
         name = _clean_name(name)
         async with self.config.presets() as presets:
             preset = presets.get(name.lower())
             if preset is None:
-                return await ctx.send("No existe ese preset.")
+                return await ctx.send(_("That preset doesn't exist."))
             if preset["owner_guild"] != ctx.guild.id and not await self.bot.is_owner(ctx.author):
-                return await ctx.send("Solo se puede borrar desde el servidor que lo creo.")
+                return await ctx.send(_("It can only be deleted from the server that created it."))
             del presets[name.lower()]
         await self._log(ctx.guild, ctx.author, "preset_delete", name)
-        await ctx.send(f"🗑 Preset **{name}** eliminado.")
+        await ctx.send(_("🗑 Preset **{name}** deleted.").format(name=name))
 
     @profile.command(name="export")
     async def profile_export(self, ctx: commands.Context):
-        """Exportar modulos y configuracion de los cogs activos a JSON."""
+        """Export modules and active cog settings to JSON."""
         async with ctx.typing():
             payload = await self.build_export(ctx.guild)
         fp = io.BytesIO(json.dumps(payload, indent=2, ensure_ascii=False).encode("utf-8"))
         name = f"trini-profile-{ctx.guild.id}-{time.strftime('%Y%m%d-%H%M')}.json"
         await self._log(ctx.guild, ctx.author, "profile_export", name)
-        text = (
-            f"🏠 Servidor: **{discord.utils.escape_markdown(ctx.guild.name)}** (`{ctx.guild.id}`)\n"
-            f"🕒 {discord.utils.format_dt(discord.utils.utcnow(), 'f')}\n"
-            f"📤 Exportados **{len(payload['cogs'])}** cogs y **{sum(1 for v in payload['modules'].values() if v)}** modulos.\n"
-            "⚠️ El archivo contiene configuracion del servidor, compartelo con cuidado."
-        )
+        text = _("🏠 Server: **{escape_markdown}** (`{guild_id}`)\n🕒 {format_dt}\n📤 Exported **{count}** cogs and **{value}** modules.\n⚠️ The file contains server settings, share it carefully.").format(escape_markdown=discord.utils.escape_markdown(ctx.guild.name), guild_id=ctx.guild.id, format_dt=discord.utils.format_dt(discord.utils.utcnow(), 'f'), count=len(payload['cogs']), value=sum(1 for v in payload['modules'].values() if v))
         if ctx.interaction is not None:
             return await ctx.send(text, file=discord.File(fp, filename=name), ephemeral=True)
         try:
             await ctx.author.send(text, file=discord.File(fp, filename=name))
-            await ctx.send("📬 Te he enviado el export por mensaje privado.")
+            await ctx.send(_("📬 I've sent you the export by DM."))
         except discord.HTTPException:
-            await ctx.send("No puedo enviarte mensajes privados. Activalos o usa la version slash del comando.")
+            await ctx.send(_("I can't DM you. Enable DMs or use the slash version of the command."))
 
     @profile.command(name="import")
     async def profile_import(self, ctx: commands.Context, file: Optional[discord.Attachment] = None):
-        """Importar un JSON generado con `profile export`."""
+        """Import a JSON generated with `profile export`."""
         if file is None and ctx.message and ctx.message.attachments:
             file = ctx.message.attachments[0]
         if file is None:
-            return await ctx.send("Adjunta el archivo JSON exportado.")
+            return await ctx.send(_("Attach the exported JSON file."))
         if file.size > 2_000_000:
-            return await ctx.send("El archivo es demasiado grande.")
+            return await ctx.send(_("The file is too large."))
         try:
             payload = json.loads(await file.read())
         except (ValueError, discord.HTTPException):
-            return await ctx.send("No es un JSON valido.")
+            return await ctx.send(_("It isn't valid JSON."))
         if not isinstance(payload, dict) or payload.get("format") != "trini-profile":
-            return await ctx.send("El archivo no es un export de Trini Profiles.")
+            return await ctx.send(_("The file isn't a Trini Profiles export."))
         if not isinstance(payload.get("modules", {}), dict) or not isinstance(payload.get("cogs", {}), dict):
-            return await ctx.send("El archivo esta dañado (modulos o cogs con formato incorrecto).")
+            return await ctx.send(_("The file is corrupted (modules or cogs with an invalid format)."))
         source = payload.get("source_guild") or {}
         active = [MODULES[k].name for k, v in payload.get("modules", {}).items() if v and k in MODULES]
         view = ConfirmView(ctx.author, confirm_label="Importar")
         msg = await ctx.send(
             embed=discord.Embed(
-                title="📥 Importar configuracion",
+                title=_("📥 Import settings"),
                 color=discord.Color.orange(),
                 description=(
-                    f"Origen: **{source.get('name', '?')}** (`{source.get('id', '?')}`)\n"
-                    f"Perfil: `{payload.get('profile')}` · Seguridad: `{payload.get('security_level')}`\n\n"
-                    f"**Modulos:** {humanize_list(active) or '-'}\n"
-                    f"**Configuracion de cogs:** {humanize_list(list(payload.get('cogs', {}).keys())) or '-'}\n\n"
-                    "Los canales y roles se re-mapean por nombre si el servidor es distinto.\n"
-                    "La configuracion actual de esos cogs se sobrescribira."
+                    _("Source: **{get}** (`{get2}`)\nProfile: `{get3}` · Security: `{get4}`\n\n**Modules:** {value}\n**Cog settings:** {value2}\n\nChannels and roles are re-mapped by name if the server is different.\nThe current settings of those cogs will be overwritten.").format(get=source.get('name', '?'), get2=source.get('id', '?'), get3=payload.get('profile'), get4=payload.get('security_level'), value=humanize_list(active) or '-', value2=humanize_list(list(payload.get('cogs', {}).keys())) or '-')
                     + (
-                        "\n\n⚠️ **Copia completa (sin soporte Trini):** "
+                        _("\n\n⚠️ **Full copy (no Trini support):** ")
                         + humanize_list(payload.get("raw_cogs") or [])
-                        + ". Puede incluir datos de funcionamiento del servidor de origen."
+                        + _(". It may include runtime data from the source server.")
                         if payload.get("raw_cogs") else ""
                     )
                 ),
@@ -941,10 +966,10 @@ class TriniProfiles(DashboardIntegration, commands.Cog):
         )
         await view.wait()
         if not view.value:
-            return await msg.edit(content="Cancelado.", embed=None, view=None)
+            return await msg.edit(content=_("Cancelled."), embed=None, view=None)
         async with ctx.typing():
             warnings = await self.run_import(ctx.guild, payload, ctx.author)
-        text = "✅ Importacion completada."
+        text = _("✅ Import completed.")
         if warnings:
             text += "\n" + box("\n".join(warnings)[:1800])
         await msg.edit(content=text, embed=None, view=None)
