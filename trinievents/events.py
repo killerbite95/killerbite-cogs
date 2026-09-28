@@ -23,7 +23,6 @@ from redbot.core.bot import Red
 
 from .dashboard_integration import DashboardIntegration
 from .timeparse import (
-    WEEKDAY_NAMES,
     WEEKDAYS,
     format_local,
     get_tz,
@@ -33,6 +32,22 @@ from .timeparse import (
     valid_tz,
 )
 from .views import ArenCupModal, EventButton, EventModal, OpenModalView, event_view
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("TriniEvents", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
+
+
+# Nombres de los dias para mostrar (el parseo acepta español e ingles en timeparse).
+WEEKDAY_LABELS = [N_("Monday"), N_("Tuesday"), N_("Wednesday"), N_("Thursday"), N_("Friday"), N_("Saturday"), N_("Sunday")]
+
+
+def _weekday(index: int) -> str:
+    return _(WEEKDAY_LABELS[index % 7])
 
 log = logging.getLogger("red.killerbite95.trinievents")
 
@@ -43,10 +58,10 @@ STATUS_COLOR = {
     "cancelled": discord.Color.red(),
 }
 STATUS_LABEL = {
-    "scheduled": "📅 Programado",
-    "ongoing": "🟢 En curso",
-    "ended": "🏁 Finalizado",
-    "cancelled": "🚫 Cancelado",
+    "scheduled": N_("📅 Scheduled"),
+    "ongoing": N_("🟢 Ongoing"),
+    "ended": N_("🏁 Finished"),
+    "cancelled": N_("🚫 Cancelled"),
 }
 MAX_EVENTS_KEPT = 300
 
@@ -66,8 +81,9 @@ def is_event_staff():
     return commands.check(predicate)
 
 
+@cog_i18n(_)
 class TriniEvents(DashboardIntegration, commands.Cog):
-    """Eventos de comunidad: inscripciones, reservas, recordatorios, roles/canales temporales y estadisticas."""
+    """Community events: sign-ups, waitlists, reminders, temporary roles/channels and statistics."""
 
     __author__ = "Killerbite95"
     __version__ = "1.0.0"
@@ -95,7 +111,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
-        return f"{pre}\n\nVersion: {self.__version__}"
+        return _("{pre}\n\nVersion: {version}").format(pre=pre, version=self.__version__)
 
     async def red_delete_data_for_user(self, *, requester, user_id: int) -> None:
         for guild_id in (await self.config.all_guilds()):
@@ -166,40 +182,40 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         arencup = event.get("arencup") or {}
         if is_arencup:
             if arencup.get("checkin"):
-                embed.add_field(name="Check-in", value=f"<t:{arencup['checkin']}:t>", inline=True)
-            embed.add_field(name="Inicio", value=f"<t:{start}:t>", inline=True)
+                embed.add_field(name=_("Check-in"), value=f"<t:{arencup['checkin']}:t>", inline=True)
+            embed.add_field(name=_("Start"), value=f"<t:{start}:t>", inline=True)
             embed.add_field(name="📅", value=f"<t:{start}:D> · <t:{start}:R>", inline=False)
             if arencup.get("teams"):
-                embed.add_field(name="Equipos", value=f"{arencup['teams']} equipos", inline=True)
+                embed.add_field(name=_("Teams"), value=_("{teams} teams").format(teams=arencup['teams']), inline=True)
             if event.get("remind"):
-                embed.add_field(name="🔔 Recordatorios", value=str(len(event["remind"])), inline=True)
+                embed.add_field(name=_("🔔 Reminders"), value=str(len(event["remind"])), inline=True)
         else:
-            embed.add_field(name="📅 Fecha", value=f"<t:{start}:D>", inline=True)
-            embed.add_field(name="🕙 Hora", value=f"<t:{start}:t> · <t:{start}:R>", inline=True)
+            embed.add_field(name=_("📅 Date"), value=f"<t:{start}:D>", inline=True)
+            embed.add_field(name=_("🕙 Time"), value=f"<t:{start}:t> · <t:{start}:R>", inline=True)
             slots = event["slots"]
             count = len(event["participants"])
             embed.add_field(
-                name="👥 Participantes",
+                name=_("👥 Participants"),
                 value=f"{count} / {slots}" if slots else f"{count}",
                 inline=True,
             )
             if event["waitlist"]:
-                embed.add_field(name="Lista de espera", value=str(len(event["waitlist"])), inline=True)
-            embed.add_field(name="⏱ Duracion", value=f"{event['duration']} min", inline=True)
+                embed.add_field(name=_("Waitlist"), value=str(len(event["waitlist"])), inline=True)
+            embed.add_field(name=_("⏱ Duration"), value=_("{duration} min").format(duration=event['duration']), inline=True)
             if event.get("required_role"):
-                embed.add_field(name="Rol requerido", value=f"<@&{event['required_role']}>", inline=True)
+                embed.add_field(name=_("Required role"), value=f"<@&{event['required_role']}>", inline=True)
             if event["participants"]:
                 names = " ".join(f"<@{u}>" for u in event["participants"][:40])
                 if count > 40:
-                    names += f" y {count - 40} mas"
-                embed.add_field(name="Inscritos", value=names[:1024], inline=False)
+                    names += _(" and {value} more").format(value=count - 40)
+                embed.add_field(name=_("Signed up"), value=names[:1024], inline=False)
             if event["status"] in ("ongoing", "ended") and event.get("attended"):
-                embed.add_field(name="✋ Check-in", value=f"{len(event['attended'])} / {count}", inline=True)
-        embed.add_field(name="Estado", value=STATUS_LABEL[event["status"]], inline=True)
-        footer = f"Evento #{event['id']}"
+                embed.add_field(name=_("✋ Check-in"), value=f"{len(event['attended'])} / {count}", inline=True)
+        embed.add_field(name=_("Status"), value=_(STATUS_LABEL[event["status"]]), inline=True)
+        footer = _("Event #{id}").format(id=event['id'])
         rec = event.get("recurrence")
         if rec:
-            footer += f" · se repite {'cada dia' if rec['freq'] == 'daily' else 'cada ' + WEEKDAY_NAMES[rec.get('weekday', 0)]}"
+            footer += _(" · repeats {value}").format(value=_("every day") if rec['freq'] == 'daily' else _("every {value}").format(value=_weekday(rec.get('weekday', 0))))
         if event.get("tag"):
             footer += f" · {event['tag']}"
         embed.set_footer(text=footer)
@@ -299,15 +315,15 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         start = parse_datetime(values["date"], tz)
         if start is None:
             return await interaction.response.send_message(
-                "❌ Fecha no valida. Usa `02/10/2026 22:00`, `viernes 22:00`, `mañana 21:30` o `+2h`.", ephemeral=True
+                _("❌ Invalid date. Use `02/10/2026 22:00`, `friday 22:00`, `tomorrow 21:30` or `+2h`."), ephemeral=True
             )
         if start < time.time() - 60:
-            return await interaction.response.send_message("❌ La fecha ya ha pasado.", ephemeral=True)
+            return await interaction.response.send_message(_("❌ That date has already passed."), ephemeral=True)
         try:
             slots = max(0, int(values["slots"] or 0))
             duration = int(values["duration"]) if values["duration"] else None
         except ValueError:
-            return await interaction.response.send_message("❌ Plazas y duracion deben ser numeros.", ephemeral=True)
+            return await interaction.response.send_message(_("❌ Slots and duration must be numbers."), ephemeral=True)
         kw: Dict[str, Any] = dict(
             title=values["name"], description=values["description"], start=start, slots=slots,
             required_role=required_role, channel_id=channel_id, creator=interaction.user.id, tag=tag,
@@ -317,7 +333,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         await interaction.response.defer(ephemeral=True, thinking=True)
         event, msg = await self.create_event(guild, **kw)
         await interaction.followup.send(
-            f"✅ Evento **#{event['id']}** creado para {format_local(start, tz)} ({tz})." + (f" {msg.jump_url}" if msg else " ⚠️ No pude publicarlo en el canal."),
+            _("✅ Event **#{id}** created for {value} ({tz}).").format(id=event['id'], value=format_local(start, tz), tz=tz) + (f" {msg.jump_url}" if msg else _(" ⚠️ I couldn't post it in the channel.")),
             ephemeral=True,
         )
 
@@ -327,7 +343,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         start = parse_datetime(values["start"], tz)
         checkin = parse_datetime(values["checkin"], tz) if values["checkin"] else None
         if start is None or (values["checkin"] and checkin is None):
-            return await interaction.response.send_message("❌ Fecha no valida. Ej: `02/10/2026 19:00`.", ephemeral=True)
+            return await interaction.response.send_message(_("❌ Invalid date. E.g.: `02/10/2026 19:00`."), ephemeral=True)
         url = values["url"]
         if url and not url.startswith(("http://", "https://")):
             url = "https://" + url
@@ -339,7 +355,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
             arencup={"url": url or None, "checkin": checkin, "teams": values["teams"] or None},
             channels={"enabled": False, "category_id": None, "ids": []},
         )
-        await interaction.followup.send(f"🏆 Evento ArenCup **#{event['id']}** publicado." + (f" {msg.jump_url}" if msg else ""), ephemeral=True)
+        await interaction.followup.send(_("🏆 ArenCup event **#{id}** posted.").format(id=event['id']) + (f" {msg.jump_url}" if msg else ""), ephemeral=True)
 
     # ------------------------------------------------------------------
     # Botones
@@ -354,23 +370,23 @@ class TriniEvents(DashboardIntegration, commands.Cog):
             async with self.config.guild(guild).events() as events:
                 event = events.get(str(event_id))
                 if event is None:
-                    return "Este evento ya no existe."
+                    return _("This event no longer exists.")
                 if event["status"] in ("ended", "cancelled"):
-                    return "Este evento ya ha finalizado."
+                    return _("This event has already ended.")
                 uid = member.id
                 if action == "join":
                     if event.get("required_role") and not any(r.id == event["required_role"] for r in member.roles):
-                        return f"Necesitas el rol <@&{event['required_role']}> para participar."
+                        return _("You need the <@&{required_role}> role to join.").format(required_role=event['required_role'])
                     if uid in event["participants"]:
-                        return "Ya estas inscrito. ✅"
+                        return _("You're already signed up. ✅")
                     if uid in event["waitlist"]:
-                        return f"Ya estas en la lista de espera (posicion {event['waitlist'].index(uid) + 1})."
+                        return _("You're already on the waitlist (position {value}).").format(value=event['waitlist'].index(uid) + 1)
                     if event["slots"] and len(event["participants"]) >= event["slots"]:
                         event["waitlist"].append(uid)
-                        reply = f"Plazas completas. Estas en la **lista de espera** (posicion {len(event['waitlist'])}). Te avisare si queda una plaza libre."
+                        reply = _("It's full. You're on the **waitlist** (position {count}). I'll let you know if a spot opens up.").format(count=len(event['waitlist']))
                     else:
                         event["participants"].append(uid)
-                        reply = f"✅ Inscrito en **{event['title']}** (<t:{event['start']}:F>)."
+                        reply = _("✅ Signed up for **{title}** (<t:{start}:F>).").format(title=event['title'], start=event['start'])
                         if event["role"]["assigned"]:
                             await self._give_role(guild, event, [uid])
                 elif action == "leave":
@@ -379,7 +395,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
                         event["cancelled_by"].append(uid)
                         if uid in event["attended"]:
                             event["attended"].remove(uid)
-                        reply = "Has cancelado tu plaza."
+                        reply = _("You cancelled your spot.")
                         if event["role"]["assigned"]:
                             await self._take_role(guild, event, [uid])
                         if event["waitlist"]:
@@ -389,28 +405,28 @@ class TriniEvents(DashboardIntegration, commands.Cog):
                                 await self._give_role(guild, event, [promoted])
                     elif uid in event["waitlist"]:
                         event["waitlist"].remove(uid)
-                        reply = "Has salido de la lista de espera."
+                        reply = _("You left the waitlist.")
                     else:
-                        return "No estas inscrito en este evento."
+                        return _("You're not signed up for this event.")
                 elif action == "remind":
                     if uid in event["remind"]:
                         event["remind"].remove(uid)
-                        return "🔕 Ya no recibiras recordatorios de este evento."
+                        return _("🔕 You won't get reminders for this event anymore.")
                     event["remind"].append(uid)
-                    reply = "🔔 Te avisare antes del evento por mensaje privado."
+                    reply = _("🔔 I'll remind you by DM before the event.")
                     if event["kind"] != "arencup":
                         return reply
                 elif action == "checkin":
                     if not self._checkin_open(event, settings):
-                        return "El check-in no esta abierto."
+                        return _("Check-in is not open.")
                     if uid not in event["participants"]:
-                        return "Solo los participantes inscritos pueden hacer check-in."
+                        return _("Only signed-up participants can check in.")
                     if uid in event["attended"]:
-                        return "Ya habias hecho check-in. ✋"
+                        return _("You had already checked in. ✋")
                     event["attended"].append(uid)
-                    reply = "✋ Check-in registrado. ¡A jugar!"
+                    reply = _("✋ Checked in. Have fun!")
                 else:
-                    return "Accion desconocida."
+                    return _("Unknown action.")
                 snapshot = copy.deepcopy(event)
         await self.refresh_message(guild, snapshot, settings)
         if promoted:
@@ -420,7 +436,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
     async def _announce_promotion(self, guild: discord.Guild, event: Dict[str, Any], user_id: int) -> None:
         member = guild.get_member(user_id)
         channel = guild.get_channel_or_thread(event.get("channel_id") or 0)
-        text = f"<@{user_id}> ha pasado automaticamente de reserva a participante en **{event['title']}**."
+        text = _("<@{user_id}> was automatically moved from the waitlist to participant in **{title}**.").format(user_id=user_id, title=event['title'])
         if channel is not None:
             try:
                 ref = channel.get_partial_message(event["message_id"]) if event.get("message_id") else None
@@ -429,7 +445,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
                 pass
         if member is not None:
             try:
-                await member.send(f"🎉 Se ha liberado una plaza: ya eres participante de **{event['title']}** (<t:{event['start']}:F>) en {guild.name}.")
+                await member.send(_("🎉 A spot opened up: you're now a participant in **{title}** (<t:{start}:F>) in {guild_name}.").format(title=event['title'], start=event['start'], guild_name=guild.name))
             except discord.HTTPException:
                 pass
 
@@ -549,19 +565,19 @@ class TriniEvents(DashboardIntegration, commands.Cog):
 
     async def _send_reminder(self, guild: discord.Guild, event: Dict[str, Any], minutes: int, settings: Dict[str, Any]) -> None:
         anchor = (event.get("arencup") or {}).get("checkin") or event["start"]
-        what = "el check-in" if anchor != event["start"] else "el evento"
-        when = "24 horas" if minutes == 1440 else (f"{minutes // 60} hora(s)" if minutes % 60 == 0 else f"{minutes} minutos")
+        what = _("check-in") if anchor != event["start"] else _("the event")
+        when = _("24 hours") if minutes == 1440 else (_("{value} hour(s)").format(value=minutes // 60) if minutes % 60 == 0 else _("{minutes} minutes").format(minutes=minutes))
         embed = discord.Embed(
             title=f"🔔 {event['title']}",
-            description=f"Empieza {what} en **{when}** (<t:{anchor}:t>, <t:{anchor}:R>).\nServidor: **{guild.name}**",
+            description=_("{what} starts in **{when}** (<t:{anchor}:t>, <t:{anchor}:R>).\nServer: **{guild_name}**").format(what=what, when=when, anchor=anchor, guild_name=guild.name),
             color=STATUS_COLOR["scheduled"],
         )
         channel = guild.get_channel_or_thread(event.get("channel_id") or 0)
         if channel is not None and event.get("message_id"):
-            embed.add_field(name="Evento", value=f"[Ver mensaje](https://discord.com/channels/{guild.id}/{channel.id}/{event['message_id']})")
+            embed.add_field(name=_("Event"), value=_("[View message](https://discord.com/channels/{guild_id}/{channel_id}/{message_id})").format(guild_id=guild.id, channel_id=channel.id, message_id=event['message_id']))
         url = (event.get("arencup") or {}).get("url")
         if url:
-            embed.add_field(name="Torneo", value=url)
+            embed.add_field(name=_("Tournament"), value=url)
         recipients = list(dict.fromkeys(event["participants"] + event["remind"]))
         for uid in recipients:
             member = guild.get_member(uid)
@@ -575,7 +591,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         if settings["staff_ping"] and settings["staff_role"] and channel is not None:
             try:
                 await channel.send(
-                    f"<@&{settings['staff_role']}> recordatorio: **{event['title']}** empieza <t:{anchor}:R>.",
+                    _("<@&{staff_role}> reminder: **{title}** starts <t:{anchor}:R>.").format(staff_role=settings['staff_role'], title=event['title'], anchor=anchor),
                     allowed_mentions=discord.AllowedMentions(roles=True),
                 )
             except discord.HTTPException:
@@ -595,6 +611,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         await self.bot.wait_until_red_ready()
 
     async def _tick_guild(self, guild: discord.Guild, now: float) -> None:
+        await set_contextual_locales_from_guild(self.bot, guild)
         events = await self.config.guild(guild).events()
         active = [e for e in events.values() if e["status"] in ("scheduled", "ongoing")]
         if not active:
@@ -713,7 +730,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
     async def _get_event(self, ctx: commands.Context, event_id: int) -> Optional[Dict[str, Any]]:
         event = (await self.config.guild(ctx.guild).events()).get(str(event_id))
         if event is None:
-            await ctx.send("No existe ese evento. Mira `event list`.")
+            await ctx.send(_("That event doesn't exist. See `event list`."))
         return event
 
     async def _event_autocomplete(self, interaction: discord.Interaction, current: str):
@@ -722,7 +739,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         events = sorted((await self.config.guild(interaction.guild).events()).values(), key=lambda e: -e["start"])
         out = []
         for e in events:
-            label = f"#{e['id']} {e['title']} · {STATUS_LABEL[e['status']]}"
+            label = f"#{e['id']} {e['title']} · {_(STATUS_LABEL[e['status']])}"
             if current.lower() in label.lower():
                 out.append(discord.app_commands.Choice(name=label[:100], value=e["id"]))
         return out[:25]
@@ -730,7 +747,7 @@ class TriniEvents(DashboardIntegration, commands.Cog):
     @commands.hybrid_group(name="event")
     @commands.guild_only()
     async def event(self, ctx: commands.Context):
-        """Trini Events: actividades de comunidad."""
+        """Trini Events: community activities."""
 
     @event.command(name="create")
     @is_event_staff()
@@ -741,10 +758,10 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         required_role: Optional[discord.Role] = None,
         tag: Optional[str] = None,
     ):
-        """Crear un evento con formulario (nombre, fecha, plazas, duracion, descripcion)."""
+        """Create an event with a form (name, date, slots, duration, description)."""
         target = channel or ctx.guild.get_channel(await self.config.guild(ctx.guild).channel() or 0) or ctx.channel
         if not target.permissions_for(ctx.guild.me).send_messages:
-            return await ctx.send(f"No puedo publicar en {target.mention}.")
+            return await ctx.send(_("I can't post in {target}.").format(target=target.mention))
 
         async def submit(interaction: discord.Interaction, values: Dict[str, str]):
             await self._modal_create(interaction, values, channel_id=target.id, required_role=required_role.id if required_role else None, tag=tag)
@@ -753,12 +770,12 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         if ctx.interaction is not None:
             await ctx.interaction.response.send_modal(factory())
         else:
-            await ctx.send("📝 Pulsa para rellenar el evento:", view=OpenModalView(ctx.author, factory))
+            await ctx.send(_("📝 Press to fill in the event:"), view=OpenModalView(ctx.author, factory))
 
     @event.command(name="arencup")
     @is_event_staff()
     async def event_arencup(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Publicar un torneo de ArenCup (check-in, inicio, enlace y recordatorios)."""
+        """Post an ArenCup tournament (check-in, start, link and reminders)."""
         target = channel or ctx.guild.get_channel(await self.config.guild(ctx.guild).channel() or 0) or ctx.channel
 
         async def submit(interaction: discord.Interaction, values: Dict[str, str]):
@@ -768,28 +785,28 @@ class TriniEvents(DashboardIntegration, commands.Cog):
         if ctx.interaction is not None:
             await ctx.interaction.response.send_modal(factory())
         else:
-            await ctx.send("🏆 Pulsa para rellenar el torneo:", view=OpenModalView(ctx.author, factory))
+            await ctx.send(_("🏆 Press to fill in the tournament:"), view=OpenModalView(ctx.author, factory))
 
     @event.command(name="edit")
     @is_event_staff()
     async def event_edit(self, ctx: commands.Context, event_id: int):
-        """Editar nombre, fecha, plazas, duracion y descripcion de un evento."""
+        """Edit an event's name, date, slots, duration and description."""
         event = await self._get_event(ctx, event_id)
         if event is None:
             return
         if event["kind"] == "arencup":
-            return await ctx.send("Para eventos ArenCup, cancelalo y vuelve a publicarlo.")
+            return await ctx.send(_("For ArenCup events, cancel it and post it again."))
         tz = await self.config.guild(ctx.guild).timezone()
 
         async def submit(interaction: discord.Interaction, values: Dict[str, str]):
             start = parse_datetime(values["date"], tz)
             if start is None:
-                return await interaction.response.send_message("❌ Fecha no valida.", ephemeral=True)
+                return await interaction.response.send_message(_("❌ Invalid date."), ephemeral=True)
             try:
                 slots = max(0, int(values["slots"] or 0))
                 duration = int(values["duration"] or event["duration"])
             except ValueError:
-                return await interaction.response.send_message("❌ Plazas y duracion deben ser numeros.", ephemeral=True)
+                return await interaction.response.send_message(_("❌ Slots and duration must be numbers."), ephemeral=True)
             await interaction.response.defer(ephemeral=True)
             promoted: List[int] = []
             async with self._locks[ctx.guild.id]:
@@ -809,38 +826,38 @@ class TriniEvents(DashboardIntegration, commands.Cog):
             await self.refresh_message(ctx.guild, current)
             for uid in promoted:
                 await self._announce_promotion(ctx.guild, current, uid)
-            await interaction.followup.send(f"✅ Evento #{event_id} actualizado.", ephemeral=True)
+            await interaction.followup.send(_("✅ Event #{event_id} updated.").format(event_id=event_id), ephemeral=True)
 
         defaults = {
             "name": event["title"], "date": format_local(event["start"], tz), "slots": str(event["slots"]),
             "duration": str(event["duration"]), "description": event.get("description") or "",
         }
-        factory = lambda: EventModal(submit, title=f"Editar evento #{event_id}", defaults=defaults)  # noqa: E731
+        factory = lambda: EventModal(submit, title=_("Edit event #{event_id}").format(event_id=event_id), defaults=defaults)  # noqa: E731
         if ctx.interaction is not None:
             await ctx.interaction.response.send_modal(factory())
         else:
-            await ctx.send("📝 Pulsa para editar el evento:", view=OpenModalView(ctx.author, factory))
+            await ctx.send(_("📝 Press to edit the event:"), view=OpenModalView(ctx.author, factory))
 
     @event.command(name="list")
     async def event_list(self, ctx: commands.Context):
-        """Proximos eventos."""
+        """Upcoming events."""
         events = sorted(
             (e for e in (await self.config.guild(ctx.guild).events()).values() if e["status"] in ("scheduled", "ongoing")),
             key=lambda e: e["start"],
         )
         if not events:
-            return await ctx.send("No hay eventos programados.")
+            return await ctx.send(_("There are no scheduled events."))
         lines = []
         for e in events[:25]:
             count = f"{len(e['participants'])}/{e['slots']}" if e["slots"] else str(len(e["participants"]))
-            link = f" · [ver](https://discord.com/channels/{ctx.guild.id}/{e['channel_id']}/{e['message_id']})" if e.get("message_id") else ""
+            link = _(" · [view](https://discord.com/channels/{guild_id}/{channel_id}/{message_id})").format(guild_id=ctx.guild.id, channel_id=e['channel_id'], message_id=e['message_id']) if e.get("message_id") else ""
             icon = "🏆" if e["kind"] == "arencup" else ("🟢" if e["status"] == "ongoing" else "📅")
             lines.append(f"{icon} `#{e['id']}` **{e['title']}** · <t:{e['start']}:f> · 👥 {count}{link}")
-        await ctx.send(embed=discord.Embed(title="📅 Proximos eventos", description="\n".join(lines), color=STATUS_COLOR["scheduled"]))
+        await ctx.send(embed=discord.Embed(title=_("📅 Upcoming events"), description="\n".join(lines), color=STATUS_COLOR["scheduled"]))
 
     @event.command(name="info")
     async def event_info(self, ctx: commands.Context, event_id: int):
-        """Ver un evento."""
+        """Show an event."""
         event = await self._get_event(ctx, event_id)
         if event is None:
             return
@@ -852,32 +869,32 @@ class TriniEvents(DashboardIntegration, commands.Cog):
 
     @event.command(name="participants")
     async def event_participants(self, ctx: commands.Context, event_id: int):
-        """Participantes, reservas y check-in de un evento."""
+        """Participants, waitlist and check-in of an event."""
         event = await self._get_event(ctx, event_id)
         if event is None:
             return
         attended = set(event["attended"])
         parts = [f"{'✋' if u in attended else '•'} <@{u}>" for u in event["participants"]]
         embed = discord.Embed(title=f"👥 {event['title']}", color=STATUS_COLOR[event["status"]])
-        embed.add_field(name=f"Participantes ({len(parts)})", value="\n".join(parts)[:1024] or "—", inline=False)
+        embed.add_field(name=_("Participants ({count})").format(count=len(parts)), value="\n".join(parts)[:1024] or "—", inline=False)
         if event["waitlist"]:
-            embed.add_field(name=f"Lista de espera ({len(event['waitlist'])})", value="\n".join(f"{i}. <@{u}>" for i, u in enumerate(event["waitlist"], 1))[:1024], inline=False)
+            embed.add_field(name=_("Waitlist ({count})").format(count=len(event['waitlist'])), value="\n".join(f"{i}. <@{u}>" for i, u in enumerate(event["waitlist"], 1))[:1024], inline=False)
         if event["remind"]:
-            embed.add_field(name="🔔 Recordarme", value=str(len(event["remind"])), inline=True)
+            embed.add_field(name=_("🔔 Remind me"), value=str(len(event["remind"])), inline=True)
         if event["cancelled_by"]:
-            embed.add_field(name="Cancelaciones", value=str(len(event["cancelled_by"])), inline=True)
+            embed.add_field(name=_("Cancellations"), value=str(len(event["cancelled_by"])), inline=True)
         await ctx.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     @event.command(name="cancel")
     @is_event_staff()
     async def event_cancel(self, ctx: commands.Context, event_id: int, *, reason: Optional[str] = None):
-        """Cancelar un evento y avisar a los inscritos."""
+        """Cancel an event and notify the participants."""
         settings = await self.config.guild(ctx.guild).all()
         async with self._locks[ctx.guild.id]:
             async with self.config.guild(ctx.guild).events() as evs:
                 ev = evs.get(str(event_id))
                 if ev is None or ev["status"] in ("ended", "cancelled"):
-                    return await ctx.send("Ese evento no existe o ya ha terminado.")
+                    return await ctx.send(_("That event doesn't exist or has already ended."))
                 ev["status"] = "cancelled"
                 ev["recurrence"] = None
                 current = copy.deepcopy(ev)
@@ -889,48 +906,48 @@ class TriniEvents(DashboardIntegration, commands.Cog):
             if member is None:
                 continue
             try:
-                await member.send(f"🚫 El evento **{current['title']}** (<t:{current['start']}:F>) en {ctx.guild.name} ha sido cancelado." + (f"\nMotivo: {reason}" if reason else ""))
+                await member.send(_("🚫 The event **{title}** (<t:{start}:F>) in {guild_name} has been cancelled.").format(title=current['title'], start=current['start'], guild_name=ctx.guild.name) + (_("\nReason: {reason}").format(reason=reason) if reason else ""))
                 notified += 1
             except discord.HTTPException:
                 pass
-        await ctx.send(f"🚫 Evento #{event_id} cancelado. Avisados: {notified}.")
+        await ctx.send(_("🚫 Event #{event_id} cancelled. Notified: {notified}.").format(event_id=event_id, notified=notified))
 
     @event.command(name="clone")
     @is_event_staff()
     async def event_clone(self, ctx: commands.Context, event_id: int, *, when: str):
-        """Repetir un evento anterior en otra fecha. Ej: `event clone 12 viernes 22:00`."""
+        """Repeat a previous event on another date. E.g.: `event clone 12 friday 22:00`."""
         event = await self._get_event(ctx, event_id)
         if event is None:
             return
         tz = await self.config.guild(ctx.guild).timezone()
         start = parse_datetime(when, tz)
         if start is None or start < time.time():
-            return await ctx.send("Fecha no valida o pasada. Ej: `02/10/2026 22:00`, `viernes 22:00`.")
+            return await ctx.send(_("Invalid or past date. E.g.: `02/10/2026 22:00`, `friday 22:00`."))
         fields = self._clone_fields(event, start)
         fields["recurrence"] = None
         fields["creator"] = ctx.author.id
         new, msg = await self.create_event(ctx.guild, **fields)
-        await ctx.send(f"✅ Evento clonado como **#{new['id']}** ({format_local(start, tz)})." + (f" {msg.jump_url}" if msg else ""))
+        await ctx.send(_("✅ Event cloned as **#{id}** ({value}).").format(id=new['id'], value=format_local(start, tz)) + (f" {msg.jump_url}" if msg else ""))
 
     @event.command(name="repeat")
     @is_event_staff()
     async def event_repeat(self, ctx: commands.Context, event_id: int, frequency: str, weekday: Optional[str] = None, at: Optional[str] = None):
-        """Hacer recurrente un evento: `event repeat 12 weekly friday 22:00`, `daily` o `off`."""
+        """Make an event recurring: `event repeat 12 weekly friday 22:00`, `daily` or `off`."""
         frequency = frequency.lower()
         if frequency not in ("weekly", "daily", "off", "semanal", "diario"):
-            return await ctx.send("Frecuencias: `weekly`, `daily`, `off`.")
+            return await ctx.send(_("Frequencies: `weekly`, `daily`, `off`."))
         frequency = {"semanal": "weekly", "diario": "daily"}.get(frequency, frequency)
         wd = None
         if weekday:
             wd = WEEKDAYS.get(weekday.lower())
             if wd is None:
-                return await ctx.send("Dia no valido (ej: `viernes`, `friday`).")
+                return await ctx.send(_("Invalid day (e.g.: `friday`, `viernes`)."))
         if at and parse_time(at) is None:
-            return await ctx.send("Hora no valida (ej: `22:00`).")
+            return await ctx.send(_("Invalid time (e.g.: `22:00`)."))
         async with self.config.guild(ctx.guild).events() as evs:
             ev = evs.get(str(event_id))
             if ev is None:
-                return await ctx.send("No existe ese evento.")
+                return await ctx.send(_("That event doesn't exist."))
             if frequency == "off":
                 ev["recurrence"] = None
             else:
@@ -944,27 +961,27 @@ class TriniEvents(DashboardIntegration, commands.Cog):
             current = copy.deepcopy(ev)
         await self.refresh_message(ctx.guild, current)
         if frequency == "off":
-            return await ctx.send(f"El evento #{event_id} ya no se repite.")
+            return await ctx.send(_("Event #{event_id} no longer repeats.").format(event_id=event_id))
         rec = current["recurrence"]
-        when = "cada dia" if rec["freq"] == "daily" else f"cada {WEEKDAY_NAMES[rec['weekday']]}"
-        await ctx.send(f"🔁 El evento #{event_id} se repetira {when} a las {rec['time']}. La siguiente edicion se publica al terminar esta.")
+        when = _("every day") if rec["freq"] == "daily" else _("every {value}").format(value=_weekday(rec['weekday']))
+        await ctx.send(_("🔁 Event #{event_id} will repeat {when} at {time}. The next edition is posted when this one ends.").format(event_id=event_id, when=when, time=rec['time']))
 
     @event.command(name="attend")
     @is_event_staff()
     async def event_attend(self, ctx: commands.Context, event_id: int, member: discord.Member):
-        """Marcar/desmarcar manualmente la asistencia de un participante."""
+        """Manually mark/unmark a participant's attendance."""
         async with self.config.guild(ctx.guild).events() as evs:
             ev = evs.get(str(event_id))
             if ev is None:
-                return await ctx.send("No existe ese evento.")
+                return await ctx.send(_("That event doesn't exist."))
             if member.id not in ev["participants"]:
-                return await ctx.send("Ese usuario no esta inscrito.")
+                return await ctx.send(_("That user is not signed up."))
             if member.id in ev["attended"]:
                 ev["attended"].remove(member.id)
-                text = f"Asistencia de {member.mention} desmarcada."
+                text = _("Attendance of {member} unmarked.").format(member=member.mention)
             else:
                 ev["attended"].append(member.id)
-                text = f"✋ Asistencia de {member.mention} registrada."
+                text = _("✋ Attendance of {member} recorded.").format(member=member.mention)
             current = copy.deepcopy(ev)
         await self.refresh_message(ctx.guild, current)
         await ctx.send(text, allowed_mentions=discord.AllowedMentions.none())
@@ -972,13 +989,13 @@ class TriniEvents(DashboardIntegration, commands.Cog):
     @event.command(name="remove")
     @is_event_staff()
     async def event_remove(self, ctx: commands.Context, event_id: int, member: discord.Member):
-        """Quitar a un participante (entra el primero de la lista de espera)."""
+        """Remove a participant (the first one on the waitlist gets in)."""
         promoted = None
         async with self._locks[ctx.guild.id]:
             async with self.config.guild(ctx.guild).events() as evs:
                 ev = evs.get(str(event_id))
                 if ev is None:
-                    return await ctx.send("No existe ese evento.")
+                    return await ctx.send(_("That event doesn't exist."))
                 if member.id in ev["waitlist"]:
                     ev["waitlist"].remove(member.id)
                 elif member.id in ev["participants"]:
@@ -991,12 +1008,12 @@ class TriniEvents(DashboardIntegration, commands.Cog):
                         if ev["role"]["assigned"]:
                             await self._give_role(ctx.guild, ev, [promoted])
                 else:
-                    return await ctx.send("Ese usuario no esta inscrito.")
+                    return await ctx.send(_("That user is not signed up."))
                 current = copy.deepcopy(ev)
         await self.refresh_message(ctx.guild, current)
         if promoted:
             await self._announce_promotion(ctx.guild, current, promoted)
-        await ctx.send(f"{member.mention} eliminado del evento #{event_id}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(_("{member} removed from event #{event_id}.").format(member=member.mention, event_id=event_id), allowed_mentions=discord.AllowedMentions.none())
 
     @event_edit.autocomplete("event_id")
     @event_info.autocomplete("event_id")
@@ -1011,56 +1028,56 @@ class TriniEvents(DashboardIntegration, commands.Cog):
 
     @event.command(name="stats")
     async def event_stats(self, ctx: commands.Context, member: Optional[discord.Member] = None):
-        """Estadisticas de asistencia (del servidor o de un usuario)."""
+        """Attendance statistics (server or user)."""
         stats = await self.compute_stats(ctx.guild)
         events = stats["events"]
         if not events:
-            return await ctx.send("Todavia no hay eventos finalizados.")
+            return await ctx.send(_("There are no finished events yet."))
         if member is not None:
             uid = member.id
             joined = stats["participations"][uid]
             att = stats["attendances"][uid]
-            embed = discord.Embed(title=f"📊 {member.display_name} en eventos", color=STATUS_COLOR["scheduled"])
-            embed.add_field(name="Inscripciones", value=str(joined), inline=True)
-            embed.add_field(name="Asistencias", value=str(att), inline=True)
-            embed.add_field(name="No-shows", value=str(stats["noshows"][uid]), inline=True)
-            embed.add_field(name="Cancelaciones", value=str(stats["cancels"][uid]), inline=True)
+            embed = discord.Embed(title=_("📊 {member} in events").format(member=member.display_name), color=STATUS_COLOR["scheduled"])
+            embed.add_field(name=_("Sign-ups"), value=str(joined), inline=True)
+            embed.add_field(name=_("Attended"), value=str(att), inline=True)
+            embed.add_field(name=_("No-shows"), value=str(stats["noshows"][uid]), inline=True)
+            embed.add_field(name=_("Cancellations"), value=str(stats["cancels"][uid]), inline=True)
             tracked = sum(1 for e in stats["tracked"] if uid in e["participants"])
             if tracked:
-                embed.add_field(name="Tasa de asistencia", value=f"{att / tracked * 100:.0f}%", inline=True)
+                embed.add_field(name=_("Attendance rate"), value=f"{att / tracked * 100:.0f}%", inline=True)
             return await ctx.send(embed=embed)
         total_part = sum(len(e["participants"]) for e in events)
         with_slots = [e for e in events if e["slots"]]
         fill = (sum(len(e["participants"]) / e["slots"] for e in with_slots) / len(with_slots) * 100) if with_slots else None
-        embed = discord.Embed(title="📊 Estadisticas de eventos", color=STATUS_COLOR["scheduled"])
-        embed.add_field(name="Eventos finalizados", value=str(len(events)), inline=True)
-        embed.add_field(name="Inscripciones", value=f"{total_part} (media {total_part / len(events):.1f})", inline=True)
+        embed = discord.Embed(title=_("📊 Event statistics"), color=STATUS_COLOR["scheduled"])
+        embed.add_field(name=_("Finished events"), value=str(len(events)), inline=True)
+        embed.add_field(name=_("Sign-ups"), value=_("{total_part} (average {value:.1f})").format(total_part=total_part, value=total_part / len(events)), inline=True)
         if fill is not None:
-            embed.add_field(name="Ocupacion media", value=f"{fill:.0f}%", inline=True)
+            embed.add_field(name=_("Average fill rate"), value=f"{fill:.0f}%", inline=True)
         embed.add_field(
-            name="Asistencia historica",
-            value=f"{stats['attendance_rate']:.0f}% ({len(stats['tracked'])} eventos con check-in)" if stats["attendance_rate"] is not None else "sin datos de check-in",
+            name=_("Historical attendance"),
+            value=_("{attendance_rate:.0f}% ({count} events with check-in)").format(attendance_rate=stats['attendance_rate'], count=len(stats['tracked'])) if stats["attendance_rate"] is not None else _("no check-in data"),
             inline=True,
         )
-        embed.add_field(name="Cancelaciones", value=str(sum(stats["cancels"].values())), inline=True)
-        embed.add_field(name="No-shows", value=str(sum(stats["noshows"].values())), inline=True)
+        embed.add_field(name=_("Cancellations"), value=str(sum(stats["cancels"].values())), inline=True)
+        embed.add_field(name=_("No-shows"), value=str(sum(stats["noshows"].values())), inline=True)
         top_events = sorted(events, key=lambda e: -len(e["participants"]))[:5]
         embed.add_field(
-            name="Eventos con mayor participacion",
+            name=_("Events with the most participants"),
             value="\n".join(f"`#{e['id']}` {e['title']} · {len(e['participants'])} · <t:{e['start']}:d>" for e in top_events),
             inline=False,
         )
         top_users = stats["participations"].most_common(5)
         if top_users:
             embed.add_field(
-                name="Usuarios mas activos",
+                name=_("Most active users"),
                 value="\n".join(f"<@{u}> · {n} eventos · {stats['attendances'][u]} asistencias" for u, n in top_users),
                 inline=False,
             )
         if stats["by_tag"]:
             rows = sorted(stats["by_tag"].items(), key=lambda kv: -kv[1][1])[:8]
             embed.add_field(
-                name="Asistencia por tipo",
+                name=_("Attendance by type"),
                 value="\n".join(f"{tag}: {a / p * 100:.0f}% ({a}/{p})" for tag, (a, p) in rows if p),
                 inline=False,
             )
@@ -1073,111 +1090,111 @@ class TriniEvents(DashboardIntegration, commands.Cog):
     @event.group(name="settings")
     @commands.admin_or_permissions(manage_guild=True)
     async def event_settings(self, ctx: commands.Context):
-        """Configuracion de Trini Events."""
+        """Trini Events settings."""
 
     async def _changed(self, ctx: commands.Context, key: str, value: Any) -> None:
         self.bot.dispatch("trini_settings_change", ctx.guild, "Events", ctx.author, key, str(value))
 
     @event_settings.command(name="show")
     async def settings_show(self, ctx: commands.Context):
-        """Ver la configuracion actual."""
+        """Show the current settings."""
         s = await self.config.guild(ctx.guild).all()
-        embed = discord.Embed(title="⚙️ Trini Events", color=STATUS_COLOR["scheduled"])
-        embed.add_field(name="Canal por defecto", value=f"<#{s['channel']}>" if s["channel"] else "canal del comando", inline=True)
-        embed.add_field(name="Zona horaria", value=s["timezone"], inline=True)
-        embed.add_field(name="Recordatorios", value=", ".join(f"{m} min" for m in sorted(s["reminders"], reverse=True)) or "ninguno", inline=True)
-        embed.add_field(name="Staff", value=(f"<@&{s['staff_role']}>" if s["staff_role"] else "—") + (" (ping)" if s["staff_ping"] else ""), inline=True)
-        role = f"<@&{s['participant_role']}>" if s["participant_role"] else ("auto por evento" if s["auto_role"] else "no")
-        embed.add_field(name="Rol de participante", value=f"{role} · {s['role_lead']} min antes", inline=True)
-        embed.add_field(name="Canales temporales", value=f"{'si' if s['temp_channels'] else 'no'} · al acabar: {s['archive_mode']}", inline=True)
-        embed.add_field(name="Duracion por defecto", value=f"{s['default_duration']} min", inline=True)
-        embed.add_field(name="Check-in", value=f"{s['checkin_open']} min antes", inline=True)
+        embed = discord.Embed(title=_("⚙️ Trini Events"), color=STATUS_COLOR["scheduled"])
+        embed.add_field(name=_("Default channel"), value=f"<#{s['channel']}>" if s["channel"] else _("command channel"), inline=True)
+        embed.add_field(name=_("Timezone"), value=s["timezone"], inline=True)
+        embed.add_field(name=_("Reminders"), value=", ".join(f"{m} min" for m in sorted(s["reminders"], reverse=True)) or "ninguno", inline=True)
+        embed.add_field(name=_("Staff"), value=(f"<@&{s['staff_role']}>" if s["staff_role"] else "—") + (" (ping)" if s["staff_ping"] else ""), inline=True)
+        role = f"<@&{s['participant_role']}>" if s["participant_role"] else (_("auto per event") if s["auto_role"] else "no")
+        embed.add_field(name=_("Participant role"), value=_("{role} · {role_lead} min before").format(role=role, role_lead=s['role_lead']), inline=True)
+        embed.add_field(name=_("Temporary channels"), value=_("{value} · when finished: {archive_mode}").format(value='si' if s['temp_channels'] else 'no', archive_mode=s['archive_mode']), inline=True)
+        embed.add_field(name=_("Default duration"), value=_("{default_duration} min").format(default_duration=s['default_duration']), inline=True)
+        embed.add_field(name=_("Check-in"), value=_("{checkin_open} min before").format(checkin_open=s['checkin_open']), inline=True)
         await ctx.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     @event_settings.command(name="channel")
     async def settings_channel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Canal donde se publican los eventos por defecto."""
+        """Channel where events are posted by default."""
         await self.config.guild(ctx.guild).channel.set(channel.id if channel else None)
         await self._changed(ctx, "channel", channel)
-        await ctx.send(f"Canal de eventos: {channel.mention if channel else 'el del comando'}.")
+        await ctx.send(_("Events channel: {value}.").format(value=channel.mention if channel else _("the command's channel")))
 
     @event_settings.command(name="timezone")
     async def settings_timezone(self, ctx: commands.Context, timezone: str):
-        """Zona horaria IANA para interpretar fechas (ej. `Europe/Madrid`)."""
+        """IANA timezone used to read dates (e.g. `Europe/Madrid`)."""
         if not valid_tz(timezone):
-            return await ctx.send("Zona horaria no valida. Ej: `Europe/Madrid`, `America/Mexico_City`, `UTC`.")
+            return await ctx.send(_("Invalid timezone. E.g.: `Europe/Madrid`, `America/Mexico_City`, `UTC`."))
         await self.config.guild(ctx.guild).timezone.set(timezone)
         await self._changed(ctx, "timezone", timezone)
-        await ctx.send(f"Zona horaria: `{timezone}`.")
+        await ctx.send(_("Timezone: `{timezone}`.").format(timezone=timezone))
 
     @event_settings.command(name="reminders")
     async def settings_reminders(self, ctx: commands.Context, *, minutes: str):
-        """Recordatorios en minutos antes, separados por comas. Ej: `1440,60,15` o `none`."""
+        """Reminders in minutes before, comma separated. E.g.: `1440,60,15` or `none`."""
         if minutes.strip().lower() in ("none", "ninguno", "off"):
             values: List[int] = []
         else:
             try:
                 values = sorted({int(m) for m in minutes.replace(" ", ",").split(",") if m}, reverse=True)
             except ValueError:
-                return await ctx.send("Formato: `1440,60,15`.")
+                return await ctx.send(_("Format: `1440,60,15`."))
             if any(v <= 0 or v > 10080 for v in values) or len(values) > 5:
-                return await ctx.send("Entre 1 y 10080 minutos, maximo 5 recordatorios.")
+                return await ctx.send(_("Between 1 and 10080 minutes, up to 5 reminders."))
         await self.config.guild(ctx.guild).reminders.set(values)
         await self._changed(ctx, "reminders", values)
-        await ctx.send(f"Recordatorios: {', '.join(f'{v} min' for v in values) or 'ninguno'}.")
+        await ctx.send(_("Reminders: {value}.").format(value=', '.join(f'{v} min' for v in values) or 'ninguno'))
 
     @event_settings.command(name="staffrole")
     async def settings_staffrole(self, ctx: commands.Context, role: Optional[discord.Role] = None, ping: bool = False):
-        """Rol de staff de eventos (puede gestionarlos) y si se le avisa en los recordatorios."""
+        """Event staff role (can manage events) and whether it is pinged in reminders."""
         await self.config.guild(ctx.guild).staff_role.set(role.id if role else None)
         await self.config.guild(ctx.guild).staff_ping.set(bool(role) and ping)
         await self._changed(ctx, "staff_role", role)
-        await ctx.send(f"Staff de eventos: {role.mention if role else 'ninguno'}{' (con aviso)' if role and ping else ''}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(_("Event staff: {value}{value2}.").format(value=role.mention if role else 'ninguno', value2=_(" (pinged)") if role and ping else ''), allowed_mentions=discord.AllowedMentions.none())
 
     @event_settings.command(name="participantrole")
     async def settings_participantrole(self, ctx: commands.Context, role: Optional[discord.Role] = None):
-        """Rol fijo que se da a los inscritos antes del evento y se retira al acabar."""
+        """Fixed role given to participants before the event and removed when it ends."""
         if role is not None and role >= ctx.guild.me.top_role:
-            return await ctx.send("Ese rol esta por encima del mio.")
+            return await ctx.send(_("That role is above mine."))
         await self.config.guild(ctx.guild).participant_role.set(role.id if role else None)
         await self._changed(ctx, "participant_role", role)
-        await ctx.send(f"Rol de participante: {role.mention if role else 'ninguno'}.", allowed_mentions=discord.AllowedMentions.none())
+        await ctx.send(_("Participant role: {value}.").format(value=role.mention if role else 'ninguno'), allowed_mentions=discord.AllowedMentions.none())
 
     @event_settings.command(name="autorole")
     async def settings_autorole(self, ctx: commands.Context, enabled: bool):
-        """Crear un rol temporal por evento (si no hay rol de participante fijo)."""
+        """Create a temporary role per event (if there is no fixed participant role)."""
         await self.config.guild(ctx.guild).auto_role.set(enabled)
         await self._changed(ctx, "auto_role", enabled)
-        await ctx.send(f"Rol automatico por evento: {'si' if enabled else 'no'}.")
+        await ctx.send(_("Automatic role per event: {value}.").format(value='si' if enabled else 'no'))
 
     @event_settings.command(name="rolelead")
     async def settings_rolelead(self, ctx: commands.Context, minutes: int):
-        """Minutos antes del evento para asignar el rol y crear canales."""
+        """Minutes before the event to assign the role and create channels."""
         await self.config.guild(ctx.guild).role_lead.set(max(0, min(minutes, 1440)))
         await self._changed(ctx, "role_lead", minutes)
-        await ctx.send(f"Preparacion del evento: {max(0, min(minutes, 1440))} minutos antes.")
+        await ctx.send(_("Event preparation: {value} minutes before.").format(value=max(0, min(minutes, 1440))))
 
     @event_settings.command(name="tempchannels")
     async def settings_tempchannels(self, ctx: commands.Context, enabled: bool, archive_mode: Optional[str] = None):
-        """Crear categoria y canales temporales por evento. Al acabar: `delete` o `archive`."""
+        """Create a temporary category and channels per event. When finished: `delete` or `archive`."""
         await self.config.guild(ctx.guild).temp_channels.set(enabled)
         if archive_mode:
             if archive_mode not in ("delete", "archive"):
-                return await ctx.send("Modos: `delete`, `archive`.")
+                return await ctx.send(_("Modes: `delete`, `archive`."))
             await self.config.guild(ctx.guild).archive_mode.set(archive_mode)
         await self._changed(ctx, "temp_channels", f"{enabled} {archive_mode or ''}")
-        await ctx.send(f"Canales temporales: {'si' if enabled else 'no'}" + (f" · al acabar: {archive_mode}" if archive_mode else "") + ". (Aplica a eventos nuevos)")
+        await ctx.send(_("Temporary channels: {value}").format(value='si' if enabled else 'no') + (_(" · when finished: {archive_mode}").format(archive_mode=archive_mode) if archive_mode else "") + _(". (Applies to new events)"))
 
     @event_settings.command(name="duration")
     async def settings_duration(self, ctx: commands.Context, minutes: int):
-        """Duracion por defecto de los eventos."""
+        """Default event duration."""
         await self.config.guild(ctx.guild).default_duration.set(max(5, min(minutes, 10080)))
         await self._changed(ctx, "default_duration", minutes)
-        await ctx.send(f"Duracion por defecto: {max(5, min(minutes, 10080))} min.")
+        await ctx.send(_("Default duration: {value} min.").format(value=max(5, min(minutes, 10080))))
 
     @event_settings.command(name="checkin")
     async def settings_checkin(self, ctx: commands.Context, minutes: int):
-        """Minutos antes del inicio en los que se abre el check-in."""
+        """Minutes before the start when check-in opens."""
         await self.config.guild(ctx.guild).checkin_open.set(max(0, min(minutes, 240)))
         await self._changed(ctx, "checkin_open", minutes)
-        await ctx.send(f"El check-in se abre {max(0, min(minutes, 240))} min antes.")
+        await ctx.send(_("Check-in opens {value} min before.").format(value=max(0, min(minutes, 240))))

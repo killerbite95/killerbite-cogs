@@ -1,0 +1,855 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: trinievents\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: events.py:86
+msgid ""
+"Community events: sign-ups, waitlists, reminders, temporary roles/channels "
+"and statistics."
+msgstr ""
+"Eventos de comunidad: inscripciones, reservas, recordatorios, roles/canales "
+"temporales y estadisticas."
+
+#: events.py:114
+msgid ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+
+#: events.py:185 events.py:1110 views.py:106
+msgid "Check-in"
+msgstr "Check-in"
+
+#: events.py:186 views.py:105
+msgid "Start"
+msgstr "Inicio"
+
+#: events.py:189 views.py:108
+msgid "Teams"
+msgstr "Equipos"
+
+#: events.py:189
+msgid "{teams} teams"
+msgstr "{teams} equipos"
+
+#: events.py:191
+msgid "🔔 Reminders"
+msgstr "🔔 Recordatorios"
+
+#: events.py:193
+msgid "📅 Date"
+msgstr "📅 Fecha"
+
+#: events.py:194
+msgid "🕙 Time"
+msgstr "🕙 Hora"
+
+#: events.py:198
+msgid "👥 Participants"
+msgstr "👥 Participantes"
+
+#: events.py:203
+msgid "Waitlist"
+msgstr "Lista de espera"
+
+#: events.py:204
+msgid "⏱ Duration"
+msgstr "⏱ Duracion"
+
+#: events.py:204
+msgid "{duration} min"
+msgstr "{duration} min"
+
+#: events.py:206
+msgid "Required role"
+msgstr "Rol requerido"
+
+#: events.py:210
+msgid " and {value} more"
+msgstr " y {value} mas"
+
+#: events.py:211
+msgid "Signed up"
+msgstr "Inscritos"
+
+#: events.py:213
+msgid "✋ Check-in"
+msgstr "✋ Check-in"
+
+#: events.py:214
+msgid "Status"
+msgstr "Estado"
+
+#: events.py:215
+msgid "Event #{id}"
+msgstr "Evento #{id}"
+
+#: events.py:218
+msgid " · repeats {value}"
+msgstr " · se repite {value}"
+
+#: events.py:218 events.py:965
+msgid "every day"
+msgstr "cada dia"
+
+#: events.py:218 events.py:965
+msgid "every {value}"
+msgstr "cada {value}"
+
+#: events.py:318
+msgid ""
+"❌ Invalid date. Use `02/10/2026 22:00`, `friday 22:00`, `tomorrow 21:30` or "
+"`+2h`."
+msgstr ""
+"❌ Fecha no valida. Usa `02/10/2026 22:00`, `viernes 22:00`, `mañana 21:30` o"
+" `+2h`."
+
+#: events.py:321
+msgid "❌ That date has already passed."
+msgstr "❌ La fecha ya ha pasado."
+
+#: events.py:326 events.py:808
+msgid "❌ Slots and duration must be numbers."
+msgstr "❌ Plazas y duracion deben ser numeros."
+
+#: events.py:336
+msgid "✅ Event **#{id}** created for {value} ({tz})."
+msgstr "✅ Evento **#{id}** creado para {value} ({tz})."
+
+#: events.py:336
+msgid " ⚠️ I couldn't post it in the channel."
+msgstr " ⚠️ No pude publicarlo en el canal."
+
+#: events.py:346
+msgid "❌ Invalid date. E.g.: `02/10/2026 19:00`."
+msgstr "❌ Fecha no valida. Ej: `02/10/2026 19:00`."
+
+#: events.py:358
+msgid "🏆 ArenCup event **#{id}** posted."
+msgstr "🏆 Evento ArenCup **#{id}** publicado."
+
+#: events.py:373
+msgid "This event no longer exists."
+msgstr "Este evento ya no existe."
+
+#: events.py:375
+msgid "This event has already ended."
+msgstr "Este evento ya ha finalizado."
+
+#: events.py:379
+msgid "You need the <@&{required_role}> role to join."
+msgstr "Necesitas el rol <@&{required_role}> para participar."
+
+#: events.py:381
+msgid "You're already signed up. ✅"
+msgstr "Ya estas inscrito. ✅"
+
+#: events.py:383
+msgid "You're already on the waitlist (position {value})."
+msgstr "Ya estas en la lista de espera (posicion {value})."
+
+#: events.py:386
+msgid ""
+"It's full. You're on the **waitlist** (position {count}). I'll let you know "
+"if a spot opens up."
+msgstr ""
+"Plazas completas. Estas en la **lista de espera** (posicion {count}). Te "
+"avisare si queda una plaza libre."
+
+#: events.py:389
+msgid "✅ Signed up for **{title}** (<t:{start}:F>)."
+msgstr "✅ Inscrito en **{title}** (<t:{start}:F>)."
+
+#: events.py:398
+msgid "You cancelled your spot."
+msgstr "Has cancelado tu plaza."
+
+#: events.py:408
+msgid "You left the waitlist."
+msgstr "Has salido de la lista de espera."
+
+#: events.py:410
+msgid "You're not signed up for this event."
+msgstr "No estas inscrito en este evento."
+
+#: events.py:414
+msgid "🔕 You won't get reminders for this event anymore."
+msgstr "🔕 Ya no recibiras recordatorios de este evento."
+
+#: events.py:416
+msgid "🔔 I'll remind you by DM before the event."
+msgstr "🔔 Te avisare antes del evento por mensaje privado."
+
+#: events.py:421
+msgid "Check-in is not open."
+msgstr "El check-in no esta abierto."
+
+#: events.py:423
+msgid "Only signed-up participants can check in."
+msgstr "Solo los participantes inscritos pueden hacer check-in."
+
+#: events.py:425
+msgid "You had already checked in. ✋"
+msgstr "Ya habias hecho check-in. ✋"
+
+#: events.py:427
+msgid "✋ Checked in. Have fun!"
+msgstr "✋ Check-in registrado. ¡A jugar!"
+
+#: events.py:429
+msgid "Unknown action."
+msgstr "Accion desconocida."
+
+#: events.py:439
+msgid ""
+"<@{user_id}> was automatically moved from the waitlist to participant in "
+"**{title}**."
+msgstr ""
+"<@{user_id}> ha pasado automaticamente de reserva a participante en "
+"**{title}**."
+
+#: events.py:448
+msgid ""
+"🎉 A spot opened up: you're now a participant in **{title}** (<t:{start}:F>) "
+"in {guild_name}."
+msgstr ""
+"🎉 Se ha liberado una plaza: ya eres participante de **{title}** "
+"(<t:{start}:F>) en {guild_name}."
+
+#: events.py:568
+msgid "check-in"
+msgstr "el check-in"
+
+#: events.py:568
+msgid "the event"
+msgstr "el evento"
+
+#: events.py:569
+msgid "24 hours"
+msgstr "24 horas"
+
+#: events.py:569
+msgid "{value} hour(s)"
+msgstr "{value} hora(s)"
+
+#: events.py:569
+msgid "{minutes} minutes"
+msgstr "{minutes} minutos"
+
+#: events.py:572
+msgid ""
+"{what} starts in **{when}** (<t:{anchor}:t>, <t:{anchor}:R>).\n"
+"Server: **{guild_name}**"
+msgstr ""
+"Empieza {what} en **{when}** (<t:{anchor}:t>, <t:{anchor}:R>).\n"
+"Servidor: **{guild_name}**"
+
+#: events.py:577
+msgid "Event"
+msgstr "Evento"
+
+#: events.py:577
+msgid ""
+"[View "
+"message](https://discord.com/channels/{guild_id}/{channel_id}/{message_id})"
+msgstr ""
+"[Ver "
+"mensaje](https://discord.com/channels/{guild_id}/{channel_id}/{message_id})"
+
+#: events.py:580
+msgid "Tournament"
+msgstr "Torneo"
+
+#: events.py:594
+msgid "<@&{staff_role}> reminder: **{title}** starts <t:{anchor}:R>."
+msgstr "<@&{staff_role}> recordatorio: **{title}** empieza <t:{anchor}:R>."
+
+#: events.py:732
+msgid "That event doesn't exist. See `event list`."
+msgstr "No existe ese evento. Mira `event list`."
+
+#: events.py:760
+msgid ""
+"Create an event with a form (name, date, slots, duration, description)."
+msgstr ""
+"Crear un evento con formulario (nombre, fecha, plazas, duracion, "
+"descripcion)."
+
+#: events.py:763
+msgid "I can't post in {target}."
+msgstr "No puedo publicar en {target}."
+
+#: events.py:772
+msgid "📝 Press to fill in the event:"
+msgstr "📝 Pulsa para rellenar el evento:"
+
+#: events.py:777
+msgid "Post an ArenCup tournament (check-in, start, link and reminders)."
+msgstr ""
+"Publicar un torneo de ArenCup (check-in, inicio, enlace y recordatorios)."
+
+#: events.py:787
+msgid "🏆 Press to fill in the tournament:"
+msgstr "🏆 Pulsa para rellenar el torneo:"
+
+#: events.py:792
+msgid "Edit an event's name, date, slots, duration and description."
+msgstr "Editar nombre, fecha, plazas, duracion y descripcion de un evento."
+
+#: events.py:797
+msgid "For ArenCup events, cancel it and post it again."
+msgstr "Para eventos ArenCup, cancelalo y vuelve a publicarlo."
+
+#: events.py:803
+msgid "❌ Invalid date."
+msgstr "❌ Fecha no valida."
+
+#: events.py:828
+msgid "✅ Event #{event_id} updated."
+msgstr "✅ Evento #{event_id} actualizado."
+
+#: events.py:834
+msgid "Edit event #{event_id}"
+msgstr "Editar evento #{event_id}"
+
+#: events.py:838
+msgid "📝 Press to edit the event:"
+msgstr "📝 Pulsa para editar el evento:"
+
+#: events.py:842
+msgid "Upcoming events."
+msgstr "Proximos eventos."
+
+#: events.py:848
+msgid "There are no scheduled events."
+msgstr "No hay eventos programados."
+
+#: events.py:852
+msgid ""
+" · [view](https://discord.com/channels/{guild_id}/{channel_id}/{message_id})"
+msgstr ""
+" · [ver](https://discord.com/channels/{guild_id}/{channel_id}/{message_id})"
+
+#: events.py:855
+msgid "📅 Upcoming events"
+msgstr "📅 Proximos eventos"
+
+#: events.py:859
+msgid "Show an event."
+msgstr "Ver un evento."
+
+#: events.py:871
+msgid "Participants, waitlist and check-in of an event."
+msgstr "Participantes, reservas y check-in de un evento."
+
+#: events.py:878
+msgid "Participants ({count})"
+msgstr "Participantes ({count})"
+
+#: events.py:880
+msgid "Waitlist ({count})"
+msgstr "Lista de espera ({count})"
+
+#: events.py:882
+msgid "🔔 Remind me"
+msgstr "🔔 Recordarme"
+
+#: events.py:884 events.py:1043 events.py:1061
+msgid "Cancellations"
+msgstr "Cancelaciones"
+
+#: events.py:890
+msgid "Cancel an event and notify the participants."
+msgstr "Cancelar un evento y avisar a los inscritos."
+
+#: events.py:896
+msgid "That event doesn't exist or has already ended."
+msgstr "Ese evento no existe o ya ha terminado."
+
+#: events.py:908
+msgid ""
+"🚫 The event **{title}** (<t:{start}:F>) in {guild_name} has been cancelled."
+msgstr ""
+"🚫 El evento **{title}** (<t:{start}:F>) en {guild_name} ha sido cancelado."
+
+#: events.py:908
+msgid ""
+"\n"
+"Reason: {reason}"
+msgstr ""
+"\n"
+"Motivo: {reason}"
+
+#: events.py:912
+msgid "🚫 Event #{event_id} cancelled. Notified: {notified}."
+msgstr "🚫 Evento #{event_id} cancelado. Avisados: {notified}."
+
+#: events.py:917
+msgid ""
+"Repeat a previous event on another date. E.g.: `event clone 12 friday "
+"22:00`."
+msgstr ""
+"Repetir un evento anterior en otra fecha. Ej: `event clone 12 viernes "
+"22:00`."
+
+#: events.py:924
+msgid "Invalid or past date. E.g.: `02/10/2026 22:00`, `friday 22:00`."
+msgstr "Fecha no valida o pasada. Ej: `02/10/2026 22:00`, `viernes 22:00`."
+
+#: events.py:929
+msgid "✅ Event cloned as **#{id}** ({value})."
+msgstr "✅ Evento clonado como **#{id}** ({value})."
+
+#: events.py:934
+msgid ""
+"Make an event recurring: `event repeat 12 weekly friday 22:00`, `daily` or "
+"`off`."
+msgstr ""
+"Hacer recurrente un evento: `event repeat 12 weekly friday 22:00`, `daily` o"
+" `off`."
+
+#: events.py:937
+msgid "Frequencies: `weekly`, `daily`, `off`."
+msgstr "Frecuencias: `weekly`, `daily`, `off`."
+
+#: events.py:943
+msgid "Invalid day (e.g.: `friday`, `viernes`)."
+msgstr "Dia no valido (ej: `viernes`, `friday`)."
+
+#: events.py:945
+msgid "Invalid time (e.g.: `22:00`)."
+msgstr "Hora no valida (ej: `22:00`)."
+
+#: events.py:949 events.py:975 events.py:997
+msgid "That event doesn't exist."
+msgstr "No existe ese evento."
+
+#: events.py:963
+msgid "Event #{event_id} no longer repeats."
+msgstr "El evento #{event_id} ya no se repite."
+
+#: events.py:966
+msgid ""
+"🔁 Event #{event_id} will repeat {when} at {time}. The next edition is posted"
+" when this one ends."
+msgstr ""
+"🔁 El evento #{event_id} se repetira {when} a las {time}. La siguiente "
+"edicion se publica al terminar esta."
+
+#: events.py:971
+msgid "Manually mark/unmark a participant's attendance."
+msgstr "Marcar/desmarcar manualmente la asistencia de un participante."
+
+#: events.py:977 events.py:1010
+msgid "That user is not signed up."
+msgstr "Ese usuario no esta inscrito."
+
+#: events.py:980
+msgid "Attendance of {member} unmarked."
+msgstr "Asistencia de {member} desmarcada."
+
+#: events.py:983
+msgid "✋ Attendance of {member} recorded."
+msgstr "✋ Asistencia de {member} registrada."
+
+#: events.py:991
+msgid "Remove a participant (the first one on the waitlist gets in)."
+msgstr "Quitar a un participante (entra el primero de la lista de espera)."
+
+#: events.py:1015
+msgid "{member} removed from event #{event_id}."
+msgstr "{member} eliminado del evento #{event_id}."
+
+#: events.py:1030
+msgid "Attendance statistics (server or user)."
+msgstr "Estadisticas de asistencia (del servidor o de un usuario)."
+
+#: events.py:1034
+msgid "There are no finished events yet."
+msgstr "Todavia no hay eventos finalizados."
+
+#: events.py:1039
+msgid "📊 {member} in events"
+msgstr "📊 {member} en eventos"
+
+#: events.py:1040 events.py:1053
+msgid "Sign-ups"
+msgstr "Inscripciones"
+
+#: events.py:1041
+msgid "Attended"
+msgstr "Asistencias"
+
+#: events.py:1042 events.py:1062
+msgid "No-shows"
+msgstr "No-shows"
+
+#: events.py:1046
+msgid "Attendance rate"
+msgstr "Tasa de asistencia"
+
+#: events.py:1051
+msgid "📊 Event statistics"
+msgstr "📊 Estadisticas de eventos"
+
+#: events.py:1052
+msgid "Finished events"
+msgstr "Eventos finalizados"
+
+#: events.py:1053
+msgid "{total_part} (average {value:.1f})"
+msgstr "{total_part} (media {value:.1f})"
+
+#: events.py:1055
+msgid "Average fill rate"
+msgstr "Ocupacion media"
+
+#: events.py:1057
+msgid "Historical attendance"
+msgstr "Asistencia historica"
+
+#: events.py:1058
+msgid "{attendance_rate:.0f}% ({count} events with check-in)"
+msgstr "{attendance_rate:.0f}% ({count} eventos con check-in)"
+
+#: events.py:1058
+msgid "no check-in data"
+msgstr "sin datos de check-in"
+
+#: events.py:1065
+msgid "Events with the most participants"
+msgstr "Eventos con mayor participacion"
+
+#: events.py:1072
+msgid "Most active users"
+msgstr "Usuarios mas activos"
+
+#: events.py:1079
+msgid "Attendance by type"
+msgstr "Asistencia por tipo"
+
+#: events.py:1092
+msgid "Trini Events settings."
+msgstr "Configuracion de Trini Events."
+
+#: events.py:1099
+msgid "Show the current settings."
+msgstr "Ver la configuracion actual."
+
+#: events.py:1101
+msgid "⚙️ Trini Events"
+msgstr "⚙️ Trini Events"
+
+#: events.py:1102
+msgid "Default channel"
+msgstr "Canal por defecto"
+
+#: events.py:1102
+msgid "command channel"
+msgstr "canal del comando"
+
+#: events.py:1103
+msgid "Timezone"
+msgstr "Zona horaria"
+
+#: events.py:1104
+msgid "Reminders"
+msgstr "Recordatorios"
+
+#: events.py:1105
+msgid "Staff"
+msgstr "Staff"
+
+#: events.py:1106
+msgid "auto per event"
+msgstr "auto por evento"
+
+#: events.py:1107
+msgid "Participant role"
+msgstr "Rol de participante"
+
+#: events.py:1107
+msgid "{role} · {role_lead} min before"
+msgstr "{role} · {role_lead} min antes"
+
+#: events.py:1108
+msgid "Temporary channels"
+msgstr "Canales temporales"
+
+#: events.py:1108
+msgid "{value} · when finished: {archive_mode}"
+msgstr "{value} · al acabar: {archive_mode}"
+
+#: events.py:1109
+msgid "Default duration"
+msgstr "Duracion por defecto"
+
+#: events.py:1109
+msgid "{default_duration} min"
+msgstr "{default_duration} min"
+
+#: events.py:1110
+msgid "{checkin_open} min before"
+msgstr "{checkin_open} min antes"
+
+#: events.py:1115
+msgid "Channel where events are posted by default."
+msgstr "Canal donde se publican los eventos por defecto."
+
+#: events.py:1118
+msgid "Events channel: {value}."
+msgstr "Canal de eventos: {value}."
+
+#: events.py:1118
+msgid "the command's channel"
+msgstr "el del comando"
+
+#: events.py:1122
+msgid "IANA timezone used to read dates (e.g. `Europe/Madrid`)."
+msgstr "Zona horaria IANA para interpretar fechas (ej. `Europe/Madrid`)."
+
+#: events.py:1124
+msgid "Invalid timezone. E.g.: `Europe/Madrid`, `America/Mexico_City`, `UTC`."
+msgstr ""
+"Zona horaria no valida. Ej: `Europe/Madrid`, `America/Mexico_City`, `UTC`."
+
+#: events.py:1127
+msgid "Timezone: `{timezone}`."
+msgstr "Zona horaria: `{timezone}`."
+
+#: events.py:1131
+msgid ""
+"Reminders in minutes before, comma separated. E.g.: `1440,60,15` or `none`."
+msgstr ""
+"Recordatorios en minutos antes, separados por comas. Ej: `1440,60,15` o "
+"`none`."
+
+#: events.py:1138
+msgid "Format: `1440,60,15`."
+msgstr "Formato: `1440,60,15`."
+
+#: events.py:1140
+msgid "Between 1 and 10080 minutes, up to 5 reminders."
+msgstr "Entre 1 y 10080 minutos, maximo 5 recordatorios."
+
+#: events.py:1143
+msgid "Reminders: {value}."
+msgstr "Recordatorios: {value}."
+
+#: events.py:1147
+msgid ""
+"Event staff role (can manage events) and whether it is pinged in reminders."
+msgstr ""
+"Rol de staff de eventos (puede gestionarlos) y si se le avisa en los "
+"recordatorios."
+
+#: events.py:1151
+msgid "Event staff: {value}{value2}."
+msgstr "Staff de eventos: {value}{value2}."
+
+#: events.py:1151
+msgid " (pinged)"
+msgstr " (con aviso)"
+
+#: events.py:1155
+msgid ""
+"Fixed role given to participants before the event and removed when it ends."
+msgstr ""
+"Rol fijo que se da a los inscritos antes del evento y se retira al acabar."
+
+#: events.py:1157
+msgid "That role is above mine."
+msgstr "Ese rol esta por encima del mio."
+
+#: events.py:1160
+msgid "Participant role: {value}."
+msgstr "Rol de participante: {value}."
+
+#: events.py:1164
+msgid ""
+"Create a temporary role per event (if there is no fixed participant role)."
+msgstr ""
+"Crear un rol temporal por evento (si no hay rol de participante fijo)."
+
+#: events.py:1167
+msgid "Automatic role per event: {value}."
+msgstr "Rol automatico por evento: {value}."
+
+#: events.py:1171
+msgid "Minutes before the event to assign the role and create channels."
+msgstr "Minutos antes del evento para asignar el rol y crear canales."
+
+#: events.py:1174
+msgid "Event preparation: {value} minutes before."
+msgstr "Preparacion del evento: {value} minutos antes."
+
+#: events.py:1178
+msgid ""
+"Create a temporary category and channels per event. When finished: `delete` "
+"or `archive`."
+msgstr ""
+"Crear categoria y canales temporales por evento. Al acabar: `delete` o "
+"`archive`."
+
+#: events.py:1182
+msgid "Modes: `delete`, `archive`."
+msgstr "Modos: `delete`, `archive`."
+
+#: events.py:1185
+msgid "Temporary channels: {value}"
+msgstr "Canales temporales: {value}"
+
+#: events.py:1185
+msgid " · when finished: {archive_mode}"
+msgstr " · al acabar: {archive_mode}"
+
+#: events.py:1185
+msgid ". (Applies to new events)"
+msgstr ". (Aplica a eventos nuevos)"
+
+#: events.py:1189
+msgid "Default event duration."
+msgstr "Duracion por defecto de los eventos."
+
+#: events.py:1192
+msgid "Default duration: {value} min."
+msgstr "Duracion por defecto: {value} min."
+
+#: events.py:1196
+msgid "Minutes before the start when check-in opens."
+msgstr "Minutos antes del inicio en los que se abre el check-in."
+
+#: events.py:1199
+msgid "Check-in opens {value} min before."
+msgstr "El check-in se abre {value} min antes."
+
+#: i18n_strings.py:11
+msgid "Trini Events: community activities."
+msgstr "Trini Events: actividades de comunidad."
+
+#: i18n_strings.py:12
+msgid "Monday"
+msgstr "lunes"
+
+#: i18n_strings.py:13
+msgid "Tuesday"
+msgstr "martes"
+
+#: i18n_strings.py:14
+msgid "Wednesday"
+msgstr "miercoles"
+
+#: i18n_strings.py:15
+msgid "Thursday"
+msgstr "jueves"
+
+#: i18n_strings.py:16
+msgid "Friday"
+msgstr "viernes"
+
+#: i18n_strings.py:17
+msgid "Saturday"
+msgstr "sabado"
+
+#: i18n_strings.py:18
+msgid "Sunday"
+msgstr "domingo"
+
+#: i18n_strings.py:19
+msgid "📅 Scheduled"
+msgstr "📅 Programado"
+
+#: i18n_strings.py:20
+msgid "🟢 Ongoing"
+msgstr "🟢 En curso"
+
+#: i18n_strings.py:21
+msgid "🏁 Finished"
+msgstr "🏁 Finalizado"
+
+#: i18n_strings.py:22
+msgid "🚫 Cancelled"
+msgstr "🚫 Cancelado"
+
+#: i18n_strings.py:23
+msgid "Open form"
+msgstr "Abrir formulario"
+
+#: i18n_strings.py:24
+msgid "Join"
+msgstr "Participar"
+
+#: i18n_strings.py:25
+msgid "Leave"
+msgstr "Cancelar plaza"
+
+#: i18n_strings.py:26
+msgid "Remind me"
+msgstr "Recordarme"
+
+#: views.py:47
+msgid "Trini Events is not available."
+msgstr "Trini Events no esta disponible."
+
+#: views.py:67
+msgid "View tournament"
+msgstr "Ver torneo"
+
+#: views.py:73
+msgid "Create event"
+msgstr "Crear evento"
+
+#: views.py:76 views.py:104
+msgid "Name"
+msgstr "Nombre"
+
+#: views.py:76
+msgid "Minecraft night"
+msgstr "Noche de Minecraft"
+
+#: views.py:77
+msgid "Date"
+msgstr "Fecha"
+
+#: views.py:77
+msgid "02/10/2026 22:00 · friday 22:00 · +2h"
+msgstr "02/10/2026 22:00 · viernes 22:00 · +2h"
+
+#: views.py:78
+msgid "Slots (0 = unlimited)"
+msgstr "Plazas (0 = sin limite)"
+
+#: views.py:79
+msgid "Duration (minutes)"
+msgstr "Duracion (minutos)"
+
+#: views.py:81
+msgid "Description"
+msgstr "Descripcion"
+
+#: views.py:101
+msgid "ArenCup event"
+msgstr "Evento ArenCup"
+
+#: views.py:104
+msgid "ArenCup Friday Cup #14"
+msgstr "ArenCup Friday Cup #14"
+
+#: views.py:107
+msgid "Tournament URL"
+msgstr "URL del torneo"
+
+#: views.py:136
+msgid "This form is not yours."
+msgstr "Este formulario no es tuyo."
