@@ -884,6 +884,8 @@ class TriniProfiles(commands.Cog):
         name = f"trini-profile-{ctx.guild.id}-{time.strftime('%Y%m%d-%H%M')}.json"
         await self._log(ctx.guild, ctx.author, "profile_export", name)
         text = (
+            f"🏠 Servidor: **{discord.utils.escape_markdown(ctx.guild.name)}** (`{ctx.guild.id}`)\n"
+            f"🕒 {discord.utils.format_dt(discord.utils.utcnow(), 'f')}\n"
             f"📤 Exportados **{len(payload['cogs'])}** cogs y **{sum(1 for v in payload['modules'].values() if v)}** modulos.\n"
             "⚠️ El archivo contiene configuracion del servidor, compartelo con cuidado."
         )
