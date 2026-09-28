@@ -36,6 +36,10 @@ Capa defensiva encima del servidor. No es otro automod ni logger: audita permiso
 
 Otros cogs pueden aportar hallazgos a la auditoria implementando `trini_security_findings(guild)`.
 
+## Dashboard
+
+Pagina **status** (solo lectura): Watch, Anti-Nuke, lockdown, incidentes, cuarentena y ultimos eventos. Solo admins. Las acciones siguen haciendose en Discord.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

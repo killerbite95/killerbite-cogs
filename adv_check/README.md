@@ -22,6 +22,10 @@ Verificacion completa de un usuario con interfaz interactiva: informacion basica
 
 Solo pueden usarlo moderadores (Mod en Red) o superiores.
 
+## Dashboard
+
+Pagina **check**: busca un miembro por ID o nombre y muestra roles, fechas, permisos y si esta baneado en seguimiento por AutoPrune. Mods y admins.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

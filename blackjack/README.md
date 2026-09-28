@@ -22,6 +22,10 @@ Blackjack con botones (Hit, Stand, Double Down, Split) apostando creditos del ba
 
 Tal como esta programado, `!blackjack` solo lo pueden usar moderadores o quien tenga Gestionar servidor. La configuracion de emojis es comun a todo el bot.
 
+## Dashboard
+
+Pagina principal (solo owner del bot): emojis de la baraja, globales.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

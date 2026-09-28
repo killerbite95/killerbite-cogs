@@ -27,6 +27,7 @@ from .models import (
     VoteSession,
 )
 from .views import VoteView
+from .dashboard_integration import DashboardIntegration
 
 logger = logging.getLogger("red.killerbite95.rustmaps_vote")
 
@@ -34,7 +35,7 @@ URL_PATTERN = re.compile(r"rustmaps\.com/map/(\d+)_(\d+)")
 API_BASE = "https://api.rustmaps.com"
 
 
-class RustMapsVote(commands.Cog):
+class RustMapsVote(DashboardIntegration, commands.Cog):
     """Votación de mapas de Rust usando rustmaps.com. By Killerbite95"""
 
     __author__ = "Killerbite95"
@@ -83,6 +84,7 @@ class RustMapsVote(commands.Cog):
         return []
 
     async def cog_load(self) -> None:
+        self._dashboard_register()
         self.session = aiohttp.ClientSession()
         logger.info(f"RustMapsVote v{self.__version__} loaded")
 

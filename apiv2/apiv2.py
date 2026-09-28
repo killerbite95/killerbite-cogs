@@ -31,6 +31,7 @@ from .routes.warnings_modlog import register_routes as register_warnings_modlog_
 from .routes.community import register_routes as register_community_routes
 from .routes.utilities import register_routes as register_utilities_routes
 from .routes.colacoins import register_routes as register_colacoins_routes
+from .dashboard_integration import DashboardIntegration
 
 logger = logging.getLogger("red.killerbite95.apiv2")
 
@@ -38,7 +39,7 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8742
 
 
-class APIv2(commands.Cog):
+class APIv2(DashboardIntegration, commands.Cog):
     """
     REST API server embedded in the bot for external integrations.
 
@@ -69,6 +70,7 @@ class APIv2(commands.Cog):
         self._external_routes: dict[str, list[dict]] = {}
 
     async def cog_load(self):
+        self._dashboard_register()
         await self.key_manager.load_cache()
         await self._load_key_rate_limits()
         await self.webhook_manager.initialize()

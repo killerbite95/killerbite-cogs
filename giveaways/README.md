@@ -24,6 +24,10 @@ Sorteos con boton, requisitos, presets reutilizables e historial.
 5. Gestion: `!gw list`, `!gw end <id_mensaje>`, `!gw reroll <id_mensaje>`, `!gw cancel <id_mensaje>`, `!gw entrants <id_mensaje>`.
 6. Guia completa dentro de Discord: `!gw guide`.
 
+## Dashboard
+
+Pagina **giveaways**: sorteos activos e historial. Mods y admins.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

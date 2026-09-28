@@ -54,6 +54,10 @@ Aplicar un perfil vuelve a habilitar en Red todos sus modulos, aunque alguien lo
 - En modo *exacto* crea antes un snapshot con TriniBackups.
 - Protocolo de exportacion para otros cogs: `trini_export(guild)` / `trini_import(guild, data, same_guild=...)`.
 
+## Dashboard
+
+Pagina **modules**: estado real de cada modulo por categoria, activar/desactivar y ultimos cambios. Solo admins (o *Gestionar servidor*).
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

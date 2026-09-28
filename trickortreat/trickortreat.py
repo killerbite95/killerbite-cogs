@@ -12,6 +12,7 @@ from redbot.core import commands, checks, Config, bank
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils.chat_formatting import box, pagify, humanize_number
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
+from .dashboard_integration import DashboardIntegration
 
 logger = logging.getLogger("red.killerbite95.trickortreat")
 
@@ -172,7 +173,7 @@ def _streak_multiplier(streak: int) -> float:
 # ════════════════════════════════════════════════════════════════
 
 @cog_i18n(_)
-class TrickOrTreatV2(commands.Cog):
+class TrickOrTreatV2(DashboardIntegration, commands.Cog):
     """🎃 Trick or Treat — A spooky candy collecting game!
 
     Collect candy, manage your sickness, steal from others,

@@ -1,6 +1,7 @@
 import discord
 from redbot.core import commands, Config, bank, checks
 import random
+from .dashboard_integration import DashboardIntegration
 
 class AdvancedBlackjackView(discord.ui.View):
     """
@@ -70,7 +71,7 @@ class AdvancedBlackjackView(discord.ui.View):
         await self.cog.dealer_phase(self.ctx)
         # Opcional: se puede editar el mensaje para notificar que la partida expiró.
 
-class Blackjack(commands.Cog):
+class Blackjack(DashboardIntegration, commands.Cog):
     """Cog de Blackjack avanzado con economía, botones interactivos, sistema de administración y una UI mejorada."""
 
     def __init__(self, bot):
@@ -100,6 +101,7 @@ class Blackjack(commands.Cog):
         self.games = {}
 
     async def cog_load(self):
+        self._dashboard_register()
         await self.initialize_card_config()
 
     async def initialize_card_config(self):

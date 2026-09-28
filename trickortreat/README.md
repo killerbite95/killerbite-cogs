@@ -23,6 +23,10 @@ Juego de Halloween: los usuarios piden caramelos, los comen, los roban, compran 
 5. (Opcional) Evento de servidor con objetivo comun: `!totevent start <tipo> <objetivo> 50`. Seguimiento con `!totevent status`.
 6. Guia completa del juego: `!tothelp`.
 
+## Dashboard
+
+Pagina **settings**: juego activo, canales y cooldowns (admins), estado del evento y clasificacion (mods).
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

@@ -23,6 +23,10 @@ Moneda virtual que gestionan los administradores, con clasificacion.
 
 Los saldos son **globales**: son los mismos en todos los servidores del bot. Mas detalle en [DOCUMENTATION.md](DOCUMENTATION.md).
 
+## Dashboard
+
+Pagina **colacoins**: clasificacion de los miembros del servidor y formulario para dar/quitar. Solo admins (los saldos son globales).
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

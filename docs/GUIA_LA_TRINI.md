@@ -15,7 +15,8 @@ Orden recomendado (cada paso se apoya en el anterior):
 5. [Events: actividades de comunidad](#5-events-actividades-de-comunidad)
 6. [AlienHost: servidores de juego desde Discord](#6-alienhost-servidores-de-juego-desde-discord)
 7. [Copiar la configuracion a otro servidor](#7-copiar-la-configuracion-a-otro-servidor)
-8. [Preguntas frecuentes](#8-preguntas-frecuentes)
+8. [Dashboard web](#8-dashboard-web)
+9. [Preguntas frecuentes](#9-preguntas-frecuentes)
 
 ---
 
@@ -382,7 +383,37 @@ mismo nombre** antes de importar.
 
 ---
 
-## 8. Preguntas frecuentes
+## 8. Dashboard web
+
+Con el cog **Dashboard** (AAA3A) cargado, cada cog aparece en **Terceros** de la web del bot con estas paginas. El Dashboard solo comprueba que estes en el servidor, asi que **cada pagina exige sus propios permisos**:
+
+| Cog | Pagina | Quien puede entrar |
+|---|---|---|
+| TriniProfiles | modules: estado real de los modulos y activar/desactivar | Admins / *Gestionar servidor* |
+| TriniSecurity | status: estado, incidentes, cuarentena y eventos (solo lectura) | Admins |
+| TriniBackups | backups: listar, crear y programar | *Administrador* |
+| TriniEvents | events: eventos y plazas (solo lectura) | Mods y admins |
+| AlienHost | servers: "Mis servidores" con tu cuenta vinculada | Cada usuario, solo sus servidores |
+| AlienHost | settings: canal de auditoria y rol admin | Admins |
+| TicketsTrini | view_tickets / close_ticket | Staff (mods, *Gestionar servidor* o rol de soporte) |
+| TicketsTrini | resumen global y ajustes | Owner del bot |
+| GameServerMonitor | servers | Mods y admins |
+| Suggestions | suggestions | Mods y admins |
+| AutoNick | settings | Admins |
+| AutoPrune | bans: ajustes (admins) y pendientes (mods) | Mods y admins |
+| DayCounter | counters | Admins |
+| Giveaways | giveaways | Mods y admins |
+| ColaCoins | colacoins: clasificacion y dar/quitar | Admins |
+| TrickOrTreat | settings: ajustes (admins), clasificacion (mods) | Mods y admins |
+| RustMapsVote | votes: sesion actual (mods), ajustes (admins) | Mods y admins |
+| ListRoles | roles | Mods y admins |
+| AdvCheck | check: ficha de un miembro | Mods y admins |
+| Honeypot | settings | Dueño del servidor |
+| Blackjack / APIv2 | pagina principal | Owner del bot |
+
+Las claves de AlienHost y los tokens de la API **nunca** se muestran ni se piden en la web: las claves de AlienHost se introducen solo en el formulario privado de Discord.
+
+## 9. Preguntas frecuentes
 
 **Todo sale ⚫ en `!trini status` pero funciona.**
 Ya no deberia: el estado muestra la realidad de Red. ⚫ significa que el cog no esta cargado en el

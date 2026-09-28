@@ -26,6 +26,10 @@ Crea un canal trampa arriba del todo del servidor. Los selfbots y cuentas de sca
 
 Alternativa: `!sethoneypot modalconfig` configura todo de golpe en un formulario. Si borras el aviso del canal, `!sethoneypot resend` lo vuelve a publicar.
 
+## Dashboard
+
+Pagina **settings** (la genera AAA3A_utils): los mismos ajustes que `sethoneypot`, solo para el dueño del servidor.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

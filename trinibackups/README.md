@@ -26,6 +26,10 @@ Snapshots estructurales comparables. No promete restaurar todo Discord: guarda e
 
 Los archivos se guardan comprimidos en la carpeta de datos del cog. Restaurar requiere Owner/Extra Owner/Trusted Admin si TriniSecurity esta cargado.
 
+## Dashboard
+
+Pagina **backups**: listar, crear y programar backups. Hace falta *Administrador*, como en los comandos. Restaurar solo desde Discord, con previsualizacion.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

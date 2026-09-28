@@ -24,6 +24,10 @@ Votaciones de mapas de Rust con botones, usando la API de rustmaps.com.
 6. Cierrala y anuncia el ganador: `!votemap end` (o `!votemap cancel` para anularla sin ganador).
 7. Revisa la configuracion con `!votemap settings`.
 
+## Dashboard
+
+Pagina **votes**: mapas y votos de la sesion actual (mods); canal y votos por usuario (admins).
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

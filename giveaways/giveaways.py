@@ -15,6 +15,7 @@ from redbot.core.utils.menus import DEFAULT_CONTROLS, menu
 from .converter import Args, EditArgs
 from .menu import GiveawayButton, GiveawayView
 from .objects import Giveaway, GiveawayEnterError, GiveawayExecError
+from .dashboard_integration import DashboardIntegration
 
 log = logging.getLogger("red.killerbite95.giveaways")
 GIVEAWAY_KEY = "giveaways"
@@ -27,7 +28,7 @@ GW_RED = discord.Color.from_rgb(237, 66, 69)
 GW_PURPLE = discord.Color.from_rgb(155, 89, 182)
 
 
-class Giveaways(commands.Cog):
+class Giveaways(DashboardIntegration, commands.Cog):
     """Giveaway Commands"""
 
     __version__ = "2.0.0"

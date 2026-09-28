@@ -44,6 +44,10 @@ Todo `!alienhost admin …` requiere el rol configurado (+ Trusted Admin de Trin
 
 Usa la Client API de Pelican: `GET /api/client`, `/servers/{uuid}`, `/resources`, `POST /power`, `GET|POST /backups`, `GET /account`. No se expone la consola.
 
+## Dashboard
+
+Pagina personal **servers** ("Mis servidores"): tus servidores con su estado e Iniciar/Reiniciar/Detener, usando la cuenta que vinculaste en Discord. La clave nunca se pide ni se muestra en la web. Pagina **settings** del servidor (canal de auditoria y rol admin): solo admins.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

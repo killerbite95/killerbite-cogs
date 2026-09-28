@@ -19,6 +19,10 @@ Lista todos los roles del servidor con su nombre e ID.
 1. Carga el cog.
 2. Ejecuta `!listroles`. Muestra cada rol con su ID (util para configurar otros cogs que piden IDs).
 
+## Dashboard
+
+Pagina **roles**: roles con ID, color, miembros y si son de administrador. Mods y admins.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

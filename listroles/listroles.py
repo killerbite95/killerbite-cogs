@@ -3,12 +3,13 @@ from redbot.core import commands
 from redbot.core.i18n import Translator, cog_i18n
 import io
 import logging
+from .dashboard_integration import DashboardIntegration
 
 _ = Translator("ListRoles", __file__)
 
 
 @cog_i18n(_)
-class ListRoles(commands.Cog):
+class ListRoles(DashboardIntegration, commands.Cog):
     """Cog to list server roles with their name and ID."""
     __author__ = "Killerbite95"
     __version__ = "1.0.0"

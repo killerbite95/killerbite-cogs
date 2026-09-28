@@ -5,11 +5,12 @@ from datetime import datetime, timezone
 import discord
 from redbot.core import checks, commands, Config
 from redbot.core.i18n import Translator, cog_i18n
+from .dashboard_integration import DashboardIntegration
 
 _ = Translator("AdvCheck", __file__)
 
 @cog_i18n(_)
-class Check(commands.Cog):
+class Check(DashboardIntegration, commands.Cog):
     """Cog avanzado para realizar verificaciones completas en usuarios con UI interactiva y soporte para Slash Commands.
     
     Muestra información básica, roles, fecha de ingreso, avatar, permisos, actividad

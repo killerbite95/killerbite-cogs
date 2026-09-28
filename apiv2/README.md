@@ -28,6 +28,10 @@ Servidor REST embebido en el bot para integraciones externas (webs, scripts, pan
 
 Mas detalle tecnico en [PLAN.md](PLAN.md).
 
+## Dashboard
+
+Pagina principal (solo owner del bot): estado del servidor HTTP, claves (nunca los tokens) y webhooks.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.

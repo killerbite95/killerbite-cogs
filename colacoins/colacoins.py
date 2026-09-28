@@ -5,13 +5,14 @@ from redbot.core.i18n import Translator, cog_i18n
 import discord
 import asyncio
 import logging
+from .dashboard_integration import DashboardIntegration
 
 _ = Translator("ColaCoins", __file__)
 _BACKUP_FILE = "colacoins_data.json"
 
 
 @cog_i18n(_)
-class ColaCoins(commands.Cog):
+class ColaCoins(DashboardIntegration, commands.Cog):
     """Manage ColaCoins for users."""
     __author__ = "Killerbite95"
 
@@ -26,6 +27,7 @@ class ColaCoins(commands.Cog):
         self.logger = logging.getLogger("red.ColaCoins")
 
     async def cog_load(self):
+        self._dashboard_register()
         await self.load_data()
 
     async def red_delete_data_for_user(self, *, requester, user_id: int):

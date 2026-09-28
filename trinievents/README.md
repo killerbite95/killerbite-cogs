@@ -28,6 +28,10 @@ Gestor de actividades: inscripciones, reservas, recordatorios y logistica. No ge
 
 Fechas: `02/10/2026 22:00`, `02/10 22:00`, `viernes 22:00`, `mañana 21:30`, `+2h`. Recordatorios por DM solo a inscritos y a quien pulso Recordarme.
 
+## Dashboard
+
+Pagina **events** (solo lectura): eventos proximos, en curso y recientes, con plazas y lista de espera. Mods y admins.
+
 ## Referencia completa de comandos
 
 Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.
