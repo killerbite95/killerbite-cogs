@@ -116,6 +116,21 @@ def _json_safe(value: Any) -> Any:
     return str(value)
 
 
+# Claves de datos en tiempo de ejecucion (historiales, caches, contadores...)
+# que no son configuracion. Se descartan cuando un cog no implementa
+# ``trini_export`` y hay que volcar su Config en bruto.
+_RUNTIME_KEY_EXACT = frozenset({
+    "history", "cache", "cooldowns", "user_cooldowns", "stats", "statistics",
+    "opened", "archived", "active", "entries", "leaderboard", "logs",
+})
+_RUNTIME_KEY_SUFFIXES = ("_history", "_cache", "_cooldowns", "_stats", "_log_entries")
+
+
+def _is_runtime_key(key: Any) -> bool:
+    name = str(key).lower()
+    return name in _RUNTIME_KEY_EXACT or name.endswith(_RUNTIME_KEY_SUFFIXES)
+
+
 async def export_cog(cog: commands.Cog, guild: discord.Guild) -> Optional[Dict[str, Any]]:
     """Exporta la configuracion de servidor de un cog (o ``None`` si no es posible)."""
     try:
@@ -124,7 +139,8 @@ async def export_cog(cog: commands.Cog, guild: discord.Guild) -> Optional[Dict[s
             return _json_safe(await exporter(guild))
         config = getattr(cog, "config", None)
         if isinstance(config, Config):
-            return _json_safe(await config.guild(guild).all())
+            data = await config.guild(guild).all()
+            return _json_safe({k: v for k, v in data.items() if not _is_runtime_key(k)})
     except Exception:
         log.exception("No se pudo exportar la configuracion de %s", cog.qualified_name)
     return None
@@ -142,7 +158,7 @@ async def import_cog(
         group = config.guild(guild)
         defaults = await group.all()
         for key, value in data.items():
-            if key in defaults:
+            if key in defaults and not _is_runtime_key(key):
                 await group.set_raw(key, value=value)
         return []
     return [f"{cog.qualified_name}: no soporta importacion."]
