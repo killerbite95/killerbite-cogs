@@ -13,11 +13,11 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: honeypot\honeypot.py:50 honeypot\honeypot.py:161
+#: honeypot.py:50 honeypot.py:199
 msgid "🍯 Honeypot Statistics"
 msgstr "🍯 Estadísticas del Honeypot"
 
-#: honeypot\honeypot.py:51 honeypot\honeypot.py:162
+#: honeypot.py:51 honeypot.py:200
 msgid ""
 "**Server Stats:**\n"
 "Total moderated in this server: **{count}**"
@@ -25,7 +25,7 @@ msgstr ""
 "**Estadísticas del servidor:**\n"
 "Total moderados en este servidor: **{count}**"
 
-#: honeypot\honeypot.py:62
+#: honeypot.py:62
 msgid ""
 "Create a channel at the top of the server to attract self bots/scammers and "
 "notify/mute/kick/ban them immediately!"
@@ -33,46 +33,46 @@ msgstr ""
 "Crea un canal en la parte superior del servidor para atraer "
 "selfbots/estafadores y notificar/mutear/expulsar/banearlos inmediatamente."
 
-#: honeypot\honeypot.py:144
+#: honeypot.py:182
 msgid "⚠️ DO NOT POST HERE! ⚠️"
 msgstr "⚠️ ¡NO publiques aquí! ⚠️"
 
-#: honeypot\honeypot.py:145
+#: honeypot.py:183
 msgid ""
 "An action will be immediately taken against you if you send a message in "
 "this channel."
 msgstr ""
 "Se tomará una acción inmediata contra ti si envías un mensaje en este canal."
 
-#: honeypot\honeypot.py:151
+#: honeypot.py:189
 msgid "What not to do?"
 msgstr "¿Qué no hacer?"
 
-#: honeypot\honeypot.py:152
+#: honeypot.py:190
 msgid "Do not send any messages in this channel."
 msgstr "No envíes ningún mensaje en este canal."
 
-#: honeypot\honeypot.py:156
+#: honeypot.py:194
 msgid "What WILL happen?"
 msgstr "¿Qué SUCEDERÁ?"
 
-#: honeypot\honeypot.py:157
+#: honeypot.py:195
 msgid "An action will be taken against you."
 msgstr "Se tomará una acción contra ti."
 
-#: honeypot\honeypot.py:178 honeypot\honeypot.py:201
+#: honeypot.py:216 honeypot.py:239
 msgid "## ⚠️ WARNING ⚠️"
 msgstr "## ⚠️ ADVERTENCIA ⚠️"
 
-#: honeypot\honeypot.py:261
+#: honeypot.py:299
 msgid "Honeypot — Self Bot/Scammer Detected!"
 msgstr "Honeypot — ¡Self Bot/Estafador Detectado!"
 
-#: honeypot\honeypot.py:273
+#: honeypot.py:311
 msgid "Self bot/scammer detected (message in the HoneyPot channel)."
 msgstr "Selfbot/estafador detectado (mensaje en el canal HoneyPot)."
 
-#: honeypot\honeypot.py:282
+#: honeypot.py:320
 msgid ""
 "**Failed:** I'm missing the `{permission}` permission. Run `[p]sethoneypot "
 "diagnose` for details."
@@ -80,7 +80,7 @@ msgstr ""
 "**Fallo:** Me falta el permiso `{permission}`. Ejecuta `[p]sethoneypot "
 "diagnose` para más detalles."
 
-#: honeypot\honeypot.py:286
+#: honeypot.py:324
 msgid ""
 "**Failed:** My highest role (`{my_role}`) isn't above the member's highest "
 "role (`{their_role}`). Move my role higher in **Server Settings → Roles**."
@@ -89,11 +89,11 @@ msgstr ""
 " del miembro (`{their_role}`). Mueve mi rol más arriba en **Ajustes del "
 "servidor → Roles**."
 
-#: honeypot\honeypot.py:290
+#: honeypot.py:328
 msgid "**Failed:** The mute role is not set or doesn't exist anymore."
 msgstr "**Error:** El rol de mute no está configurado o ya no existe."
 
-#: honeypot\honeypot.py:292
+#: honeypot.py:330
 msgid ""
 "**Failed:** The mute role (`{mute_role}`) isn't below my highest role "
 "(`{my_role}`), so I can't assign it."
@@ -101,34 +101,34 @@ msgstr ""
 "**Fallo:** El rol de mute (`{mute_role}`) no está por debajo de mi rol más "
 "alto (`{my_role}`), así que no puedo asignarlo."
 
-#: honeypot\honeypot.py:307
+#: honeypot.py:345
 msgid ""
 "**Failed:** An error occurred while trying to take action against the "
 "member:\n"
 msgstr ""
 "**Error:** Ocurrió un error al intentar tomar acción contra el miembro:\n"
 
-#: honeypot\honeypot.py:335
+#: honeypot.py:373
 msgid "Action:"
 msgstr "Acción:"
 
-#: honeypot\honeypot.py:338
+#: honeypot.py:376
 msgid "The member has been muted."
 msgstr "El miembro ha sido muteado."
 
-#: honeypot\honeypot.py:341
+#: honeypot.py:379
 msgid "The member has been kicked."
 msgstr "El miembro ha sido expulsado."
 
-#: honeypot\honeypot.py:343
+#: honeypot.py:381
 msgid "The member has been banned."
 msgstr "El miembro ha sido baneado."
 
-#: honeypot\honeypot.py:389
+#: honeypot.py:427
 msgid "Create the honeypot channel."
 msgstr "Crea el canal honeypot."
 
-#: honeypot\honeypot.py:396
+#: honeypot.py:434
 msgid ""
 "The honeypot channel already exists: {honeypot_channel.mention} "
 "({honeypot_channel.id})."
@@ -136,7 +136,7 @@ msgstr ""
 "El canal honeypot ya existe: {honeypot_channel.mention} "
 "({honeypot_channel.id})."
 
-#: honeypot\honeypot.py:424
+#: honeypot.py:462
 msgid ""
 "The honeypot channel has been set to {honeypot_channel.mention} ({honeypot_channel.id}). You can now start attracting self bots/scammers!\n"
 "Please make sure to enable the cog and set the logs channel, the action to take, the role to ping (and the mute role) if you haven't already."
@@ -144,11 +144,11 @@ msgstr ""
 "El canal honeypot ha sido configurado en {honeypot_channel.mention} ({honeypot_channel.id}). ¡Ahora puedes empezar a atraer selfbots/estafadores!\n"
 "Asegúrate de activar el cog y configurar el canal de logs, la acción a tomar, el rol a mentionar (y el rol de mute) si no lo has hecho ya."
 
-#: honeypot\honeypot.py:433
+#: honeypot.py:471
 msgid "Resend the honeypot embed (deletes the old one and sends a new one)."
 msgstr "Reenvía el embed del honeypot (borra el antiguo y envía uno nuevo)."
 
-#: honeypot\honeypot.py:438
+#: honeypot.py:476
 msgid ""
 "The honeypot channel is not configured. Use `[p]sethoneypot createchannel` "
 "first."
@@ -156,7 +156,7 @@ msgstr ""
 "El canal honeypot no está configurado. Usa `[p]sethoneypot createchannel` "
 "primero."
 
-#: honeypot\honeypot.py:445
+#: honeypot.py:483
 msgid ""
 "The honeypot channel no longer exists. Use `[p]sethoneypot createchannel` to"
 " create a new one."
@@ -164,11 +164,11 @@ msgstr ""
 "El canal honeypot ya no existe. Usa `[p]sethoneypot createchannel` para "
 "crear uno nuevo."
 
-#: honeypot\honeypot.py:459
+#: honeypot.py:497
 msgid "✅ Honeypot embed has been resent to {channel}."
 msgstr "✅ El embed del honeypot se ha reenviado a {channel}."
 
-#: honeypot\honeypot.py:466
+#: honeypot.py:504
 msgid ""
 "Check the setup and report everything that prevents the honeypot from "
 "working."
@@ -176,15 +176,15 @@ msgstr ""
 "Revisa la configuración e informa de todo lo que impide que el honeypot "
 "funcione."
 
-#: honeypot\honeypot.py:489
+#: honeypot.py:527
 msgid "The cog is enabled in this server."
 msgstr "El cog está activado en este servidor."
 
-#: honeypot\honeypot.py:492
+#: honeypot.py:530
 msgid "The cog is disabled. Run `[p]sethoneypot enabled True`."
 msgstr "El cog está desactivado. Ejecuta `[p]sethoneypot enabled True`."
 
-#: honeypot\honeypot.py:497
+#: honeypot.py:535
 msgid ""
 "The cog is blocked in this server by the bot owner (`[p]command "
 "listdisabled`) or by `[p]autoimmune`/`[p]cogdisable`."
@@ -192,17 +192,21 @@ msgstr ""
 "El cog está bloqueado en este servidor por el dueño del bot (`[p]command "
 "listdisabled`) o por `[p]autoimmune`/`[p]cogdisable`."
 
-#: honeypot\honeypot.py:503
+#: honeypot.py:541
 msgid "The cog is not blocked at the bot level."
 msgstr "El cog no está bloqueado a nivel del bot."
 
-#: honeypot\honeypot.py:516
+#: honeypot.py:542
+msgid "**1. Cog status**"
+msgstr "**1. Estado del cog**"
+
+#: honeypot.py:554
 msgid "No honeypot channel is configured. Run `[p]sethoneypot createchannel`."
 msgstr ""
 "No hay ningún canal honeypot configurado. Ejecuta `[p]sethoneypot "
 "createchannel`."
 
-#: honeypot\honeypot.py:524
+#: honeypot.py:562
 msgid ""
 "The configured honeypot channel (`{channel_id}`) no longer exists or I can't"
 " see it. Run `[p]sethoneypot createchannel`."
@@ -210,15 +214,15 @@ msgstr ""
 "El canal honeypot configurado (`{channel_id}`) ya no existe o no puedo "
 "verlo. Ejecuta `[p]sethoneypot createchannel`."
 
-#: honeypot\honeypot.py:532
+#: honeypot.py:570
 msgid "Honeypot channel: {channel} (`{channel_id}`)."
 msgstr "Canal honeypot: {channel} (`{channel_id}`)."
 
-#: honeypot\honeypot.py:539
+#: honeypot.py:577
 msgid "I can see the channel, so I receive its messages."
 msgstr "Puedo ver el canal, así que recibo sus mensajes."
 
-#: honeypot\honeypot.py:543
+#: honeypot.py:581
 msgid ""
 "I can't **View Channel** there, so Discord never sends me those messages and"
 " nothing can ever trigger. This is the most common cause of a silent "
@@ -227,20 +231,20 @@ msgstr ""
 "No tengo **Ver canal** ahí, así que Discord nunca me envía esos mensajes y "
 "nada puede activarse. Esta es la causa más común de un honeypot silencioso."
 
-#: honeypot\honeypot.py:549
+#: honeypot.py:587
 msgid "I can delete messages in the channel."
 msgstr "Puedo borrar mensajes en el canal."
 
-#: honeypot\honeypot.py:553
+#: honeypot.py:591
 msgid ""
 "I'm missing **Manage Messages** there: the bait message won't be deleted."
 msgstr "Me falta **Gestionar mensajes** ahí: el mensaje cebo no se borrará."
 
-#: honeypot\honeypot.py:559
+#: honeypot.py:597
 msgid "I can read the channel history."
 msgstr "Puedo leer el historial del canal."
 
-#: honeypot\honeypot.py:563
+#: honeypot.py:601
 msgid ""
 "I'm missing **Read Message History** there: the warning embed stats can't be"
 " updated."
@@ -248,7 +252,7 @@ msgstr ""
 "Me falta **Leer historial de mensajes** ahí: no se pueden actualizar las "
 "estadísticas del embed de aviso."
 
-#: honeypot\honeypot.py:572
+#: honeypot.py:610
 msgid ""
 "`@everyone` can't see the honeypot channel, so regular members will never "
 "fall for it."
@@ -256,7 +260,7 @@ msgstr ""
 "`@everyone` no puede ver el canal honeypot, así que los miembros normales "
 "nunca caerán."
 
-#: honeypot\honeypot.py:580
+#: honeypot.py:618
 msgid ""
 "`@everyone` can't send messages in the honeypot channel, so nobody can "
 "trigger it."
@@ -264,16 +268,16 @@ msgstr ""
 "`@everyone` no puede enviar mensajes en el canal honeypot, así que nadie "
 "puede activarlo."
 
-#: honeypot\honeypot.py:586
+#: honeypot.py:624
 msgid "`@everyone` can see and post in the channel."
 msgstr "`@everyone` puede ver y escribir en el canal."
 
-#: honeypot\honeypot.py:589
+#: honeypot.py:627
 msgid "No warning embed is tracked. Run `[p]sethoneypot resend`."
 msgstr ""
 "No hay ningún embed de aviso registrado. Ejecuta `[p]sethoneypot resend`."
 
-#: honeypot\honeypot.py:597
+#: honeypot.py:635
 msgid ""
 "The tracked warning embed is gone or unreachable. Run `[p]sethoneypot "
 "resend`."
@@ -281,11 +285,15 @@ msgstr ""
 "El embed de aviso registrado ya no existe o no es accesible. Ejecuta "
 "`[p]sethoneypot resend`."
 
-#: honeypot\honeypot.py:603
+#: honeypot.py:641
 msgid "The warning embed is present."
 msgstr "El embed de aviso está presente."
 
-#: honeypot\honeypot.py:616
+#: honeypot.py:642
+msgid "**2. Honeypot channel**"
+msgstr "**2. Canal honeypot**"
+
+#: honeypot.py:654
 msgid ""
 "No logs channel is set. Actions still happen, but nothing is reported. Run "
 "`[p]sethoneypot logschannel #channel`."
@@ -293,18 +301,18 @@ msgstr ""
 "No hay canal de logs configurado. Las acciones se siguen ejecutando, pero no"
 " se informa de nada. Ejecuta `[p]sethoneypot logschannel #canal`."
 
-#: honeypot\honeypot.py:624
+#: honeypot.py:662
 msgid ""
 "The configured logs channel (`{channel_id}`) no longer exists or I can't see"
 " it."
 msgstr ""
 "El canal de logs configurado (`{channel_id}`) ya no existe o no puedo verlo."
 
-#: honeypot\honeypot.py:634
+#: honeypot.py:672
 msgid "Logs channel: {channel}, and I can post embeds there."
 msgstr "Canal de logs: {channel}, y puedo publicar embeds ahí."
 
-#: honeypot\honeypot.py:642
+#: honeypot.py:680
 msgid ""
 "I'm missing **Send Messages** and/or **Embed Links** in {channel}, so "
 "detections can't be reported."
@@ -312,7 +320,11 @@ msgstr ""
 "Me faltan **Enviar mensajes** y/o **Insertar enlaces** en {channel}, así que"
 " no se pueden reportar las detecciones."
 
-#: honeypot\honeypot.py:655
+#: honeypot.py:685
+msgid "**3. Logs channel**"
+msgstr "**3. Canal de logs**"
+
+#: honeypot.py:693
 msgid ""
 "No action is set: offenders are only reported. Run `[p]sethoneypot action "
 "mute|kick|ban`."
@@ -320,19 +332,19 @@ msgstr ""
 "No hay ninguna acción configurada: los infractores solo se reportan. Ejecuta"
 " `[p]sethoneypot action mute|kick|ban`."
 
-#: honeypot\honeypot.py:661
+#: honeypot.py:699
 msgid "Action: `{action}`."
 msgstr "Acción: `{action}`."
 
-#: honeypot\honeypot.py:666
+#: honeypot.py:704
 msgid "I have the `{permission}` permission."
 msgstr "Tengo el permiso `{permission}`."
 
-#: honeypot\honeypot.py:674
+#: honeypot.py:712
 msgid "I'm missing the `{permission}` permission required by `{action}`."
 msgstr "Me falta el permiso `{permission}` que requiere `{action}`."
 
-#: honeypot\honeypot.py:688
+#: honeypot.py:726
 msgid ""
 "The action is `mute` but no valid mute role is set. Run `[p]sethoneypot "
 "muterole @role`."
@@ -340,7 +352,7 @@ msgstr ""
 "La acción es `mute` pero no hay un rol de mute válido configurado. Ejecuta "
 "`[p]sethoneypot muterole @rol`."
 
-#: honeypot\honeypot.py:696
+#: honeypot.py:734
 msgid ""
 "The mute role `{mute_role}` isn't below my highest role, so I can't assign "
 "it."
@@ -348,15 +360,19 @@ msgstr ""
 "El rol de mute `{mute_role}` no está por debajo de mi rol más alto, así que "
 "no puedo asignarlo."
 
-#: honeypot\honeypot.py:703
+#: honeypot.py:741
 msgid "Mute role: `{mute_role}`."
 msgstr "Rol de mute: `{mute_role}`."
 
-#: honeypot\honeypot.py:710
+#: honeypot.py:748
 msgid "The configured ping role (`{role_id}`) no longer exists."
 msgstr "El rol de ping configurado (`{role_id}`) ya no existe."
 
-#: honeypot\honeypot.py:722
+#: honeypot.py:753
+msgid "**4. Action**"
+msgstr "**4. Accion**"
+
+#: honeypot.py:760
 msgid ""
 "I have no role at all: I can't act on anyone. Give me a role and move it "
 "high in **Server Settings → Roles**."
@@ -364,11 +380,11 @@ msgstr ""
 "No tengo ningún rol: no puedo actuar sobre nadie. Dame un rol y muévelo bien"
 " arriba en **Ajustes del servidor → Roles**."
 
-#: honeypot\honeypot.py:735
+#: honeypot.py:773
 msgid "My highest role is `{role}` (position {position} of {total})."
 msgstr "Mi rol más alto es `{role}` (posición {position} de {total})."
 
-#: honeypot\honeypot.py:747
+#: honeypot.py:785
 msgid ""
 "{count} non-bot member(s) sit at or above my highest role, so I can't "
 "moderate them. They'll still be reported."
@@ -376,15 +392,19 @@ msgstr ""
 "{count} miembro(s) que no son bots están al mismo nivel o por encima de mi "
 "rol más alto, así que no puedo moderarlos. Se seguirán reportando."
 
-#: honeypot\honeypot.py:753
+#: honeypot.py:791
 msgid "I'm above every non-bot member."
 msgstr "Estoy por encima de todos los miembros que no son bots."
 
-#: honeypot\honeypot.py:759
+#: honeypot.py:792
+msgid "**5. Role hierarchy**"
+msgstr "**5. Jerarquia de roles**"
+
+#: honeypot.py:797
 msgid "The `members` intent is enabled."
 msgstr "El intent `members` está activado."
 
-#: honeypot\honeypot.py:763
+#: honeypot.py:801
 msgid ""
 "The `members` intent is disabled, so I can't resolve message authors as "
 "members and every detection is skipped. Enable it in the Discord Developer "
@@ -394,11 +414,11 @@ msgstr ""
 "autores de los mensajes como miembros y se omite cada detección. Actívalo en"
 " el Discord Developer Portal."
 
-#: honeypot\honeypot.py:769
+#: honeypot.py:807
 msgid "The `message_content` intent is enabled."
 msgstr "El intent `message_content` está activado."
 
-#: honeypot\honeypot.py:773
+#: honeypot.py:811
 msgid ""
 "The `message_content` intent is disabled: detections still work, but logs "
 "won't show what was posted."
@@ -406,7 +426,7 @@ msgstr ""
 "El intent `message_content` está desactivado: las detecciones siguen "
 "funcionando, pero los logs no mostrarán lo que se publicó."
 
-#: honeypot\honeypot.py:787
+#: honeypot.py:825
 msgid ""
 "The modlog case type `{case_type}` isn't registered (the core `Mod` cog is "
 "probably unloaded). Cases won't be created."
@@ -414,11 +434,15 @@ msgstr ""
 "El tipo de caso de modlog `{case_type}` no está registrado (probablemente el"
 " cog `Mod` del core está descargado). No se crearán casos."
 
-#: honeypot\honeypot.py:795
+#: honeypot.py:833
 msgid "The modlog case type `{case_type}` is registered."
 msgstr "El tipo de caso de modlog `{case_type}` está registrado."
 
-#: honeypot\honeypot.py:804
+#: honeypot.py:838
+msgid "**6. Intents & modlog**"
+msgstr "**6. Intents y modlog**"
+
+#: honeypot.py:842
 msgid ""
 "**{count} blocking issue(s) found.** The honeypot will not work until "
 "they're fixed."
@@ -426,15 +450,15 @@ msgstr ""
 "**{count} problema(s) bloqueante(s) encontrado(s).** El honeypot no "
 "funcionará hasta que se solucionen."
 
-#: honeypot\honeypot.py:809
+#: honeypot.py:847
 msgid "**No blocking issue.** {count} warning(s) worth reviewing."
 msgstr ""
 "**Ningún problema bloqueante.** {count} aviso(s) que conviene revisar."
 
-#: honeypot\honeypot.py:814
+#: honeypot.py:852
 msgid "**Everything looks good.** The honeypot is fully operational."
 msgstr "**Todo se ve bien.** El honeypot está totalmente operativo."
 
-#: honeypot\honeypot.py:817
+#: honeypot.py:855
 msgid "🍯 Honeypot Diagnostic"
 msgstr "🍯 Diagnóstico del Honeypot"

@@ -1,6 +1,3 @@
-# Spanish translations for TrickOrTreat cog.
-# Copyright (C) 2024 Killerbite95
-# This file is distributed under the same license as the TrickOrTreat package.
 #
 msgid ""
 msgstr ""
@@ -9,20 +6,134 @@ msgstr ""
 "POT-Creation-Date: 2024-01-01 00:00+0000\n"
 "PO-Revision-Date: 2024-01-01 00:00+0000\n"
 "Last-Translator: Killerbite95\n"
-"Language: es-ES\n"
 "Language-Team: es-ES\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Language: es-ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
+#: i18n_strings.py:12
+msgid "Reduces sickness by 10 per piece"
+msgstr "Reduce el mareo en 10 por pieza"
 
+#: i18n_strings.py:13
+msgid "Reduces sickness by 20 per piece"
+msgstr "Reduce el mareo en 20 por pieza"
+
+#: i18n_strings.py:14
+msgid "Randomizes your sickness — gamble!"
+msgstr "Tu mareo pasa a un valor al azar — ¡apuesta!"
+
+#: i18n_strings.py:15
+msgid "Instantly resets sickness to 0"
+msgstr "Pone el mareo a 0 al instante"
+
+#: i18n_strings.py:16
+msgid "Protects you from theft"
+msgstr "Te protege de los robos"
+
+#: i18n_strings.py:17
+msgid "Worth 10× eaten count! No sickness."
+msgstr "¡Vale x10 en caramelos comidos! Sin mareo."
+
+#: i18n_strings.py:18
+msgid "🎃 The Candy Tax!"
+msgstr "🎃 ¡El impuesto de caramelos!"
+
+#: i18n_strings.py:19
+msgid ""
+"A shadowy figure appears from the darkness and demands a toll for passing "
+"through their territory..."
+msgstr ""
+"Una figura sombría surge de la oscuridad y exige un peaje por cruzar su "
+"territorio..."
+
+#: i18n_strings.py:20
+msgid "🧙 Witch's Curse!"
+msgstr "🧙 ¡Maldición de la bruja!"
+
+#: i18n_strings.py:21
+msgid ""
+"A cackling witch leaps from behind a tombstone and hexes you with her "
+"crooked wand!"
+msgstr ""
+"¡Una bruja carcajeante salta de detrás de una lápida y te hechiza con su "
+"varita torcida!"
+
+#: i18n_strings.py:22
+msgid "👻 Haunted House!"
+msgstr "👻 ¡Casa encantada!"
+
+#: i18n_strings.py:23
+msgid ""
+"You stumbled into a haunted house! Ghostly hands grab at your candy bag..."
+msgstr ""
+"¡Has entrado en una casa encantada! Unas manos fantasmales agarran tu bolsa "
+"de caramelos..."
+
+#: i18n_strings.py:24
+msgid "💨 Butterfingers!"
+msgstr "💨 ¡Manos de mantequilla!"
+
+#: i18n_strings.py:25
+msgid "You tripped over a jack-o'-lantern and candy scattered everywhere!"
+msgstr ""
+"¡Tropezaste con una calabaza y los caramelos salieron volando por todas "
+"partes!"
+
+#: i18n_strings.py:26
+msgid "☠️ Cursed Candy!"
+msgstr "☠️ ¡Caramelo maldito!"
+
+#: i18n_strings.py:27
+msgid ""
+"That candy had a strange glow... It was cursed! Your stomach churns "
+"violently!"
+msgstr ""
+"Ese caramelo brillaba de forma extraña... ¡Estaba maldito! ¡Se te revuelve "
+"el estómago!"
+
+#: i18n_strings.py:28
+msgid "Eat candies collectively!"
+msgstr "¡Comed caramelos entre todos!"
+
+#: i18n_strings.py:29
+msgid "Collect candies via trick-or-treat!"
+msgstr "¡Recoged caramelos con truco o trato!"
+
+#: i18n_strings.py:30
+msgid "Steal candies from others!"
+msgstr "¡Robad caramelos a los demás!"
+
+#: trickortreat.py:182
+msgid ""
+"🎃 Trick or Treat — A spooky candy collecting game!\n"
+"\n"
+"    Collect candy, manage your sickness, steal from others,\n"
+"    visit the shop, build streaks, and compete for glory!\n"
+"\n"
+"    Originally by aikaterna. Expanded by Killerbite95.\n"
+"    "
+msgstr ""
+"🎃 Truco o trato: ¡un tenebroso juego de recoger caramelos!\n"
+"\n"
+"    Recoge caramelos, controla tu mareo, roba a los demás,\n"
+"    visita la tienda, haz rachas y ¡compite por la gloria!\n"
+"\n"
+"    Original de aikaterna. Ampliado por Killerbite95.\n"
+"    "
+
+#: trickortreat.py:311 trickortreat.py:940 trickortreat.py:1869
+#: trickortreat.py:1909 trickortreat.py:1995
 msgid "🎃 Trick or Treat v{version}"
 msgstr "🎃 Trick or Treat v{version}"
 
+#: trickortreat.py:347
 msgid "🎉 Guild Event Complete!"
 msgstr "🎉 ¡Evento del Servidor Completado!"
 
+#: trickortreat.py:348
 msgid ""
 "The event goal has been reached!\n"
 "\n"
@@ -34,60 +145,117 @@ msgstr ""
 "🍬 ¡Todos los participantes reciben **{reward}** caramelos de bonificación!\n"
 "*¡Felicidades!* 🎃"
 
+#: trickortreat.py:368
+msgid ""
+"Eat some candy.\n"
+"\n"
+"        Valid types: candy, chocolate, lollipop, cookie, star, golden_candy, ghost_pepper\n"
+"        Examples:\n"
+"            `[p]eatcandy 3 lollipops`\n"
+"            `[p]eatcandy star`\n"
+"            `[p]eatcandy 1 golden_candy`\n"
+"\n"
+"        🍬 — The main candy. Eat to score, but watch your sickness!\n"
+"        🍫 — Reduces sickness by 10.\n"
+"        🍭 — Reduces sickness by 20.\n"
+"        🥠 — Sets sickness randomly — fortune favours the brave.\n"
+"        ⭐ — Resets sickness to 0.\n"
+"        ✨ Golden Candy — Worth 10× eaten count! No sickness gain.\n"
+"        🌶️ Ghost Pepper — Resets your sickness to 0. Spicy!\n"
+"        "
+msgstr ""
+"Comer caramelos.\n"
+"\n"
+"Tipos válidos: candy, chocolate, lollipop, cookie, star, golden_candy, ghost_pepper\n"
+"Ejemplos:\n"
+"    `[p]eatcandy 3 lollipops`\n"
+"    `[p]eatcandy star`\n"
+"    `[p]eatcandy 1 golden_candy`\n"
+"\n"
+"🍬 — El caramelo principal. Cómelo para puntuar, ¡pero vigila tu mareo!\n"
+"🍫 — Reduce el mareo en 10.\n"
+"🍭 — Reduce el mareo en 20.\n"
+"🥠 — Pone el mareo a un valor al azar: la suerte sonríe a los valientes.\n"
+"⭐ — Pone el mareo a 0.\n"
+"✨ Caramelo dorado — ¡Vale x10 en caramelos comidos! No da mareo.\n"
+"🌶️ Chile fantasma — Pone tu mareo a 0. ¡Pica!"
+
+#: trickortreat.py:392
 msgid "That doesn't sound fun."
 msgstr "Eso no suena divertido."
 
+#: trickortreat.py:397
 msgid "You pretend to eat a candy."
 msgstr "Finges comer un caramelo."
 
-msgid "That's not a candy type! Use the inventory command to see what you have."
-msgstr "¡Ese no es un tipo de caramelo! Usa el comando de inventario para ver lo que tienes."
+#: trickortreat.py:402
+msgid ""
+"That's not a candy type! Use the inventory command to see what you have."
+msgstr ""
+"¡Ese no es un tipo de caramelo! Usa el comando de inventario para ver lo que"
+" tienes."
 
+#: trickortreat.py:407
 msgid "You don't have that many {candy_type}."
 msgstr "No tienes tantos {candy_type}."
 
+#: trickortreat.py:412
 msgid "You contemplate the idea of eating {candy_type}."
 msgstr "Contemplas la idea de comer {candy_type}."
 
+#: trickortreat.py:417
 msgid "You leisurely enjoy"
 msgstr "Disfrutas tranquilamente de"
 
+#: trickortreat.py:418
 msgid "You take the time to savor"
 msgstr "Te tomas el tiempo para saborear"
 
+#: trickortreat.py:419
 msgid "You eat"
 msgstr "Comes"
 
+#: trickortreat.py:420
 msgid "You scarf down"
 msgstr "Devoras rápidamente"
 
+#: trickortreat.py:421
 msgid "You sigh in contentment after eating"
 msgstr "Suspiras de satisfacción después de comer"
 
+#: trickortreat.py:422
 msgid "You gobble up"
 msgstr "Engulles"
 
+#: trickortreat.py:423
 msgid "You make a meal of"
 msgstr "Te preparas un festín con"
 
+#: trickortreat.py:424
 msgid "You devour"
 msgstr "Devoras"
 
+#: trickortreat.py:425
 msgid "You monstrously pig out on"
 msgstr "Te atiborras monstruosamente de"
 
+#: trickortreat.py:426
 msgid "You hastily chomp down on"
 msgstr "Masticas apresuradamente"
 
+#: trickortreat.py:427
 msgid "You daintily partake of"
 msgstr "Degustas delicadamente"
 
+#: trickortreat.py:428
 msgid "You earnestly consume"
 msgstr "Consumes con entusiasmo"
 
+#: trickortreat.py:435
 msgid "✨ Golden Candy!"
 msgstr "✨ ¡Caramelo Dorado!"
 
+#: trickortreat.py:436
 msgid ""
 "{eat_phrase} {number} golden {candy_word}!\n"
 "\n"
@@ -101,15 +269,19 @@ msgstr ""
 "**+{eaten_value}** en contador de comidos! *(¡10× bonus!)*\n"
 "¡Sin enfermedad!"
 
+#: trickortreat.py:442
 msgid "candy"
 msgstr "caramelo"
 
+#: trickortreat.py:442
 msgid "candies"
 msgstr "caramelos"
 
+#: trickortreat.py:457
 msgid "🌶️ Ghost Pepper!"
 msgstr "🌶️ ¡Pimiento Fantasma!"
 
+#: trickortreat.py:458
 msgid ""
 "{eat_phrase} {number} ghost {pepper_word}!\n"
 "\n"
@@ -123,15 +295,19 @@ msgstr ""
 "...pero el calor quema toda tu enfermedad.\n"
 "💊 ¡Enfermedad reseteada a **0**!"
 
+#: trickortreat.py:464
 msgid "pepper"
 msgstr "pimiento"
 
+#: trickortreat.py:464
 msgid "peppers"
 msgstr "pimientos"
 
+#: trickortreat.py:477
 msgid "After all that candy, sugar doesn't sound so good."
 msgstr "Después de tanto caramelo, el azúcar ya no suena tan bien."
 
+#: trickortreat.py:506
 msgid ""
 "You begin to think you don't need all this candy, maybe...\n"
 "*{lost_candy} candies are left behind*"
@@ -139,9 +315,12 @@ msgstr ""
 "Empiezas a pensar que no necesitas todo este caramelo, quizás...\n"
 "*{lost_candy} caramelos se quedan atrás*"
 
-msgid "You feel absolutely disgusted. At least you don't have any candies left."
+#: trickortreat.py:523
+msgid ""
+"You feel absolutely disgusted. At least you don't have any candies left."
 msgstr "Te sientes completamente asqueado. Al menos no te quedan caramelos."
 
+#: trickortreat.py:537
 msgid ""
 "You toss your candies on the ground in disgust.\n"
 "*{lost_candy} candies are left behind*"
@@ -149,9 +328,12 @@ msgstr ""
 "Tiras tus caramelos al suelo asqueado.\n"
 "*{lost_candy} caramelos se quedan atrás*"
 
+#: trickortreat.py:543
 msgid "{eat_phrase} {number} {pluralcandy}. (Total eaten: `{eaten_count}` 🍬)"
-msgstr "{eat_phrase} {number} {pluralcandy}. (Total comidos: `{eaten_count}` 🍬)"
+msgstr ""
+"{eat_phrase} {number} {pluralcandy}. (Total comidos: `{eaten_count}` 🍬)"
 
+#: trickortreat.py:556
 msgid ""
 "{eat_phrase} {number} {pluralchoc}. You feel slightly better!\n"
 "*Sickness has gone down by {sickness_down}*"
@@ -159,6 +341,7 @@ msgstr ""
 "{eat_phrase} {number} {pluralchoc}. ¡Te sientes un poco mejor!\n"
 "*La enfermedad ha bajado {sickness_down}*"
 
+#: trickortreat.py:570
 msgid ""
 "{eat_phrase} {number} {pluralpop}. You feel slightly better!\n"
 "*Sickness has gone down by {sickness_down}*"
@@ -166,6 +349,7 @@ msgstr ""
 "{eat_phrase} {number} {pluralpop}. ¡Te sientes un poco mejor!\n"
 "*La enfermedad ha bajado {sickness_down}*"
 
+#: trickortreat.py:586
 msgid ""
 "You feel worse!\n"
 "*Sickness has gone up by {amount}*"
@@ -173,6 +357,7 @@ msgstr ""
 "¡Te sientes peor!\n"
 "*La enfermedad ha subido {amount}*"
 
+#: trickortreat.py:588
 msgid ""
 "You feel better!\n"
 "*Sickness has gone down by {amount}*"
@@ -180,9 +365,11 @@ msgstr ""
 "¡Te sientes mejor!\n"
 "*La enfermedad ha bajado {amount}*"
 
+#: trickortreat.py:589
 msgid "{eat_phrase} {number} {pluralcookie}. {phrase}"
 msgstr "{eat_phrase} {number} {pluralcookie}. {phrase}"
 
+#: trickortreat.py:600
 msgid ""
 "{eat_phrase} {number} {pluralstar}. You feel great!\n"
 "*Sickness has been reset*"
@@ -190,42 +377,84 @@ msgstr ""
 "{eat_phrase} {number} {pluralstar}. ¡Te sientes genial!\n"
 "*La enfermedad se ha reseteado*"
 
+#: trickortreat.py:618
+msgid "[Admin] Check how many candies are 'on the ground' in the guild."
+msgstr "[Admin] Ver cuántos caramelos hay «en el suelo» en el servidor."
+
+#: trickortreat.py:621
 msgid "🎃 Guild Candy Pool"
 msgstr "🎃 Pool de Caramelos del Servidor"
 
+#: trickortreat.py:622
 msgid "**{pick}** 🍬 on the ground"
 msgstr "**{pick}** 🍬 en el suelo"
 
+#: trickortreat.py:631
+msgid "[Admin] Add candy to a user's inventory."
+msgstr "[Admin] Añadir caramelos al inventario de un usuario."
+
+#: trickortreat.py:633 trickortreat.py:649 trickortreat.py:1676
 msgid "Amount must be greater than zero."
 msgstr "La cantidad debe ser mayor que cero."
 
+#: trickortreat.py:636 trickortreat.py:652
 msgid "Invalid candy type. Valid types are: {types}."
 msgstr "Tipo de caramelo inválido. Los tipos válidos son: {types}."
 
+#: trickortreat.py:641
 msgid "Added {amount} {resolved} {emoji} to {name}'s inventory."
 msgstr "Se han añadido {amount} {resolved} {emoji} al inventario de {name}."
 
+#: trickortreat.py:647
+msgid "[Admin] Remove candy from a user's inventory."
+msgstr "[Admin] Quitar caramelos del inventario de un usuario."
+
+#: trickortreat.py:656
 msgid "{name} only has {current} {resolved} {emoji}. Cannot remove {amount}."
-msgstr "{name} solo tiene {current} {resolved} {emoji}. No se pueden quitar {amount}."
+msgstr ""
+"{name} solo tiene {current} {resolved} {emoji}. No se pueden quitar "
+"{amount}."
 
-msgid "Removed {amount} {resolved} {emoji} from {name}'s inventory. Now has {current} {resolved} {emoji}."
-msgstr "Se han quitado {amount} {resolved} {emoji} del inventario de {name}. Ahora tiene {current} {resolved} {emoji}."
+#: trickortreat.py:660
+msgid ""
+"Removed {amount} {resolved} {emoji} from {name}'s inventory. Now has "
+"{current} {resolved} {emoji}."
+msgstr ""
+"Se han quitado {amount} {resolved} {emoji} del inventario de {name}. Ahora "
+"tiene {current} {resolved} {emoji}."
 
+#: trickortreat.py:669
+msgid "Buy some candy with server currency. Prices could vary at any time."
+msgstr ""
+"Comprar caramelos con la moneda del servidor. Los precios pueden variar en "
+"cualquier momento."
+
+#: trickortreat.py:674
 msgid "Not in this reality."
 msgstr "No en esta realidad."
 
+#: trickortreat.py:683
 msgid "Not enough {credits_name} ({candy_price} required)."
 msgstr "No tienes suficientes {credits_name} ({candy_price} requeridos)."
 
+#: trickortreat.py:688
 msgid "🍬 Candy Purchased!"
 msgstr "🍬 ¡Caramelos Comprados!"
 
+#: trickortreat.py:689
 msgid "Bought **{pieces}** candies for **{candy_price}** {credits_name}."
-msgstr "Compraste **{pieces}** caramelos por **{candy_price}** {credits_name}."
+msgstr ""
+"Compraste **{pieces}** caramelos por **{candy_price}** {credits_name}."
 
+#: trickortreat.py:702
+msgid "Browse the Candy Shop! Spend candy on special items."
+msgstr "¡Mira la tienda de caramelos! Gasta caramelos en objetos especiales."
+
+#: trickortreat.py:705
 msgid "🏪 Candy Shop"
 msgstr "🏪 Tienda de Caramelos"
 
+#: trickortreat.py:706
 msgid ""
 "Spend your hard-earned candies on special treats!\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -233,27 +462,52 @@ msgstr ""
 "¡Gasta tus caramelos duramente ganados en golosinas especiales!\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
+#: trickortreat.py:720
 msgid "Use `{prefix}totbuy <item> [amount]` to purchase!"
 msgstr "¡Usa `{prefix}totbuy <item> [cantidad]` para comprar!"
 
+#: trickortreat.py:724
 msgid "🎃 Your candies: {candies} | Trick or Treat v{version}"
 msgstr "🎃 Tus caramelos: {candies} | Trick or Treat v{version}"
 
+#: trickortreat.py:730
+msgid ""
+"Buy items from the Candy Shop.\n"
+"\n"
+"        Items: chocolate, lollipop, cookie, star, shield, golden_candy\n"
+"        "
+msgstr ""
+"Comprar objetos en la tienda de caramelos.\n"
+"\n"
+"        Objetos: chocolate, lollipop, cookie, star, shield, golden_candy\n"
+"        "
+
+#: trickortreat.py:737
 msgid "Unknown item! Available: {items}"
 msgstr "¡Objeto desconocido! Disponibles: {items}"
 
+#: trickortreat.py:741 trickortreat.py:1201 trickortreat.py:1218
+#: trickortreat.py:1232
 msgid "Nice try."
 msgstr "Buen intento."
 
+#: trickortreat.py:751
 msgid "🛡️ You already have an active shield! ({remaining} remaining)"
 msgstr "🛡️ ¡Ya tienes un escudo activo! ({remaining} restante)"
 
-msgid "Not enough candies! You need **{total_cost}** 🍬 but have **{user_candies}** 🍬."
-msgstr "¡No tienes suficientes caramelos! Necesitas **{total_cost}** 🍬 pero tienes **{user_candies}** 🍬."
+#: trickortreat.py:759
+msgid ""
+"Not enough candies! You need **{total_cost}** 🍬 but have **{user_candies}** "
+"🍬."
+msgstr ""
+"¡No tienes suficientes caramelos! Necesitas **{total_cost}** 🍬 pero tienes "
+"**{user_candies}** 🍬."
 
+#: trickortreat.py:771
 msgid "🛡️ Shield Activated!"
 msgstr "🛡️ ¡Escudo Activado!"
 
+#: trickortreat.py:772
 msgid ""
 "A magical shield now protects your candy bag!\n"
 "\n"
@@ -265,9 +519,11 @@ msgstr ""
 "⏱️ Duración: **{shield_hours} horas**\n"
 "🍬 Coste: **{total_cost}** caramelos"
 
+#: trickortreat.py:782
 msgid "{emoji} Purchase Complete!"
 msgstr "{emoji} ¡Compra Completada!"
 
+#: trickortreat.py:783
 msgid ""
 "Bought **{amount}** {item_name} for **{total_cost}** 🍬\n"
 "Remaining candies: **{remaining}** 🍬"
@@ -275,27 +531,47 @@ msgstr ""
 "Compraste **{amount}** {item_name} por **{total_cost}** 🍬\n"
 "Caramelos restantes: **{remaining}** 🍬"
 
+#: trickortreat.py:800
+msgid "Show the candy eating leaderboard."
+msgstr "Mostrar la clasificación de caramelos comidos."
+
+#: trickortreat.py:805
 msgid "No one has any candy."
 msgstr "Nadie tiene caramelos."
 
+#: trickortreat.py:815
 msgid "Candies Eaten"
 msgstr "Caramelos Comidos"
 
+#: trickortreat.py:817
 msgid "Name"
 msgstr "Nombre"
 
-msgid "\N{CANDY} Global Leaderboard \N{CANDY}"
-msgstr "\N{CANDY} Tabla de Clasificación Global \N{CANDY}"
+#: trickortreat.py:831
+msgid "User {uid}"
+msgstr "Usuario {uid}"
 
+#: trickortreat.py:856
+msgid "🍬 Global Leaderboard 🍬"
+msgstr "🍬 Clasificación global 🍬"
+
+#: trickortreat.py:859
 msgid "🎃 Page {current}/{total} | Trick or Treat v{version}"
 msgstr "🎃 Página {current}/{total} | Trick or Treat v{version}"
 
+#: trickortreat.py:873
+msgid "Check your candy bag — full inventory with stats!"
+msgstr "Mira tu bolsa de caramelos: ¡inventario completo con estadísticas!"
+
+#: trickortreat.py:892
 msgid "🎃 {name}'s Candy Bag"
 msgstr "🎃 Bolsa de Caramelos de {name}"
 
+#: trickortreat.py:905
 msgid "🍬 Inventory"
 msgstr "🍬 Inventario"
 
+#: trickortreat.py:910
 msgid ""
 "\n"
 "⚠️ *Rewards quartered! You might lose candy...*"
@@ -303,6 +579,7 @@ msgstr ""
 "\n"
 "⚠️ *¡Recompensas divididas entre 4! Podrías perder caramelos...*"
 
+#: trickortreat.py:912
 msgid ""
 "\n"
 "⚠️ *Rewards halved! Eat chocolate to recover.*"
@@ -310,6 +587,7 @@ msgstr ""
 "\n"
 "⚠️ *¡Recompensas a la mitad! Come chocolate para recuperarte.*"
 
+#: trickortreat.py:914
 msgid ""
 "\n"
 "😨 *You really don't feel so good...*"
@@ -317,6 +595,7 @@ msgstr ""
 "\n"
 "😨 *Realmente no te sientes nada bien...*"
 
+#: trickortreat.py:916
 msgid ""
 "\n"
 "😰 *You don't feel so great...*"
@@ -324,24 +603,57 @@ msgstr ""
 "\n"
 "😰 *No te sientes muy bien...*"
 
+#: trickortreat.py:917
 msgid "💊 Sickness"
 msgstr "💊 Enfermedad"
 
+#: trickortreat.py:923
+msgid ""
+"{streak_emoji} **Streak:** {streak} day{value} (×{multiplier:.1f} bonus)"
+msgstr ""
+"{streak_emoji} **Racha:** {streak} día{value} (bonus ×{multiplier:.1f})"
+
+#: trickortreat.py:925
+msgid "🏆 **Best Streak:** {best_streak} days"
+msgstr "🏆 **Mejor racha:** {best_streak} días"
+
+#: trickortreat.py:928
 msgid "🛡️ **Shield:** ✅ Active ({remaining} left)"
 msgstr "🛡️ **Escudo:** ✅ Activo ({remaining} restante)"
 
+#: trickortreat.py:930
 msgid "📋 Status"
 msgstr "📋 Estado"
 
+#: trickortreat.py:934
+msgid "🍬 **Eaten:** {value}"
+msgstr "🍬 **Comidos:** {value}"
+
+#: trickortreat.py:935
+msgid "🎭 **Tricks:** {get} │ **Treats:** {get2}"
+msgstr "🎭 **Trucos:** {get} │ **Tratos:** {get2}"
+
+#: trickortreat.py:936
+msgid "🗡️ **Stolen:** {value} │ **Lost:** {value2}"
+msgstr "🗡️ **Robados:** {value} │ **Perdidos:** {value2}"
+
+#: trickortreat.py:938
 msgid "📊 Stats"
 msgstr "📊 Estadísticas"
 
+#: trickortreat.py:951
+msgid "📖 Full game guide for Trick or Treat."
+msgstr "📖 Guía completa de Truco o trato."
+
+#: trickortreat.py:954
 msgid "🎃 Page {current}/{total} — Trick or Treat v{version}"
 msgstr "🎃 Página {current}/{total} — Trick or Treat v{version}"
 
+#: trickortreat.py:958
 msgid "📖 Guide — How to Play?"
 msgstr "📖 Guía — ¿Cómo jugar?"
 
+#: trickortreat.py:959
 msgid ""
 "Welcome to **Trick or Treat**! 🎃\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -369,9 +681,11 @@ msgstr ""
 "\n"
 "Usa `{p}cinventory` para ver tu inventario y `{p}cboard` para la tabla."
 
+#: trickortreat.py:975
 msgid "🍬 Guide — Candy Types"
 msgstr "🍬 Guía — Tipos de Caramelos"
 
+#: trickortreat.py:976
 msgid ""
 "Each candy type has a special effect when eaten:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -407,12 +721,23 @@ msgstr ""
 "\n"
 "🌶️ **Pimiento Fantasma** — *ULTRA RARO*. Resetea enfermedad a **0** al comerlo."
 
+#: trickortreat.py:989
 msgid "📝 How to eat"
 msgstr "📝 Cómo comer"
 
+#: trickortreat.py:990
+msgid ""
+"`{p}eatcandy [amount] [type]`\n"
+"Examples: `{p}eatcandy 3 chocolate` · `{p}eatcandy star`"
+msgstr ""
+"`{p}eatcandy [cantidad] [tipo]`\n"
+"Ejemplos: `{p}eatcandy 3 chocolate` · `{p}eatcandy star`"
+
+#: trickortreat.py:998
 msgid "💊 Guide — Sickness System"
 msgstr "💊 Guía — Sistema de Enfermedad"
 
+#: trickortreat.py:999
 msgid ""
 "Sickness rises when you eat candies and affects your rewards:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -444,15 +769,23 @@ msgstr ""
 "🍫 Chocolates (-10) · 🍭 Piruletas (-20) · ⭐ Estrellas (reset) · 🌶️ Pimientos Fantasma (reset)\n"
 "También te recuperas un poco pasivamente al chatear en canales de ToT."
 
+#: trickortreat.py:1013
 msgid "💡 Tip"
 msgstr "💡 Consejo"
 
-msgid "Don't let sickness go above 80. Buy cures from the shop if you don't get them as bonus drops."
-msgstr "No dejes subir la enfermedad por encima de 80. Compra curas en la tienda si no te salen de bonus."
+#: trickortreat.py:1014
+msgid ""
+"Don't let sickness go above 80. Buy cures from the shop if you don't get "
+"them as bonus drops."
+msgstr ""
+"No dejes subir la enfermedad por encima de 80. Compra curas en la tienda si "
+"no te salen de bonus."
 
+#: trickortreat.py:1022
 msgid "🏪 Guide — Shop & Shield"
 msgstr "🏪 Guía — Tienda y Escudo"
 
+#: trickortreat.py:1023
 msgid ""
 "Spend your candies at the shop to buy useful items:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -478,15 +811,25 @@ msgstr ""
 "🛡️ **Escudo** — 75 🍬 · Protección contra robos\n"
 "✨ **Caramelo Dorado** — 200 🍬 · 10× puntuación, sin enfermedad\n"
 
+#: trickortreat.py:1035
 msgid "🛡️ What does the Shield do?"
 msgstr "🛡️ ¿Qué hace el Escudo?"
 
-msgid "The shield protects your candy bag from theft via `stealcandy`. It lasts several hours (configurable by admins). You can only have **1 active** at a time."
-msgstr "El escudo protege tu bolsa de caramelos contra robos con `stealcandy`. Dura varias horas (configurable por admins). Solo puedes tener **1 activo** a la vez."
+#: trickortreat.py:1036
+msgid ""
+"The shield protects your candy bag from theft via `stealcandy`. It lasts "
+"several hours (configurable by admins). You can only have **1 active** at a "
+"time."
+msgstr ""
+"El escudo protege tu bolsa de caramelos contra robos con `stealcandy`. Dura "
+"varias horas (configurable por admins). Solo puedes tener **1 activo** a la "
+"vez."
 
+#: trickortreat.py:1045
 msgid "🔥 Guide — Streaks, Stealing & Rare Items"
 msgstr "🔥 Guía — Rachas, Robos e Ítems Raros"
 
+#: trickortreat.py:1046
 msgid ""
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
 "\n"
@@ -526,12 +869,15 @@ msgstr ""
 "✨ **Caramelo Dorado** (0.5%) — Vale ×10 al comerlo.\n"
 "🌶️ **Pimiento Fantasma** (0.3%) — Resetea tu enfermedad.\n"
 
+#: trickortreat.py:1068
 msgid "📋 Guide — Command List"
 msgstr "📋 Guía — Lista de Comandos"
 
+#: trickortreat.py:1073
 msgid "🎮 Player"
 msgstr "🎮 Jugador"
 
+#: trickortreat.py:1074
 msgid ""
 "`trick or treat` — Go door to door\n"
 "`{p}eatcandy [n] [type]` — Eat candy\n"
@@ -543,23 +889,27 @@ msgid ""
 "`{p}buycandy <n>` — Buy candy with bot currency\n"
 "`{p}pickup` — Pick up candy from the ground\n"
 "`{p}stealcandy [@user]` — Steal candy\n"
+"`{p}totevent` — View current event progress\n"
 "`{p}tothelp` — This guide"
 msgstr ""
-"`trick or treat` — Ir de puerta en puerta\n"
+"`trick or treat` — Ir puerta por puerta\n"
 "`{p}eatcandy [n] [tipo]` — Comer caramelos\n"
 "`{p}cinventory` — Ver tu inventario\n"
 "`{p}totstats [@usuario]` — Estadísticas detalladas\n"
-"`{p}cboard` — Tabla de comidos global\n"
+"`{p}cboard` — Clasificación global de comidos\n"
 "`{p}totshop` — Ver la tienda\n"
-"`{p}totbuy <objeto> [n]` — Comprar de la tienda\n"
-"`{p}buycandy <n>` — Comprar caramelos con moneda del bot\n"
+"`{p}totbuy <objeto> [n]` — Comprar en la tienda\n"
+"`{p}buycandy <n>` — Comprar caramelos con la moneda del bot\n"
 "`{p}pickup` — Recoger caramelos del suelo\n"
 "`{p}stealcandy [@usuario]` — Robar caramelos\n"
+"`{p}totevent` — Ver el progreso del evento\n"
 "`{p}tothelp` — Esta guía"
 
+#: trickortreat.py:1089
 msgid "🔧 Admin / Mod"
 msgstr "🔧 Admin / Mod"
 
+#: trickortreat.py:1090
 msgid ""
 "`{p}tottoggle` — Toggle the game on/off\n"
 "`{p}totchannel add/remove` — Game channels\n"
@@ -571,106 +921,221 @@ msgid ""
 "`{p}totaddcandies <n>` — Add to pool\n"
 "`{p}totgivecandy @user type n` — Give candy\n"
 "`{p}totremovecandy @user type n` — Remove candy\n"
-"`{p}totevent start/status/stop` — Guild events"
+"`{p}totevent start/stop` — Start/stop events\n"
+"`{p}totevent reward/goal <n>` — Adjust event"
 msgstr ""
-"`{p}tottoggle` — Activar/desactivar el juego\n"
+"`{p}tottoggle` — Activar o desactivar el juego\n"
 "`{p}totchannel add/remove` — Canales del juego\n"
-"`{p}totcooldown [s]` — Cooldown de trick or treat\n"
-"`{p}totpickupcooldown [s]` — Cooldown de pickup\n"
-"`{p}totstealcooldown [s]` — Cooldown de steal\n"
+"`{p}totcooldown [s]` — Espera de truco o trato\n"
+"`{p}totpickupcooldown [s]` — Espera de recoger\n"
+"`{p}totstealcooldown [s]` — Espera de robar\n"
 "`{p}totshieldhours [h]` — Duración del escudo\n"
-"`{p}totbalance` — Caramelos en el pool\n"
-"`{p}totaddcandies <n>` — Añadir al pool\n"
-"`{p}totgivecandy @user tipo n` — Dar caramelos\n"
-"`{p}totremovecandy @user tipo n` — Quitar caramelos\n"
-"`{p}totevent start/status/stop` — Eventos del servidor"
+"`{p}totbalance` — Caramelos en el bote\n"
+"`{p}totaddcandies <n>` — Añadir al bote\n"
+"`{p}totgivecandy @usuario tipo n` — Dar caramelos\n"
+"`{p}totremovecandy @usuario tipo n` — Quitar caramelos\n"
+"`{p}totevent start/stop` — Empezar/detener eventos\n"
+"`{p}totevent reward/goal <n>` — Ajustar el evento"
 
+#: trickortreat.py:1117
+msgid "View detailed trick-or-treat statistics."
+msgstr "Ver estadísticas detalladas de truco o trato."
+
+#: trickortreat.py:1129
 msgid "📊 {name}'s Statistics"
 msgstr "📊 Estadísticas de {name}"
 
+#: trickortreat.py:1135
 msgid "🍬 Candy Stats"
 msgstr "🍬 Estadísticas de Caramelos"
 
+#: trickortreat.py:1136
+msgid ""
+"Total Eaten: **{value}**\n"
+"Current Candies: **{value2}**\n"
+"Sickness: {value3} **{get}**/100"
+msgstr ""
+"Total comidos: **{value}**\n"
+"Caramelos actuales: **{value2}**\n"
+"Mareo: {value3} **{get}**/100"
+
+#: trickortreat.py:1142
 msgid "🔥 Streaks"
 msgstr "🔥 Rachas"
 
+#: trickortreat.py:1143
+msgid ""
+"Current: **{streak}** day{value}\n"
+"Best: **{best_streak}** day{value2}\n"
+"Multiplier: **×{value3:.1f}**"
+msgstr ""
+"Actual: **{streak}** día{value}\n"
+"Mejor: **{best_streak}** día{value2}\n"
+"Multiplicador: **×{value3:.1f}**"
+
+#: trickortreat.py:1149
 msgid "🎭 Trick or Treat"
 msgstr "🎭 Trick or Treat"
 
+#: trickortreat.py:1150
+msgid ""
+"Total Visits: **{total_visits}**\n"
+"Treats: **{treats}** ({treat_pct}%)\n"
+"Tricks: **{tricks}** ({value}%)"
+msgstr ""
+"Visitas totales: **{total_visits}**\n"
+"Tratos: **{treats}** ({treat_pct}%)\n"
+"Trucos: **{tricks}** ({value}%)"
+
+#: trickortreat.py:1156
 msgid "🗡️ Theft Record"
 msgstr "🗡️ Registro de Robos"
 
+#: trickortreat.py:1157
+msgid ""
+"Stolen from others: **{value}** 🍬\n"
+"Lost to theft: **{value2}** 🍬"
+msgstr ""
+"Robados a otros: **{value}** 🍬\n"
+"Perdidos por robos: **{value2}** 🍬"
+
+#: trickortreat.py:1168
+msgid "✨ Golden Candies: **{golden}**\n"
+msgstr "✨ Caramelos dorados: **{golden}**\n"
+
+#: trickortreat.py:1170
+msgid "🌶️ Ghost Peppers: **{peppers}**\n"
+msgstr "🌶️ Chiles fantasma: **{peppers}**\n"
+
+#: trickortreat.py:1171
 msgid "💎 Rare Items"
 msgstr "💎 Objetos Raros"
 
+#: trickortreat.py:1175
 msgid "🛡️ Shield"
 msgstr "🛡️ Escudo"
 
+#: trickortreat.py:1175
 msgid "✅ Active ({remaining} left)"
 msgstr "✅ Activo ({remaining} restante)"
 
+#: trickortreat.py:1187
+msgid "[Owner] Clear all saved game data."
+msgstr "[Owner] Borrar todos los datos guardados del juego."
+
+#: trickortreat.py:1189
 msgid ""
 "This will clear ALL saved data for this cog and reset it to the defaults.\n"
 msgstr ""
-"Esto borrará TODOS los datos guardados de este cog y los reseteará a los valores por defecto.\n"
+"Esto borrará TODOS los datos guardados de este cog y los reseteará a los "
+"valores por defecto.\n"
 
-msgid "If you are absolutely sure you want to do this, use `{prefix}totclearall yes`."
-msgstr "Si estás absolutamente seguro de querer hacer esto, usa `{prefix}totclearall yes`."
+#: trickortreat.py:1190
+msgid ""
+"If you are absolutely sure you want to do this, use `{prefix}totclearall "
+"yes`."
+msgstr ""
+"Si estás absolutamente seguro de querer hacer esto, usa `{prefix}totclearall"
+" yes`."
 
+#: trickortreat.py:1193
 msgid "All data for this cog has been cleared."
 msgstr "Todos los datos de este cog han sido borrados."
 
+#: trickortreat.py:1199
+msgid "Set the cooldown time for trick or treating on the server."
+msgstr "Fijar el tiempo de espera de truco o trato en el servidor."
+
+#: trickortreat.py:1204
 msgid "Trick or treating cooldown time reset to 5m."
 msgstr "Cooldown de trick or treat reseteado a 5m."
 
+#: trickortreat.py:1207
 msgid "Trick or treating cooldown time set to the minimum of 30s."
 msgstr "Cooldown de trick or treat establecido al mínimo de 30s."
 
+#: trickortreat.py:1210
 msgid "Trick or treating cooldown time set to {cooldown_time}s."
 msgstr "Cooldown de trick or treat establecido en {cooldown_time}s."
 
+#: trickortreat.py:1216
+msgid "Set the cooldown time for the pickup command (default: 600s)."
+msgstr "Fijar el tiempo de espera del comando pickup (por defecto: 600 s)."
+
+#: trickortreat.py:1221
 msgid "Pickup cooldown reset to 10m (600s)."
 msgstr "Cooldown de pickup reseteado a 10m (600s)."
 
+#: trickortreat.py:1224
 msgid "Pickup cooldown set to {val}s."
 msgstr "Cooldown de pickup establecido en {val}s."
 
+#: trickortreat.py:1230
+msgid "Set the cooldown time for the stealcandy command (default: 600s)."
+msgstr ""
+"Fijar el tiempo de espera del comando stealcandy (por defecto: 600 s)."
+
+#: trickortreat.py:1235
 msgid "Steal cooldown reset to 10m (600s)."
 msgstr "Cooldown de steal reseteado a 10m (600s)."
 
+#: trickortreat.py:1238
 msgid "Steal cooldown set to {val}s."
 msgstr "Cooldown de steal establecido en {val}s."
 
+#: trickortreat.py:1244
+msgid "Set how many hours a shield lasts (default: 4)."
+msgstr "Fijar cuántas horas dura un escudo (por defecto: 4)."
+
+#: trickortreat.py:1247
 msgid "Shield duration reset to 4 hours."
 msgstr "Duración del escudo reseteada a 4 horas."
 
+#: trickortreat.py:1249
 msgid "Shield duration set to {hours} hours."
 msgstr "Duración del escudo establecida en {hours} horas."
 
+#: trickortreat.py:1258
+msgid "Pick up some candy, if there is any."
+msgstr "Recoger caramelos del suelo, si hay."
+
+#: trickortreat.py:1266
 msgid "You need to wait {remaining}s before picking up candy again."
 msgstr "Debes esperar {remaining}s antes de recoger caramelos de nuevo."
 
+#: trickortreat.py:1274 trickortreat.py:1284
 msgid "You start searching the area for candy..."
 msgstr "Empiezas a buscar caramelos por la zona..."
 
+#: trickortreat.py:1278
 msgid "There's no candy left on the ground!"
 msgstr "¡No quedan caramelos en el suelo!"
 
+#: trickortreat.py:1288
 msgid "You found {found} 🍬!"
 msgstr "¡Encontraste {found} 🍬!"
 
+#: trickortreat.py:1293
+msgid "Steal some candy. Beware of shields!"
+msgstr "Robar caramelos. ¡Cuidado con los escudos!"
+
+#: trickortreat.py:1301
 msgid "You need to wait {remaining}s before stealing again."
 msgstr "Debes esperar {remaining}s antes de robar de nuevo."
 
+#: trickortreat.py:1310
 msgid "No one has any candy yet!"
 msgstr "¡Nadie tiene caramelos todavía!"
 
+#: trickortreat.py:1320
 msgid "You couldn't find anyone to steal from."
 msgstr "No pudiste encontrar a nadie a quien robar."
 
+#: trickortreat.py:1328
 msgid "🛡️ Shield Blocked!"
 msgstr "🛡️ ¡Escudo Bloqueó!"
 
+#: trickortreat.py:1329
 msgid ""
 "You tried to steal from **{name}**, but their candy bag\n"
 "is protected by a **magical shield**! ✨\n"
@@ -682,63 +1147,103 @@ msgstr ""
 "\n"
 "El escudo expira en: {remaining}"
 
+#: trickortreat.py:1345 trickortreat.py:1385 trickortreat.py:1412
 msgid "You snuck around for a while but didn't find anything."
 msgstr "Merodeaste un rato pero no encontraste nada."
 
+#: trickortreat.py:1354 trickortreat.py:1363
 msgid "You see an unsuspecting guildmate..."
 msgstr "Ves a un miembro del servidor desprevenido..."
 
-msgid "There was nothing in {user1}'s pockets, so you picked {user2}'s pockets but they had no candy either!"
-msgstr "No había nada en los bolsillos de {user1}, así que revisaste los de {user2}, ¡pero tampoco tenía caramelos!"
+#: trickortreat.py:1359
+msgid ""
+"There was nothing in {user1}'s pockets, so you picked {user2}'s pockets but "
+"they had no candy either!"
+msgstr ""
+"No había nada en los bolsillos de {user1}, así que revisaste los de {user2},"
+" ¡pero tampoco tenía caramelos!"
 
-msgid "There was nothing in {user1}'s pockets, so you looked around again... you saw {user2} in the distance, but you didn't think you could catch up..."
-msgstr "No había nada en los bolsillos de {user1}, así que miraste de nuevo... viste a {user2} a lo lejos, pero no creíste poder alcanzarle..."
+#: trickortreat.py:1368
+msgid ""
+"There was nothing in {user1}'s pockets, so you looked around again... you "
+"saw {user2} in the distance, but you didn't think you could catch up..."
+msgstr ""
+"No había nada en los bolsillos de {user1}, así que miraste de nuevo... viste"
+" a {user2} a lo lejos, pero no creíste poder alcanzarle..."
 
+#: trickortreat.py:1372
 msgid "You start sneaking around in the shadows..."
 msgstr "Empiezas a acechar entre las sombras..."
 
-msgid "You snuck up on {user} and tried picking their pockets but there was nothing there!"
-msgstr "Te acercaste sigilosamente a {user} e intentaste robarle, ¡pero no había nada!"
+#: trickortreat.py:1377
+msgid ""
+"You snuck up on {user} and tried picking their pockets but there was nothing"
+" there!"
+msgstr ""
+"Te acercaste sigilosamente a {user} e intentaste robarle, ¡pero no había "
+"nada!"
 
+#: trickortreat.py:1381
 msgid "You start looking around for a target..."
 msgstr "Empiezas a buscar un objetivo..."
 
+#: trickortreat.py:1394
 msgid "You stealthily move over to an unsuspecting person..."
 msgstr "Te acercas sigilosamente a una persona desprevenida..."
 
+#: trickortreat.py:1398
 msgid "You found someone to pickpocket, but they had nothing but pocket lint."
-msgstr "Encontraste a alguien a quien robar, pero solo tenía pelusa en los bolsillos."
+msgstr ""
+"Encontraste a alguien a quien robar, pero solo tenía pelusa en los "
+"bolsillos."
 
+#: trickortreat.py:1402
 msgid "You look around furtively..."
 msgstr "Miras a tu alrededor furtivamente..."
 
+#: trickortreat.py:1403
 msgid "You glance around slowly, looking for your target..."
 msgstr "Miras lentamente a tu alrededor, buscando tu objetivo..."
 
+#: trickortreat.py:1404
 msgid "You see someone with a full candy bag..."
 msgstr "Ves a alguien con una bolsa llena de caramelos..."
 
+#: trickortreat.py:1408
 msgid "You creep closer to the target..."
 msgstr "Te acercas sigilosamente al objetivo..."
 
+#: trickortreat.py:1426
 msgid "You hear a sound behind you! When you turn back, your target is gone."
-msgstr "¡Escuchas un sonido detrás de ti! Cuando te giras, tu objetivo ha desaparecido."
+msgstr ""
+"¡Escuchas un sonido detrás de ti! Cuando te giras, tu objetivo ha "
+"desaparecido."
 
+#: trickortreat.py:1427
 msgid "You look away for a moment and your target has vanished."
 msgstr "Apartas la mirada un momento y tu objetivo ha desaparecido."
 
-msgid "Something flashes in your peripheral vision, and as you turn to look, your target gets away..."
-msgstr "Algo destella en tu visión periférica, y cuando te giras a mirar, tu objetivo escapa..."
+#: trickortreat.py:1428
+msgid ""
+"Something flashes in your peripheral vision, and as you turn to look, your "
+"target gets away..."
+msgstr ""
+"Algo destella en tu visión periférica, y cuando te giras a mirar, tu "
+"objetivo escapa..."
 
+#: trickortreat.py:1452
 msgid "There seems to be an unsuspecting victim in the corner..."
 msgstr "Parece haber una víctima desprevenida en la esquina..."
 
+#: trickortreat.py:1454
 msgid "You stole {stolen} 🍬 from {user}!"
 msgstr "¡Robaste {stolen} 🍬 de {user}!"
 
+#: trickortreat.py:1459
 msgid "🗡️ Candy Theft Alert!"
 msgstr "🗡️ ¡Alerta de Robo de Caramelos!"
 
+#: trickortreat.py:1460
 msgid ""
 "**{thief}** just stole **{stolen}** 🍬 from your bag!\n"
 "\n"
@@ -752,31 +1257,84 @@ msgstr ""
 "\n"
 "*¡Compra un 🛡️ Escudo en la tienda para protegerte!*"
 
-msgid ""
-"No active event. Use `{prefix}totevent start <type> <goal>` to start one!\n"
-"Event types: {event_types}"
-msgstr ""
-"No hay evento activo. ¡Usa `{prefix}totevent start <tipo> <meta>` para iniciar uno!\n"
-"Tipos de evento: {event_types}"
+#: trickortreat.py:1478
+msgid "View or manage guild-wide trick-or-treat events!"
+msgstr "¡Ver o gestionar eventos de truco o trato de todo el servidor!"
 
+#: trickortreat.py:1481
+msgid "❌ No active event right now."
+msgstr "❌ Ahora mismo no hay ningún evento activo."
+
+#: trickortreat.py:1496
 msgid "🎃 Guild Event — {desc}"
 msgstr "🎃 Evento del Servidor — {desc}"
 
+#: trickortreat.py:1497
+msgid ""
+"**Goal:** {get} {title} **{value}** candies!\n"
+"\n"
+"**Progress:**\n"
+"{bar} **{value2}**/{value} ({pct}%)\n"
+"\n"
+"**Reward:** {value3} 🍬 per participant\n"
+"\n"
+"{value4}"
+msgstr ""
+"**Objetivo:** {get} {title} ¡**{value}** caramelos!\n"
+"\n"
+"**Progreso:**\n"
+"{bar} **{value2}**/{value} ({pct}%)\n"
+"\n"
+"**Premio:** {value3} 🍬 por participante\n"
+"\n"
+"{value4}"
+
+#: trickortreat.py:1500
+msgid "🎉 *Almost there! Keep going!*"
+msgstr "🎉 *¡Casi lo tenéis! ¡Seguid así!*"
+
+#: trickortreat.py:1500
+msgid "💪 *Keep going!*"
+msgstr "💪 *¡Seguid así!*"
+
+#: trickortreat.py:1508
+msgid ""
+"Start a guild event!\n"
+"\n"
+"        Types: eat, collect, steal\n"
+"        Example: [p]totevent start eat 5000 100\n"
+"        "
+msgstr ""
+"¡Empezar un evento del servidor!\n"
+"\n"
+"        Tipos: eat, collect, steal\n"
+"        Ejemplo: [p]totevent start eat 5000 100\n"
+"        "
+
+#: trickortreat.py:1515
 msgid "Invalid event type! Choose from: {types}"
 msgstr "¡Tipo de evento inválido! Elige entre: {types}"
 
+#: trickortreat.py:1517 trickortreat.py:1589
 msgid "Goal must be positive!"
 msgstr "¡La meta debe ser positiva!"
 
+#: trickortreat.py:1519 trickortreat.py:1571
 msgid "Reward must be positive!"
 msgstr "¡La recompensa debe ser positiva!"
 
-msgid "An event is already active! Use `{prefix}totevent stop` to cancel it first."
-msgstr "¡Ya hay un evento activo! Usa `{prefix}totevent stop` para cancelarlo primero."
+#: trickortreat.py:1521
+msgid ""
+"An event is already active! Use `{prefix}totevent stop` to cancel it first."
+msgstr ""
+"¡Ya hay un evento activo! Usa `{prefix}totevent stop` para cancelarlo "
+"primero."
 
+#: trickortreat.py:1531
 msgid "🎃 New Guild Event Started!"
 msgstr "🎃 ¡Nuevo Evento del Servidor!"
 
+#: trickortreat.py:1532
 msgid ""
 "**{desc}**\n"
 "\n"
@@ -792,23 +1350,79 @@ msgstr ""
 "\n"
 "*¡El progreso de todos cuenta! ¡Trabajen juntos!* 🎃"
 
+#: trickortreat.py:1546
+msgid "Check the current event progress."
+msgstr "Ver el progreso del evento actual."
+
+#: trickortreat.py:1548 trickortreat.py:1569 trickortreat.py:1587
 msgid "No active event right now."
 msgstr "No hay evento activo ahora mismo."
 
+#: trickortreat.py:1554
+msgid "Stop the current guild event."
+msgstr "Detener el evento actual del servidor."
+
+#: trickortreat.py:1556
 msgid "No active event to stop."
 msgstr "No hay evento activo que detener."
 
+#: trickortreat.py:1558
 msgid "🎃 Event Cancelled"
 msgstr "🎃 Evento Cancelado"
 
+#: trickortreat.py:1558
 msgid "The guild event has been cancelled."
 msgstr "El evento del servidor ha sido cancelado."
 
+#: trickortreat.py:1564
 msgid ""
-"Trick or Treat Channels:\n"
+"Change the reward for the current event.\n"
+"\n"
+"        Example: [p]totevent reward 200\n"
+"        "
 msgstr ""
-"Canales de Trick or Treat:\n"
+"Cambiar el premio del evento actual.\n"
+"\n"
+"        Ejemplo: [p]totevent reward 200\n"
+"        "
 
+#: trickortreat.py:1574
+msgid "✅ Event reward updated to **{reward}** 🍬 per participant!"
+msgstr "✅ ¡Premio del evento actualizado a **{reward}** 🍬 por participante!"
+
+#: trickortreat.py:1582
+msgid ""
+"Change the goal for the current event.\n"
+"\n"
+"        Example: [p]totevent goal 10000\n"
+"        "
+msgstr ""
+"Cambiar el objetivo del evento actual.\n"
+"\n"
+"        Ejemplo: [p]totevent goal 10000\n"
+"        "
+
+#: trickortreat.py:1593
+msgid "Goal must be higher than current progress ({progress})!"
+msgstr "¡El objetivo debe ser mayor que el progreso actual ({progress})!"
+
+#: trickortreat.py:1599
+msgid "✅ Event goal updated to **{goal}**!"
+msgstr "✅ ¡Objetivo del evento actualizado a **{goal}**!"
+
+#: trickortreat.py:1610
+msgid "Channel management for Trick or Treat."
+msgstr "Gestión de canales de Truco o trato."
+
+#: trickortreat.py:1614
+msgid "Trick or Treat Channels:\n"
+msgstr "Canales de Trick or Treat:\n"
+
+#: trickortreat.py:1624
+msgid "Add a text channel for Trick or Treating."
+msgstr "Añadir un canal de texto para Truco o trato."
+
+#: trickortreat.py:1629
 msgid ""
 "\n"
 "The game toggle for this server is **Off**. Turn it on with the `{prefix}tottoggle` command."
@@ -816,119 +1430,184 @@ msgstr ""
 "\n"
 "El juego está **Desactivado** en este servidor. Actívalo con el comando `{prefix}tottoggle`."
 
+#: trickortreat.py:1637
 msgid "{channel} added to the valid Trick or Treat channels.{toggle_info}"
-msgstr "{channel} añadido a los canales válidos de Trick or Treat.{toggle_info}"
+msgstr ""
+"{channel} añadido a los canales válidos de Trick or Treat.{toggle_info}"
 
-msgid "{channel} is already in the list of Trick or Treat channels.{toggle_info}"
-msgstr "{channel} ya está en la lista de canales de Trick or Treat.{toggle_info}"
+#: trickortreat.py:1639
+msgid ""
+"{channel} is already in the list of Trick or Treat channels.{toggle_info}"
+msgstr ""
+"{channel} ya está en la lista de canales de Trick or Treat.{toggle_info}"
 
+#: trickortreat.py:1644
+msgid "Remove a text channel from Trick or Treating."
+msgstr "Quitar un canal de texto de Truco o trato."
+
+#: trickortreat.py:1649
 msgid "{channel} not in whitelist."
 msgstr "{channel} no está en la lista blanca."
 
+#: trickortreat.py:1652
 msgid "{channel} removed from the list of Trick or Treat channels."
 msgstr "{channel} eliminado de la lista de canales de Trick or Treat."
 
-msgid ""
-"Trick or Treating active: {status}.\n"
-msgstr ""
-"Trick or Treat activo: {status}.\n"
+#: trickortreat.py:1658
+msgid "Toggle trick or treating on the whole server."
+msgstr "Activar o desactivar truco o trato en todo el servidor."
 
+#: trickortreat.py:1660
+msgid "Trick or Treating active: {status}.\n"
+msgstr "Trick or Treat activo: {status}.\n"
+
+#: trickortreat.py:1665
 msgid "Trick or Treating channel added: {channel}"
 msgstr "Canal de Trick or Treat añadido: {channel}"
 
-msgid "Added {amount} 🍬 to the pool. Now there are {total} 🍬 available to pick up."
-msgstr "Se han añadido {amount} 🍬 al pool. Ahora hay {total} 🍬 disponibles para recoger."
+#: trickortreat.py:1674
+msgid "Add candies to the guild pool."
+msgstr "Añadir caramelos al bote del servidor."
 
+#: trickortreat.py:1679
+msgid ""
+"Added {amount} 🍬 to the pool. Now there are {total} 🍬 available to pick up."
+msgstr ""
+"Se han añadido {amount} 🍬 al pool. Ahora hay {total} 🍬 disponibles para "
+"recoger."
+
+#: trickortreat.py:1684
+msgid "Trick or Treat version."
+msgstr "Versión de Truco o trato."
+
+#: trickortreat.py:1685
 msgid "Trick or Treat version {version}"
 msgstr "Trick or Treat versión {version}"
 
+#: trickortreat.py:1743
 msgid "The thought of candy right now doesn't really sound like a good idea."
 msgstr "La idea de caramelos ahora mismo no suena como una buena idea."
 
+#: trickortreat.py:1744
 msgid "All the lights on this street are dark..."
 msgstr "Todas las luces de esta calle están apagadas..."
 
+#: trickortreat.py:1745
 msgid "It's starting to get late."
 msgstr "Se está haciendo tarde."
 
+#: trickortreat.py:1746
 msgid "The wind howls through the trees. Does it seem darker all of a sudden?"
 msgstr "El viento aúlla entre los árboles. ¿De repente parece más oscuro?"
 
+#: trickortreat.py:1747
 msgid "You start to walk the long distance to the next house..."
 msgstr "Empiezas a caminar la larga distancia hasta la siguiente casa..."
 
+#: trickortreat.py:1748
 msgid "You take a moment to count your candy before moving on."
 msgstr "Te tomas un momento para contar tus caramelos antes de continuar."
 
+#: trickortreat.py:1749
 msgid "The house you were approaching just turned the light off."
 msgstr "La casa a la que te acercabas acaba de apagar la luz."
 
+#: trickortreat.py:1750
 msgid "The wind starts to pick up as you look for the next house..."
 msgstr "El viento empieza a soplar mientras buscas la siguiente casa..."
 
+#: trickortreat.py:1780
 msgid "*You hear footsteps...*"
 msgstr "*Escuchas pasos...*"
 
-msgid "*You're left alone with your thoughts as you wait for the door to open...*"
-msgstr "*Te quedas solo con tus pensamientos mientras esperas a que se abra la puerta...*"
+#: trickortreat.py:1781
+msgid ""
+"*You're left alone with your thoughts as you wait for the door to open...*"
+msgstr ""
+"*Te quedas solo con tus pensamientos mientras esperas a que se abra la "
+"puerta...*"
 
+#: trickortreat.py:1782
 msgid "*The wind howls through the trees...*"
 msgstr "*El viento aúlla entre los árboles...*"
 
+#: trickortreat.py:1783
 msgid "*Does it feel colder out here all of a sudden?*"
 msgstr "*¿De repente hace más frío aquí fuera?*"
 
+#: trickortreat.py:1784
 msgid "*Somewhere inside the house, you hear wood creaking...*"
 msgstr "*En algún lugar dentro de la casa, escuchas madera crujiendo...*"
 
+#: trickortreat.py:1785
 msgid "*You walk up the path to the door and knock...*"
 msgstr "*Caminas por el sendero hasta la puerta y tocas...*"
 
+#: trickortreat.py:1786
 msgid "*You knock on the door...*"
 msgstr "*Tocas la puerta...*"
 
+#: trickortreat.py:1787
 msgid "*There's a movement in the shadows by the side of the house...*"
 msgstr "*Hay un movimiento en las sombras al lado de la casa...*"
 
+#: trickortreat.py:1795
 msgid "*The door slowly opens...*"
 msgstr "*La puerta se abre lentamente...*"
 
+#: trickortreat.py:1796
 msgid "*The ancient wooden door starts to open...*"
 msgstr "*La antigua puerta de madera empieza a abrirse...*"
 
+#: trickortreat.py:1797
 msgid "*A light turns on overhead...*"
 msgstr "*Una luz se enciende arriba...*"
 
+#: trickortreat.py:1798
 msgid "*You hear a scuffling noise...*"
 msgstr "*Escuchas un ruido de arrastre...*"
 
+#: trickortreat.py:1799
 msgid "*There's someone talking inside...*"
 msgstr "*Hay alguien hablando dentro...*"
 
+#: trickortreat.py:1800
 msgid "*The wind whips around your feet...*"
 msgstr "*El viento azota tus pies...*"
 
+#: trickortreat.py:1801
 msgid "*A crow caws ominously...*"
 msgstr "*Un cuervo grazna ominosamente...*"
 
+#: trickortreat.py:1802
 msgid "*You hear an owl hooting in the distance...*"
 msgstr "*Escuchas un búho ululando a lo lejos...*"
 
+#: trickortreat.py:1852
 msgid "💔 Lost **{candy_lost}** candies!"
 msgstr "💔 ¡Perdiste **{candy_lost}** caramelos!"
 
+#: trickortreat.py:1855
+msgid "{value} Sickness: **+{sickness_gained}** ({value2} {new_sick}/100)"
+msgstr "{value} Mareo: **+{sickness_gained}** ({value2} {new_sick}/100)"
+
+#: trickortreat.py:1858
 msgid "*Better luck next time...* 👻"
 msgstr "*Mejor suerte la próxima vez...* 👻"
 
+#: trickortreat.py:1866
 msgid "🎃 TRICK! — {name}"
 msgstr "🎃 ¡TRUCO! — {name}"
 
+#: trickortreat.py:1886
 msgid "⚠️ *Sickness penalty: rewards quartered!*"
 msgstr "⚠️ *Penalización por enfermedad: ¡recompensas divididas entre 4!*"
 
+#: trickortreat.py:1894
 msgid "🤮 Too Sick!"
 msgstr "🤮 ¡Demasiado Enfermo!"
 
+#: trickortreat.py:1896
 msgid ""
 "You're so sick that you **dropped** {lost} candies!\n"
 "\n"
@@ -940,44 +1619,82 @@ msgstr ""
 "{face} {bar} **{sickness}**/100\n"
 "*¡Come chocolate o piruletas para recuperarte!*"
 
+#: trickortreat.py:1914
 msgid "⚠️ *Sickness penalty: rewards halved!*"
 msgstr "⚠️ *Penalización por enfermedad: ¡recompensas a la mitad!*"
 
+#: trickortreat.py:1920
 msgid "Oh, hello. What a cute costume!"
 msgstr "Oh, hola. ¡Qué disfraz tan bonito!"
 
+#: trickortreat.py:1921
 msgid "Look at that costume!"
 msgstr "¡Mira ese disfraz!"
 
+#: trickortreat.py:1922
 msgid "Out this late at night?"
 msgstr "¿Fuera a estas horas de la noche?"
 
+#: trickortreat.py:1923
 msgid "Here's a little something for you."
 msgstr "Aquí tienes un detallito."
 
+#: trickortreat.py:1924
 msgid "The peppermint ones are my favorite."
 msgstr "Los de menta son mis favoritos."
 
+#: trickortreat.py:1925
 msgid "Come back again later if the light is still on."
 msgstr "Vuelve más tarde si la luz sigue encendida."
 
+#: trickortreat.py:1926
 msgid "Go ahead, take a few."
 msgstr "Adelante, coge unos cuantos."
 
+#: trickortreat.py:1927
 msgid "Aww, look at you. Here, take this."
 msgstr "Aww, mírate. Toma, llévate esto."
 
+#: trickortreat.py:1928
 msgid "Don't eat all those at once!"
 msgstr "¡No te los comas todos de una vez!"
 
+#: trickortreat.py:1929
 msgid "Well, I think this is the last of it."
 msgstr "Bueno, creo que esto es lo último."
 
+#: trickortreat.py:1937
+msgid " *(×{multiplier:.1f} streak!)*"
+msgstr " *(¡racha ×{multiplier:.1f}!)*"
+
+#: trickortreat.py:1938
+msgid "🍬 **+{candy}** Candies{streak_text}\n"
+msgstr "🍬 **+{candy}** caramelos{streak_text}\n"
+
+#: trickortreat.py:1957
+msgid "✨ **+1 Golden Candy!** *(LEGENDARY!)*"
+msgstr "✨ **¡+1 caramelo dorado!** *(¡LEGENDARIO!)*"
+
+#: trickortreat.py:1963
+msgid "🌶️ **+1 Ghost Pepper!** *(ULTRA RARE!)*"
+msgstr "🌶️ **¡+1 chile fantasma!** *(¡ULTRA RARO!)*"
+
+#: trickortreat.py:1966
 msgid "**Bonus Drops:**"
 msgstr "**Bonus Extra:**"
 
+#: trickortreat.py:1968
 msgid "🌟 **RARE DROPS:**"
 msgstr "🌟 **DROPS RAROS:**"
 
+#: trickortreat.py:1972
+msgid ""
+"\n"
+"🔥 **Streak:** {streak} day{value}"
+msgstr ""
+"\n"
+"🔥 **Racha:** {streak} día{value}"
+
+#: trickortreat.py:1992
 msgid "🎃 TREAT! — {name}"
 msgstr "🎃 ¡DULCE! — {name}"

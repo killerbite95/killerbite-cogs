@@ -9,7 +9,7 @@ import random
 import math
 from discord.ext import tasks
 from redbot.core import commands, checks, Config, bank
-from redbot.core.i18n import Translator, cog_i18n
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
 from redbot.core.utils.chat_formatting import box, pagify, humanize_number
 from redbot.core.utils.menus import menu, DEFAULT_CONTROLS
 from .dashboard_integration import DashboardIntegration
@@ -68,31 +68,36 @@ BONUS_TABLE = {
     ],
 }
 
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
+
+
 # ──── Shop Items ────
 SHOP_ITEMS = {
     "chocolate": {
         "price": 15, "emoji": "🍫", "field": "chocolates",
-        "desc": "Reduces sickness by 10 per piece",
+        "desc": N_("Reduces sickness by 10 per piece"),
     },
     "lollipop": {
         "price": 30, "emoji": "🍭", "field": "lollipops",
-        "desc": "Reduces sickness by 20 per piece",
+        "desc": N_("Reduces sickness by 20 per piece"),
     },
     "cookie": {
         "price": 25, "emoji": "🥠", "field": "cookies",
-        "desc": "Randomizes your sickness — gamble!",
+        "desc": N_("Randomizes your sickness — gamble!"),
     },
     "star": {
         "price": 50, "emoji": "⭐", "field": "stars",
-        "desc": "Instantly resets sickness to 0",
+        "desc": N_("Instantly resets sickness to 0"),
     },
     "shield": {
         "price": 75, "emoji": "🛡️", "field": None,
-        "desc": "Protects you from theft",
+        "desc": N_("Protects you from theft"),
     },
     "golden_candy": {
         "price": 200, "emoji": "✨", "field": "golden_candies",
-        "desc": "Worth 10× eaten count! No sickness.",
+        "desc": N_("Worth 10× eaten count! No sickness."),
     },
 }
 
@@ -100,32 +105,32 @@ SHOP_ITEMS = {
 TRICK_EVENTS = [
     {
         "type": "candy_tax",
-        "title": "🎃 The Candy Tax!",
-        "desc": "A shadowy figure appears from the darkness and demands a toll for passing through their territory...",
+        "title": N_("🎃 The Candy Tax!"),
+        "desc": N_("A shadowy figure appears from the darkness and demands a toll for passing through their territory..."),
         "min_loss": 3, "max_loss": 10,
     },
     {
         "type": "sickness_curse",
-        "title": "🧙 Witch's Curse!",
-        "desc": "A cackling witch leaps from behind a tombstone and hexes you with her crooked wand!",
+        "title": N_("🧙 Witch's Curse!"),
+        "desc": N_("A cackling witch leaps from behind a tombstone and hexes you with her crooked wand!"),
         "sickness_add": 20,
     },
     {
         "type": "haunted_house",
-        "title": "👻 Haunted House!",
-        "desc": "You stumbled into a haunted house! Ghostly hands grab at your candy bag...",
+        "title": N_("👻 Haunted House!"),
+        "desc": N_("You stumbled into a haunted house! Ghostly hands grab at your candy bag..."),
         "sickness_add": 15, "min_loss": 2, "max_loss": 7,
     },
     {
         "type": "candy_fumble",
-        "title": "💨 Butterfingers!",
-        "desc": "You tripped over a jack-o'-lantern and candy scattered everywhere!",
+        "title": N_("💨 Butterfingers!"),
+        "desc": N_("You tripped over a jack-o'-lantern and candy scattered everywhere!"),
         "loss_pct": 0.15,
     },
     {
         "type": "cursed_candy",
-        "title": "☠️ Cursed Candy!",
-        "desc": "That candy had a strange glow... It was cursed! Your stomach churns violently!",
+        "title": N_("☠️ Cursed Candy!"),
+        "desc": N_("That candy had a strange glow... It was cursed! Your stomach churns violently!"),
         "sickness_add": 30,
     },
 ]
@@ -137,9 +142,9 @@ SICKNESS_FACES = [
 
 # ──── Guild Event Types ────
 EVENT_TYPES = {
-    "eat": {"verb": "eaten", "emoji": "🍬", "desc": "Eat candies collectively!"},
-    "collect": {"verb": "collected", "emoji": "🎃", "desc": "Collect candies via trick-or-treat!"},
-    "steal": {"verb": "stolen", "emoji": "🗡️", "desc": "Steal candies from others!"},
+    "eat": {"verb": "eaten", "emoji": "🍬", "desc": N_("Eat candies collectively!")},
+    "collect": {"verb": "collected", "emoji": "🎃", "desc": N_("Collect candies via trick-or-treat!")},
+    "steal": {"verb": "stolen", "emoji": "🗡️", "desc": N_("Steal candies from others!")},
 }
 
 
@@ -823,7 +828,7 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
             else:
                 user_obj = self.bot.get_user(uid)
             if user_obj is None:
-                user_name = f"User {uid}"
+                user_name = _("User {uid}").format(uid=uid)
             elif len(user_obj.display_name) > 28:
                 user_name = f"{user_obj.display_name[:25]}..."
             else:
@@ -915,9 +920,9 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
         status_lines = []
         if streak > 0:
             streak_emoji = "🔥" if streak >= 5 else "📅"
-            status_lines.append(f"{streak_emoji} **Streak:** {streak} day{'s' if streak != 1 else ''} (×{multiplier:.1f} bonus)")
+            status_lines.append(_("{streak_emoji} **Streak:** {streak} day{value} (×{multiplier:.1f} bonus)").format(streak_emoji=streak_emoji, streak=streak, value='s' if streak != 1 else '', multiplier=multiplier))
         if best_streak > 0:
-            status_lines.append(f"🏆 **Best Streak:** {best_streak} days")
+            status_lines.append(_("🏆 **Best Streak:** {best_streak} days").format(best_streak=best_streak))
         if await self._check_shield(ctx.author):
             remaining = await self._shield_remaining(ctx.author)
             status_lines.append(_("🛡️ **Shield:** ✅ Active ({remaining} left)").format(remaining=remaining))
@@ -926,9 +931,9 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
 
         # Stats
         stats_lines = [
-            f"🍬 **Eaten:** {humanize_number(userdata.get('eaten', 0))}",
-            f"🎭 **Tricks:** {userdata.get('trick_count', 0)} │ **Treats:** {userdata.get('treat_count', 0)}",
-            f"🗡️ **Stolen:** {humanize_number(userdata.get('stolen', 0))} │ **Lost:** {humanize_number(userdata.get('been_stolen', 0))}",
+            _("🍬 **Eaten:** {value}").format(value=humanize_number(userdata.get('eaten', 0))),
+            _("🎭 **Tricks:** {get} │ **Treats:** {get2}").format(get=userdata.get('trick_count', 0), get2=userdata.get('treat_count', 0)),
+            _("🗡️ **Stolen:** {value} │ **Lost:** {value2}").format(value=humanize_number(userdata.get('stolen', 0)), value2=humanize_number(userdata.get('been_stolen', 0))),
         ]
         em.add_field(name=_("📊 Stats"), value="\n".join(stats_lines), inline=False)
 
@@ -1128,37 +1133,29 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
 
         em.add_field(
             name=_("🍬 Candy Stats"),
-            value=(
-                f"Total Eaten: **{humanize_number(userdata.get('eaten', 0))}**\n"
-                f"Current Candies: **{humanize_number(userdata.get('candies', 0))}**\n"
-                f"Sickness: {_sickness_face(userdata.get('sickness', 0))} **{userdata.get('sickness', 0)}**/100"
-            ),
+            value=_("Total Eaten: **{value}**\n"
+                "Current Candies: **{value2}**\n"
+                "Sickness: {value3} **{get}**/100").format(value=humanize_number(userdata.get('eaten', 0)), value2=humanize_number(userdata.get('candies', 0)), value3=_sickness_face(userdata.get('sickness', 0)), get=userdata.get('sickness', 0)),
             inline=True,
         )
         em.add_field(
             name=_("🔥 Streaks"),
-            value=(
-                f"Current: **{streak}** day{'s' if streak != 1 else ''}\n"
-                f"Best: **{best_streak}** day{'s' if best_streak != 1 else ''}\n"
-                f"Multiplier: **×{_streak_multiplier(streak):.1f}**"
-            ),
+            value=_("Current: **{streak}** day{value}\n"
+                "Best: **{best_streak}** day{value2}\n"
+                "Multiplier: **×{value3:.1f}**").format(streak=streak, value='s' if streak != 1 else '', best_streak=best_streak, value2='s' if best_streak != 1 else '', value3=_streak_multiplier(streak)),
             inline=True,
         )
         em.add_field(
             name=_("🎭 Trick or Treat"),
-            value=(
-                f"Total Visits: **{total_visits}**\n"
-                f"Treats: **{treats}** ({treat_pct}%)\n"
-                f"Tricks: **{tricks}** ({100 - treat_pct}%)"
-            ),
+            value=_("Total Visits: **{total_visits}**\n"
+                "Treats: **{treats}** ({treat_pct}%)\n"
+                "Tricks: **{tricks}** ({value}%)").format(total_visits=total_visits, treats=treats, treat_pct=treat_pct, tricks=tricks, value=100 - treat_pct),
             inline=True,
         )
         em.add_field(
             name=_("🗡️ Theft Record"),
-            value=(
-                f"Stolen from others: **{humanize_number(userdata.get('stolen', 0))}** 🍬\n"
-                f"Lost to theft: **{humanize_number(userdata.get('been_stolen', 0))}** 🍬"
-            ),
+            value=_("Stolen from others: **{value}** 🍬\n"
+                "Lost to theft: **{value2}** 🍬").format(value=humanize_number(userdata.get('stolen', 0)), value2=humanize_number(userdata.get('been_stolen', 0))),
             inline=True,
         )
 
@@ -1168,9 +1165,9 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
         if golden > 0 or peppers > 0:
             rare_text = ""
             if golden > 0:
-                rare_text += f"✨ Golden Candies: **{golden}**\n"
+                rare_text += _("✨ Golden Candies: **{golden}**\n").format(golden=golden)
             if peppers > 0:
-                rare_text += f"🌶️ Ghost Peppers: **{peppers}**\n"
+                rare_text += _("🌶️ Ghost Peppers: **{peppers}**\n").format(peppers=peppers)
             em.add_field(name=_("💎 Rare Items"), value=rare_text.strip(), inline=True)
 
         if await self._check_shield(user):
@@ -1497,10 +1494,10 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
 
         em = self._make_embed(
             _("🎃 Guild Event — {desc}").format(desc=_(info.get("desc", "Unknown"))),
-            f"**Goal:** {info.get('emoji', '🍬')} {event_type.title()} **{humanize_number(goal)}** candies!\n\n"
-            f"**Progress:**\n{bar} **{humanize_number(progress)}**/{humanize_number(goal)} ({pct}%)\n\n"
-            f"**Reward:** {humanize_number(reward)} 🍬 per participant\n\n"
-            f"{'🎉 *Almost there! Keep going!*' if pct >= 75 else '💪 *Keep going!*'}",
+            _("**Goal:** {get} {title} **{value}** candies!\n\n"
+            "**Progress:**\n{bar} **{value2}**/{value} ({pct}%)\n\n"
+            "**Reward:** {value3} 🍬 per participant\n\n"
+            "{value4}").format(get=info.get('emoji', '🍬'), title=event_type.title(), value=humanize_number(goal), bar=bar, value2=humanize_number(progress), pct=pct, value3=humanize_number(reward), value4=_('🎉 *Almost there! Keep going!*') if pct >= 75 else _('💪 *Keep going!*')),
             HALLOWEEN_GOLD if pct >= 75 else HALLOWEEN_PURPLE,
         )
         await ctx.send(embed=em)
@@ -1717,6 +1714,8 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
 
         if not await self.has_perm(message.author):
             return
+        # Los listeners no pasan por un comando: se fija el idioma del servidor.
+        await set_contextual_locales_from_guild(self.bot, guild)
 
         # Passive sickness recovery and pool growth
         chance = random.randint(1, 12)
@@ -1855,7 +1854,7 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
                 effects.append(_("💔 Lost **{candy_lost}** candies!").format(candy_lost=candy_lost))
             if sickness_gained > 0:
                 new_sick = sickness + sickness_gained
-                effects.append(f"{_sickness_face(new_sick)} Sickness: **+{sickness_gained}** ({_sickness_bar(new_sick)} {new_sick}/100)")
+                effects.append(_("{value} Sickness: **+{sickness_gained}** ({value2} {new_sick}/100)").format(value=_sickness_face(new_sick), sickness_gained=sickness_gained, value2=_sickness_bar(new_sick), new_sick=new_sick))
             if effects:
                 trick_desc += "\n\n" + "\n".join(effects)
             trick_desc += "\n\n" + _("*Better luck next time...* 👻")
@@ -1937,8 +1936,8 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
         # Streak display
         streak_text = ""
         if streak > 1:
-            streak_text = f" *(×{multiplier:.1f} streak!)*"
-        treat_desc += f"🍬 **+{candy}** Candies{streak_text}\n"
+            streak_text = _(" *(×{multiplier:.1f} streak!)*").format(multiplier=multiplier)
+        treat_desc += _("🍬 **+{candy}** Candies{streak_text}\n").format(candy=candy, streak_text=streak_text)
 
         # Bonus drops
         bonus_lines = []
@@ -1957,13 +1956,13 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
         if golden_roll < 0.005:  # 0.5% chance
             current_golden = userdata.get("golden_candies", 0)
             await self.config.user(message.author).golden_candies.set(current_golden + 1)
-            rare_lines.append("✨ **+1 Golden Candy!** *(LEGENDARY!)*")
+            rare_lines.append(_("✨ **+1 Golden Candy!** *(LEGENDARY!)*"))
 
         pepper_roll = random.random()
         if pepper_roll < 0.003:  # 0.3% chance
             current_peppers = userdata.get("ghost_peppers", 0)
             await self.config.user(message.author).ghost_peppers.set(current_peppers + 1)
-            rare_lines.append("🌶️ **+1 Ghost Pepper!** *(ULTRA RARE!)*")
+            rare_lines.append(_("🌶️ **+1 Ghost Pepper!** *(ULTRA RARE!)*"))
 
         if bonus_lines:
             treat_desc += "\n" + _("**Bonus Drops:**") + "\n" + "\n".join(bonus_lines) + "\n"
@@ -1972,7 +1971,7 @@ class TrickOrTreatV2(DashboardIntegration, commands.Cog):
 
         # Streak info
         if streak >= 2:
-            treat_desc += f"\n🔥 **Streak:** {streak} day{'s' if streak != 1 else ''}"
+            treat_desc += _("\n🔥 **Streak:** {streak} day{value}").format(streak=streak, value='s' if streak != 1 else '')
         if sickness_penalty:
             treat_desc += f"\n{sickness_penalty}"
 

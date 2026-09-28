@@ -35,7 +35,7 @@ class HoneypotStatsView(ui.View):
         self.cog: "Honeypot" = cog
 
     @ui.button(
-        label="Honeypot Stats",
+        label=_("Honeypot Stats"),
         style=discord.ButtonStyle.blurple,
         emoji="🍯",
         custom_id="honeypot_stats_button",
@@ -539,7 +539,7 @@ class Honeypot(Cog):
             )
         else:
             status_lines.append(ok(_("The cog is not blocked at the bot level.")))
-        sections.append(("**1. Cog status**", status_lines))
+        sections.append((_("**1. Cog status**"), status_lines))
 
         # 2. Honeypot channel.
         channel_lines: list[str] = []
@@ -639,7 +639,7 @@ class Honeypot(Cog):
                     )
                 else:
                     channel_lines.append(ok(_("The warning embed is present.")))
-        sections.append(("**2. Honeypot channel**", channel_lines))
+        sections.append((_("**2. Honeypot channel**"), channel_lines))
 
         # 3. Logs channel.
         logs_lines: list[str] = []
@@ -682,7 +682,7 @@ class Honeypot(Cog):
                         ).format(channel=logs_channel.mention)
                     )
                 )
-        sections.append(("**3. Logs channel**", logs_lines))
+        sections.append((_("**3. Logs channel**"), logs_lines))
 
         # 4. Action and permissions.
         action_lines: list[str] = []
@@ -750,7 +750,7 @@ class Honeypot(Cog):
                     )
                 )
             )
-        sections.append(("**4. Action**", action_lines))
+        sections.append((_("**4. Action**"), action_lines))
 
         # 5. Role hierarchy.
         hierarchy_lines: list[str] = []
@@ -789,7 +789,7 @@ class Honeypot(Cog):
                 )
             else:
                 hierarchy_lines.append(ok(_("I'm above every non-bot member.")))
-        sections.append(("**5. Role hierarchy**", hierarchy_lines))
+        sections.append((_("**5. Role hierarchy**"), hierarchy_lines))
 
         # 6. Intents and modlog.
         misc_lines: list[str] = []
@@ -835,7 +835,7 @@ class Honeypot(Cog):
                         )
                     )
                 )
-        sections.append(("**6. Intents & modlog**", misc_lines))
+        sections.append((_("**6. Intents & modlog**"), misc_lines))
 
         if blockers:
             color = discord.Color.red()
