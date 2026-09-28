@@ -15,6 +15,9 @@ from typing import Any, Dict, List, Optional
 from urllib.parse import quote, urlparse
 
 import aiohttp
+from redbot.core.i18n import Translator
+
+_ = Translator("AlienHost", __file__)
 
 log = logging.getLogger("red.killerbite95.alienhost.api")
 
@@ -30,12 +33,12 @@ class PelicanError(Exception):
     @property
     def friendly(self) -> str:
         return {
-            401: "La clave API no es valida o ha sido revocada. Vuelve a vincular tu cuenta (`alienhost link`).",
-            403: "Tu clave API no tiene permiso para esto (o la IP del bot no esta permitida en la clave).",
-            404: "No encontrado en el panel.",
-            409: "El servidor esta ocupado o en un estado que no permite la accion.",
-            429: "Demasiadas peticiones al panel. Espera un momento.",
-        }.get(self.status, self.message or "Error del panel.")
+            401: _("The API key is invalid or was revoked. Link your account again (`alienhost link`)."),
+            403: _("Your API key doesn't have permission for this (or the bot's IP isn't allowed on the key)."),
+            404: _("Not found on the panel."),
+            409: _("The server is busy or in a state that doesn't allow the action."),
+            429: _("Too many requests to the panel. Wait a moment."),
+        }.get(self.status, self.message or _("Panel error."))
 
 
 def normalize_panel(url: str) -> Optional[str]:
@@ -84,9 +87,9 @@ class PelicanClient:
                 return data if isinstance(data, dict) else {}
         except aiohttp.ClientError as exc:
             log.debug("Error de red con %s: %s", self.panel, exc)
-            raise PelicanError(503, "No se pudo contactar con el panel.") from exc
+            raise PelicanError(503, _("Couldn't reach the panel.")) from exc
         except asyncio.TimeoutError as exc:
-            raise PelicanError(504, "El panel no respondio a tiempo.") from exc
+            raise PelicanError(504, _("The panel didn't respond in time.")) from exc
 
     # ---- Client API ----
 

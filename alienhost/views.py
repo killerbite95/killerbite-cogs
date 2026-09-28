@@ -3,50 +3,68 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, Awaitable, Callable, Dict, List, Optional
 
 import discord
+from redbot.core.i18n import Translator, set_contextual_locales_from_guild
+
+_ = Translator("AlienHost", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
 
 if TYPE_CHECKING:
     from .alienhost import AlienHost
 
 ALERT_KINDS = {
-    "offline": "Servidor offline",
-    "ram": "RAM > 90 % (10 min)",
-    "cpu": "CPU > 95 % (10 min)",
-    "backup_failed": "Backup fallido",
-    "restarted": "Servidor reiniciado",
+    "offline": N_("Server offline"),
+    "ram": N_("RAM > 90 % (10 min)"),
+    "cpu": N_("CPU > 95 % (10 min)"),
+    "backup_failed": N_("Backup failed"),
+    "restarted": N_("Server restarted"),
 }
 
 
 class LinkModal(discord.ui.Modal):
     """Pide URL del panel y clave API sin que queden en el chat."""
 
-    def __init__(self, on_submit: Callable[[discord.Interaction, str, str], Awaitable[None]], *, default_panel: str, title: str = "Vincular AlienHost", key_label: str = "Clave API del area cliente (pacc_…)"):
-        super().__init__(title=title, timeout=600)
+    def __init__(self, on_submit: Callable[[discord.Interaction, str, str], Awaitable[None]], *, default_panel: str, title: Optional[str] = None, key_label: Optional[str] = None):
+        super().__init__(title=title or _("Link AlienHost"), timeout=600)
         self._cb = on_submit
-        self.panel = discord.ui.TextInput(label="URL del panel", default=default_panel, max_length=200)
+        self.panel = discord.ui.TextInput(label=_("Panel URL"), default=default_panel, max_length=200)
         self.key = discord.ui.TextInput(
-            label=key_label,
-            placeholder="Perfil → Claves API → Crear",
+            label=key_label or _("Client area API key (pacc_…)"),
+            placeholder=_("Profile → API Keys → Create"),
             min_length=20,
             max_length=200,
         )
         self.add_item(self.panel)
         self.add_item(self.key)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         await self._cb(interaction, self.panel.value.strip(), self.key.value.strip())
 
 
 class OpenModalView(discord.ui.View):
-    def __init__(self, author: discord.abc.User, factory: Callable[[], discord.ui.Modal], label: str = "Conectar cuenta"):
+    def __init__(self, author: discord.abc.User, factory: Callable[[], discord.ui.Modal], label: Optional[str] = None):
         super().__init__(timeout=300)
         self.author = author
         self.factory = factory
-        self.open.label = label
+        self.open.label = label or _("Connect account")
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
-    @discord.ui.button(label="Conectar cuenta", emoji="🔗", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label=_("Connect account"), emoji="🔗", style=discord.ButtonStyle.blurple)
     async def open(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.author.id:
-            return await interaction.response.send_message("Este boton no es para ti. Usa el comando `alienhost link`.", ephemeral=True)
+            return await interaction.response.send_message(_("This button isn't for you. Use the `alienhost link` command."), ephemeral=True)
         await interaction.response.send_modal(self.factory())
 
 
@@ -56,8 +74,9 @@ class OwnerView(discord.ui.View):
         self.owner_id = owner_id
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
         if interaction.user.id != self.owner_id:
-            await interaction.response.send_message("Este panel no es tuyo.", ephemeral=True)
+            await interaction.response.send_message(_("This panel isn't yours."), ephemeral=True)
             return False
         return True
 
@@ -67,18 +86,23 @@ class ConfirmView(OwnerView):
         super().__init__(owner_id, timeout=60)
         self.value: Optional[bool] = None
         self.yes.label = label
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
-    @discord.ui.button(label="Confirmar", style=discord.ButtonStyle.red)
+    @discord.ui.button(label=_("Confirm"), style=discord.ButtonStyle.red)
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
         self.stop()
-        await interaction.response.edit_message(content="⏳ Enviando…", view=None)
+        await interaction.response.edit_message(content=_("⏳ Sending…"), view=None)
 
-    @discord.ui.button(label="Cancelar", style=discord.ButtonStyle.grey)
+    @discord.ui.button(label=_("Cancel"), style=discord.ButtonStyle.grey)
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
         self.stop()
-        await interaction.response.edit_message(content="Cancelado.", view=None)
+        await interaction.response.edit_message(content=_("Cancelled."), view=None)
 
 
 POWER_BUTTONS = [
@@ -103,15 +127,20 @@ class ServerPanel(OwnerView):
             btn = discord.ui.Button(label=label, emoji=emoji, style=style, disabled=not has_perm(perms, perm), row=0)
             btn.callback = self._power(signal)
             self.add_item(btn)
-        backups = discord.ui.Button(label="Backups", emoji="💾", style=discord.ButtonStyle.grey, disabled=not has_perm(perms, "backup.read"), row=1)
+        backups = discord.ui.Button(label=_("Backups"), emoji="💾", style=discord.ButtonStyle.grey, disabled=not has_perm(perms, "backup.read"), row=1)
         backups.callback = self._backups
         self.add_item(backups)
-        refresh = discord.ui.Button(label="Actualizar", emoji="🔃", style=discord.ButtonStyle.grey, row=1)
+        refresh = discord.ui.Button(label=_("Refresh"), emoji="🔃", style=discord.ButtonStyle.grey, row=1)
         refresh.callback = self._refresh
         self.add_item(refresh)
-        alerts = discord.ui.Button(label="Alertas", emoji="🔔", style=discord.ButtonStyle.grey, row=1)
+        alerts = discord.ui.Button(label=_("Alerts"), emoji="🔔", style=discord.ButtonStyle.grey, row=1)
         alerts.callback = self._alerts
         self.add_item(alerts)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     def _power(self, signal: str):
         async def callback(interaction: discord.Interaction):
@@ -128,7 +157,7 @@ class ServerPanel(OwnerView):
 
     async def _refresh(self, interaction: discord.Interaction):
         await interaction.response.defer()
-        embed, _ = await self.cog.server_embed(interaction.user, self.identifier)
+        embed, _view = await self.cog.server_embed(interaction.user, self.identifier)
         await interaction.edit_original_response(embed=embed, view=self)
 
     async def _alerts(self, interaction: discord.Interaction):
@@ -141,7 +170,7 @@ class ServerSelectView(OwnerView):
         self.cog = cog
         self.guild_id = guild_id
         select = discord.ui.Select(
-            placeholder="Elige un servidor",
+            placeholder=_("Pick a server"),
             options=[
                 discord.SelectOption(label=s.get("name", s["identifier"])[:100], value=s["uuid"], description=f"{s.get('node', '')} · {s['identifier']}"[:100])
                 for s in servers[:25]
@@ -150,6 +179,11 @@ class ServerSelectView(OwnerView):
         select.callback = self._select
         self.select = select
         self.add_item(select)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def _select(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
@@ -169,8 +203,13 @@ class BackupsView(OwnerView):
         self.identifier = identifier
         self.guild_id = guild_id
         self.create.disabled = not can_create
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
-    @discord.ui.button(label="Crear backup", emoji="💾", style=discord.ButtonStyle.green)
+    @discord.ui.button(label=_("Create backup"), emoji="💾", style=discord.ButtonStyle.green)
     async def create(self, interaction: discord.Interaction, button: discord.ui.Button):
         button.disabled = True
         await interaction.response.edit_message(view=self)
@@ -186,11 +225,16 @@ class AlertsView(OwnerView):
         self.name = name
         self.state = {k: bool(current.get(k, False)) for k in ALERT_KINDS}
         for key in ALERT_KINDS:
-            btn = discord.ui.Button(label=ALERT_KINDS[key], row=0 if key in ("offline", "ram", "cpu") else 1)
+            btn = discord.ui.Button(label=_(ALERT_KINDS[key]), row=0 if key in ("offline", "ram", "cpu") else 1)
             btn.callback = self._toggle(key)
             btn.custom_id = f"alert:{key}"
             self.add_item(btn)
         self._style()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     def _style(self) -> None:
         for item in self.children:
@@ -200,9 +244,9 @@ class AlertsView(OwnerView):
                 item.emoji = "✅" if self.state[key] else "❌"
 
     def embed(self) -> discord.Embed:
-        lines = [f"{ALERT_KINDS[k]:<24} {'✅' if v else '❌'}" for k, v in self.state.items()]
-        e = discord.Embed(title=f"🔔 Alertas · {self.name}", description="```\n" + "\n".join(lines) + "\n```", color=discord.Color.blurple())
-        e.set_footer(text="Las alertas llegan por mensaje privado. Pulsa para activar/desactivar.")
+        lines = [f"{_(ALERT_KINDS[k]):<24} {'✅' if v else '❌'}" for k, v in self.state.items()]
+        e = discord.Embed(title=_("🔔 Alerts · {self_name}").format(self_name=self.name), description="```\n" + "\n".join(lines) + "\n```", color=discord.Color.blurple())
+        e.set_footer(text=_("Alerts arrive by DM. Click to turn them on/off."))
         return e
 
     def _toggle(self, key: str):
@@ -222,11 +266,16 @@ class PrivateReplyView(discord.ui.View):
         self.owner_id = owner_id
         self.payload = payload
         self.message: Optional[discord.Message] = None
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
-    @discord.ui.button(label="Ver en privado", emoji="🔒", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label=_("View privately"), emoji="🔒", style=discord.ButtonStyle.blurple)
     async def show(self, interaction: discord.Interaction, button: discord.ui.Button):
         if interaction.user.id != self.owner_id:
-            return await interaction.response.send_message("Esto no es para ti.", ephemeral=True)
+            return await interaction.response.send_message(_("This isn't for you."), ephemeral=True)
         await interaction.response.send_message(ephemeral=True, **self.payload)
         self.stop()
         try:
@@ -244,16 +293,21 @@ class PrivateReplyView(discord.ui.View):
 
 class SearchModal(discord.ui.Modal):
     def __init__(self, on_submit: Callable[[discord.Interaction, str], Awaitable[None]], current: str = ""):
-        super().__init__(title="Buscar servidor", timeout=300)
+        super().__init__(title=_("Find server"), timeout=300)
         self._cb = on_submit
         self.query = discord.ui.TextInput(
-            label="Nombre, identificador, UUID o nodo",
-            placeholder="Vacio = quitar filtro",
+            label=_("Name, identifier, UUID or node"),
+            placeholder=_("Empty = clear filter"),
             default=current or None,
             required=False,
             max_length=100,
         )
         self.add_item(self.query)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def on_submit(self, interaction: discord.Interaction) -> None:
         await self._cb(interaction, (self.query.value or "").strip())
@@ -278,6 +332,11 @@ class AdminServerBrowseView(OwnerView):
         self.page = 0
         self._states: Dict[str, Optional[str]] = {}
         self.apply_filter(query)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     # ---- datos ----
 
@@ -319,14 +378,14 @@ class AdminServerBrowseView(OwnerView):
                 icon = self.STATE_ICON.get(self._states.get(s["uuid"]), "⚪")
             lines.append(f"{icon} **{s.get('name', '?')}** · {s.get('node', '?')} · `{s.get('identifier', '?')}`")
         embed = discord.Embed(
-            title="🖥 Todos los servidores del panel",
-            description="\n".join(lines) or "Ningun servidor coincide con la busqueda.",
+            title=_("🖥 All panel servers"),
+            description="\n".join(lines) or _("No server matches the search."),
             color=discord.Color.from_rgb(124, 92, 255),
         )
-        footer = f"{len(self.filtered)} servidor(es)"
+        footer = _("{count} server(s)").format(count=len(self.filtered))
         if self.query:
-            footer += f" de {len(self.all_servers)} · filtro: {self.query}"
-        footer += f" · pagina {self.page + 1}/{self.total_pages}"
+            footer += _(" of {count} · filter: {query}").format(count=len(self.all_servers), query=self.query)
+        footer += _(" · page {value}/{total_pages}").format(value=self.page + 1, total_pages=self.total_pages)
         embed.set_footer(text=footer)
         self._build_items()
         return embed
@@ -336,7 +395,7 @@ class AdminServerBrowseView(OwnerView):
         chunk = self.current_chunk()
         start = self.page * self.PAGE_SIZE
         select = discord.ui.Select(
-            placeholder=f"Administrar servidor ({start + 1}-{start + len(chunk)})" if chunk else "Sin resultados",
+            placeholder=_("Manage server ({value}-{value2})").format(value=start + 1, value2=start + len(chunk)) if chunk else _("No results"),
             options=[
                 discord.SelectOption(
                     label=(s.get("name") or s.get("identifier") or "?")[:100],
@@ -351,16 +410,16 @@ class AdminServerBrowseView(OwnerView):
         select.callback = self._select
         self.add_item(select)
         for label, cb, disabled in (
-            ("◀ Anterior", self._prev, self.page <= 0),
-            ("Siguiente ▶", self._next, self.page >= self.total_pages - 1),
+            (_("◀ Previous"), self._prev, self.page <= 0),
+            (_("Next ▶"), self._next, self.page >= self.total_pages - 1),
         ):
             btn = discord.ui.Button(label=label, style=discord.ButtonStyle.grey, disabled=disabled, row=1)
             btn.callback = cb
             self.add_item(btn)
-        search = discord.ui.Button(label="Buscar", emoji="🔍", style=discord.ButtonStyle.blurple, row=1)
+        search = discord.ui.Button(label=_("Search"), emoji="🔍", style=discord.ButtonStyle.blurple, row=1)
         search.callback = self._open_search
         self.add_item(search)
-        refresh = discord.ui.Button(label="Actualizar", emoji="🔃", style=discord.ButtonStyle.grey, row=1)
+        refresh = discord.ui.Button(label=_("Refresh"), emoji="🔃", style=discord.ButtonStyle.grey, row=1)
         refresh.callback = self._refresh
         self.add_item(refresh)
 

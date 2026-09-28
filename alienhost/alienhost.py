@@ -41,24 +41,32 @@ from .views import (
     PrivateReplyView,
     has_perm,
 )
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("AlienHost", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
 
 log = logging.getLogger("red.killerbite95.alienhost")
 
 DEFAULT_PANEL = "https://pelican.alienhost.es"
 COLOR = discord.Color.from_rgb(124, 92, 255)
 STATE = {
-    "running": "🟢 Online",
-    "starting": "🟡 Iniciando",
-    "stopping": "🟠 Deteniendo",
-    "offline": "🔴 Offline",
+    "running": N_("🟢 Online"),
+    "starting": N_("🟡 Starting"),
+    "stopping": N_("🟠 Stopping"),
+    "offline": N_("🔴 Offline"),
 }
 SERVER_STATUS = {
-    "installing": "🔧 Instalando",
-    "install_failed": "❌ Instalacion fallida",
-    "reinstall_failed": "❌ Reinstalacion fallida",
-    "restoring_backup": "⏪ Restaurando backup",
+    "installing": N_("🔧 Installing"),
+    "install_failed": N_("❌ Install failed"),
+    "reinstall_failed": N_("❌ Reinstall failed"),
+    "restoring_backup": N_("⏪ Restoring backup"),
 }
-SIGNAL_LABEL = {"start": "iniciado", "restart": "reiniciado", "stop": "detenido", "kill": "forzado (kill)"}
+SIGNAL_LABEL = {"start": N_("started"), "restart": N_("restarted"), "stop": N_("stopped"), "kill": N_("killed")}
 CONFIRM_SIGNALS = {"restart", "stop", "kill"}
 POWER_COOLDOWN = 10
 POWER_PER_HOUR = 20
@@ -87,8 +95,9 @@ def fmt_uptime(ms: Optional[int]) -> str:
     return f"{d}d {h}h" if d else (f"{h}h {m}m" if h else f"{m}m")
 
 
+@cog_i18n(_)
 class AlienHost(DashboardIntegration, commands.Cog):
-    """Integracion con AlienHost: vincula tu clave API de Pelican y controla tus servidores desde Discord."""
+    """AlienHost integration: link your Pelican API key and control your servers from Discord."""
 
     __author__ = "Killerbite95"
     __version__ = "1.0.0"
@@ -127,7 +136,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
-        return f"{pre}\n\nVersion: {self.__version__}"
+        return _("{pre}\n\nVersion: {version}").format(pre=pre, version=self.__version__)
 
     async def red_delete_data_for_user(self, *, requester, user_id: int) -> None:
         await self.config.user_from_id(user_id).clear()
@@ -157,7 +166,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
         else:
             view = PrivateReplyView(ctx.author.id, kwargs)
             view.message = await ctx.send(
-                f"🔒 {ctx.author.mention}, pulsa para verlo en privado.",
+                _("🔒 {author}, click to view it privately.").format(author=ctx.author.mention),
                 view=view,
                 allowed_mentions=discord.AllowedMentions(users=[ctx.author]),
             )
@@ -170,6 +179,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
         await self._handle_leak(message)
 
     async def _handle_leak(self, message: discord.Message) -> None:
+        await set_contextual_locales_from_guild(self.bot, message.guild)
         deleted = False
         try:
             await message.delete()
@@ -177,15 +187,15 @@ class AlienHost(DashboardIntegration, commands.Cog):
         except discord.HTTPException:
             pass
         text = (
-            f"⚠️ {message.author.mention}, has pegado una clave API de Pelican en el chat"
-            + (" y la he borrado." if deleted else " y **no he podido borrarla**.")
-            + f" Por seguridad **eliminala en el panel** (Perfil → Claves API), crea otra y vinculala con `{self.p}alienhost link` (formulario privado)."
+            _("⚠️ {author}, you pasted a Pelican API key in the chat").format(author=message.author.mention)
+            + (_(" and I deleted it.") if deleted else _(" and **I couldn't delete it**."))
+            + _(" For safety, **delete it in the panel** (Profile → API Keys), create a new one and link it with `{p}alienhost link` (private form).").format(p=self.p)
         )
         try:
             await message.channel.send(text, delete_after=30, allowed_mentions=discord.AllowedMentions(users=[message.author]))
         except discord.HTTPException:
             pass
-        await self._audit(message.guild, message.author, "key_leak", f"en #{getattr(message.channel, 'name', '?')} · borrado={deleted}")
+        await self._audit(message.guild, message.author, "key_leak", _("in #{value} · deleted={deleted}").format(value=getattr(message.channel, 'name', '?'), deleted=deleted))
 
     async def cog_unload(self) -> None:
         self.alert_loop.cancel()
@@ -222,22 +232,22 @@ class AlienHost(DashboardIntegration, commands.Cog):
         await interaction.response.defer(ephemeral=True, thinking=True)
         panel = normalize_panel(panel_raw)
         if panel is None:
-            return await interaction.followup.send("❌ URL del panel no valida.", ephemeral=True)
+            return await interaction.followup.send(_("❌ Invalid panel URL."), ephemeral=True)
         if not await self._panel_allowed(panel):
             allowed = humanize_list([f"`{p}`" for p in await self.config.allowed_panels()])
-            return await interaction.followup.send(f"❌ Ese panel no esta permitido. Paneles admitidos: {allowed}.", ephemeral=True)
+            return await interaction.followup.send(_("❌ That panel isn't allowed. Allowed panels: {allowed}.").format(allowed=allowed), ephemeral=True)
         if key.startswith("papp_"):
             return await interaction.followup.send(
-                "❌ Esa es una clave de **aplicacion** (`papp_`). Crea una clave en tu **area cliente**: Perfil → Claves API.",
+                _("❌ That's an **application** key (`papp_`). Create a key in your **client area**: Profile → API Keys."),
                 ephemeral=True,
             )
         if not key.startswith(("pacc_", "ptlc_")):
-            return await interaction.followup.send("❌ Formato de clave no reconocido. Debe empezar por `pacc_`.", ephemeral=True)
+            return await interaction.followup.send(_("❌ Unrecognized key format. It must start with `pacc_`."), ephemeral=True)
         client = PelicanClient(self.session, panel, key)
         try:
             account = await client.account()
         except PelicanError as exc:
-            return await interaction.followup.send(f"❌ No se pudo validar la clave: {exc.friendly}", ephemeral=True)
+            return await interaction.followup.send(_("❌ Couldn't validate the key: {friendly}").format(friendly=exc.friendly), ephemeral=True)
         async with self.config.user(interaction.user).all() as data:
             data["panel"] = panel
             data["api_key"] = self.vault.encrypt(key)
@@ -247,41 +257,37 @@ class AlienHost(DashboardIntegration, commands.Cog):
         self._admin_servers_cache.pop(interaction.user.id, None)
         await self._audit(interaction.guild, interaction.user, "link", panel)
         embed = discord.Embed(
-            title="✅ Cuenta de AlienHost vinculada",
+            title=_("✅ AlienHost account linked"),
             color=discord.Color.green(),
-            description=(
-                f"Usuario del panel: **{account.get('username', '?')}**\nPanel: `{panel}`\n\n"
-                "La clave se ha guardado **cifrada** y no aparecera en ningun mensaje.\n"
-                f"Prueba ahora `{self.p}alienhost servers`."
-            ),
+            description=_("Panel user: **{get}**\nPanel: `{panel}`\n\nThe key was saved **encrypted** and won't appear in any message.\nNow try `{p}alienhost servers`.").format(get=account.get('username', '?'), panel=panel, p=self.p),
         )
         if not account.get("2fa_enabled"):
-            embed.add_field(name="⚠️ 2FA desactivado", value="Te recomendamos activar 2FA en tu cuenta del panel.", inline=False)
-        embed.set_footer(text="Consejo: en el panel puedes limitar la clave a la IP del bot (IPs permitidas).")
+            embed.add_field(name=_("⚠️ 2FA disabled"), value=_("We recommend enabling 2FA on your panel account."), inline=False)
+        embed.set_footer(text=_("Tip: in the panel you can restrict the key to the bot's IP (allowed IPs)."))
         await interaction.followup.send(embed=embed, ephemeral=True)
 
     async def _on_admin_key(self, interaction: discord.Interaction, panel_raw: str, key: str) -> None:
         await interaction.response.defer(ephemeral=True, thinking=True)
         panel = normalize_panel(panel_raw)
         if panel is None or not await self._panel_allowed(panel):
-            return await interaction.followup.send("❌ Panel no valido o no permitido.", ephemeral=True)
+            return await interaction.followup.send(_("❌ Invalid or not allowed panel."), ephemeral=True)
         if not key.startswith(("papp_", "ptla_")):
-            return await interaction.followup.send("❌ Para administracion hace falta una clave de aplicacion (`papp_`).", ephemeral=True)
+            return await interaction.followup.send(_("❌ Administration needs an application key (`papp_`)."), ephemeral=True)
         client = PelicanClient(self.session, panel, key)
         try:
             await client.app_list("nodes", {"per_page": 1})
         except PelicanError as exc:
-            return await interaction.followup.send(f"❌ No se pudo validar la clave: {exc.friendly}", ephemeral=True)
+            return await interaction.followup.send(_("❌ Couldn't validate the key: {friendly}").format(friendly=exc.friendly), ephemeral=True)
         await self.config.admin.set({"panel": panel, "key": self.vault.encrypt(key)})
         await self._audit(interaction.guild, interaction.user, "admin_key_set", panel)
-        await interaction.followup.send("✅ Clave de administracion guardada (cifrada).", ephemeral=True)
+        await interaction.followup.send(_("✅ Admin key saved (encrypted)."), ephemeral=True)
 
     async def _open_modal(self, ctx: commands.Context, modal_factory, label: str) -> None:
         if ctx.interaction is not None:
             await ctx.interaction.response.send_modal(modal_factory())
         else:
             await ctx.send(
-                "🔐 Por seguridad, los datos se introducen en un formulario privado. **Nunca pegues tu clave en el chat.**",
+                _("🔐 For security, the details are entered in a private form. **Never paste your key in the chat.**"),
                 view=OpenModalView(ctx.author, modal_factory, label),
             )
 
@@ -300,7 +306,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
         if channel is None:
             return
         embed = discord.Embed(description=f"{user.mention} · `{action}` · {detail}", color=COLOR, timestamp=discord.utils.utcnow())
-        embed.set_author(name="🖥 AlienHost")
+        embed.set_author(name=_("🖥 AlienHost"))
         try:
             await channel.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
         except discord.HTTPException:
@@ -317,7 +323,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
             return cached[1]
         client = await self.client_for(user)
         if client is None:
-            raise PelicanError(0, f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`.")
+            raise PelicanError(0, _("You have no linked account. Use `{p}alienhost link`.").format(p=self.p))
         servers = await client.servers()
         self._server_cache[user.id] = (time.time(), servers)
         return servers
@@ -349,7 +355,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
     async def server_embed(self, user: discord.abc.User, identifier: str) -> Tuple[discord.Embed, Optional[List[str]]]:
         client = await self.client_for(user)
         if client is None:
-            return discord.Embed(description=f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`.", color=discord.Color.red()), None
+            return discord.Embed(description=_("You have no linked account. Use `{p}alienhost link`.").format(p=self.p), color=discord.Color.red()), None
         try:
             server, res = await asyncio.gather(client.server(identifier), client.resources(identifier))
         except PelicanError as exc:
@@ -360,11 +366,11 @@ class AlienHost(DashboardIntegration, commands.Cog):
         r = res.get("resources", {})
         status = server.get("status")
         if res.get("is_suspended") or status == "suspended":
-            state = "⛔ Suspendido"
+            state = _("⛔ Suspended")
         elif status in SERVER_STATUS:
-            state = SERVER_STATUS[status]
+            state = _(SERVER_STATUS[status])
         else:
-            state = STATE.get(res.get("current_state"), res.get("current_state", "?"))
+            state = _(STATE[res.get("current_state")]) if res.get("current_state") in STATE else res.get("current_state", "?")
         cpu_limit = limits.get("cpu") or 0
         mem_limit = (limits.get("memory") or 0) * 1024 * 1024
         disk_limit = (limits.get("disk") or 0) * 1024 * 1024
@@ -377,7 +383,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
             ("Uptime", fmt_uptime(r.get("uptime"))),
         ]
         if server.get("is_node_under_maintenance"):
-            rows.append(("Aviso", "Nodo en mantenimiento"))
+            rows.append(("Aviso", _("Node under maintenance")))
         body = "\n".join(f"{k:<12} {v}" for k, v in rows)
         embed = discord.Embed(title=f"🖥 {server.get('name', identifier)}", description=f"```\n{body}\n```", color=COLOR)
         embed.set_footer(text=f"{server.get('identifier', identifier)} · {client.panel}")
@@ -392,9 +398,9 @@ class AlienHost(DashboardIntegration, commands.Cog):
         while log_ and now - log_[0] > 3600:
             log_.popleft()
         if log_ and now - log_[-1] < POWER_COOLDOWN:
-            return f"Espera {POWER_COOLDOWN - int(now - log_[-1])}s antes de otra accion."
+            return _("Wait {value}s before another action.").format(value=POWER_COOLDOWN - int(now - log_[-1]))
         if len(log_) >= POWER_PER_HOUR:
-            return "Has alcanzado el limite de acciones por hora."
+            return _("You've reached the hourly action limit.")
         log_.append(now)
         return None
 
@@ -402,8 +408,8 @@ class AlienHost(DashboardIntegration, commands.Cog):
         name = self._cached_name(interaction.user.id, identifier)
         if signal in CONFIRM_SIGNALS:
             view = ConfirmView(interaction.user.id, {"restart": "Reiniciar", "stop": "Detener", "kill": "Forzar kill"}[signal])
-            warn = " Puede provocar perdida de datos no guardados." if signal == "kill" else ""
-            await interaction.response.send_message(f"¿Seguro que quieres enviar **{signal}** a **{name}**?{warn}", view=view, ephemeral=True)
+            warn = _(" It may cause loss of unsaved data.") if signal == "kill" else ""
+            await interaction.response.send_message(_("Are you sure you want to send **{signal}** to **{name}**?{warn}").format(signal=signal, name=name, warn=warn), view=view, ephemeral=True)
             await view.wait()
             if not view.value:
                 return
@@ -420,18 +426,18 @@ class AlienHost(DashboardIntegration, commands.Cog):
             return f"⏳ {limited}"
         client = await self.client_for(user)
         if client is None:
-            return f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`."
+            return _("You have no linked account. Use `{p}alienhost link`.").format(p=self.p)
         try:
             await client.power(identifier, signal)
         except PelicanError as exc:
             return f"❌ {exc.friendly}"
         await self._audit(guild, user, f"power:{signal}", f"{name} (`{identifier}`)")
-        return f"✅ **{name}** {SIGNAL_LABEL[signal]}."
+        return f"✅ **{name}** {_(SIGNAL_LABEL[signal])}."
 
     async def backups_panel(self, user: discord.abc.User, identifier: str, guild_id: Optional[int]) -> Tuple[discord.Embed, Optional[discord.ui.View]]:
         client = await self.client_for(user)
         if client is None:
-            return discord.Embed(description="No tienes cuenta vinculada.", color=discord.Color.red()), None
+            return discord.Embed(description=_("You have no linked account."), color=discord.Color.red()), None
         try:
             server, data = await asyncio.gather(client.server(identifier), client.backups(identifier))
         except PelicanError as exc:
@@ -441,18 +447,18 @@ class AlienHost(DashboardIntegration, commands.Cog):
         for b in backups[:10]:
             date = (b.get("created_at") or "")[:16].replace("T", " ")
             if not b.get("completed_at"):
-                lines.append(f"⏳ {date}    en curso")
+                lines.append(_("⏳ {date}    in progress").format(date=date))
             elif b.get("is_successful"):
                 lines.append(f"✅ {date}    {fmt_bytes(b.get('bytes'))}" + ("  🔒" if b.get("is_locked") else ""))
             else:
-                lines.append(f"❌ {date}    Fallido")
+                lines.append(_("❌ {date}    Failed").format(date=date))
         limit = server.get("feature_limits", {}).get("backups") or 0
         embed = discord.Embed(
-            title=f"💾 Backups · {server.get('name', identifier)}",
-            description="```\n" + ("\n".join(lines) or "Sin backups") + "\n```",
+            title=_("💾 Backups · {get}").format(get=server.get('name', identifier)),
+            description="```\n" + ("\n".join(lines) or _("No backups")) + "\n```",
             color=COLOR,
         )
-        embed.set_footer(text=f"{len(backups)} / {limit or '∞'} backups · Las descargas se hacen desde el panel.")
+        embed.set_footer(text=_("{count} / {value} backups · Downloads are done from the panel.").format(count=len(backups), value=limit or '∞'))
         meta = server.get("_meta", {})
         perms = ["*"] if meta.get("is_server_owner") else list(meta.get("user_permissions", []))
         can_create = has_perm(perms, "backup.create") and (not limit or len(backups) < limit)
@@ -464,14 +470,14 @@ class AlienHost(DashboardIntegration, commands.Cog):
             return f"⏳ {limited}"
         client = await self.client_for(user)
         if client is None:
-            return "No tienes cuenta vinculada."
+            return _("You have no linked account.")
         try:
             backup = await client.create_backup(identifier)
         except PelicanError as exc:
             return f"❌ {exc.friendly}"
         guild = self.bot.get_guild(guild_id) if guild_id else None
         await self._audit(guild, user, "backup:create", f"`{identifier}` {backup.get('name', '')}")
-        return "💾 Backup solicitado. Aparecera en la lista cuando termine."
+        return _("💾 Backup requested. It will show up in the list when it finishes.")
 
     # ------------------------------------------------------------------
     # Alertas
@@ -495,7 +501,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
         user = self.bot.get_user(user_id)
         if user is None:
             return
-        embed = discord.Embed(title="⚠️ AlienHost", description=f"**{server_name}**\n\n{text}" + (f"\n\n{detail}" if detail else ""), color=discord.Color.orange(), timestamp=discord.utils.utcnow())
+        embed = discord.Embed(title=_("⚠️ AlienHost"), description=f"**{server_name}**\n\n{text}" + (f"\n\n{detail}" if detail else ""), color=discord.Color.orange(), timestamp=discord.utils.utcnow())
         try:
             await user.send(embed=embed)
         except discord.HTTPException:
@@ -508,6 +514,8 @@ class AlienHost(DashboardIntegration, commands.Cog):
         if (self._polls * 60) % interval >= 60:
             return
         check_backups = self._polls % 10 == 0
+        # Avisos por DM (sin servidor): se usa el idioma global del bot.
+        await set_contextual_locales_from_guild(self.bot, None)
         users = await self.config.all_users()
         sem = asyncio.Semaphore(5)
 
@@ -549,21 +557,21 @@ class AlienHost(DashboardIntegration, commands.Cog):
             uptime = r.get("uptime") or 0
             if prev_state is not None:
                 if prefs.get("offline") and prev_state == "running" and state == "offline":
-                    await self._notify(uid, name, "🔴 El servidor se ha detenido (offline).")
+                    await self._notify(uid, name, _("🔴 The server has stopped (offline)."))
                 if prefs.get("restarted") and state == "running" and (
                     prev_state in ("offline", "starting", "stopping") or (prev_uptime and uptime < prev_uptime)
                 ):
-                    await self._notify(uid, name, "🔄 El servidor se ha reiniciado.")
+                    await self._notify(uid, name, _("🔄 The server has restarted."))
             st["state"], st["uptime"] = state, uptime
             limits = st.get("limits", {})
             mem_limit = (limits.get("memory") or 0) * 1024 * 1024
             cpu_limit = limits.get("cpu") or 0
             if prefs.get("ram") and mem_limit and state == "running":
                 await self._sustained(st, "ram", r.get("memory_bytes", 0) / mem_limit >= 0.9, now, uid, name,
-                                      "RAM superior al 90 % durante 10 minutos.", f"{fmt_bytes(r.get('memory_bytes'))} / {fmt_bytes(mem_limit)}")
+                                      _("RAM above 90 % for 10 minutes."), f"{fmt_bytes(r.get('memory_bytes'))} / {fmt_bytes(mem_limit)}")
             if prefs.get("cpu") and cpu_limit and state == "running":
                 await self._sustained(st, "cpu", r.get("cpu_absolute", 0) / cpu_limit >= 0.95, now, uid, name,
-                                      "CPU superior al 95 % durante 10 minutos.", f"{r.get('cpu_absolute', 0):.0f} % / {cpu_limit} %")
+                                      _("CPU above 95 % for 10 minutes."), f"{r.get('cpu_absolute', 0):.0f} % / {cpu_limit} %")
             if prefs.get("backup_failed") and check_backups:
                 try:
                     backups = (await client.backups(identifier))["backups"]
@@ -572,8 +580,8 @@ class AlienHost(DashboardIntegration, commands.Cog):
                 failed = {b["uuid"] for b in backups if b.get("completed_at") and not b.get("is_successful")}
                 known = st.get("failed_backups")
                 if known is not None:
-                    for _ in failed - known:
-                        await self._notify(uid, name, "❌ Un backup ha fallado.", "Revisa el panel para mas detalles.")
+                    for _uuid in failed - known:
+                        await self._notify(uid, name, _("❌ A backup has failed."), _("Check the panel for more details."))
                 st["failed_backups"] = failed
 
     async def _sustained(self, st: Dict[str, Any], kind: str, high: bool, now: float, uid: int, name: str, text: str, detail: str) -> None:
@@ -600,15 +608,15 @@ class AlienHost(DashboardIntegration, commands.Cog):
         if role is not None and admin_configured:
             findings.append({
                 "severity": "info",
-                "title": f"AlienHost: {len(role.members)} miembro(s) con acceso a comandos de infraestructura",
-                "detail": f"Rol {role.mention}" + ("" if data["require_trusted"] else " · no se exige Trusted Admin"),
+                "title": _("AlienHost: {count} member(s) with access to infrastructure commands").format(count=len(role.members)),
+                "detail": _("Role {role}").format(role=role.mention) + ("" if data["require_trusted"] else _(" · Trusted Admin not required")),
                 "penalty": 0 if data["require_trusted"] else 3,
                 "category": "alienhost",
             })
             if not data["require_trusted"]:
                 findings[-1]["severity"] = "warning"
         if admin_configured and not data["log_channel"]:
-            findings.append({"severity": "info", "title": "AlienHost sin canal de auditoria", "detail": f"`{self.p}alienhost set logchannel #canal`", "penalty": 1, "category": "alienhost"})
+            findings.append({"severity": "info", "title": _("AlienHost has no audit channel"), "detail": _("`{p}alienhost set logchannel #channel`").format(p=self.p), "penalty": 1, "category": "alienhost"})
         return findings
 
     async def trini_export(self, guild: discord.Guild) -> Dict[str, Any]:
@@ -666,27 +674,27 @@ class AlienHost(DashboardIntegration, commands.Cog):
         partial = [s for s in servers if q in s.get("name", "").lower()]
         found = exact or partial
         if len(found) != 1:
-            await ctx.send(f"Servidor no encontrado o ambiguo. Usa `{self.p}alienhost servers`.", ephemeral=True)
+            await ctx.send(_("Server not found or ambiguous. Use `{p}alienhost servers`.").format(p=self.p), ephemeral=True)
             return None
         return found[0]
 
     @commands.hybrid_group(name="alienhost", aliases=["ah"])
     async def alienhost(self, ctx: commands.Context):
-        """AlienHost: tus servidores de juego desde Discord."""
+        """AlienHost: your game servers from Discord."""
 
     @alienhost.command(name="link")
     async def ah_link(self, ctx: commands.Context):
-        """Vincular tu cuenta con la URL del panel y una clave API de tu area cliente."""
+        """Link your account with the panel URL and an API key from your client area."""
         default = await self.config.default_panel()
 
         def factory() -> LinkModal:
             return LinkModal(self._on_link, default_panel=default)
 
-        await self._open_modal(ctx, factory, "Conectar cuenta")
+        await self._open_modal(ctx, factory, _("Connect account"))
 
     @alienhost.command(name="unlink")
     async def ah_unlink(self, ctx: commands.Context):
-        """Desvincular tu cuenta y borrar la clave guardada."""
+        """Unlink your account and delete the saved key."""
         panel = await self.config.user(ctx.author).panel()
         await self.config.user(ctx.author).clear()
         self._server_cache.pop(ctx.author.id, None)
@@ -695,44 +703,44 @@ class AlienHost(DashboardIntegration, commands.Cog):
             self._alert_state.pop(key, None)
         await self._audit(ctx.guild, ctx.author, "unlink", panel or "-")
         await ctx.send(
-            "🔓 Cuenta desvinculada y clave eliminada del bot."
-            + (f"\nRecuerda borrar tambien la clave en {panel} (Perfil → Claves API)." if panel else ""),
+            _("🔓 Account unlinked and key deleted from the bot.")
+            + (_("\nRemember to also delete the key in {panel} (Profile → API Keys).").format(panel=panel) if panel else ""),
             ephemeral=True,
         )
 
     @alienhost.command(name="account")
     async def ah_account(self, ctx: commands.Context):
-        """Ver el estado de tu vinculacion."""
+        """View your link status."""
         data = await self.config.user(ctx.author).all()
         if not data["api_key"]:
-            return await ctx.send(f"No tienes cuenta vinculada. Usa `{self.p}alienhost link`.", ephemeral=True)
+            return await ctx.send(_("You have no linked account. Use `{p}alienhost link`.").format(p=self.p), ephemeral=True)
         client = await self.client_for(ctx.author)
-        status = "🟢 clave valida"
+        status = _("🟢 valid key")
         if client is None:
-            status = "🔴 no se pudo descifrar la clave, vuelve a vincular"
+            status = _("🔴 couldn't decrypt the key, link again")
         else:
             try:
                 await client.account()
             except PelicanError as exc:
                 status = f"🔴 {exc.friendly}"
-        embed = discord.Embed(title="🔗 Cuenta de AlienHost", color=COLOR)
-        embed.add_field(name="Usuario", value=data["account"].get("username", "?"), inline=True)
-        embed.add_field(name="Panel", value=data["panel"], inline=True)
-        embed.add_field(name="Estado", value=status, inline=False)
-        embed.add_field(name="Vinculada", value=f"<t:{data['linked_at']}:R>" if data["linked_at"] else "?", inline=True)
-        embed.add_field(name="Alertas activas", value=str(len(data["alerts"])), inline=True)
+        embed = discord.Embed(title=_("🔗 AlienHost account"), color=COLOR)
+        embed.add_field(name=_("User"), value=data["account"].get("username", "?"), inline=True)
+        embed.add_field(name=_("Panel"), value=data["panel"], inline=True)
+        embed.add_field(name=_("Status"), value=status, inline=False)
+        embed.add_field(name=_("Linked"), value=f"<t:{data['linked_at']}:R>" if data["linked_at"] else "?", inline=True)
+        embed.add_field(name=_("Active alerts"), value=str(len(data["alerts"])), inline=True)
         await self._private(ctx, embed=embed)
 
     @alienhost.command(name="servers")
     async def ah_servers(self, ctx: commands.Context):
-        """Listar tus servidores."""
+        """List your servers."""
         await ctx.defer(ephemeral=True)
         try:
             servers = await self._servers(ctx.author, fresh=True)
         except PelicanError as exc:
             return await ctx.send(f"❌ {exc.friendly if exc.status else exc.message}", ephemeral=True)
         if not servers:
-            return await ctx.send("No tienes servidores en este panel.", ephemeral=True)
+            return await ctx.send(_("You have no servers on this panel."), ephemeral=True)
         client = await self.client_for(ctx.author)
         sem = asyncio.Semaphore(5)
 
@@ -746,18 +754,18 @@ class AlienHost(DashboardIntegration, commands.Cog):
         states = await asyncio.gather(*(state(s) for s in servers[:25]))
         lines = [
             f"{STATE.get(st, '⚪ ?').split(' ')[0]} **{s.get('name', '?')}** · {s.get('node', '?')} · `{s['identifier']}`"
-            + (" · ⛔ suspendido" if s.get("status") == "suspended" or s.get("is_suspended") else "")
-            + (f" · {SERVER_STATUS[s['status']]}" if s.get("status") in SERVER_STATUS else "")
+            + (_(" · ⛔ suspended") if s.get("status") == "suspended" or s.get("is_suspended") else "")
+            + (f" · {_(SERVER_STATUS[s['status']])}" if s.get("status") in SERVER_STATUS else "")
             for s, st in zip(servers, states)
         ]
-        embed = discord.Embed(title="🖥 Tus servidores de AlienHost", description="\n".join(lines), color=COLOR)
+        embed = discord.Embed(title=_("🖥 Your AlienHost servers"), description="\n".join(lines), color=COLOR)
         if len(servers) > 25:
-            embed.set_footer(text=f"Mostrando 25 de {len(servers)}")
+            embed.set_footer(text=_("Showing 25 of {count}").format(count=len(servers)))
         await self._private(ctx, embed=embed, view=ServerSelectView(self, ctx.author.id, servers, ctx.guild.id if ctx.guild else None))
 
     @alienhost.command(name="server")
     async def ah_server(self, ctx: commands.Context, *, server: str):
-        """Detalles de un servidor con acciones rapidas."""
+        """Server details with quick actions."""
         await ctx.defer(ephemeral=True)
         s = await self._resolve_server(ctx, server)
         if s is None:
@@ -770,16 +778,16 @@ class AlienHost(DashboardIntegration, commands.Cog):
 
     @alienhost.command(name="power")
     async def ah_power(self, ctx: commands.Context, server: str, signal: str):
-        """Enviar start, stop, restart o kill a un servidor."""
+        """Send start, stop, restart or kill to a server."""
         signal = signal.lower()
         if signal not in SIGNAL_LABEL:
-            return await ctx.send("Señales: `start`, `stop`, `restart`, `kill`.", ephemeral=True)
+            return await ctx.send(_("Signals: `start`, `stop`, `restart`, `kill`."), ephemeral=True)
         s = await self._resolve_server(ctx, server)
         if s is None:
             return
         if signal in CONFIRM_SIGNALS:
             view = ConfirmView(ctx.author.id, {"restart": "Reiniciar", "stop": "Detener", "kill": "Forzar kill"}[signal])
-            await ctx.send(f"¿Seguro que quieres enviar **{signal}** a **{s.get('name')}**?", view=view, ephemeral=True)
+            await ctx.send(_("Are you sure you want to send **{signal}** to **{get}**?").format(signal=signal, get=s.get('name')), view=view, ephemeral=True)
             await view.wait()
             if not view.value:
                 return
@@ -792,7 +800,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
 
     @alienhost.command(name="backups")
     async def ah_backups(self, ctx: commands.Context, *, server: str):
-        """Ver los ultimos backups de un servidor (y crear uno)."""
+        """View a server's latest backups (and create one)."""
         await ctx.defer(ephemeral=True)
         s = await self._resolve_server(ctx, server)
         if s is None:
@@ -805,16 +813,16 @@ class AlienHost(DashboardIntegration, commands.Cog):
 
     @alienhost.command(name="alerts")
     async def ah_alerts(self, ctx: commands.Context, *, server: Optional[str] = None):
-        """Configurar alertas por DM de un servidor (o ver las activas)."""
+        """Set up DM alerts for a server (or view the active ones)."""
         if server is None:
             alerts = await self.config.user(ctx.author).alerts()
             if not alerts:
-                return await ctx.send(f"No tienes alertas. Usa `{self.p}alienhost alerts <servidor>`.", ephemeral=True)
+                return await ctx.send(_("You have no alerts. Use `{p}alienhost alerts <server>`.").format(p=self.p), ephemeral=True)
             lines = [
-                f"**{a.get('name', ident)}** · " + ", ".join(ALERT_KINDS[k] for k in ALERT_KINDS if a.get(k))
+                f"**{a.get('name', ident)}** · " + ", ".join(_(ALERT_KINDS[k]) for k in ALERT_KINDS if a.get(k))
                 for ident, a in alerts.items()
             ]
-            return await self._private(ctx, embed=discord.Embed(title="🔔 Tus alertas", description="\n".join(lines), color=COLOR))
+            return await self._private(ctx, embed=discord.Embed(title=_("🔔 Your alerts"), description="\n".join(lines), color=COLOR))
         s = await self._resolve_server(ctx, server)
         if s is None:
             return
@@ -835,11 +843,11 @@ class AlienHost(DashboardIntegration, commands.Cog):
 
     @alienhost.group(name="admin")
     async def ah_admin(self, ctx: commands.Context):
-        """Administracion interna de AlienHost."""
+        """Internal AlienHost administration."""
 
     async def _require_infra_admin(self, ctx: commands.Context) -> bool:
         if not await self._is_infra_admin(ctx):
-            await ctx.send("🔒 Solo administradores de AlienHost (rol configurado + Trusted Admin en Trini Security).", ephemeral=True)
+            await ctx.send(_("🔒 AlienHost admins only (configured role + Trusted Admin in Trini Security)."), ephemeral=True)
             return False
         return True
 
@@ -849,7 +857,7 @@ class AlienHost(DashboardIntegration, commands.Cog):
             return None
         client = await self.admin_client()
         if client is None:
-            await ctx.send(f"No hay clave de administracion. El owner debe usar `{self.p}alienhost admin setkey`.", ephemeral=True)
+            await ctx.send(_("There's no admin key. The owner must use `{p}alienhost admin setkey`.").format(p=self.p), ephemeral=True)
         return client
 
     async def _admin_servers(self, user: discord.abc.User, *, fresh: bool = False) -> List[Dict[str, Any]]:
@@ -864,12 +872,12 @@ class AlienHost(DashboardIntegration, commands.Cog):
             return cached[1]
         client = await self.client_for(user)
         if client is None:
-            raise PelicanError(0, f"No tienes cuenta vinculada. Usa `{self.p}alienhost link` con una cuenta de administrador del panel.")
+            raise PelicanError(0, _("You have no linked account. Use `{p}alienhost link` with a panel admin account.").format(p=self.p))
         try:
             servers = await client.servers(admin_all=True)
         except PelicanError as exc:
             if exc.status == 403:
-                raise PelicanError(403, "Tu cuenta vinculada en AlienHost no es administradora (root admin) del panel, asi que no puede ver todos los servidores.") from exc
+                raise PelicanError(403, _("Your linked AlienHost account isn't a panel admin (root admin), so it can't see every server.")) from exc
             raise
         self._admin_servers_cache[user.id] = (time.time(), servers)
         return servers
@@ -877,17 +885,17 @@ class AlienHost(DashboardIntegration, commands.Cog):
     @ah_admin.command(name="setkey")
     @commands.is_owner()
     async def ah_admin_setkey(self, ctx: commands.Context):
-        """(Owner) Guardar la clave de aplicacion (papp_) mediante formulario privado."""
+        """(Owner) Save the application key (papp_) through a private form."""
         default = await self.config.default_panel()
 
         def factory() -> LinkModal:
-            return LinkModal(self._on_admin_key, default_panel=default, title="Clave de administracion", key_label="Clave de aplicacion (papp_…)")
+            return LinkModal(self._on_admin_key, default_panel=default, title=_("Admin key"), key_label=_("Application key (papp_…)"))
 
-        await self._open_modal(ctx, factory, "Introducir clave")
+        await self._open_modal(ctx, factory, _("Enter key"))
 
     @ah_admin.command(name="nodes")
     async def ah_admin_nodes(self, ctx: commands.Context):
-        """Estado de los nodos."""
+        """Node status."""
         client = await self._admin_ctx(ctx)
         if client is None:
             return
@@ -906,17 +914,16 @@ class AlienHost(DashboardIntegration, commands.Cog):
             mem_pct = (alloc.get("memory", 0) / mem * 100) if mem else 0
             icon = "🟠" if n.get("maintenance_mode") else ("🟡" if mem_pct >= 90 else "🟢")
             lines.append(
-                f"{icon} **{n.get('name')}** · {n.get('fqdn')}\n"
-                f"   RAM asignada {mem_pct:.0f}% · Disco {(alloc.get('disk', 0) / disk * 100) if disk else 0:.0f}% · Servers {per_node.get(n.get('id'), 0)}"
-                + (" · mantenimiento" if n.get("maintenance_mode") else "")
+                _("{icon} **{get}** · {get2}\n   Allocated RAM {mem_pct:.0f}% · Disk {value:.0f}% · Servers {get3}").format(icon=icon, get=n.get('name'), get2=n.get('fqdn'), mem_pct=mem_pct, value=(alloc.get('disk', 0) / disk * 100) if disk else 0, get3=per_node.get(n.get('id'), 0))
+                + (_(" · maintenance") if n.get("maintenance_mode") else "")
             )
-        embed = discord.Embed(title="🛰 Nodos de AlienHost", description="\n".join(lines)[:4000] or "Sin nodos", color=COLOR)
-        embed.set_footer(text=f"{len(nodes)} nodos · {len(servers)} servidores (primeros 100)")
+        embed = discord.Embed(title=_("🛰 AlienHost nodes"), description="\n".join(lines)[:4000] or _("No nodes"), color=COLOR)
+        embed.set_footer(text=_("{count} nodes · {count2} servers (first 100)").format(count=len(nodes), count2=len(servers)))
         await self._private(ctx, embed=embed)
 
     @ah_admin.command(name="incidents")
     async def ah_admin_incidents(self, ctx: commands.Context):
-        """Servidores suspendidos, con instalacion fallida o nodos en mantenimiento."""
+        """Suspended servers, failed installs or nodes under maintenance."""
         client = await self._admin_ctx(ctx)
         if client is None:
             return
@@ -925,22 +932,22 @@ class AlienHost(DashboardIntegration, commands.Cog):
             nodes, servers = await asyncio.gather(client.app_list("nodes"), client.app_list("servers"))
         except PelicanError as exc:
             return await ctx.send(f"❌ {exc.friendly}", ephemeral=True)
-        lines = [f"🟠 Nodo **{n.get('name')}** en mantenimiento" for n in nodes if n.get("maintenance_mode")]
+        lines = [_("🟠 Node **{get}** under maintenance").format(get=n.get('name')) for n in nodes if n.get("maintenance_mode")]
         for s in servers:
             status = s.get("status")
             if s.get("suspended") or status == "suspended":
-                lines.append(f"⛔ **{s.get('name')}** (`{s.get('identifier')}`) suspendido")
+                lines.append(_("⛔ **{get}** (`{get2}`) suspended").format(get=s.get('name'), get2=s.get('identifier')))
             elif status in ("install_failed", "reinstall_failed", "restoring_backup"):
                 lines.append(f"🔧 **{s.get('name')}** (`{s.get('identifier')}`) · {status}")
-        await self._private(ctx, embed=discord.Embed(title="🚧 Incidencias", description="\n".join(lines)[:4000] or "🟢 Sin incidencias", color=COLOR))
+        await self._private(ctx, embed=discord.Embed(title=_("🚧 Incidents"), description="\n".join(lines)[:4000] or _("🟢 No incidents"), color=COLOR))
 
     @ah_admin.command(name="servers")
     async def ah_admin_servers(self, ctx: commands.Context, *, query: Optional[str] = None):
-        """Ver y administrar TODOS los servidores del panel (25 por pagina, con buscador).
+        """View and manage ALL panel servers (25 per page, with search).
 
-        Usa tu propia cuenta vinculada con `alienhost link`, que debe ser
-        administradora (root admin) del panel. Opcionalmente filtra por nombre,
-        identificador, UUID o nodo.
+        Uses your own account linked with `alienhost link`, which must be
+        a panel admin (root admin). Optionally filter by name,
+        identifier, UUID or node.
         """
         if not await self._require_infra_admin(ctx):
             return
@@ -950,15 +957,15 @@ class AlienHost(DashboardIntegration, commands.Cog):
         except PelicanError as exc:
             return await ctx.send(f"❌ {exc.friendly if exc.status not in (0, 403) else exc.message}", ephemeral=True)
         if not servers:
-            return await ctx.send("El panel no tiene servidores.", ephemeral=True)
+            return await ctx.send(_("The panel has no servers."), ephemeral=True)
         view = AdminServerBrowseView(self, ctx.author.id, servers, ctx.guild.id if ctx.guild else None, query=(query or "").strip())
         embed = await view.render(ctx.author)
-        await self._audit(ctx.guild, ctx.author, "admin:servers", f"{len(servers)} servidores" + (f" · filtro {query}" if query else ""))
+        await self._audit(ctx.guild, ctx.author, "admin:servers", _("{count} servers").format(count=len(servers)) + (_(" · filter {query}").format(query=query) if query else ""))
         await self._private(ctx, embed=embed, view=view)
 
     @ah_admin.command(name="user")
     async def ah_admin_user(self, ctx: commands.Context, *, query: str):
-        """Buscar un cliente por email o usuario (o mencion de Discord vinculada)."""
+        """Find a customer by email or username (or linked Discord mention)."""
         client = await self._admin_ctx(ctx)
         if client is None:
             return
@@ -976,14 +983,14 @@ class AlienHost(DashboardIntegration, commands.Cog):
         except PelicanError as exc:
             return await ctx.send(f"❌ {exc.friendly}", ephemeral=True)
         if not users:
-            return await ctx.send("Usuario no encontrado.", ephemeral=True)
+            return await ctx.send(_("User not found."), ephemeral=True)
         u = users[0]
         servers = [s.get("attributes", {}) for s in u.get("relationships", {}).get("servers", {}).get("data", [])]
         embed = discord.Embed(title=f"👤 {u.get('username')}", color=COLOR)
-        embed.add_field(name="Email", value=u.get("email", "?"), inline=True)
+        embed.add_field(name=_("Email"), value=u.get("email", "?"), inline=True)
         embed.add_field(name="2FA", value="✅" if u.get("2fa") or u.get("2fa_enabled") else "❌", inline=True)
-        embed.add_field(name="Admin", value="✅" if u.get("root_admin") else "❌", inline=True)
-        embed.add_field(name=f"Servidores ({len(servers)})", value="\n".join(f"• {s.get('name')} (`{s.get('identifier')}`)" for s in servers[:15]) or "—", inline=False)
+        embed.add_field(name=_("Admin"), value="✅" if u.get("root_admin") else "❌", inline=True)
+        embed.add_field(name=_("Servers ({count})").format(count=len(servers)), value="\n".join(f"• {s.get('name')} (`{s.get('identifier')}`)" for s in servers[:15]) or "—", inline=False)
         await self._private(ctx, embed=embed)
 
     # ------------------------------------------------------------------
@@ -992,12 +999,12 @@ class AlienHost(DashboardIntegration, commands.Cog):
 
     @alienhost.group(name="set")
     async def ah_set(self, ctx: commands.Context):
-        """Configuracion de la integracion."""
+        """Integration settings."""
 
     @ah_set.command(name="panels")
     @commands.is_owner()
     async def ah_set_panels(self, ctx: commands.Context, action: str, url: Optional[str] = None):
-        """(Owner) Paneles permitidos: `add <url>`, `remove <url>`, `list`, `default <url>`."""
+        """(Owner) Allowed panels: `add <url>`, `remove <url>`, `list`, `default <url>`."""
         action = action.lower()
         panels = await self.config.allowed_panels()
         if action == "list":
@@ -1005,64 +1012,64 @@ class AlienHost(DashboardIntegration, commands.Cog):
             return await ctx.send("\n".join(f"• `{p}`{' (por defecto)' if p == default else ''}" for p in panels) or "Ninguno")
         norm = normalize_panel(url or "")
         if norm is None:
-            return await ctx.send("URL no valida.")
+            return await ctx.send(_("Invalid URL."))
         if action == "add":
             if norm not in panels:
                 panels.append(norm)
                 await self.config.allowed_panels.set(panels)
-            await ctx.send(f"Panel permitido: `{norm}`.")
+            await ctx.send(_("Panel allowed: `{norm}`.").format(norm=norm))
         elif action == "remove":
             await self.config.allowed_panels.set([p for p in panels if p != norm])
-            await ctx.send(f"Panel eliminado: `{norm}`. Las cuentas vinculadas a el dejaran de funcionar.")
+            await ctx.send(_("Panel removed: `{norm}`. Accounts linked to it will stop working.").format(norm=norm))
         elif action == "default":
             if norm not in panels:
-                return await ctx.send("Primero añadelo con `add`.")
+                return await ctx.send(_("Add it first with `add`."))
             await self.config.default_panel.set(norm)
-            await ctx.send(f"Panel por defecto: `{norm}`.")
+            await ctx.send(_("Default panel: `{norm}`.").format(norm=norm))
         else:
-            await ctx.send("Acciones: `add`, `remove`, `list`, `default`.")
+            await ctx.send(_("Actions: `add`, `remove`, `list`, `default`."))
 
     @ah_set.command(name="pollinterval")
     @commands.is_owner()
     async def ah_set_poll(self, ctx: commands.Context, seconds: int):
-        """(Owner) Cada cuanto se comprueban las alertas (minimo 60s)."""
+        """(Owner) How often alerts are checked (minimum 60s)."""
         await self.config.poll_interval.set(max(60, seconds))
-        await ctx.send(f"Intervalo de alertas: {max(60, seconds)}s.")
+        await ctx.send(_("Alert interval: {value}s.").format(value=max(60, seconds)))
 
     @ah_set.command(name="logchannel")
     @commands.guild_only()
     @commands.admin_or_permissions(manage_guild=True)
     async def ah_set_logchannel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Canal donde se registran las acciones (power, backups, vinculaciones)."""
+        """Channel where actions are logged (power, backups, links)."""
         await self.config.guild(ctx.guild).log_channel.set(channel.id if channel else None)
         self.bot.dispatch("trini_settings_change", ctx.guild, "AlienHost", ctx.author, "log_channel", str(channel))
-        await ctx.send(f"Canal de auditoria de AlienHost: {channel.mention if channel else 'ninguno'}.")
+        await ctx.send(_("AlienHost audit channel: {value}.").format(value=channel.mention if channel else 'ninguno'))
 
     @ah_set.command(name="adminrole")
     @commands.guild_only()
     @commands.admin_or_permissions(administrator=True)
     async def ah_set_adminrole(self, ctx: commands.Context, role: Optional[discord.Role] = None, require_trusted: bool = True):
-        """Rol con acceso a `alienhost admin` y si ademas se exige Trusted Admin de Trini Security."""
+        """Role with access to `alienhost admin`, and whether Trini Security Trusted Admin is also required."""
         await self.config.guild(ctx.guild).admin_role.set(role.id if role else None)
         await self.config.guild(ctx.guild).require_trusted.set(require_trusted)
         self.bot.dispatch("trini_settings_change", ctx.guild, "AlienHost", ctx.author, "admin_role", f"{role} trusted={require_trusted}")
         await ctx.send(
-            f"Rol de administracion: {role.mention if role else 'ninguno'} · exigir Trusted Admin: {'si' if require_trusted else 'no'}.",
+            _("Admin role: {value} · require Trusted Admin: {value2}.").format(value=role.mention if role else 'ninguno', value2='si' if require_trusted else 'no'),
             allowed_mentions=discord.AllowedMentions.none(),
         )
 
     @ah_set.command(name="show")
     async def ah_set_show(self, ctx: commands.Context):
-        """Ver la configuracion."""
+        """View the settings."""
         g = await self.config.guild(ctx.guild).all() if ctx.guild else {}
         admin = await self.config.admin()
-        embed = discord.Embed(title="⚙️ AlienHost", color=COLOR)
-        embed.add_field(name="Paneles permitidos", value="\n".join(await self.config.allowed_panels()) or "—", inline=False)
-        embed.add_field(name="Clave admin", value=f"✅ {admin['panel']}" if admin.get("key") else "❌", inline=True)
-        embed.add_field(name="Alertas cada", value=f"{await self.config.poll_interval()}s", inline=True)
+        embed = discord.Embed(title=_("⚙️ AlienHost"), color=COLOR)
+        embed.add_field(name=_("Allowed panels"), value="\n".join(await self.config.allowed_panels()) or "—", inline=False)
+        embed.add_field(name=_("Admin key"), value=f"✅ {admin['panel']}" if admin.get("key") else "❌", inline=True)
+        embed.add_field(name=_("Alerts every"), value=f"{await self.config.poll_interval()}s", inline=True)
         if g:
-            embed.add_field(name="Canal de auditoria", value=f"<#{g['log_channel']}>" if g["log_channel"] else "—", inline=True)
-            embed.add_field(name="Rol admin", value=(f"<@&{g['admin_role']}>" if g["admin_role"] else "—") + (" (+Trusted)" if g["require_trusted"] else ""), inline=True)
+            embed.add_field(name=_("Audit channel"), value=f"<#{g['log_channel']}>" if g["log_channel"] else "—", inline=True)
+            embed.add_field(name=_("Admin role"), value=(f"<@&{g['admin_role']}>" if g["admin_role"] else "—") + (" (+Trusted)" if g["require_trusted"] else ""), inline=True)
         linked = sum(1 for d in (await self.config.all_users()).values() if d.get("api_key"))
-        embed.add_field(name="Cuentas vinculadas", value=str(linked), inline=True)
+        embed.add_field(name=_("Linked accounts"), value=str(linked), inline=True)
         await self._private(ctx, embed=embed, allowed_mentions=discord.AllowedMentions.none())

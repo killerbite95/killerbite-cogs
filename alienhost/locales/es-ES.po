@@ -1,0 +1,843 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: alienhost\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: alienhost.py:100
+msgid ""
+"AlienHost integration: link your Pelican API key and control your servers "
+"from Discord."
+msgstr ""
+"Integracion con AlienHost: vincula tu clave API de Pelican y controla tus "
+"servidores desde Discord."
+
+#: alienhost.py:139
+msgid ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+
+#: alienhost.py:169
+msgid "🔒 {author}, click to view it privately."
+msgstr "🔒 {author}, pulsa para verlo en privado."
+
+#: alienhost.py:190
+msgid "⚠️ {author}, you pasted a Pelican API key in the chat"
+msgstr "⚠️ {author}, has pegado una clave API de Pelican en el chat"
+
+#: alienhost.py:191
+msgid " and I deleted it."
+msgstr " y la he borrado."
+
+#: alienhost.py:191
+msgid " and **I couldn't delete it**."
+msgstr " y **no he podido borrarla**."
+
+#: alienhost.py:192
+msgid ""
+" For safety, **delete it in the panel** (Profile → API Keys), create a new "
+"one and link it with `{p}alienhost link` (private form)."
+msgstr ""
+" Por seguridad **eliminala en el panel** (Perfil → Claves API), crea otra y "
+"vinculala con `{p}alienhost link` (formulario privado)."
+
+#: alienhost.py:198
+msgid "in #{value} · deleted={deleted}"
+msgstr "en #{value} · borrado={deleted}"
+
+#: alienhost.py:235
+msgid "❌ Invalid panel URL."
+msgstr "❌ URL del panel no valida."
+
+#: alienhost.py:238
+msgid "❌ That panel isn't allowed. Allowed panels: {allowed}."
+msgstr "❌ Ese panel no esta permitido. Paneles admitidos: {allowed}."
+
+#: alienhost.py:241
+msgid ""
+"❌ That's an **application** key (`papp_`). Create a key in your **client "
+"area**: Profile → API Keys."
+msgstr ""
+"❌ Esa es una clave de **aplicacion** (`papp_`). Crea una clave en tu **area "
+"cliente**: Perfil → Claves API."
+
+#: alienhost.py:245
+msgid "❌ Unrecognized key format. It must start with `pacc_`."
+msgstr "❌ Formato de clave no reconocido. Debe empezar por `pacc_`."
+
+#: alienhost.py:250 alienhost.py:280
+msgid "❌ Couldn't validate the key: {friendly}"
+msgstr "❌ No se pudo validar la clave: {friendly}"
+
+#: alienhost.py:260
+msgid "✅ AlienHost account linked"
+msgstr "✅ Cuenta de AlienHost vinculada"
+
+#: alienhost.py:262
+msgid ""
+"Panel user: **{get}**\n"
+"Panel: `{panel}`\n"
+"\n"
+"The key was saved **encrypted** and won't appear in any message.\n"
+"Now try `{p}alienhost servers`."
+msgstr ""
+"Usuario del panel: **{get}**\n"
+"Panel: `{panel}`\n"
+"\n"
+"La clave se ha guardado **cifrada** y no aparecera en ningun mensaje.\n"
+"Prueba ahora `{p}alienhost servers`."
+
+#: alienhost.py:265
+msgid "⚠️ 2FA disabled"
+msgstr "⚠️ 2FA desactivado"
+
+#: alienhost.py:265
+msgid "We recommend enabling 2FA on your panel account."
+msgstr "Te recomendamos activar 2FA en tu cuenta del panel."
+
+#: alienhost.py:266
+msgid ""
+"Tip: in the panel you can restrict the key to the bot's IP (allowed IPs)."
+msgstr ""
+"Consejo: en el panel puedes limitar la clave a la IP del bot (IPs "
+"permitidas)."
+
+#: alienhost.py:273
+msgid "❌ Invalid or not allowed panel."
+msgstr "❌ Panel no valido o no permitido."
+
+#: alienhost.py:275
+msgid "❌ Administration needs an application key (`papp_`)."
+msgstr "❌ Para administracion hace falta una clave de aplicacion (`papp_`)."
+
+#: alienhost.py:283
+msgid "✅ Admin key saved (encrypted)."
+msgstr "✅ Clave de administracion guardada (cifrada)."
+
+#: alienhost.py:290
+msgid ""
+"🔐 For security, the details are entered in a private form. **Never paste "
+"your key in the chat.**"
+msgstr ""
+"🔐 Por seguridad, los datos se introducen en un formulario privado. **Nunca "
+"pegues tu clave en el chat.**"
+
+#: alienhost.py:309
+msgid "🖥 AlienHost"
+msgstr "🖥 AlienHost"
+
+#: alienhost.py:326 alienhost.py:358 alienhost.py:429 alienhost.py:716
+msgid "You have no linked account. Use `{p}alienhost link`."
+msgstr "No tienes cuenta vinculada. Usa `{p}alienhost link`."
+
+#: alienhost.py:369
+msgid "⛔ Suspended"
+msgstr "⛔ Suspendido"
+
+#: alienhost.py:386
+msgid "Node under maintenance"
+msgstr "Nodo en mantenimiento"
+
+#: alienhost.py:401
+msgid "Wait {value}s before another action."
+msgstr "Espera {value}s antes de otra accion."
+
+#: alienhost.py:403
+msgid "You've reached the hourly action limit."
+msgstr "Has alcanzado el limite de acciones por hora."
+
+#: alienhost.py:411
+msgid " It may cause loss of unsaved data."
+msgstr " Puede provocar perdida de datos no guardados."
+
+#: alienhost.py:412
+msgid "Are you sure you want to send **{signal}** to **{name}**?{warn}"
+msgstr "¿Seguro que quieres enviar **{signal}** a **{name}**?{warn}"
+
+#: alienhost.py:440 alienhost.py:473
+msgid "You have no linked account."
+msgstr "No tienes cuenta vinculada."
+
+#: alienhost.py:450
+msgid "⏳ {date}    in progress"
+msgstr "⏳ {date}    en curso"
+
+#: alienhost.py:454
+msgid "❌ {date}    Failed"
+msgstr "❌ {date}    Fallido"
+
+#: alienhost.py:457
+msgid "💾 Backups · {get}"
+msgstr "💾 Backups · {get}"
+
+#: alienhost.py:458
+msgid "No backups"
+msgstr "Sin backups"
+
+#: alienhost.py:461
+msgid "{count} / {value} backups · Downloads are done from the panel."
+msgstr "{count} / {value} backups · Las descargas se hacen desde el panel."
+
+#: alienhost.py:480
+msgid "💾 Backup requested. It will show up in the list when it finishes."
+msgstr "💾 Backup solicitado. Aparecera en la lista cuando termine."
+
+#: alienhost.py:504
+msgid "⚠️ AlienHost"
+msgstr "⚠️ AlienHost"
+
+#: alienhost.py:560
+msgid "🔴 The server has stopped (offline)."
+msgstr "🔴 El servidor se ha detenido (offline)."
+
+#: alienhost.py:564
+msgid "🔄 The server has restarted."
+msgstr "🔄 El servidor se ha reiniciado."
+
+#: alienhost.py:571
+msgid "RAM above 90 % for 10 minutes."
+msgstr "RAM superior al 90 % durante 10 minutos."
+
+#: alienhost.py:574
+msgid "CPU above 95 % for 10 minutes."
+msgstr "CPU superior al 95 % durante 10 minutos."
+
+#: alienhost.py:584
+msgid "❌ A backup has failed."
+msgstr "❌ Un backup ha fallado."
+
+#: alienhost.py:584
+msgid "Check the panel for more details."
+msgstr "Revisa el panel para mas detalles."
+
+#: alienhost.py:611
+msgid "AlienHost: {count} member(s) with access to infrastructure commands"
+msgstr ""
+"AlienHost: {count} miembro(s) con acceso a comandos de infraestructura"
+
+#: alienhost.py:612
+msgid "Role {role}"
+msgstr "Rol {role}"
+
+#: alienhost.py:612
+msgid " · Trusted Admin not required"
+msgstr " · no se exige Trusted Admin"
+
+#: alienhost.py:619
+msgid "AlienHost has no audit channel"
+msgstr "AlienHost sin canal de auditoria"
+
+#: alienhost.py:619
+msgid "`{p}alienhost set logchannel #channel`"
+msgstr "`{p}alienhost set logchannel #canal`"
+
+#: alienhost.py:677
+msgid "Server not found or ambiguous. Use `{p}alienhost servers`."
+msgstr "Servidor no encontrado o ambiguo. Usa `{p}alienhost servers`."
+
+#: alienhost.py:687
+msgid ""
+"Link your account with the panel URL and an API key from your client area."
+msgstr ""
+"Vincular tu cuenta con la URL del panel y una clave API de tu area cliente."
+
+#: alienhost.py:693 i18n_strings.py:24 views.py:57
+msgid "Connect account"
+msgstr "Conectar cuenta"
+
+#: alienhost.py:697
+msgid "Unlink your account and delete the saved key."
+msgstr "Desvincular tu cuenta y borrar la clave guardada."
+
+#: alienhost.py:706
+msgid "🔓 Account unlinked and key deleted from the bot."
+msgstr "🔓 Cuenta desvinculada y clave eliminada del bot."
+
+#: alienhost.py:707
+msgid ""
+"\n"
+"Remember to also delete the key in {panel} (Profile → API Keys)."
+msgstr ""
+"\n"
+"Recuerda borrar tambien la clave en {panel} (Perfil → Claves API)."
+
+#: alienhost.py:713
+msgid "View your link status."
+msgstr "Ver el estado de tu vinculacion."
+
+#: alienhost.py:718
+msgid "🟢 valid key"
+msgstr "🟢 clave valida"
+
+#: alienhost.py:720
+msgid "🔴 couldn't decrypt the key, link again"
+msgstr "🔴 no se pudo descifrar la clave, vuelve a vincular"
+
+#: alienhost.py:726
+msgid "🔗 AlienHost account"
+msgstr "🔗 Cuenta de AlienHost"
+
+#: alienhost.py:727
+msgid "User"
+msgstr "Usuario"
+
+#: alienhost.py:728
+msgid "Panel"
+msgstr "Panel"
+
+#: alienhost.py:729
+msgid "Status"
+msgstr "Estado"
+
+#: alienhost.py:730
+msgid "Linked"
+msgstr "Vinculada"
+
+#: alienhost.py:731
+msgid "Active alerts"
+msgstr "Alertas activas"
+
+#: alienhost.py:736
+msgid "List your servers."
+msgstr "Listar tus servidores."
+
+#: alienhost.py:743
+msgid "You have no servers on this panel."
+msgstr "No tienes servidores en este panel."
+
+#: alienhost.py:757
+msgid " · ⛔ suspended"
+msgstr " · ⛔ suspendido"
+
+#: alienhost.py:761
+msgid "🖥 Your AlienHost servers"
+msgstr "🖥 Tus servidores de AlienHost"
+
+#: alienhost.py:763
+msgid "Showing 25 of {count}"
+msgstr "Mostrando 25 de {count}"
+
+#: alienhost.py:768
+msgid "Server details with quick actions."
+msgstr "Detalles de un servidor con acciones rapidas."
+
+#: alienhost.py:781
+msgid "Send start, stop, restart or kill to a server."
+msgstr "Enviar start, stop, restart o kill a un servidor."
+
+#: alienhost.py:784
+msgid "Signals: `start`, `stop`, `restart`, `kill`."
+msgstr "Señales: `start`, `stop`, `restart`, `kill`."
+
+#: alienhost.py:790
+msgid "Are you sure you want to send **{signal}** to **{get}**?"
+msgstr "¿Seguro que quieres enviar **{signal}** a **{get}**?"
+
+#: alienhost.py:803
+msgid "View a server's latest backups (and create one)."
+msgstr "Ver los ultimos backups de un servidor (y crear uno)."
+
+#: alienhost.py:816
+msgid "Set up DM alerts for a server (or view the active ones)."
+msgstr "Configurar alertas por DM de un servidor (o ver las activas)."
+
+#: alienhost.py:820
+msgid "You have no alerts. Use `{p}alienhost alerts <server>`."
+msgstr "No tienes alertas. Usa `{p}alienhost alerts <servidor>`."
+
+#: alienhost.py:825
+msgid "🔔 Your alerts"
+msgstr "🔔 Tus alertas"
+
+#: alienhost.py:846
+msgid "Internal AlienHost administration."
+msgstr "Administracion interna de AlienHost."
+
+#: alienhost.py:850
+msgid ""
+"🔒 AlienHost admins only (configured role + Trusted Admin in Trini Security)."
+msgstr ""
+"🔒 Solo administradores de AlienHost (rol configurado + Trusted Admin en "
+"Trini Security)."
+
+#: alienhost.py:860
+msgid "There's no admin key. The owner must use `{p}alienhost admin setkey`."
+msgstr ""
+"No hay clave de administracion. El owner debe usar `{p}alienhost admin "
+"setkey`."
+
+#: alienhost.py:875
+msgid ""
+"You have no linked account. Use `{p}alienhost link` with a panel admin "
+"account."
+msgstr ""
+"No tienes cuenta vinculada. Usa `{p}alienhost link` con una cuenta de "
+"administrador del panel."
+
+#: alienhost.py:880
+msgid ""
+"Your linked AlienHost account isn't a panel admin (root admin), so it can't "
+"see every server."
+msgstr ""
+"Tu cuenta vinculada en AlienHost no es administradora (root admin) del "
+"panel, asi que no puede ver todos los servidores."
+
+#: alienhost.py:888
+msgid "(Owner) Save the application key (papp_) through a private form."
+msgstr ""
+"(Owner) Guardar la clave de aplicacion (papp_) mediante formulario privado."
+
+#: alienhost.py:892 alienhost.py:1068
+msgid "Admin key"
+msgstr "Clave admin"
+
+#: alienhost.py:892
+msgid "Application key (papp_…)"
+msgstr "Clave de aplicacion (papp_…)"
+
+#: alienhost.py:894
+msgid "Enter key"
+msgstr "Introducir clave"
+
+#: alienhost.py:898
+msgid "Node status."
+msgstr "Estado de los nodos."
+
+#: alienhost.py:917
+msgid ""
+"{icon} **{get}** · {get2}\n"
+"   Allocated RAM {mem_pct:.0f}% · Disk {value:.0f}% · Servers {get3}"
+msgstr ""
+"{icon} **{get}** · {get2}\n"
+"   RAM asignada {mem_pct:.0f}% · Disco {value:.0f}% · Servers {get3}"
+
+#: alienhost.py:918
+msgid " · maintenance"
+msgstr " · mantenimiento"
+
+#: alienhost.py:920
+msgid "🛰 AlienHost nodes"
+msgstr "🛰 Nodos de AlienHost"
+
+#: alienhost.py:920
+msgid "No nodes"
+msgstr "Sin nodos"
+
+#: alienhost.py:921
+msgid "{count} nodes · {count2} servers (first 100)"
+msgstr "{count} nodos · {count2} servidores (primeros 100)"
+
+#: alienhost.py:926
+msgid "Suspended servers, failed installs or nodes under maintenance."
+msgstr ""
+"Servidores suspendidos, con instalacion fallida o nodos en mantenimiento."
+
+#: alienhost.py:935
+msgid "🟠 Node **{get}** under maintenance"
+msgstr "🟠 Nodo **{get}** en mantenimiento"
+
+#: alienhost.py:939
+msgid "⛔ **{get}** (`{get2}`) suspended"
+msgstr "⛔ **{get}** (`{get2}`) suspendido"
+
+#: alienhost.py:942
+msgid "🚧 Incidents"
+msgstr "🚧 Incidencias"
+
+#: alienhost.py:942
+msgid "🟢 No incidents"
+msgstr "🟢 Sin incidencias"
+
+#: alienhost.py:946
+msgid ""
+"View and manage ALL panel servers (25 per page, with search).\n"
+"\n"
+"        Uses your own account linked with `alienhost link`, which must be\n"
+"        a panel admin (root admin). Optionally filter by name,\n"
+"        identifier, UUID or node.\n"
+"        "
+msgstr ""
+"Ver y administrar TODOS los servidores del panel (25 por pagina, con buscador).\n"
+"\n"
+"        Usa tu propia cuenta vinculada con `alienhost link`, que debe ser\n"
+"        administradora (root admin) del panel. Opcionalmente filtra por nombre,\n"
+"        identificador, UUID o nodo.\n"
+"        "
+
+#: alienhost.py:960
+msgid "The panel has no servers."
+msgstr "El panel no tiene servidores."
+
+#: alienhost.py:963
+msgid "{count} servers"
+msgstr "{count} servidores"
+
+#: alienhost.py:963
+msgid " · filter {query}"
+msgstr " · filtro {query}"
+
+#: alienhost.py:968
+msgid "Find a customer by email or username (or linked Discord mention)."
+msgstr ""
+"Buscar un cliente por email o usuario (o mencion de Discord vinculada)."
+
+#: alienhost.py:986
+msgid "User not found."
+msgstr "Usuario no encontrado."
+
+#: alienhost.py:990
+msgid "Email"
+msgstr "Email"
+
+#: alienhost.py:992
+msgid "Admin"
+msgstr "Admin"
+
+#: alienhost.py:993
+msgid "Servers ({count})"
+msgstr "Servidores ({count})"
+
+#: alienhost.py:1002
+msgid "Integration settings."
+msgstr "Configuracion de la integracion."
+
+#: alienhost.py:1007
+msgid ""
+"(Owner) Allowed panels: `add <url>`, `remove <url>`, `list`, `default "
+"<url>`."
+msgstr ""
+"(Owner) Paneles permitidos: `add <url>`, `remove <url>`, `list`, `default "
+"<url>`."
+
+#: alienhost.py:1015
+msgid "Invalid URL."
+msgstr "URL no valida."
+
+#: alienhost.py:1020
+msgid "Panel allowed: `{norm}`."
+msgstr "Panel permitido: `{norm}`."
+
+#: alienhost.py:1023
+msgid "Panel removed: `{norm}`. Accounts linked to it will stop working."
+msgstr ""
+"Panel eliminado: `{norm}`. Las cuentas vinculadas a el dejaran de funcionar."
+
+#: alienhost.py:1026
+msgid "Add it first with `add`."
+msgstr "Primero añadelo con `add`."
+
+#: alienhost.py:1028
+msgid "Default panel: `{norm}`."
+msgstr "Panel por defecto: `{norm}`."
+
+#: alienhost.py:1030
+msgid "Actions: `add`, `remove`, `list`, `default`."
+msgstr "Acciones: `add`, `remove`, `list`, `default`."
+
+#: alienhost.py:1035
+msgid "(Owner) How often alerts are checked (minimum 60s)."
+msgstr "(Owner) Cada cuanto se comprueban las alertas (minimo 60s)."
+
+#: alienhost.py:1037
+msgid "Alert interval: {value}s."
+msgstr "Intervalo de alertas: {value}s."
+
+#: alienhost.py:1043
+msgid "Channel where actions are logged (power, backups, links)."
+msgstr ""
+"Canal donde se registran las acciones (power, backups, vinculaciones)."
+
+#: alienhost.py:1046
+msgid "AlienHost audit channel: {value}."
+msgstr "Canal de auditoria de AlienHost: {value}."
+
+#: alienhost.py:1052
+msgid ""
+"Role with access to `alienhost admin`, and whether Trini Security Trusted "
+"Admin is also required."
+msgstr ""
+"Rol con acceso a `alienhost admin` y si ademas se exige Trusted Admin de "
+"Trini Security."
+
+#: alienhost.py:1057
+msgid "Admin role: {value} · require Trusted Admin: {value2}."
+msgstr "Rol de administracion: {value} · exigir Trusted Admin: {value2}."
+
+#: alienhost.py:1063
+msgid "View the settings."
+msgstr "Ver la configuracion."
+
+#: alienhost.py:1066
+msgid "⚙️ AlienHost"
+msgstr "⚙️ AlienHost"
+
+#: alienhost.py:1067
+msgid "Allowed panels"
+msgstr "Paneles permitidos"
+
+#: alienhost.py:1069
+msgid "Alerts every"
+msgstr "Alertas cada"
+
+#: alienhost.py:1071
+msgid "Audit channel"
+msgstr "Canal de auditoria"
+
+#: alienhost.py:1072
+msgid "Admin role"
+msgstr "Rol admin"
+
+#: alienhost.py:1074
+msgid "Linked accounts"
+msgstr "Cuentas vinculadas"
+
+#: api.py:36
+msgid ""
+"The API key is invalid or was revoked. Link your account again (`alienhost "
+"link`)."
+msgstr ""
+"La clave API no es valida o ha sido revocada. Vuelve a vincular tu cuenta "
+"(`alienhost link`)."
+
+#: api.py:37
+msgid ""
+"Your API key doesn't have permission for this (or the bot's IP isn't allowed"
+" on the key)."
+msgstr ""
+"Tu clave API no tiene permiso para esto (o la IP del bot no esta permitida "
+"en la clave)."
+
+#: api.py:38
+msgid "Not found on the panel."
+msgstr "No encontrado en el panel."
+
+#: api.py:39
+msgid "The server is busy or in a state that doesn't allow the action."
+msgstr "El servidor esta ocupado o en un estado que no permite la accion."
+
+#: api.py:40
+msgid "Too many requests to the panel. Wait a moment."
+msgstr "Demasiadas peticiones al panel. Espera un momento."
+
+#: api.py:41
+msgid "Panel error."
+msgstr "Error del panel."
+
+#: api.py:90
+msgid "Couldn't reach the panel."
+msgstr "No se pudo contactar con el panel."
+
+#: api.py:92
+msgid "The panel didn't respond in time."
+msgstr "El panel no respondio a tiempo."
+
+#: i18n_strings.py:11
+msgid "AlienHost: your game servers from Discord."
+msgstr "AlienHost: tus servidores de juego desde Discord."
+
+#: i18n_strings.py:12
+msgid "🟢 Online"
+msgstr "🟢 Online"
+
+#: i18n_strings.py:13
+msgid "🟡 Starting"
+msgstr "🟡 Iniciando"
+
+#: i18n_strings.py:14
+msgid "🟠 Stopping"
+msgstr "🟠 Deteniendo"
+
+#: i18n_strings.py:15
+msgid "🔴 Offline"
+msgstr "🔴 Offline"
+
+#: i18n_strings.py:16
+msgid "🔧 Installing"
+msgstr "🔧 Instalando"
+
+#: i18n_strings.py:17
+msgid "❌ Install failed"
+msgstr "❌ Instalacion fallida"
+
+#: i18n_strings.py:18
+msgid "❌ Reinstall failed"
+msgstr "❌ Reinstalacion fallida"
+
+#: i18n_strings.py:19
+msgid "⏪ Restoring backup"
+msgstr "⏪ Restaurando backup"
+
+#: i18n_strings.py:20
+msgid "started"
+msgstr "iniciado"
+
+#: i18n_strings.py:21
+msgid "restarted"
+msgstr "reiniciado"
+
+#: i18n_strings.py:22
+msgid "stopped"
+msgstr "detenido"
+
+#: i18n_strings.py:23
+msgid "killed"
+msgstr "forzado (kill)"
+
+#: i18n_strings.py:25
+msgid "Confirm"
+msgstr "Confirmar"
+
+#: i18n_strings.py:26
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: i18n_strings.py:27
+msgid "Create backup"
+msgstr "Crear backup"
+
+#: i18n_strings.py:28
+msgid "View privately"
+msgstr "Ver en privado"
+
+#: i18n_strings.py:29
+msgid "Server offline"
+msgstr "Servidor offline"
+
+#: i18n_strings.py:30
+msgid "RAM > 90 % (10 min)"
+msgstr "RAM > 90 % (10 min)"
+
+#: i18n_strings.py:31
+msgid "CPU > 95 % (10 min)"
+msgstr "CPU > 95 % (10 min)"
+
+#: i18n_strings.py:32
+msgid "Backup failed"
+msgstr "Backup fallido"
+
+#: i18n_strings.py:33
+msgid "Server restarted"
+msgstr "Servidor reiniciado"
+
+#: views.py:31
+msgid "Link AlienHost"
+msgstr "Vincular AlienHost"
+
+#: views.py:33
+msgid "Panel URL"
+msgstr "URL del panel"
+
+#: views.py:35
+msgid "Client area API key (pacc_…)"
+msgstr "Clave API del area cliente (pacc_…)"
+
+#: views.py:36
+msgid "Profile → API Keys → Create"
+msgstr "Perfil → Claves API → Crear"
+
+#: views.py:67
+msgid "This button isn't for you. Use the `alienhost link` command."
+msgstr "Este boton no es para ti. Usa el comando `alienhost link`."
+
+#: views.py:79
+msgid "This panel isn't yours."
+msgstr "Este panel no es tuyo."
+
+#: views.py:99
+msgid "⏳ Sending…"
+msgstr "⏳ Enviando…"
+
+#: views.py:105
+msgid "Cancelled."
+msgstr "Cancelado."
+
+#: views.py:130
+msgid "Backups"
+msgstr "Backups"
+
+#: views.py:133 views.py:422
+msgid "Refresh"
+msgstr "Actualizar"
+
+#: views.py:136
+msgid "Alerts"
+msgstr "Alertas"
+
+#: views.py:173
+msgid "Pick a server"
+msgstr "Elige un servidor"
+
+#: views.py:248
+msgid "🔔 Alerts · {self_name}"
+msgstr "🔔 Alertas · {self_name}"
+
+#: views.py:249
+msgid "Alerts arrive by DM. Click to turn them on/off."
+msgstr ""
+"Las alertas llegan por mensaje privado. Pulsa para activar/desactivar."
+
+#: views.py:278
+msgid "This isn't for you."
+msgstr "Esto no es para ti."
+
+#: views.py:296
+msgid "Find server"
+msgstr "Buscar servidor"
+
+#: views.py:299
+msgid "Name, identifier, UUID or node"
+msgstr "Nombre, identificador, UUID o nodo"
+
+#: views.py:300
+msgid "Empty = clear filter"
+msgstr "Vacio = quitar filtro"
+
+#: views.py:381
+msgid "🖥 All panel servers"
+msgstr "🖥 Todos los servidores del panel"
+
+#: views.py:382
+msgid "No server matches the search."
+msgstr "Ningun servidor coincide con la busqueda."
+
+#: views.py:385
+msgid "{count} server(s)"
+msgstr "{count} servidor(es)"
+
+#: views.py:387
+msgid " of {count} · filter: {query}"
+msgstr " de {count} · filtro: {query}"
+
+#: views.py:388
+msgid " · page {value}/{total_pages}"
+msgstr " · pagina {value}/{total_pages}"
+
+#: views.py:398
+msgid "Manage server ({value}-{value2})"
+msgstr "Administrar servidor ({value}-{value2})"
+
+#: views.py:398
+msgid "No results"
+msgstr "Sin resultados"
+
+#: views.py:413
+msgid "◀ Previous"
+msgstr "◀ Anterior"
+
+#: views.py:414
+msgid "Next ▶"
+msgstr "Siguiente ▶"
+
+#: views.py:419
+msgid "Search"
+msgstr "Buscar"
