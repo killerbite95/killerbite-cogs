@@ -1,7 +1,7 @@
 import discord
 import time
 import re
-from typing import List
+from typing import List, Optional
 from redbot.core import commands, Config, checks
 from .dashboard_integration import DashboardIntegration
 
@@ -35,7 +35,9 @@ class AutoNick(DashboardIntegration, commands.Cog):
         self.config = Config.get_conf(self, identifier=123456789012345678, force_registration=True)
         default_guild = {
             "channel": None,    # Canal configurado para escuchar mensajes
-            "cooldown": 60      # Cooldown en segundos entre cambios de apodo
+            "cooldown": 60,     # Cooldown en segundos entre cambios de apodo
+            # Lista propia del servidor; None = usar la lista global por defecto.
+            "forbidden_names": None,
         }
         self.config.register_guild(**default_guild)
         self.config.register_global(forbidden_names=DEFAULT_FORBIDDEN_NAMES)
@@ -68,17 +70,25 @@ class AutoNick(DashboardIntegration, commands.Cog):
                 await group.set_raw(key, value=value)
         return []
 
-    async def get_forbidden_names(self) -> List[str]:
-        """Obtiene la lista actual de palabras prohibidas."""
-        return await self.config.forbidden_names()
+    async def get_forbidden_names(self, guild: Optional[discord.Guild] = None) -> List[str]:
+        """Lista de palabras prohibidas del servidor (o la global si no tiene propia)."""
+        if guild is not None:
+            names = await self.config.guild(guild).forbidden_names()
+            if names is not None:
+                return list(names)
+        return list(await self.config.forbidden_names())
 
-    async def is_valid_name(self, name: str) -> bool:
+    async def set_forbidden_names(self, guild: discord.Guild, names: List[str]) -> None:
+        """Guarda la lista del servidor (la global no se toca desde un servidor)."""
+        await self.config.guild(guild).forbidden_names.set(list(names))
+
+    async def is_valid_name(self, name: str, guild: Optional[discord.Guild] = None) -> bool:
         """
         Valida que el nombre no contenga ninguna de las palabras o frases prohibidas.
         Se utiliza una búsqueda con límites de palabra para evitar falsos positivos.
         """
         lower_name = name.lower()
-        forbidden_list = await self.get_forbidden_names()
+        forbidden_list = await self.get_forbidden_names(guild)
         for banned in forbidden_list:
             if re.search(r'\b' + re.escape(banned) + r'\b', lower_name):
                 return False
@@ -88,6 +98,8 @@ class AutoNick(DashboardIntegration, commands.Cog):
     async def on_message(self, message: discord.Message):
         # Ignorar mensajes de bots o fuera de servidores
         if message.author.bot or not message.guild:
+            return
+        if await self.bot.cog_disabled_in_guild(self, message.guild):
             return
 
         channel_id = await self.config.guild(message.guild).channel()
@@ -110,8 +122,15 @@ class AutoNick(DashboardIntegration, commands.Cog):
         new_nick = message.content.strip()
         if not new_nick:
             return
+        mention_only = discord.AllowedMentions(users=[message.author], everyone=False, roles=False)
+        if len(new_nick) > 32:
+            await message.channel.send(
+                f"{message.author.mention}, el apodo no puede tener mas de 32 caracteres.",
+                allowed_mentions=mention_only,
+            )
+            return
 
-        if not await self.is_valid_name(new_nick):
+        if not await self.is_valid_name(new_nick, message.guild):
             await message.channel.send(
                 f"{message.author.mention}, el nombre contiene palabras o nombres no permitidos. Por favor, elige otro."
             )
@@ -122,7 +141,8 @@ class AutoNick(DashboardIntegration, commands.Cog):
         try:
             await message.author.edit(nick=new_nick)
             await message.channel.send(
-                f"{message.author.mention}, tu apodo ha sido cambiado a: **{new_nick}**"
+                f"{message.author.mention}, tu apodo ha sido cambiado a: **{discord.utils.escape_markdown(new_nick)}**",
+                allowed_mentions=mention_only,
             )
         except discord.Forbidden:
             await message.channel.send(
@@ -194,11 +214,11 @@ class AutoNick(DashboardIntegration, commands.Cog):
         Ejemplo: `/autonick admin addforbidden [palabra o frase]`
         """
         word = word.lower().strip()
-        forbidden = await self.config.forbidden_names()
+        forbidden = await self.get_forbidden_names(ctx.guild)
         if word in forbidden:
             return await ctx.send("Esa palabra ya se encuentra en la lista de prohibidos.")
         forbidden.append(word)
-        await self.config.forbidden_names.set(forbidden)
+        await self.set_forbidden_names(ctx.guild, forbidden)
         await ctx.send(f"La palabra '{word}' ha sido añadida a la lista de prohibidos.")
 
     @admin.command(name="removeforbidden")
@@ -209,11 +229,11 @@ class AutoNick(DashboardIntegration, commands.Cog):
         Ejemplo: `/autonick admin removeforbidden [palabra o frase]`
         """
         word = word.lower().strip()
-        forbidden = await self.config.forbidden_names()
+        forbidden = await self.get_forbidden_names(ctx.guild)
         if word not in forbidden:
             return await ctx.send("Esa palabra no se encuentra en la lista de prohibidos.")
         forbidden.remove(word)
-        await self.config.forbidden_names.set(forbidden)
+        await self.set_forbidden_names(ctx.guild, forbidden)
         await ctx.send(f"La palabra '{word}' ha sido eliminada de la lista de prohibidos.")
 
     @admin.command(name="listforbidden")
@@ -222,10 +242,12 @@ class AutoNick(DashboardIntegration, commands.Cog):
         Muestra la lista de todas las palabras o frases prohibidas.
         Ejemplo: `/autonick admin listforbidden`
         """
-        forbidden = await self.config.forbidden_names()
+        forbidden = await self.get_forbidden_names(ctx.guild)
         if not forbidden:
             return await ctx.send("La lista de palabras prohibidas está vacía.")
         formatted = "\n".join(f"- {word}" for word in forbidden)
+        if len(formatted) > 4000:
+            formatted = formatted[:3990] + "\n…"
         embed = discord.Embed(title="Palabras prohibidas", description=formatted, color=discord.Color.red())
         await ctx.send(embed=embed)
 

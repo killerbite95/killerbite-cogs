@@ -17,7 +17,7 @@ Blackjack con botones (Hit, Stand, Double Down, Split) apostando creditos del ba
 ## Puesta en marcha paso a paso
 
 1. Asegurate de que el banco de Red funciona y los jugadores tienen creditos (`!bank balance`).
-2. Juega una mano: `!blackjack 100` (apuesta 100 creditos). Usa los botones del mensaje para jugar.
+2. Juega una mano: `!blackjack 100` (apuesta 100 creditos). Usa los botones del mensaje para jugar. Solo puedes tener una partida a la vez; si no pulsas nada en 2 minutos, te plantas automaticamente y la mano se resuelve.
 3. (Opcional) Personaliza las cartas con emojis: `!bjadmin setrank A <emoji>`, `!bjadmin setsuit hearts <emoji>`. Revisalo con `!bjadmin show` y vuelve a los de serie con `!bjadmin reset`.
 
 Tal como esta programado, `!blackjack` solo lo pueden usar moderadores o quien tenga Gestionar servidor. La configuracion de emojis es comun a todo el bot.

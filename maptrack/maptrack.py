@@ -74,13 +74,18 @@ class MapTrack(commands.Cog):
                 await group.set_raw(key, value=value)
         return []
 
+    async def cog_check(self, ctx):
+        return ctx.guild is not None
+
     @commands.command(name="addmaptrack", aliases=["añadirmaptrack"])
     @checks.admin_or_permissions(administrator=True)
     async def add_map_track(self, ctx, server_ip: str, channel: ChannelOrThreadConverter = None):
         """Adds a server to track map changes.
-
         Uso: !addmaptrack <server_ip> [channel_id]
         """
+        host, _, port = server_ip.rpartition(":")
+        if not host or not port.isdigit() or not 0 < int(port) < 65536:
+            return await ctx.send("Formato invalido. Usa `IP:puerto`, por ejemplo `1.2.3.4:27015`.")
         channel = channel or ctx.channel
         async with self.config.guild(ctx.guild).map_track_channels() as map_track_channels:
             map_track_channels[server_ip] = channel.id
@@ -125,6 +130,7 @@ class MapTrack(commands.Cog):
         await ctx.send(message)
 
     @commands.command(name="forcemaptrack", aliases=["forzarmaptrack"])
+    @checks.mod_or_permissions(manage_messages=True)
     async def force_map_track(self, ctx):
         """Forces a map tracking update in the current channel or thread."""
         map_track_channels = await self.config.guild(ctx.guild).map_track_channels()
@@ -143,14 +149,24 @@ class MapTrack(commands.Cog):
     async def map_check(self):
         """Verifica periódicamente si hay un cambio de mapa en los servidores rastreados."""
         for guild in self.bot.guilds:
-            # Limpiar map tracks con canales eliminados
-            await self.cleanup_map_tracks(guild)
-            map_track_channels = await self.config.guild(guild).map_track_channels()
-            tasks_list = []
-            for server_ip in list(map_track_channels.keys()):
-                tasks_list.append(self.send_map_update(guild, server_ip))
-            if tasks_list:
-                await asyncio.gather(*tasks_list)
+            try:
+                if await self.bot.cog_disabled_in_guild(self, guild):
+                    continue
+                # Limpiar map tracks con canales eliminados
+                await self.cleanup_map_tracks(guild)
+                map_track_channels = await self.config.guild(guild).map_track_channels()
+                tasks_list = []
+                for server_ip in list(map_track_channels.keys()):
+                    tasks_list.append(self.send_map_update(guild, server_ip))
+                if tasks_list:
+                    await asyncio.gather(*tasks_list, return_exceptions=True)
+            except Exception:
+                # Un fallo en un servidor no debe parar el bucle para todos.
+                self.logger.exception("Error en MapTrack para el servidor %s", guild.id)
+
+    @map_check.before_loop
+    async def before_map_check(self):
+        await self.bot.wait_until_red_ready()
 
     async def cleanup_map_tracks(self, guild):
         """Elimina map tracks asociados con canales o hilos eliminados."""

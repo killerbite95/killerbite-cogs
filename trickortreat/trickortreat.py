@@ -1706,6 +1706,8 @@ class TrickOrTreatV2(commands.Cog):
             self._toggle_cache[guild.id] = await self.config.guild(guild).toggle()
         if not self._toggle_cache[guild.id]:
             return
+        if await self.bot.cog_disabled_in_guild(self, guild):
+            return
 
         if guild.id not in self._channel_cache:
             self._channel_cache[guild.id] = await self.config.guild(guild).channel()

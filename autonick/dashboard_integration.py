@@ -70,10 +70,10 @@ class DashboardIntegration:
                 word = word.strip().lower()
                 if word:
                     try:
-                        forbidden = await self.config.forbidden_names()
+                        forbidden = await self.get_forbidden_names(guild)
                         if word not in forbidden:
                             forbidden.append(word)
-                            await self.config.forbidden_names.set(forbidden)
+                            await self.set_forbidden_names(guild, forbidden)
                             notifications.append({"message": f"Palabra '{html_mod.escape(word)}' añadida.", "category": "success"})
                         else:
                             notifications.append({"message": "Esa palabra ya existe.", "category": "warning"})
@@ -85,10 +85,10 @@ class DashboardIntegration:
                 word = word.strip().lower()
                 if word:
                     try:
-                        forbidden = await self.config.forbidden_names()
+                        forbidden = await self.get_forbidden_names(guild)
                         if word in forbidden:
                             forbidden.remove(word)
-                            await self.config.forbidden_names.set(forbidden)
+                            await self.set_forbidden_names(guild, forbidden)
                             notifications.append({"message": f"Palabra '{html_mod.escape(word)}' eliminada.", "category": "success"})
                         else:
                             notifications.append({"message": "Esa palabra no está en la lista.", "category": "warning"})
@@ -98,7 +98,7 @@ class DashboardIntegration:
         # GET — load THIS guild's config
         try:
             guild_data = await self.config.guild(guild).all()
-            forbidden_names = await self.config.forbidden_names()
+            forbidden_names = await self.get_forbidden_names(guild)
         except Exception:
             return {"status": 0, "web_content": {"source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar datos.</p></div>'}}
 

@@ -20,7 +20,7 @@ Cuenta los dias transcurridos desde una fecha.
 2. Consulta cuantos dias han pasado: `!dias`.
 3. Para empezar de cero: `!resetear_dias`.
 
-Ahora mismo cualquier usuario puede cambiar o resetear la fecha. Si quieres limitarlo, usa el cog Permissions de Red (por ejemplo `!permissions addserverrule deny establecer_fecha @everyone`).
+Cambiar o resetear la fecha requiere ser admin o tener *Gestionar servidor*; `!dias` lo puede usar cualquiera.
 
 ## Referencia completa de comandos
 
@@ -29,5 +29,5 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor p
 | Comando | Descripcion | Permiso |
 |---|---|---|
 | `!dias` | Muestra el número de días pasados desde la fecha de inicio. | Todos |
-| `!establecer_fecha <year> <month> <day>` | Establece la fecha de inicio en formato año, mes, día. | Todos |
-| `!resetear_dias` | Resetea la fecha de inicio. | Todos |
+| `!establecer_fecha <year> <month> <day>` | Establece la fecha de inicio en formato año, mes, día. | Admin o permiso Gestionar servidor |
+| `!resetear_dias` | Resetea la fecha de inicio. | Admin o permiso Gestionar servidor |

@@ -1,6 +1,7 @@
 import discord
 from redbot.core import commands
 from redbot.core.i18n import Translator, cog_i18n
+import io
 import logging
 
 _ = Translator("ListRoles", __file__)
@@ -20,6 +21,7 @@ class ListRoles(commands.Cog):
         pre_processed = super().format_help_for_context(ctx)
         return f"{pre_processed}\n\nVersion: {self.__version__}"
 
+    @commands.guild_only()
     @commands.command(name="listroles")
     async def listroles(self, ctx: commands.Context):
         """List all server roles with their name and ID."""
@@ -27,10 +29,14 @@ class ListRoles(commands.Cog):
         if not roles:
             return await ctx.send(_("No roles found in this server."))
 
-        role_lines = [f"{role.name}: {role.id}" for role in roles]
+        role_lines = [f"{role.name}: {role.id}" for role in reversed(roles)]
         role_text = "\n".join(role_lines)
+        message = _("Server roles:") + f"\n{role_text}"
 
-        if len(role_text) > 2000:
-            await ctx.send(file=discord.File(fp=role_text.encode("utf-8"), filename="roles.txt"))
+        if len(message) > 2000:
+            await ctx.send(
+                _("Server roles:"),
+                file=discord.File(io.BytesIO(role_text.encode("utf-8")), filename="roles.txt"),
+            )
         else:
-            await ctx.send(_("Server roles:") + f"\n{role_text}")
+            await ctx.send(message, allowed_mentions=discord.AllowedMentions.none())

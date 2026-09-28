@@ -7,6 +7,7 @@ import asyncio
 import logging
 
 _ = Translator("ColaCoins", __file__)
+_BACKUP_FILE = "colacoins_data.json"
 
 
 @cog_i18n(_)
@@ -23,27 +24,47 @@ class ColaCoins(commands.Cog):
         }
         self.config.register_global(**default_global)
         self.logger = logging.getLogger("red.ColaCoins")
-        self.logger.setLevel(logging.INFO)
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(name)s: %(message)s')
-        handler.setFormatter(formatter)
-        if not self.logger.handlers:
-            self.logger.addHandler(handler)
 
-    async def save_data(self):
-        data = await self.config.colacoins()
-        with open("colacoins_data.json", "w") as f:
+    async def cog_load(self):
+        await self.load_data()
+
+    async def red_delete_data_for_user(self, *, requester, user_id: int):
+        async with self.config.colacoins() as colacoins:
+            colacoins.pop(str(user_id), None)
+        await self.save_data()
+
+    @staticmethod
+    def _write_backup(data):
+        with open(_BACKUP_FILE, "w") as f:
             json.dump(data, f)
 
-    async def load_data(self):
-        if os.path.exists("colacoins_data.json"):
-            with open("colacoins_data.json", "r") as f:
-                data = json.load(f)
-                await self.config.colacoins.set(data)
+    async def save_data(self):
+        """Copia de respaldo en JSON (Config es la fuente de verdad)."""
+        data = await self.config.colacoins()
+        try:
+            await asyncio.to_thread(self._write_backup, data)
+        except OSError:
+            self.logger.warning("No se pudo escribir %s", _BACKUP_FILE)
 
-    @commands.Cog.listener()
-    async def on_ready(self):
-        await self.load_data()
+    async def load_data(self):
+        """Migracion unica desde el JSON antiguo.
+
+        Solo se usa si Config esta vacio: antes se leia en cada ``on_ready``
+        (tambien en cada reconexion) y podia pisar los saldos con una copia vieja.
+        """
+        if await self.config.colacoins():
+            return
+        if not os.path.exists(_BACKUP_FILE):
+            return
+        try:
+            with open(_BACKUP_FILE, "r") as f:
+                data = json.load(f)
+        except (OSError, ValueError):
+            self.logger.warning("No se pudo leer %s", _BACKUP_FILE)
+            return
+        if isinstance(data, dict) and data:
+            await self.config.colacoins.set(data)
+            self.logger.info("ColaCoins migrados desde %s (%s usuarios).", _BACKUP_FILE, len(data))
 
     @commands.admin_or_permissions(administrator=True)
     @commands.command(name="givecolacoins", aliases=["darcolacoins"])

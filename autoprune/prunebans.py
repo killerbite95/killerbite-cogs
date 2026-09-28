@@ -1,15 +1,17 @@
 import discord
-from discord.ext import commands, tasks
+from discord.ext import tasks
 from redbot.core import commands, Config, checks, bank
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator, cog_i18n
 import asyncio
+import logging
 import datetime
 
 from redbot.core.bank import bank_prune
 from .dashboard_integration import DashboardIntegration
 
 _ = Translator("PruneBans", __file__)
+log = logging.getLogger("red.killerbite.autoprune")
 
 
 @cog_i18n(_)
@@ -55,6 +57,11 @@ class PruneBans(DashboardIntegration, commands.Cog):
 
     def cog_unload(self):
         self.update_ban_countdown.cancel()
+
+    async def red_delete_data_for_user(self, *, requester, user_id: int):
+        for guild_id in await self.config.all_guilds():
+            async with self.config.guild_from_id(guild_id).ban_track() as ban_track:
+                ban_track.pop(str(user_id), None)
 
     @commands.command(name="setlogprune")
     @checks.admin_or_permissions(administrator=True)
@@ -215,7 +222,7 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 remaining_days = max(0, remaining_time.days)
                 remaining_seconds = remaining_time.seconds
                 remaining_hours, remaining_minutes = divmod(remaining_seconds, 3600)
-                remaining_minutes, _ = divmod(remaining_minutes, 60)
+                remaining_minutes = remaining_minutes // 60
                 remaining_hours = max(0, remaining_hours)
                 remaining_minutes = max(0, remaining_minutes)
                 user = guild.get_member(user_id)
@@ -235,6 +242,8 @@ class PruneBans(DashboardIntegration, commands.Cog):
     @commands.Cog.listener()
     async def on_member_ban(self, guild, user):
         """Event triggered when a user is banned."""
+        if await self.bot.cog_disabled_in_guild(self, guild):
+            return
         ban_log_channel_id = await self.config.guild(guild).ban_log_channel()
         if ban_log_channel_id:
             ban_log_channel = guild.get_channel(ban_log_channel_id)
@@ -257,7 +266,7 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 embed = discord.Embed(
                     title=_("🔨 User Banned"),
                     color=discord.Color.red(),
-                    timestamp=ban_date
+                    timestamp=ban_date.replace(tzinfo=datetime.timezone.utc)
                 )
                 embed.add_field(name=_("User"), value=f"{user.mention} (ID: {user.id})", inline=False)
                 embed.add_field(name=_("Ban Date"), value=ban_date.strftime('%Y-%m-%d %H:%M:%S UTC'), inline=False)
@@ -277,6 +286,8 @@ class PruneBans(DashboardIntegration, commands.Cog):
     @commands.Cog.listener()
     async def on_member_unban(self, guild, user):
         """Event triggered when a user is unbanned manually."""
+        if await self.bot.cog_disabled_in_guild(self, guild):
+            return
         async with self.config.guild(guild).ban_track() as ban_track:
             if str(user.id) in ban_track:
                 del ban_track[str(user.id)]
@@ -294,25 +305,34 @@ class PruneBans(DashboardIntegration, commands.Cog):
     async def update_ban_countdown(self):
         """Update ban countdowns every 24 hours."""
         for guild in self.bot.guilds:
-            ban_log_channel_id = await self.config.guild(guild).ban_log_channel()
-            if not ban_log_channel_id:
-                continue
-            ban_log_channel = guild.get_channel(ban_log_channel_id)
-            if not ban_log_channel:
-                continue
-            async with self.config.guild(guild).ban_track() as ban_track:
-                for user_id_str, ban_info in list(ban_track.items()):
-                    ban_date = datetime.datetime.fromisoformat(ban_info["ban_date"])
-                    now = datetime.datetime.utcnow()
-                    time_since_ban = now - ban_date
+            try:
+                await self._check_ban_countdowns(guild)
+            except Exception:
+                log.exception("Error revisando los baneos de %s", guild.id)
 
-                    if time_since_ban >= datetime.timedelta(days=7):
-                        await ban_log_channel.send(
-                            _("⏰ **User ID {user_id} has passed the 7-day ban period and is ready to be pruned.**").format(
-                                user_id=user_id_str
-                            )
+    async def _check_ban_countdowns(self, guild):
+        if await self.bot.cog_disabled_in_guild(self, guild):
+            return
+        ban_log_channel_id = await self.config.guild(guild).ban_log_channel()
+        if not ban_log_channel_id:
+            return
+        ban_log_channel = guild.get_channel(ban_log_channel_id)
+        if not ban_log_channel:
+            return
+        async with self.config.guild(guild).ban_track() as ban_track:
+            for user_id_str, ban_info in list(ban_track.items()):
+                ban_date = datetime.datetime.fromisoformat(ban_info["ban_date"])
+                now = datetime.datetime.utcnow()
+                time_since_ban = now - ban_date
+
+                if time_since_ban >= datetime.timedelta(days=7) and not ban_info.get("prune_notified"):
+                    ban_info["prune_notified"] = True
+                    await ban_log_channel.send(
+                        _("⏰ **User ID {user_id} has passed the 7-day ban period and is ready to be pruned.**").format(
+                            user_id=user_id_str
                         )
+                    )
 
     @update_ban_countdown.before_loop
     async def before_update_ban_countdown(self):
-        await self.bot.wait_until_ready()
+        await self.bot.wait_until_red_ready()

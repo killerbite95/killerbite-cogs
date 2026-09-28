@@ -66,6 +66,7 @@ class DayCounter(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.guild_only()
+    @commands.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def establecer_fecha(self, ctx, year: int, month: int, day: int):
         '''Establece la fecha de inicio en formato año, mes, día.'''
@@ -86,6 +87,7 @@ class DayCounter(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.guild_only()
+    @commands.admin_or_permissions(manage_guild=True)
     @commands.command()
     async def resetear_dias(self, ctx):
         '''Resetea la fecha de inicio.'''

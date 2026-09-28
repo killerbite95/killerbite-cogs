@@ -22,7 +22,7 @@ Los usuarios escriben el apodo que quieren en un canal y el bot se lo pone autom
 4. Revisa la configuracion: `!autonick info`.
 5. Listo: cualquiera que escriba en ese canal recibe como apodo el texto de su mensaje.
 
-La lista de nombres prohibidos es comun a todos los servidores del bot.
+Cada servidor tiene su propia lista de nombres prohibidos: empieza con la lista por defecto y los cambios que hagas solo afectan a ese servidor (tambien viaja con `!profile export`/`import`). Los apodos de mas de 32 caracteres se rechazan.
 
 ## Referencia completa de comandos
 

@@ -17,5 +17,6 @@
         "dateparser"
     ],
     "min_bot_version": "3.5.0",
-    "hidden": false
+    "hidden": false,
+    "end_user_data_statement": "Este cog guarda los IDs de los usuarios que participan en sorteos activos y finalizados."
 }

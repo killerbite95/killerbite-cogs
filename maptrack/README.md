@@ -16,7 +16,7 @@ Avisa en un canal o hilo cada vez que un servidor de juego cambia de mapa.
 
 ## Puesta en marcha paso a paso
 
-1. Añade el servidor y el canal (o hilo) de avisos: `!addmaptrack 51.77.10.20:27015 #cambios-de-mapa`.
+1. Añade el servidor (formato `IP:puerto`) y el canal (o hilo) de avisos: `!addmaptrack 51.77.10.20:27015 #cambios-de-mapa`.
 2. Repite con cada servidor que quieras seguir.
 3. Comprueba la lista: `!maptracks`.
 4. Fuerza una comprobacion en el canal actual: `!forcemaptrack`.
@@ -29,6 +29,6 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor p
 | Comando | Descripcion | Permiso |
 |---|---|---|
 | `!addmaptrack <server_ip> [channel]` | Adds a server to track map changes. Alias: `añadirmaptrack`. | Admin o permiso Administrator |
-| `!forcemaptrack` | Forces a map tracking update in the current channel or thread. Alias: `forzarmaptrack`. | Todos |
+| `!forcemaptrack` | Forces a map tracking update in the current channel or thread. Alias: `forzarmaptrack`. | Mod o permiso Gestionar mensajes |
 | `!maptracks` | Lists all servers with active map tracking. Alias: `listarmaptracks`. | Todos |
 | `!removemaptrack <channel>` | Removes all map tracks from a channel or thread. Alias: `borrarmaptrack`. | Admin o permiso Administrator |

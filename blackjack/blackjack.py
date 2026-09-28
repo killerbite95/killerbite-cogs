@@ -51,6 +51,23 @@ class AdvancedBlackjackView(discord.ui.View):
         # Deshabilita los botones al expirar el tiempo.
         for child in self.children:
             child.disabled = True
+        # Solo la vista vigente de la partida la resuelve (las anteriores ya
+        # fueron sustituidas al pulsar un boton): se planta en lo que quede.
+        game = self.cog.games.get(self.ctx.author.id)
+        if not game or game.get("view") is not self:
+            return
+        game["active_hand"] = len(game["player_hands"])
+        message = game.get("message")
+        if message is not None:
+            try:
+                await message.edit(view=None)
+            except discord.HTTPException:
+                pass
+        await self.ctx.send(
+            f"{self.ctx.author.mention}, se acabo el tiempo: te plantas automaticamente.",
+            allowed_mentions=discord.AllowedMentions(users=[self.ctx.author]),
+        )
+        await self.cog.dealer_phase(self.ctx)
         # Opcional: se puede editar el mensaje para notificar que la partida expiró.
 
 class Blackjack(commands.Cog):
@@ -67,7 +84,7 @@ class Blackjack(commands.Cog):
         # Variable caché para la configuración de las cartas.
         self.card_config = {"ranks": default_ranks.copy(), "suits": default_suits.copy()}
         # Cargamos la configuración de forma asíncrona.
-        self.bot.loop.create_task(self.initialize_card_config())
+        # (se carga en cog_load)
 
         # Diccionario para partidas activas:
         # self.games[user_id] = {
@@ -81,6 +98,9 @@ class Blackjack(commands.Cog):
         #    "double_down_used": [bool, ...]  # Una por cada mano
         # }
         self.games = {}
+
+    async def cog_load(self):
+        await self.initialize_card_config()
 
     async def initialize_card_config(self):
         self.card_config["ranks"] = await self.config.ranks()
@@ -99,6 +119,8 @@ class Blackjack(commands.Cog):
         """
         if bet <= 0:
             return await ctx.send("La apuesta debe ser mayor que 0.")
+        if ctx.author.id in self.games:
+            return await ctx.send("Ya tienes una partida en curso. Terminala antes de empezar otra.")
 
         balance = await bank.get_balance(ctx.author)
         if balance < bet:
@@ -131,8 +153,8 @@ class Blackjack(commands.Cog):
         embed.title = "Blackjack: Mano #1"
         embed.color = discord.Color.blue()
         embed.set_footer(text=f"Apuesta base: {bet} | Saldo tras apostar: {balance - bet}\nUsa los botones para jugar.")
-        view = AdvancedBlackjackView(self, ctx, timeout=120)
-        await ctx.send(embed=embed, view=view)
+        view = self.build_view(ctx)
+        self.games[ctx.author.id]["message"] = await ctx.send(embed=embed, view=view)
 
     # ====================
     # Funciones de jugadas
@@ -143,6 +165,8 @@ class Blackjack(commands.Cog):
         game = self.games.get(ctx.author.id)
         if not game:
             return await interaction.response.send_message("No tienes una partida activa.", ephemeral=True)
+        if game["active_hand"] >= len(game["player_hands"]):
+            return await interaction.response.send_message("Esa mano ya ha terminado.", ephemeral=True)
 
         active_idx = game["active_hand"]
         current_hand = game["player_hands"][active_idx]
@@ -170,6 +194,8 @@ class Blackjack(commands.Cog):
         game = self.games.get(ctx.author.id)
         if not game:
             return await interaction.response.send_message("No tienes una partida activa.", ephemeral=True)
+        if game["active_hand"] >= len(game["player_hands"]):
+            return await interaction.response.send_message("Esa mano ya ha terminado.", ephemeral=True)
         game["active_hand"] += 1
 
         embed = self.build_embed(ctx)
@@ -186,6 +212,8 @@ class Blackjack(commands.Cog):
         game = self.games.get(ctx.author.id)
         if not game:
             return await interaction.response.send_message("No tienes una partida activa.", ephemeral=True)
+        if game["active_hand"] >= len(game["player_hands"]):
+            return await interaction.response.send_message("Esa mano ya ha terminado.", ephemeral=True)
         active_idx = game["active_hand"]
         current_hand = game["player_hands"][active_idx]
 
@@ -224,6 +252,8 @@ class Blackjack(commands.Cog):
         game = self.games.get(ctx.author.id)
         if not game:
             return await interaction.response.send_message("No tienes una partida activa.", ephemeral=True)
+        if game["active_hand"] >= len(game["player_hands"]):
+            return await interaction.response.send_message("Esa mano ya ha terminado.", ephemeral=True)
         active_idx = game["active_hand"]
         current_hand = game["player_hands"][active_idx]
 
@@ -265,7 +295,8 @@ class Blackjack(commands.Cog):
 
     async def dealer_phase(self, ctx):
         """Fase del Dealer tras que el jugador termine sus jugadas."""
-        game = self.games.get(ctx.author.id)
+        # Se saca la partida antes de pagar: un doble clic no puede resolverla dos veces.
+        game = self.games.pop(ctx.author.id, None)
         if not game:
             return
 
@@ -312,7 +343,7 @@ class Blackjack(commands.Cog):
         else:
             final_color = discord.Color.red()       # Pérdida
 
-        embed_final = self.build_embed(ctx, reveal_dealer=True)
+        embed_final = self.build_embed(ctx, reveal_dealer=True, game=game)
         embed_final.title = "Resultado Final"
         embed_final.color = final_color
         resumen = "\n".join(results)
@@ -320,9 +351,6 @@ class Blackjack(commands.Cog):
         embed_final.add_field(name="Resumen", value=resumen, inline=False)
         embed_final.set_footer(text=f"Ganancia total: {total_win} créditos.")
         await ctx.send(embed=embed_final)
-
-        # Limpiar la partida.
-        self.games.pop(ctx.author.id, None)
 
     # ============================
     # Utilidades y funciones auxiliares
@@ -373,12 +401,12 @@ class Blackjack(commands.Cog):
             return f"{self.card_to_str(hand[0])} 🂠"
         return " ".join(self.card_to_str(c) for c in hand)
 
-    def build_embed(self, ctx, reveal_dealer=False, busted_hand=None):
+    def build_embed(self, ctx, reveal_dealer=False, busted_hand=None, game=None):
         """
         Construye un embed mostrando la mano del dealer y las manos del jugador.
         Se utiliza Markdown para mayor claridad.
         """
-        game = self.games.get(ctx.author.id)
+        game = game or self.games.get(ctx.author.id)
         if not game:
             return discord.Embed(description="Error: no se encontró la partida.", color=discord.Color.red())
 
@@ -404,7 +432,11 @@ class Blackjack(commands.Cog):
 
     def build_view(self, ctx):
         """Reconstruye la vista para actualizar los botones."""
-        return AdvancedBlackjackView(self, ctx, timeout=120)
+        view = AdvancedBlackjackView(self, ctx, timeout=120)
+        game = self.games.get(ctx.author.id)
+        if game is not None:
+            game["view"] = view
+        return view
 
     def card_value_for_split(self, card):
         """

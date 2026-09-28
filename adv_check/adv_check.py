@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from datetime import datetime, timezone
 
 import discord
@@ -56,8 +57,11 @@ class Check(commands.Cog):
         # Se obtiene el apartado de sanciones de forma asíncrona, pasando el ctx para poder invocar el comando de warnings.
         embeds["sanctions"] = await self._build_sanctions_embed(ctx, member)
 
-        view = CheckView(member, embeds)
-        await ctx.send(embed=embeds["basic"], view=view, ephemeral=True)
+        for embed in embeds.values():
+            if embed.description and len(embed.description) > 4000:
+                embed.description = embed.description[:3990] + "\n…"
+        view = CheckView(ctx.author.id, member, embeds)
+        view.message = await ctx.send(embed=embeds["basic"], view=view, ephemeral=True)
 
     def _build_basic_info(self, member: discord.Member) -> discord.Embed:
         """Crea un embed con información básica del usuario (sin discriminador)."""
@@ -201,10 +205,30 @@ class Check(commands.Cog):
 
 class CheckView(discord.ui.View):
     """Vista interactiva para navegar por la información del usuario."""
-    def __init__(self, member: discord.Member, embeds: dict, timeout: float = 120.0):
+    def __init__(self, author_id: int, member: discord.Member, embeds: dict, timeout: float = 120.0):
         super().__init__(timeout=timeout)
+        self.author_id = author_id
         self.member = member
         self.embeds = embeds
+        self.message: Optional[discord.Message] = None
+
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Con el prefijo el mensaje es publico: solo quien lanzo el check puede navegar.
+        if interaction.user.id != self.author_id:
+            await interaction.response.send_message(
+                _("Solo quien ejecuto el comando puede usar este menu."), ephemeral=True
+            )
+            return False
+        return True
+
+    async def on_timeout(self) -> None:
+        for child in self.children:
+            child.disabled = True
+        if self.message is not None:
+            try:
+                await self.message.edit(view=self)
+            except discord.HTTPException:
+                pass
 
     @discord.ui.select(
         placeholder="Selecciona una sección",
