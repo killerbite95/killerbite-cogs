@@ -21,6 +21,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import discord
 from redbot.core import Config, commands
 
+from .third_party import get_adapter
+
 log = logging.getLogger("red.killerbite95.triniprofiles.portable")
 
 SNOWFLAKE_MIN = 10**15
@@ -131,19 +133,127 @@ def _is_runtime_key(key: Any) -> bool:
     return name in _RUNTIME_KEY_EXACT or name.endswith(_RUNTIME_KEY_SUFFIXES)
 
 
+SCOPES_KEY = "__trini_scopes__"
+
+
+def find_config(cog: commands.Cog) -> Optional[Config]:
+    """``Config`` del cog: normalmente ``self.config``, pero algunos cogs de
+    terceros lo guardan con otro nombre (p. ej. Sticky usa ``self.conf``)."""
+    config = getattr(cog, "config", None)
+    if isinstance(config, Config):
+        return config
+    for value in vars(cog).values():
+        if isinstance(value, Config):
+            return value
+    return None
+
+
+def _drop_path(data: Dict[str, Any], path: Tuple[str, ...]) -> None:
+    node: Any = data
+    for key in path[:-1]:
+        node = node.get(key) if isinstance(node, dict) else None
+        if node is None:
+            return
+    if isinstance(node, dict):
+        node.pop(path[-1], None)
+
+
+def _deep_merge(base: Any, update: Any) -> Any:
+    """``update`` sobre ``base`` conservando lo que ``update`` no trae."""
+    if isinstance(base, dict) and isinstance(update, dict):
+        merged = dict(base)
+        for key, value in update.items():
+            merged[key] = _deep_merge(base.get(key), value) if key in base else value
+        return merged
+    return update
+
+
+async def _export_raw(cog: commands.Cog, config: Config, guild: discord.Guild) -> Dict[str, Any]:
+    """Copia en bruto de un cog sin ``trini_export``, afinada con su adaptador."""
+    adapter = get_adapter(cog.qualified_name)
+    data = await config.guild(guild).all()
+    data = {k: v for k, v in data.items() if not _is_runtime_key(k) and k not in adapter.runtime}
+    for path in adapter.runtime_paths:
+        _drop_path(data, path)
+    scopes: Dict[str, Any] = {}
+    if adapter.channel:
+        channels = {
+            str(cid): {k: v for k, v in values.items() if k not in adapter.channel_runtime}
+            for cid, values in (await config.all_channels()).items()
+            if guild.get_channel(cid) is not None
+        }
+        if channels:
+            scopes["channel"] = channels
+    if adapter.role:
+        roles = {str(rid): values for rid, values in (await config.all_roles()).items() if guild.get_role(rid) is not None}
+        if roles:
+            scopes["role"] = roles
+    for group in adapter.custom_guild_groups:
+        entries = await config.custom(group, str(guild.id)).all()
+        if entries:
+            scopes.setdefault("custom", {})[group] = entries
+    if scopes:
+        data[SCOPES_KEY] = scopes
+    return data
+
+
 async def export_cog(cog: commands.Cog, guild: discord.Guild) -> Optional[Dict[str, Any]]:
     """Exporta la configuracion de servidor de un cog (o ``None`` si no es posible)."""
     try:
         exporter = getattr(cog, "trini_export", None)
         if exporter is not None:
             return _json_safe(await exporter(guild))
-        config = getattr(cog, "config", None)
-        if isinstance(config, Config):
-            data = await config.guild(guild).all()
-            return _json_safe({k: v for k, v in data.items() if not _is_runtime_key(k)})
+        config = find_config(cog)
+        if config is not None:
+            return _json_safe(await _export_raw(cog, config, guild))
     except Exception:
         log.exception("No se pudo exportar la configuracion de %s", cog.qualified_name)
     return None
+
+
+async def _import_raw(
+    cog: commands.Cog, config: Config, guild: discord.Guild, data: Dict[str, Any], *, same_guild: bool
+) -> List[str]:
+    adapter = get_adapter(cog.qualified_name)
+    data = dict(data)
+    scopes = data.pop(SCOPES_KEY, None) or {}
+    group = config.guild(guild)
+    current = await group.all()
+    merge_keys = {path[0] for path in adapter.runtime_paths}
+    for key, value in data.items():
+        if key not in current or _is_runtime_key(key) or key in adapter.runtime:
+            continue
+        if key in adapter.local and not same_guild:
+            continue
+        if key in merge_keys:
+            # Conserva los datos de funcionamiento actuales (contadores, ultimo mensaje).
+            value = _deep_merge(current[key], value)
+        await group.set_raw(key, value=value)
+    for cid, values in (scopes.get("channel") or {}).items():
+        if not str(cid).isdigit() or guild.get_channel(int(cid)) is None:
+            continue
+        channel_group = config.channel_from_id(int(cid))
+        channel_current = await channel_group.all()
+        for key, value in values.items():
+            if key in channel_current and key not in adapter.channel_runtime:
+                await channel_group.set_raw(key, value=value)
+    for rid, values in (scopes.get("role") or {}).items():
+        if not str(rid).isdigit() or guild.get_role(int(rid)) is None:
+            continue
+        role_group = config.role_from_id(int(rid))
+        role_current = await role_group.all()
+        for key, value in values.items():
+            if key in role_current:
+                await role_group.set_raw(key, value=value)
+    for group_name, entries in (scopes.get("custom") or {}).items():
+        if group_name not in adapter.custom_guild_groups:
+            continue
+        for sub_id, values in entries.items():
+            # En los grupos soportados el segundo identificador es un canal del servidor.
+            if str(sub_id).isdigit() and guild.get_channel(int(sub_id)) is None:
+                continue
+            await config.custom(group_name, str(guild.id), str(sub_id)).set(values)
+    return [adapter.note] if adapter.note and not same_guild else []
 
 
 async def import_cog(
@@ -153,12 +263,7 @@ async def import_cog(
     importer = getattr(cog, "trini_import", None)
     if importer is not None:
         return list(await importer(guild, data, same_guild=same_guild) or [])
-    config = getattr(cog, "config", None)
-    if isinstance(config, Config):
-        group = config.guild(guild)
-        defaults = await group.all()
-        for key, value in data.items():
-            if key in defaults and not _is_runtime_key(key):
-                await group.set_raw(key, value=value)
-        return []
+    config = find_config(cog)
+    if config is not None:
+        return await _import_raw(cog, config, guild, data, same_guild=same_guild)
     return [f"{cog.qualified_name}: no soporta importacion."]

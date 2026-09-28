@@ -27,11 +27,11 @@ Configuracion por perfiles de La Trini. Un perfil es una **plantilla inicial**, 
 
 ## Catalogo de modulos
 
-El catalogo (`triniprofiles/registry.py`) cubre ~70 modulos, agrupados por su origen:
+El catalogo (`triniprofiles/registry.py`) cubre 73 modulos, agrupados por su origen:
 
 - **Trini** (`profiles`, `security`, `backups`, `events`, `alienhost`) y **killerbite-cogs** (`apiv2`, `gameservermonitor`, `tickets`, `suggestions`, `giveaways`, `honeypot`, `autonick`, `colacoins`, `adv_check`, `autoprune`, `blackjack`, `day_counter`, `listroles`, `maptrack`, `rustmaps`, `trickortreat`): nombre de clase conocido con certeza.
 - **Red** (`mod`, `warnings`, `reports`, `modlog`, `mutes`, `filter`, `cleanup`, `admin`, `alias`, `customcom`, `general`, `trivia`, `image`, `audio`, `streams`, `economy`, `downloader`, `permissions`): vienen de serie con Red-DiscordBot.
-- **Terceros** (`captcha`→`advancedcaptcha`, `welcome`, `rolesbuttons`, `autoroom`, `youtube`, `assistant`, etc.): no conocemos el nombre exacto de su clase, asi que **no se adivina**. Cada uno guarda su `package` (la carpeta/extension real) y se resuelve buscando, entre los cogs realmente cargados, cual viene de ese paquete — funciona sin importar como se llame su clase.
+- **Terceros** (30 cogs: `captcha`, `welcome`, `rolesbuttons`, `roleutils`, `autoroom`, `sticky`, `linkwarner`, `youtube`, `assistant`, `tags`, `reminders`, `frases`, `easterhunt`...): nombre de clase y paquete tomados de sus cogs reales. Se buscan primero por clase y, si no, por el paquete del que viene el cog cargado.
 - **Conceptuales** (`applications`, `forms`, `status`, `incidents`, `arencup`): categorias del roadmap para las que aun no hay un cog concreto asignado; se muestran siempre como no cargadas hasta que edites `registry.py` con el paquete real que uses.
 
 `!trini status` y `!trini modules` muestran el **estado real** de cada modulo en el servidor, preguntando a Red (no solo al apunte de Profiles):
@@ -48,6 +48,23 @@ Aplicar un perfil vuelve a habilitar en Red todos sus modulos, aunque alguien lo
 ## Perfil "Todo activado"
 
 `all_on` (🟢) es un preset predefinido que marca **todos los modulos no-core como ON**. Pensado para probar el bot entero o para servidores que quieren tenerlo todo disponible desde el primer dia; aparece junto al resto en `!trini setup` y `!profile list`. Como con cualquier perfil, es solo el punto de partida: despues ajustas con `!trini modules`.
+
+## Exportar cogs de terceros
+
+Los cogs de terceros no implementan el protocolo Trini, asi que `!profile export` copia su configuracion tal cual, sin los datos que se generan solos (historiales, contadores, caches...). Para los que guardan cosas especiales hay adaptadores en `triniprofiles/third_party.py`, sacados de su configuracion real:
+
+| Cog | Que se hace |
+|---|---|
+| Welcome | No copia el ultimo mensaje ni los contadores de entradas y salidas; conserva los del servidor destino. |
+| Sticky | Copia el mensaje fijado de cada canal (se guarda por canal), sin el ultimo mensaje enviado. |
+| LinkWarner | Copia tambien las excepciones por canal. |
+| AutoRoom | Copia las salas origen (tipo, formato de nombre, categoria...). |
+| RoleUtils | Copia los roles "sticky"; los reaction roles dependen de mensajes y no se copian. |
+| RolesButtons, UrlButtons, DiscordModals | Van ligados a mensajes concretos: solo se restauran en el mismo servidor; en otro servidor avisa de que hay que recrearlos. |
+| DisboardReminder | No copia la hora del proximo bump. |
+| YouTube | Las suscripciones son globales del bot: avisa de que hay que volver a suscribir. |
+
+Los canales y roles se re-mapean por nombre tambien dentro de la configuracion por canal.
 
 ## Integracion
 - Al aplicar un perfil emite `trini_profile_applied`; TriniSecurity activa Watch (nivel `high`) o Watch + Anti-Nuke (`strict`).
