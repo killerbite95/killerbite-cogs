@@ -16,6 +16,9 @@ from .converter import Args, EditArgs
 from .menu import GiveawayButton, GiveawayView
 from .objects import Giveaway, GiveawayEnterError, GiveawayExecError
 from .dashboard_integration import DashboardIntegration
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("Giveaways", __file__)
 
 log = logging.getLogger("red.killerbite95.giveaways")
 GIVEAWAY_KEY = "giveaways"
@@ -28,6 +31,7 @@ GW_RED = discord.Color.from_rgb(237, 66, 69)
 GW_PURPLE = discord.Color.from_rgb(155, 89, 182)
 
 
+@cog_i18n(_)
 class Giveaways(DashboardIntegration, commands.Cog):
     """Giveaway Commands"""
 
@@ -36,7 +40,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
     def format_help_for_context(self, ctx):
         pre_processed = super().format_help_for_context(ctx)
-        return f"{pre_processed}\nCog Version: {self.__version__}\nAuthor: {self.__author__}"
+        return _("{pre_processed}\nCog Version: {version}\nAuthor: {author}").format(pre_processed=pre_processed, version=self.__version__, author=self.__author__)
 
     def __init__(self, bot):
         self.bot = bot
@@ -94,7 +98,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         await self.bot.wait_until_ready()
         self.session = aiohttp.ClientSession()
         data = await self.config.custom(GIVEAWAY_KEY).all()
-        for _, guild in data.items():
+        for _guild_id, guild in data.items():
             for msgid, giveaway in guild.items():
                 try:
                     if giveaway.get("ended", False):
@@ -175,6 +179,8 @@ class Giveaways(DashboardIntegration, commands.Cog):
         guild = self.bot.get_guild(giveaway.guildid)
         if guild is None:
             return None
+        # Se llama desde el bucle de comprobacion: idioma del servidor del sorteo.
+        await set_contextual_locales_from_guild(self.bot, guild)
         channel_obj = guild.get_channel(giveaway.channelid)
         if channel_obj is None:
             return None
@@ -182,14 +188,14 @@ class Giveaways(DashboardIntegration, commands.Cog):
         winners = giveaway.draw_winner()
         winner_objs = None
         if winners is None:
-            txt = "Not enough entries to roll the giveaway."
+            txt = _("Not enough entries to roll the giveaway.")
         else:
             winner_objs = []
             txt = ""
             for winner in winners:
                 winner_obj = guild.get_member(winner)
                 if winner_obj is None:
-                    txt += f"{winner} (Not Found)\n"
+                    txt += _("{winner} (Not Found)\n").format(winner=winner)
                 else:
                     txt += f"{winner_obj.mention} ({winner_obj.display_name})\n"
                     winner_objs.append(winner_obj)
@@ -198,27 +204,27 @@ class Giveaways(DashboardIntegration, commands.Cog):
         winner_count = giveaway.kwargs.get("winners", 1) or 1
         embed = discord.Embed(
             title=f"{f'{winner_count}x ' if winner_count > 1 else ''}{giveaway.prize}",
-            description=f"Winner(s):\n{txt}",
+            description=_("Winner(s):\n{txt}").format(txt=txt),
             color=await self.bot.get_embed_color(channel_obj),
             timestamp=datetime.now(timezone.utc),
         )
         embed.set_footer(
-            text=f"Reroll: {(await self.bot.get_prefix(msg))[-1]}gw reroll {giveaway.messageid} | Ended at"
+            text=_("Reroll: {value}gw reroll {messageid} | Ended at").format(value=(await self.bot.get_prefix(msg))[-1], messageid=giveaway.messageid)
         )
         try:
-            await msg.edit(content="🎉 Giveaway Ended 🎉", embed=embed, view=None)
+            await msg.edit(content=_("🎉 Giveaway Ended 🎉"), embed=embed, view=None)
         except (discord.NotFound, discord.Forbidden) as exc:
             log.error("Error editing giveaway message: ", exc_info=exc)
             return winners
         if giveaway.kwargs.get("announce"):
             announce_embed = discord.Embed(
-                title="Giveaway Ended",
-                description=f"Congratulations to the {f'{str(winner_count)} ' if winner_count > 1 else ''}winner{'s' if winner_count > 1 else ''} of [{giveaway.prize}]({msg.jump_url}).\n{txt}",
+                title=_("Giveaway Ended"),
+                description=_("Congratulations to the {value}winner{value2} of [{prize}]({jump_url}).\n{txt}").format(value=f'{str(winner_count)} ' if winner_count > 1 else '', value2='s' if winner_count > 1 else '', prize=giveaway.prize, jump_url=msg.jump_url, txt=txt),
                 color=await self.bot.get_embed_color(channel_obj),
             )
 
             announce_embed.set_footer(
-                text=f"Reroll: {(await self.bot.get_prefix(msg))[-1]}gw reroll {giveaway.messageid}"
+                text=_("Reroll: {value}gw reroll {messageid}").format(value=(await self.bot.get_prefix(msg))[-1], messageid=giveaway.messageid)
             )
             await channel_obj.send(
                 content=(
@@ -233,7 +239,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
                 for winner in winner_objs:
                     with contextlib.suppress(discord.Forbidden):
                         await winner.send(
-                            f"Congratulations! You won {giveaway.prize} in the giveaway on {guild}!"
+                            _("Congratulations! You won {prize} in the giveaway on {guild}!").format(prize=giveaway.prize, guild=guild)
                         )
         return winners
 
@@ -290,14 +296,14 @@ class Giveaways(DashboardIntegration, commands.Cog):
         hosted_by = ctx.guild.get_member(arguments.get("hosted-by", ctx.author.id)) or ctx.author
         embed = discord.Embed(
             title=f"{f'{winner_count}x ' if winner_count > 1 else ''}{prize}",
-            description=f"{description}\n\nClick the button below to enter\n\n**Hosted by:** {hosted_by.mention}\n\nEnds: <t:{int(end.timestamp())}:R>",
+            description=_("{description}\n\nClick the button below to enter\n\n**Hosted by:** {hosted_by}\n\nEnds: <t:{timestamp}:R>").format(description=description, hosted_by=hosted_by.mention, timestamp=int(end.timestamp())),
             color=arguments.get("colour", await ctx.embed_color()),
         )
         if arguments["image"] is not None:
             embed.set_image(url=arguments["image"])
         if arguments["thumbnail"] is not None:
             embed.set_thumbnail(url=arguments["thumbnail"])
-        embed.set_footer(text="🎉 0 participants")
+        embed.set_footer(text=_("🎉 0 participants"))
 
         txt = "\n"
         if arguments["ateveryone"]:
@@ -317,7 +323,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         view = GiveawayView(self)
         msg = await channel.send(
-            content=f"🎉 Giveaway 🎉{txt}",
+            content=_("🎉 Giveaway 🎉{txt}").format(txt=txt),
             embed=embed,
             allowed_mentions=discord.AllowedMentions(
                 roles=bool(arguments["mentions"]),
@@ -326,7 +332,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         )
         view.add_item(
             GiveawayButton(
-                label=arguments["button-text"] or "Join Giveaway",
+                label=arguments["button-text"] or _("Join Giveaway"),
                 style=arguments["button-style"] or "green",
                 emoji=emoji,
                 cog=self,
@@ -337,7 +343,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         self.bot.add_view(view)
         await msg.edit(view=view)
         if ctx.interaction:
-            await ctx.send("Giveaway created!", ephemeral=True)
+            await ctx.send(_("Giveaway created!"), ephemeral=True)
 
         giveaway_obj = Giveaway(
             ctx.guild.id,
@@ -401,10 +407,10 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         embed = discord.Embed(
             title=f"{prize}",
-            description=f"\nClick the button below to enter\n\n**Hosted by:** {ctx.author.mention}\n\nEnds: <t:{int(end.timestamp())}:R>",
+            description=_("\nClick the button below to enter\n\n**Hosted by:** {author}\n\nEnds: <t:{timestamp}:R>").format(author=ctx.author.mention, timestamp=int(end.timestamp())),
             color=await ctx.embed_color(),
         )
-        embed.set_footer(text="🎉 0 participants")
+        embed.set_footer(text=_("🎉 0 participants"))
         view = GiveawayView(self)
 
         msg = await channel.send(embed=embed)
@@ -436,7 +442,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
             },
         )
         if ctx.interaction:
-            await ctx.send("Giveaway created!", ephemeral=True)
+            await ctx.send(_("Giveaway created!"), ephemeral=True)
         self.giveaways[msg.id] = giveaway_obj
         giveaway_dict = deepcopy(giveaway_obj.__dict__)
         giveaway_dict["endtime"] = giveaway_dict["endtime"].timestamp()
@@ -450,10 +456,10 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """Reroll a giveaway."""
         data = await self.config.custom(GIVEAWAY_KEY, ctx.guild.id).all()
         if str(msgid) not in data:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
         if msgid in self.giveaways:
             return await ctx.send(
-                f"Giveaway already running. Please wait for it to end or end it via `{ctx.clean_prefix}gw end {msgid}`."
+                _("Giveaway already running. Please wait for it to end or end it via `{clean_prefix}gw end {msgid}`.").format(clean_prefix=ctx.clean_prefix, msgid=msgid)
             )
         giveaway_dict = data[str(msgid)]
         giveaway_dict["endtime"] = datetime.fromtimestamp(giveaway_dict["endtime"]).replace(
@@ -484,7 +490,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """End a giveaway."""
         if msgid in self.giveaways:
             if self.giveaways[msgid].guildid != ctx.guild.id:
-                return await ctx.send("Giveaway not found.")
+                return await ctx.send(_("Giveaway not found."))
             giveaway = self.giveaways[msgid]
             winner_ids = await self.draw_winner(giveaway)
             del self.giveaways[msgid]
@@ -494,7 +500,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
             await self._save_history(giveaway, winner_ids)
             await ctx.tick()
         else:
-            await ctx.send("Giveaway not found.")
+            await ctx.send(_("Giveaway not found."))
 
     @giveaway.command(aliases=["adv"])
     @commands.has_permissions(manage_guild=True)
@@ -530,9 +536,9 @@ class Giveaways(DashboardIntegration, commands.Cog):
                 prize = data.get("prize", "Unknown")
 
         if entrants_list is None:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
         if not entrants_list:
-            return await ctx.send("No entrants.")
+            return await ctx.send(_("No entrants."))
         count = {}
         for entrant in entrants_list:
             if entrant not in count:
@@ -547,9 +553,9 @@ class Giveaways(DashboardIntegration, commands.Cog):
         embeds = []
         for page in pagify(msg, delims=["\n"], page_length=800):
             embed = discord.Embed(
-                title=f"Entrants — {prize}", description=page, color=await ctx.embed_color()
+                title=_("Entrants — {prize}").format(prize=prize), description=page, color=await ctx.embed_color()
             )
-            embed.set_footer(text=f"Total unique entrants: {len(count)}")
+            embed.set_footer(text=_("Total unique entrants: {count}").format(count=len(count)))
             embeds.append(embed)
 
         if len(embeds) == 1:
@@ -565,7 +571,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         giveaway = self.giveaways.get(msgid)
         if giveaway:
             winner_count = giveaway.kwargs.get("winners", 1) or 1
-            msg = f"**Status:** 🟢 Active\n**Entrants:** {len(set(giveaway.entrants))}\n**End:** <t:{int(giveaway.endtime.timestamp())}:R>\n"
+            msg = _("**Status:** 🟢 Active\n**Entrants:** {count}\n**End:** <t:{timestamp}:R>\n").format(count=len(set(giveaway.entrants)), timestamp=int(giveaway.endtime.timestamp()))
             for kwarg in giveaway.kwargs:
                 if giveaway.kwargs[kwarg]:
                     msg += f"**{kwarg.title()}:** {giveaway.kwargs[kwarg]}\n"
@@ -574,20 +580,20 @@ class Giveaways(DashboardIntegration, commands.Cog):
                 color=await ctx.embed_color(),
                 description=msg,
             )
-            embed.set_footer(text=f"Giveaway ID #{msgid}")
+            embed.set_footer(text=_("Giveaway ID #{msgid}").format(msgid=msgid))
             return await ctx.send(embed=embed)
 
         # Check ended giveaways in config
         data = await self.config.custom(GIVEAWAY_KEY, ctx.guild.id, str(msgid)).all()
         if not data:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
 
         winner_count = data.get("kwargs", {}).get("winners", 1) or 1
         prize = data.get("prize", "Unknown")
         entrants = data.get("entrants", [])
         ended = data.get("ended", False)
-        msg = f"**Status:** {'🔴 Ended' if ended else '⚪ Unknown'}\n"
-        msg += f"**Entrants:** {len(set(entrants))}\n"
+        msg = _("**Status:** {value}\n").format(value=_('🔴 Ended') if ended else _('⚪ Unknown'))
+        msg += _("**Entrants:** {count}\n").format(count=len(set(entrants)))
         kwargs = data.get("kwargs", {})
         for kwarg, value in kwargs.items():
             if value:
@@ -597,7 +603,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
             color=await ctx.embed_color(),
             description=msg,
         )
-        embed.set_footer(text=f"Giveaway ID #{msgid}")
+        embed.set_footer(text=_("Giveaway ID #{msgid}").format(msgid=msgid))
         await ctx.send(embed=embed)
 
     @giveaway.command(name="list")
@@ -605,14 +611,14 @@ class Giveaways(DashboardIntegration, commands.Cog):
     async def _list(self, ctx: commands.Context):
         """List all giveaways in the server."""
         if not self.giveaways:
-            return await ctx.send("No giveaways are running.")
+            return await ctx.send(_("No giveaways are running."))
         giveaways = {
             x: self.giveaways[x]
             for x in self.giveaways
             if self.giveaways[x].guildid == ctx.guild.id
         }
         if not giveaways:
-            return await ctx.send("No giveaways are running.")
+            return await ctx.send(_("No giveaways are running."))
         msg = "".join(
             f"{msgid}: [{giveaways[msgid].prize}](https://discord.com/channels/{value.guildid}/{giveaways[msgid].channelid}/{msgid})\n"
             for msgid, value in giveaways.items()
@@ -621,7 +627,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         embeds = []
         for page in pagify(msg, delims=["\n"]):
             embed = discord.Embed(
-                title=f"Giveaways in {ctx.guild}", description=page, color=await ctx.embed_color()
+                title=_("Giveaways in {guild}").format(guild=ctx.guild), description=page, color=await ctx.embed_color()
             )
             embeds.append(embed)
         if len(embeds) == 1:
@@ -635,9 +641,8 @@ class Giveaways(DashboardIntegration, commands.Cog):
         pages = []
         color = await ctx.embed_color()
 
-        em1 = discord.Embed(title="Giveaway Advanced — Required Arguments", color=color)
-        em1.description = (
-            "**NOTE:** Giveaways are checked every 15 seconds, so they may end slightly later than specified.\n\n"
+        em1 = discord.Embed(title=_("Giveaway Advanced — Required Arguments"), color=color)
+        em1.description = _("**NOTE:** Giveaways are checked every 15 seconds, so they may end slightly later than specified.\n\n"
             "**Required arguments:**\n"
             "`--prize` / `-p`: The prize to be won.\n\n"
             "**Duration (one required):**\n"
@@ -648,14 +653,12 @@ class Giveaways(DashboardIntegration, commands.Cog):
             "`--emoji`: Custom emoji for the giveaway.\n"
             "`--winners`: Number of winners to draw.\n"
             "`--description`: Description shown on the embed.\n"
-            "`--hosted-by`: Override the host user."
-        )
-        em1.set_footer(text=f"Page 1/3 — {ctx.clean_prefix}gw explain")
+            "`--hosted-by`: Override the host user.")
+        em1.set_footer(text=_("Page 1/3 — {clean_prefix}gw explain").format(clean_prefix=ctx.clean_prefix))
         pages.append(em1)
 
-        em2 = discord.Embed(title="Giveaway Advanced — Restrictions & Styling", color=color)
-        em2.description = (
-            "**Restrictions:**\n"
+        em2 = discord.Embed(title=_("Giveaway Advanced — Restrictions & Styling"), color=color)
+        em2.description = _("**Restrictions:**\n"
             "`--roles`: Restrict to specific roles.\n"
             "`--blacklist`: Blacklisted roles.\n"
             "`--joined`: Minimum days in server.\n"
@@ -673,14 +676,12 @@ class Giveaways(DashboardIntegration, commands.Cog):
             "`--button-text`: Custom button text.\n"
             "`--button-style`: `green`, `blurple`, `grey`, or `red`.\n"
             "`--mentions`: Roles to @mention.\n"
-            "`--ateveryone` / `--athere`: Mention everyone/here."
-        )
-        em2.set_footer(text=f"Page 2/3 — {ctx.clean_prefix}gw explain")
+            "`--ateveryone` / `--athere`: Mention everyone/here.")
+        em2.set_footer(text=_("Page 2/3 — {clean_prefix}gw explain").format(clean_prefix=ctx.clean_prefix))
         pages.append(em2)
 
-        em3 = discord.Embed(title="Giveaway Advanced — Toggles & Integrations", color=color)
-        em3.description = (
-            "**Toggles:**\n"
+        em3 = discord.Embed(title=_("Giveaway Advanced — Toggles & Integrations"), color=color)
+        em3.description = _("**Toggles:**\n"
             "`--congratulate`: DM winners.\n"
             "`--notify`: DM users who fail to enter.\n"
             "`--multientry`: Allow multiple entries.\n"
@@ -694,10 +695,9 @@ class Giveaways(DashboardIntegration, commands.Cog):
             "`--mee6-level`: MEE6 level.\n"
             "`--amari-level` / `--amari-weekly-xp`: Amari.\n\n"
             "**Examples:**\n"
-            f"`{ctx.clean_prefix}gw adv --prize Nitro --duration 1h30m --winners 2 --congratulate`\n"
-            f"`{ctx.clean_prefix}gw adv --prize VIP Role --end tomorrow at 6pm --roles @Members --cost 500`"
-        )
-        em3.set_footer(text=f"Page 3/3 — {ctx.clean_prefix}gw explain")
+            "`{clean_prefix}gw adv --prize Nitro --duration 1h30m --winners 2 --congratulate`\n"
+            "`{clean_prefix}gw adv --prize VIP Role --end tomorrow at 6pm --roles @Members --cost 500`").format(clean_prefix=ctx.clean_prefix)
+        em3.set_footer(text=_("Page 3/3 — {clean_prefix}gw explain").format(clean_prefix=ctx.clean_prefix))
         pages.append(em3)
 
         if len(pages) == 1:
@@ -712,10 +712,10 @@ class Giveaways(DashboardIntegration, commands.Cog):
         See `[p]gw explain` for more info on the flags.
         """
         if msgid not in self.giveaways:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
         giveaway = self.giveaways[msgid]
         if giveaway.guildid != ctx.guild.id:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
         if flags.get("prize"):
             giveaway.prize = flags["prize"]
         if flags.get("emoji"):
@@ -743,7 +743,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
             description = giveaway.kwargs.get("description", "") or ""
             new_embed = discord.Embed(
                 title=f"{f'{winners}x ' if winners > 1 else ''}{giveaway.prize}",
-                description=f"{description}\n\nClick the button below to enter\n\n**Hosted by:** {hosted_by.mention}\n\nEnds: <t:{int(giveaway_dict['endtime'])}:R>",
+                description=_("{description}\n\nClick the button below to enter\n\n**Hosted by:** {hosted_by}\n\nEnds: <t:{endtime}:R>").format(description=description, hosted_by=hosted_by.mention, endtime=int(giveaway_dict['endtime'])),
                 color=flags.get("colour", await ctx.embed_color()),
             )
             if giveaway.kwargs.get("image"):
@@ -759,7 +759,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
     async def integrations(self, ctx: commands.Context):
         """Various 3rd party integrations for giveaways."""
 
-        msg = """
+        msg = _("""
         3rd party integrations for giveaways.
 
         You can use these integrations to integrate giveaways with other 3rd party services.
@@ -770,22 +770,22 @@ class Giveaways(DashboardIntegration, commands.Cog):
         `--tatsu-rep`: Integrate with the Tatsumaki's rep system, must have a valid Tatsumaki API key set.
         `--mee6-level`: Integrate with the MEE6 levelling system.
         `--amari-level`: Integrate with the Amari's levelling system.
-        `--amari-weekly-xp`: Integrate with the Amari's weekly xp system.""".format(
+        `--amari-weekly-xp`: Integrate with the Amari's weekly xp system.""").format(
             prefix=ctx.clean_prefix
         )
         if await self.bot.is_owner(ctx.author):
-            msg += """
+            msg += _("""
                 **API Keys**
                 Tatsu's API key can be set with the following command (You must find where this key is yourself): `{prefix}set api tatsumaki authorization <key>`
                 Amari's API key can be set with the following command (Apply [here](https://docs.google.com/forms/d/e/1FAIpQLScQDCsIqaTb1QR9BfzbeohlUJYA3Etwr-iSb0CRKbgjA-fq7Q/viewform)): `{prefix}set api amari authorization <key>`
 
 
-                For any integration suggestions, suggest them via the [#support-flare-cogs](https://discord.gg/GET4DVk) channel on the support server or [flare-cogs](https://github.com/flaree/flare-cogs/issues/new/choose) github.""".format(
+                For any integration suggestions, suggest them via the [#support-flare-cogs](https://discord.gg/GET4DVk) channel on the support server or [flare-cogs](https://github.com/flaree/flare-cogs/issues/new/choose) github.""").format(
                 prefix=ctx.clean_prefix
             )
 
         embed = discord.Embed(
-            title="3rd Party Integrations", description=msg, color=await ctx.embed_color()
+            title=_("3rd Party Integrations"), description=msg, color=await ctx.embed_color()
         )
         await ctx.send(embed=embed)
 
@@ -794,40 +794,40 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         def _role_text(role_id):
             role = ctx.guild.get_role(role_id)
-            return role.mention if role else f"<deleted role {role_id}>"
+            return role.mention if role else _("<deleted role {role_id}>").format(role_id=role_id)
 
         if args.get("roles"):
-            msg += f"**Roles:** {', '.join(_role_text(x) for x in args['roles'])}\n"
+            msg += _("**Roles:** {join}\n").format(join=', '.join(_role_text(x) for x in args['roles']))
         if args.get("multi"):
-            msg += f"**Multiplier:** {args['multi']}\n"
+            msg += _("**Multiplier:** {multi}\n").format(multi=args['multi'])
         if args.get("multi-roles"):
-            msg += f"**Multiplier Roles:** {', '.join(_role_text(x) for x in args['multi-roles'])}\n"
+            msg += _("**Multiplier Roles:** {join}\n").format(join=', '.join(_role_text(x) for x in args['multi-roles']))
         if args.get("cost"):
-            msg += f"**Cost:** {args['cost']}\n"
+            msg += _("**Cost:** {cost}\n").format(cost=args['cost'])
         if args.get("joined"):
-            msg += f"**Joined:** {args['joined']} days\n"
+            msg += _("**Joined:** {joined} days\n").format(joined=args['joined'])
         if args.get("created"):
-            msg += f"**Created:** {args['created']} days\n"
+            msg += _("**Created:** {created} days\n").format(created=args['created'])
         if args.get("blacklist"):
-            msg += f"**Blacklist:** {', '.join(_role_text(x) for x in args['blacklist'])}\n"
+            msg += _("**Blacklist:** {join}\n").format(join=', '.join(_role_text(x) for x in args['blacklist']))
         if args.get("winners"):
-            msg += f"**Winners:** {args['winners']}\n"
+            msg += _("**Winners:** {winners}\n").format(winners=args['winners'])
         if args.get("mee6_level"):
-            msg += f"**MEE6 Level:** {args['mee6_level']}\n"
+            msg += _("**MEE6 Level:** {mee6_level}\n").format(mee6_level=args['mee6_level'])
         if args.get("amari_level"):
-            msg += f"**Amari Level:** {args['amari_level']}\n"
+            msg += _("**Amari Level:** {amari_level}\n").format(amari_level=args['amari_level'])
         if args.get("amari_weekly_xp"):
-            msg += f"**Amari Weekly XP:** {args['amari_weekly_xp']}\n"
+            msg += _("**Amari Weekly XP:** {amari_weekly_xp}\n").format(amari_weekly_xp=args['amari_weekly_xp'])
         if args.get("tatsu_level"):
-            msg += f"**Tatsu Level:** {args['tatsu_level']}\n"
+            msg += _("**Tatsu Level:** {tatsu_level}\n").format(tatsu_level=args['tatsu_level'])
         if args.get("tatsu_rep"):
-            msg += f"**Tatsu Rep:** {args['tatsu_rep']}\n"
+            msg += _("**Tatsu Rep:** {tatsu_rep}\n").format(tatsu_rep=args['tatsu_rep'])
         if args.get("level_req"):
-            msg += f"**Level Requirement:** {args['level_req']}\n"
+            msg += _("**Level Requirement:** {level_req}\n").format(level_req=args['level_req'])
         if args.get("rep_req"):
-            msg += f"**Rep Requirement:** {args['rep_req']}\n"
+            msg += _("**Rep Requirement:** {rep_req}\n").format(rep_req=args['rep_req'])
         if args.get("bypass-roles"):
-            msg += f"**Bypass Roles:** {', '.join(_role_text(x) for x in args['bypass-roles'])} ({args['bypass-type']})\n"
+            msg += _("**Bypass Roles:** {join} ({bypasstype})\n").format(join=', '.join(_role_text(x) for x in args['bypass-roles']), bypasstype=args['bypass-type'])
 
         return msg
 
@@ -842,10 +842,10 @@ class Giveaways(DashboardIntegration, commands.Cog):
     async def cancel(self, ctx: commands.Context, msgid: int):
         """Cancel a giveaway without drawing winners."""
         if msgid not in self.giveaways:
-            return await ctx.send("Giveaway not found or already ended.")
+            return await ctx.send(_("Giveaway not found or already ended."))
         giveaway = self.giveaways[msgid]
         if giveaway.guildid != ctx.guild.id:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
 
         # Edit the original message
         guild = self.bot.get_guild(giveaway.guildid)
@@ -854,20 +854,20 @@ class Giveaways(DashboardIntegration, commands.Cog):
             msg = channel_obj.get_partial_message(giveaway.messageid)
             embed = discord.Embed(
                 title=f"~~{giveaway.prize}~~",
-                description="🚫 Giveaway cancelled.",
+                description=_("🚫 Giveaway cancelled."),
                 color=discord.Color.dark_grey(),
                 timestamp=datetime.now(timezone.utc),
             )
-            embed.set_footer(text="Cancelled")
+            embed.set_footer(text=_("Cancelled"))
             with contextlib.suppress(discord.HTTPException):
-                await msg.edit(content="🚫 Giveaway Cancelled", embed=embed, view=None)
+                await msg.edit(content=_("🚫 Giveaway Cancelled"), embed=embed, view=None)
 
         del self.giveaways[msgid]
         gw = await self.config.custom(GIVEAWAY_KEY, ctx.guild.id, str(msgid)).all()
         gw["ended"] = True
         gw["cancelled"] = True
         await self.config.custom(GIVEAWAY_KEY, ctx.guild.id, str(msgid)).set(gw)
-        await ctx.send(f"Giveaway for **{giveaway.prize}** has been cancelled.")
+        await ctx.send(_("Giveaway for **{prize}** has been cancelled.").format(prize=giveaway.prize))
 
     @giveaway.command()
     @commands.has_permissions(manage_guild=True)
@@ -875,15 +875,15 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """Remove all ended giveaways from the config for this server."""
         data = await self.config.custom(GIVEAWAY_KEY, ctx.guild.id).all()
         if not data:
-            return await ctx.send("No giveaway data found.")
+            return await ctx.send(_("No giveaway data found."))
         removed = 0
         for msgid, gw in list(data.items()):
             if gw.get("ended", False):
                 await self.config.custom(GIVEAWAY_KEY, ctx.guild.id, str(msgid)).clear()
                 removed += 1
         if removed == 0:
-            return await ctx.send("No ended giveaways to clean up.")
-        await ctx.send(f"Cleaned up **{removed}** ended giveaway(s) from the config.")
+            return await ctx.send(_("No ended giveaways to clean up."))
+        await ctx.send(_("Cleaned up **{removed}** ended giveaway(s) from the config.").format(removed=removed))
 
     @giveaway.command()
     @commands.has_permissions(manage_guild=True)
@@ -892,14 +892,14 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """Delete a specific giveaway from the config."""
         data = await self.config.custom(GIVEAWAY_KEY, ctx.guild.id, str(msgid)).all()
         if not data:
-            return await ctx.send("Giveaway not found.")
+            return await ctx.send(_("Giveaway not found."))
         if msgid in self.giveaways:
             return await ctx.send(
-                f"This giveaway is still active. Use `{ctx.clean_prefix}gw end {msgid}` or `{ctx.clean_prefix}gw cancel {msgid}` first."
+                _("This giveaway is still active. Use `{clean_prefix}gw end {msgid}` or `{clean_prefix}gw cancel {msgid}` first.").format(clean_prefix=ctx.clean_prefix, msgid=msgid)
             )
         prize = data.get("prize", "Unknown")
         await self.config.custom(GIVEAWAY_KEY, ctx.guild.id, str(msgid)).clear()
-        await ctx.send(f"Giveaway **{prize}** (ID: {msgid}) deleted from config.")
+        await ctx.send(_("Giveaway **{prize}** (ID: {msgid}) deleted from config.").format(prize=prize, msgid=msgid))
 
     # ═══════════════════════════════════════════════════════════
     #  HISTORY
@@ -911,7 +911,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """View recent giveaway history (last 50)."""
         hist = await self.config.guild(ctx.guild).history()
         if not hist:
-            return await ctx.send("No giveaway history yet.")
+            return await ctx.send(_("No giveaway history yet."))
 
         msg = ""
         for entry in reversed(hist):
@@ -921,16 +921,14 @@ class Giveaways(DashboardIntegration, commands.Cog):
             entrant_count = entry.get("entrant_count", 0)
             winner_text = ", ".join(
                 f"<@{w}>" for w in winners
-            ) if winners else "No winners"
-            msg += (
-                f"**{prize}** — <t:{int(ended_at)}:R>\n"
-                f"  Winners: {winner_text} | Entrants: {entrant_count}\n\n"
-            )
+            ) if winners else _("No winners")
+            msg += _("**{prize}** — <t:{ended_at}:R>\n"
+                "  Winners: {winner_text} | Entrants: {entrant_count}\n\n").format(prize=prize, ended_at=int(ended_at), winner_text=winner_text, entrant_count=entrant_count)
 
         embeds = []
         for page in pagify(msg, delims=["\n\n"], page_length=1000):
             embed = discord.Embed(
-                title=f"Giveaway History — {ctx.guild.name}",
+                title=_("Giveaway History — {guild_name}").format(guild_name=ctx.guild.name),
                 description=page,
                 color=await ctx.embed_color(),
             )
@@ -957,15 +955,15 @@ class Giveaways(DashboardIntegration, commands.Cog):
         lines = []
         for key, value in defaults.items():
             if isinstance(value, bool):
-                lines.append(f"**{key}:** {'✅ On' if value else '❌ Off'}")
+                lines.append(f"**{key}:** {'✅ On' if value else _('❌ Off')}")
             else:
                 lines.append(f"**{key}:** {value}")
         embed = discord.Embed(
-            title=f"Giveaway Defaults — {ctx.guild.name}",
-            description="\n".join(lines) or "No defaults set.",
+            title=_("Giveaway Defaults — {guild_name}").format(guild_name=ctx.guild.name),
+            description="\n".join(lines) or _("No defaults set."),
             color=await ctx.embed_color(),
         )
-        embed.set_footer(text=f"Use {ctx.clean_prefix}gw set <key> <value> to change")
+        embed.set_footer(text=_("Use {clean_prefix}gw set <key> <value> to change").format(clean_prefix=ctx.clean_prefix))
         await ctx.send(embed=embed)
 
     @gw_set.command(name="updatebutton")
@@ -1021,7 +1019,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
     async def gw_set_buttontext(self, ctx: commands.Context, *, text: str):
         """Set the default button text for giveaways."""
         if len(text) > 70:
-            return await ctx.send("Button text must be less than 70 characters.")
+            return await ctx.send(_("Button text must be less than 70 characters."))
         async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["button-text"] = text
         await ctx.tick()
@@ -1032,7 +1030,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """Set the default button style. Options: green, blurple, grey, red."""
         from .menu import BUTTON_STYLE
         if style.lower() not in BUTTON_STYLE:
-            return await ctx.send(f"Style must be one of: {', '.join(BUTTON_STYLE.keys())}")
+            return await ctx.send(_("Style must be one of: {join}").format(join=', '.join(BUTTON_STYLE.keys())))
         async with self.config.guild(ctx.guild).guild_defaults() as defaults:
             defaults["button-style"] = style.lower()
         await ctx.tick()
@@ -1059,10 +1057,10 @@ class Giveaways(DashboardIntegration, commands.Cog):
         try:
             await EditArgs().convert(ctx, flags)
         except Exception as e:
-            return await ctx.send(f"Invalid flags: {e}")
+            return await ctx.send(_("Invalid flags: {e}").format(e=e))
         async with self.config.guild(ctx.guild).presets() as presets:
             presets[name.lower()] = flags
-        await ctx.send(f"✅ Preset **{name}** saved.")
+        await ctx.send(_("✅ Preset **{name}** saved.").format(name=name))
 
     @preset.command(name="use")
     @commands.has_permissions(manage_guild=True)
@@ -1076,12 +1074,12 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """
         presets = await self.config.guild(ctx.guild).presets()
         if name.lower() not in presets:
-            return await ctx.send(f"Preset `{name}` not found. Use `{ctx.clean_prefix}gw preset list` to see all presets.")
+            return await ctx.send(_("Preset `{name}` not found. Use `{clean_prefix}gw preset list` to see all presets.").format(name=name, clean_prefix=ctx.clean_prefix))
         combined = presets[name.lower()] + " " + extra_flags
         try:
             arguments = await Args().convert(ctx, combined)
         except Exception as e:
-            return await ctx.send(f"Error: {e}")
+            return await ctx.send(_("Error: {e}").format(e=e))
         arguments = await self._apply_guild_defaults(ctx, arguments)
         await self._create_advanced_giveaway(ctx, arguments)
 
@@ -1091,12 +1089,12 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """List all saved presets."""
         presets = await self.config.guild(ctx.guild).presets()
         if not presets:
-            return await ctx.send("No presets saved yet.")
+            return await ctx.send(_("No presets saved yet."))
         msg = ""
         for name, flags in presets.items():
             msg += f"**{name}** — `{flags[:80]}{'...' if len(flags) > 80 else ''}`\n"
         embed = discord.Embed(
-            title=f"Giveaway Presets — {ctx.guild.name}",
+            title=_("Giveaway Presets — {guild_name}").format(guild_name=ctx.guild.name),
             description=msg,
             color=await ctx.embed_color(),
         )
@@ -1108,9 +1106,9 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """Delete a saved preset."""
         async with self.config.guild(ctx.guild).presets() as presets:
             if name.lower() not in presets:
-                return await ctx.send(f"Preset `{name}` not found.")
+                return await ctx.send(_("Preset `{name}` not found.").format(name=name))
             del presets[name.lower()]
-        await ctx.send(f"Preset **{name}** deleted.")
+        await ctx.send(_("Preset **{name}** deleted.").format(name=name))
 
     # ═══════════════════════════════════════════════════════════
     #  QUICK CREATE (gw create)
@@ -1123,7 +1121,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         duration="How long the giveaway lasts (e.g. 1h30m, 2d, 30m).",
         winners="Number of winners (default: 1).",
         channel="The channel for the giveaway (defaults to current).",
-        description="Optional description for the giveaway.",
+        description=_("Optional description for the giveaway."),
     )
     async def create(
         self,
@@ -1161,14 +1159,12 @@ class Giveaways(DashboardIntegration, commands.Cog):
         desc_text = f"{description}\n\n" if description else ""
         embed = discord.Embed(
             title=f"{f'{winners}x ' if winners > 1 else ''}{prize}",
-            description=(
-                f"{desc_text}Click the button below to enter\n\n"
-                f"**Hosted by:** {ctx.author.mention}\n\n"
-                f"Ends: <t:{int(end.timestamp())}:R>"
-            ),
+            description=_("{desc_text}Click the button below to enter\n\n"
+                "**Hosted by:** {author}\n\n"
+                "Ends: <t:{timestamp}:R>").format(desc_text=desc_text, author=ctx.author.mention, timestamp=int(end.timestamp())),
             color=await ctx.embed_color(),
         )
-        embed.set_footer(text="🎉 0 participants")
+        embed.set_footer(text=_("🎉 0 participants"))
 
         view = GiveawayView(self)
         msg = await channel.send(embed=embed)
@@ -1206,7 +1202,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
         await self.config.custom(GIVEAWAY_KEY, str(ctx.guild.id), str(msg.id)).set(giveaway_dict)
 
         if ctx.interaction:
-            await ctx.send("Giveaway created!", ephemeral=True)
+            await ctx.send(_("Giveaway created!"), ephemeral=True)
         else:
             await ctx.tick()
 
@@ -1220,23 +1216,23 @@ class Giveaways(DashboardIntegration, commands.Cog):
         """📖 Full guide for the Giveaway system."""
         p = ctx.prefix
         pages = []
-        footer_tpl = "🎉 Page {current}/{total} — Giveaways v{version}"
+        footer_tpl = _("🎉 Page {current}/{total} — Giveaways v{version}")
 
         # ── Page 1: Introduction ──
         em1 = self._make_guide_embed(
-            "📖 Guide — Getting Started",
-            "Welcome to the **Giveaway System**! 🎉\n"
+            _("📖 Guide — Getting Started"),
+            _("Welcome to the **Giveaway System**! 🎉\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "**Quick Start:**\n"
-            f"Use `{p}gw start #channel 1h Prize Name` to create a simple giveaway.\n\n"
+            "Use `{p}gw start #channel 1h Prize Name` to create a simple giveaway.\n\n"
             "**Interactive Creation:**\n"
-            f"Use `/gw create` (slash command) to create a giveaway with a form.\n\n"
+            "Use `/gw create` (slash command) to create a giveaway with a form.\n\n"
             "**Advanced Giveaways:**\n"
-            f"Use `{p}gw advanced` with flags for full customization: "
+            "Use `{p}gw advanced` with flags for full customization: "
             "role restrictions, multipliers, costs, descriptions, custom embeds, and more.\n\n"
             "**How it works:**\n"
             "Users click the button on the giveaway message to enter. "
-            "When time is up, winners are drawn automatically and announced.",
+            "When time is up, winners are drawn automatically and announced.").format(p=p),
             GW_BLUE,
         )
         em1.set_footer(text=footer_tpl.format(current=1, total=5, version=self.__version__))
@@ -1244,8 +1240,8 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         # ── Page 2: Features ──
         em2 = self._make_guide_embed(
-            "⚙️ Guide — Features",
-            "The giveaway system includes many powerful features:\n"
+            _("⚙️ Guide — Features"),
+            _("The giveaway system includes many powerful features:\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "🔒 **Role Restrictions** — Limit who can enter by roles.\n\n"
             "🚫 **Blacklists** — Block specific roles from entering.\n\n"
@@ -1256,7 +1252,7 @@ class Giveaways(DashboardIntegration, commands.Cog):
             "🔄 **Rerolls** — Reroll ended giveaways if needed.\n\n"
             "🎨 **Customizable** — Colors, images, emojis, button styles.\n\n"
             "📨 **DM Notifications** — Notify winners and failed entries.\n\n"
-            "🔗 **3rd Party** — MEE6, Tatsu, Amari, Leveler integrations.",
+            "🔗 **3rd Party** — MEE6, Tatsu, Amari, Leveler integrations."),
             GW_GREEN,
         )
         em2.set_footer(text=footer_tpl.format(current=2, total=5, version=self.__version__))
@@ -1264,26 +1260,26 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         # ── Page 3: Server Defaults & Presets ──
         em3 = self._make_guide_embed(
-            "🛠️ Guide — Defaults & Presets",
-            "Customize defaults and save reusable templates:\n"
+            _("🛠️ Guide — Defaults & Presets"),
+            _("Customize defaults and save reusable templates:\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "**Server Defaults:**\n"
             "Configure default settings that apply to all new giveaways.\n"
-            f"`{p}gw set show` — View current defaults\n"
-            f"`{p}gw set updatebutton true/false`\n"
-            f"`{p}gw set congratulate true/false`\n"
-            f"`{p}gw set notify true/false`\n"
-            f"`{p}gw set showrequirements true/false`\n"
-            f"`{p}gw set announce true/false`\n"
-            f"`{p}gw set emoji 🎁`\n"
-            f"`{p}gw set buttontext Join Now!`\n"
-            f"`{p}gw set buttonstyle blurple`\n\n"
+            "`{p}gw set show` — View current defaults\n"
+            "`{p}gw set updatebutton true/false`\n"
+            "`{p}gw set congratulate true/false`\n"
+            "`{p}gw set notify true/false`\n"
+            "`{p}gw set showrequirements true/false`\n"
+            "`{p}gw set announce true/false`\n"
+            "`{p}gw set emoji 🎁`\n"
+            "`{p}gw set buttontext Join Now!`\n"
+            "`{p}gw set buttonstyle blurple`\n\n"
             "**Presets (Templates):**\n"
             "Save commonly used flag combinations.\n"
-            f"`{p}gw preset save weekly --winners 3 --congratulate --roles @Members`\n"
-            f"`{p}gw preset use weekly --prize Nitro --duration 7d`\n"
-            f"`{p}gw preset list` — View all presets\n"
-            f"`{p}gw preset delete weekly`",
+            "`{p}gw preset save weekly --winners 3 --congratulate --roles @Members`\n"
+            "`{p}gw preset use weekly --prize Nitro --duration 7d`\n"
+            "`{p}gw preset list` — View all presets\n"
+            "`{p}gw preset delete weekly`").format(p=p),
             GW_GOLD,
         )
         em3.set_footer(text=footer_tpl.format(current=3, total=5, version=self.__version__))
@@ -1291,24 +1287,24 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         # ── Page 4: Managing Giveaways ──
         em4 = self._make_guide_embed(
-            "📋 Guide — Managing Giveaways",
-            "Commands for managing active and ended giveaways:\n"
+            _("📋 Guide — Managing Giveaways"),
+            _("Commands for managing active and ended giveaways:\n"
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n"
             "**While Active:**\n"
-            f"`{p}gw list` — List all active giveaways\n"
-            f"`{p}gw info <id>` — View giveaway details\n"
-            f"`{p}gw entrants <id>` — List all participants\n"
-            f"`{p}gw edit <id> [flags]` — Edit an active giveaway\n"
-            f"`{p}gw end <id>` — End and draw winners now\n"
-            f"`{p}gw cancel <id>` — Cancel without drawing\n\n"
+            "`{p}gw list` — List all active giveaways\n"
+            "`{p}gw info <id>` — View giveaway details\n"
+            "`{p}gw entrants <id>` — List all participants\n"
+            "`{p}gw edit <id> [flags]` — Edit an active giveaway\n"
+            "`{p}gw end <id>` — End and draw winners now\n"
+            "`{p}gw cancel <id>` — Cancel without drawing\n\n"
             "**After Ended:**\n"
-            f"`{p}gw reroll <id>` — Reroll winners\n"
-            f"`{p}gw info <id>` — View ended giveaway info\n"
-            f"`{p}gw entrants <id>` — View entrants of ended giveaway\n"
-            f"`{p}gw history` — View recent giveaway history\n\n"
+            "`{p}gw reroll <id>` — Reroll winners\n"
+            "`{p}gw info <id>` — View ended giveaway info\n"
+            "`{p}gw entrants <id>` — View entrants of ended giveaway\n"
+            "`{p}gw history` — View recent giveaway history\n\n"
             "**Maintenance:**\n"
-            f"`{p}gw cleanup` — Remove all ended giveaways from config\n"
-            f"`{p}gw delete <id>` — Delete a specific ended giveaway",
+            "`{p}gw cleanup` — Remove all ended giveaways from config\n"
+            "`{p}gw delete <id>` — Delete a specific ended giveaway").format(p=p),
             GW_PURPLE,
         )
         em4.set_footer(text=footer_tpl.format(current=4, total=5, version=self.__version__))
@@ -1316,45 +1312,39 @@ class Giveaways(DashboardIntegration, commands.Cog):
 
         # ── Page 5: Command Reference ──
         em5 = self._make_guide_embed(
-            "📚 Guide — Command Reference",
-            "Full list of available commands:\n"
-            "━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            _("📚 Guide — Command Reference"),
+            _("Full list of available commands:\n"
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━"),
             GW_RED,
         )
         em5.add_field(
-            name="🎉 Creation",
-            value=(
-                f"`{p}gw start [#ch] <time> <prize>` — Quick giveaway\n"
-                f"`{p}gw create [#ch]` — Interactive form (slash)\n"
-                f"`{p}gw advanced <flags>` — Full customization\n"
-                f"`{p}gw preset use <name> [flags]` — From template"
-            ),
+            name=_("🎉 Creation"),
+            value=_("`{p}gw start [#ch] <time> <prize>` — Quick giveaway\n"
+                "`{p}gw create [#ch]` — Interactive form (slash)\n"
+                "`{p}gw advanced <flags>` — Full customization\n"
+                "`{p}gw preset use <name> [flags]` — From template").format(p=p),
             inline=False,
         )
         em5.add_field(
-            name="🔧 Management",
-            value=(
-                f"`{p}gw list` — Active giveaways\n"
-                f"`{p}gw info <id>` — Details\n"
-                f"`{p}gw entrants <id>` — Participants\n"
-                f"`{p}gw edit <id> <flags>` — Edit active\n"
-                f"`{p}gw end <id>` — End & draw\n"
-                f"`{p}gw cancel <id>` — Cancel\n"
-                f"`{p}gw reroll <id>` — Reroll winners"
-            ),
+            name=_("🔧 Management"),
+            value=_("`{p}gw list` — Active giveaways\n"
+                "`{p}gw info <id>` — Details\n"
+                "`{p}gw entrants <id>` — Participants\n"
+                "`{p}gw edit <id> <flags>` — Edit active\n"
+                "`{p}gw end <id>` — End & draw\n"
+                "`{p}gw cancel <id>` — Cancel\n"
+                "`{p}gw reroll <id>` — Reroll winners").format(p=p),
             inline=False,
         )
         em5.add_field(
-            name="⚙️ Configuration",
-            value=(
-                f"`{p}gw set show` — View defaults\n"
-                f"`{p}gw set <key> <value>` — Change default\n"
-                f"`{p}gw preset save/use/list/delete`\n"
-                f"`{p}gw history` — Winner history\n"
-                f"`{p}gw cleanup` — Clear ended data\n"
-                f"`{p}gw explain` — Flag reference\n"
-                f"`{p}gw integrations` — 3rd party info"
-            ),
+            name=_("⚙️ Configuration"),
+            value=_("`{p}gw set show` — View defaults\n"
+                "`{p}gw set <key> <value>` — Change default\n"
+                "`{p}gw preset save/use/list/delete`\n"
+                "`{p}gw history` — Winner history\n"
+                "`{p}gw cleanup` — Clear ended data\n"
+                "`{p}gw explain` — Flag reference\n"
+                "`{p}gw integrations` — 3rd party info").format(p=p),
             inline=False,
         )
         em5.set_footer(text=footer_tpl.format(current=5, total=5, version=self.__version__))

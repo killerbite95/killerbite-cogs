@@ -6,6 +6,9 @@ import discord
 from discord.ui import Button, Modal, TextInput, View
 
 from .objects import AlreadyEnteredError, GiveawayEnterError, GiveawayExecError
+from redbot.core.i18n import Translator, set_contextual_locales_from_guild
+
+_ = Translator("Giveaways", __file__)
 
 log = logging.getLogger("red.killerbite95.giveaways")
 
@@ -14,6 +17,11 @@ class GiveawayView(View):
     def __init__(self, cog):
         super().__init__(timeout=None)
         self.cog = cog
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
 
 BUTTON_STYLE = {
@@ -58,14 +66,14 @@ class GiveawayButton(Button):
                 return
             except AlreadyEnteredError:
                 await interaction.followup.send(
-                    "You have been removed from the giveaway.", ephemeral=True
+                    _("You have been removed from the giveaway."), ephemeral=True
                 )
                 await self.update_entrant(giveaway, interaction)
                 await self.update_label(giveaway, interaction)
                 return
             await self.update_entrant(giveaway, interaction)
             await interaction.followup.send(
-                f"You have been entered into the giveaway for {giveaway.prize}.",
+                _("You have been entered into the giveaway for {prize}.").format(prize=giveaway.prize),
                 ephemeral=True,
             )
             await self.update_label(giveaway, interaction)
@@ -85,7 +93,7 @@ class GiveawayButton(Button):
             # Also update embed footer with participant count
             embed = interaction.message.embeds[0] if interaction.message.embeds else None
             if embed:
-                embed.set_footer(text=f"🎉 {count} participant{'s' if count != 1 else ''}")
+                embed.set_footer(text=_("🎉 {count} participant{value}").format(count=count, value='s' if count != 1 else ''))
                 await interaction.message.edit(embed=embed, view=self.view)
             else:
                 await interaction.message.edit(view=self.view)
@@ -101,29 +109,29 @@ def _parse_duration(text: str):
     return timedelta(days=d, hours=h, minutes=m, seconds=s)
 
 
-class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
+class GiveawayCreateModal(Modal, title=_("🎉 Create Giveaway")):
     prize_input = TextInput(
-        label="Prize",
-        placeholder="What's the prize?",
+        label=_("Prize"),
+        placeholder=_("What's the prize?"),
         required=True,
         max_length=200,
     )
     duration_input = TextInput(
-        label="Duration (e.g. 1h30m, 2d, 30m)",
+        label=_("Duration (e.g. 1h30m, 2d, 30m)"),
         placeholder="1h30m",
         required=True,
         max_length=50,
     )
     winners_input = TextInput(
-        label="Number of Winners",
+        label=_("Number of Winners"),
         placeholder="1",
         required=False,
         default="1",
         max_length=3,
     )
     description_input = TextInput(
-        label="Description (optional)",
-        placeholder="Optional description for the giveaway",
+        label=_("Description (optional)"),
+        placeholder=_("Optional description for the giveaway"),
         required=False,
         style=discord.TextStyle.paragraph,
         max_length=1000,
@@ -133,6 +141,11 @@ class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
         super().__init__()
         self.cog = cog
         self.channel = channel
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
     async def on_submit(self, interaction: discord.Interaction):
         prize = self.prize_input.value.strip()
@@ -143,7 +156,7 @@ class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
         duration = _parse_duration(duration_text)
         if duration is None or duration.total_seconds() < 60:
             return await interaction.response.send_message(
-                "Invalid duration. Use formats like `1h30m`, `2d`, `30m`. Minimum 1 minute.",
+                _("Invalid duration. Use formats like `1h30m`, `2d`, `30m`. Minimum 1 minute."),
                 ephemeral=True,
             )
 
@@ -153,7 +166,7 @@ class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
                 raise ValueError
         except ValueError:
             return await interaction.response.send_message(
-                "Number of winners must be a positive number.", ephemeral=True
+                _("Number of winners must be a positive number."), ephemeral=True
             )
 
         guild = interaction.guild
@@ -170,14 +183,12 @@ class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
         desc_text = f"{description}\n\n" if description else ""
         embed = discord.Embed(
             title=f"{f'{winners}x ' if winners > 1 else ''}{prize}",
-            description=(
-                f"{desc_text}Click the button below to enter\n\n"
-                f"**Hosted by:** {interaction.user.mention}\n\n"
-                f"Ends: <t:{int(end.timestamp())}:R>"
-            ),
+            description=_("{desc_text}Click the button below to enter\n\n"
+                "**Hosted by:** {user}\n\n"
+                "Ends: <t:{timestamp}:R>").format(desc_text=desc_text, user=interaction.user.mention, timestamp=int(end.timestamp())),
             color=discord.Color.greyple(),
         )
-        embed.set_footer(text="🎉 0 participants")
+        embed.set_footer(text=_("🎉 0 participants"))
 
         view = GiveawayView(self.cog)
         msg = await self.channel.send(embed=embed)
@@ -219,4 +230,4 @@ class GiveawayCreateModal(Modal, title="🎉 Create Giveaway"):
             "giveaways", str(guild.id), str(msg.id)
         ).set(giveaway_dict)
 
-        await interaction.response.send_message("Giveaway created!", ephemeral=True)
+        await interaction.response.send_message(_("Giveaway created!"), ephemeral=True)

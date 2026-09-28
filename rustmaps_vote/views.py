@@ -6,6 +6,7 @@ working after a bot restart without needing ``bot.add_view`` registration.
 """
 
 import discord
+from redbot.core.i18n import set_contextual_locales_from_guild
 from typing import List
 
 
@@ -27,3 +28,8 @@ class VoteView(discord.ui.View):
                     row=(map_id - 1) // 5,
                 )
             )
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)

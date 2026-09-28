@@ -1,0 +1,435 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:46+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: i18n_strings.py:11
+msgid "Rust map votes using rustmaps.com."
+msgstr ""
+
+#: rustmaps_vote.py:43
+#, docstring
+msgid "Rust map voting using rustmaps.com. By Killerbite95"
+msgstr ""
+
+#: rustmaps_vote.py:109
+msgid ""
+"Invalid URL. It must look like `https://rustmaps.com/map/<size>_<seed>`."
+msgstr ""
+
+#: rustmaps_vote.py:117
+msgid "The RustMaps API key is not set."
+msgstr ""
+
+#: rustmaps_vote.py:130
+msgid "Invalid API key."
+msgstr ""
+
+#: rustmaps_vote.py:132
+msgid "Map not found."
+msgstr ""
+
+#: rustmaps_vote.py:134
+msgid "The map is still being generated, try again later."
+msgstr ""
+
+#: rustmaps_vote.py:135
+msgid "RustMaps API error (HTTP {status})."
+msgstr ""
+
+#: rustmaps_vote.py:137
+msgid "Timed out while contacting RustMaps."
+msgstr ""
+
+#: rustmaps_vote.py:139
+msgid "Network error while contacting RustMaps: {exc}"
+msgstr ""
+
+#: rustmaps_vote.py:176
+msgid "🗺️ Map {map_id}"
+msgstr ""
+
+#: rustmaps_vote.py:180
+msgid "**Type:** {map_type}"
+msgstr ""
+
+#: rustmaps_vote.py:182
+msgid "🌱 Seed"
+msgstr ""
+
+#: rustmaps_vote.py:183
+msgid "📏 Size"
+msgstr ""
+
+#: rustmaps_vote.py:186
+msgid "🏛️ Monuments"
+msgstr ""
+
+#: rustmaps_vote.py:191
+msgid "🌍 Biomes"
+msgstr ""
+
+#: rustmaps_vote.py:195
+msgid "🏔️ Terrain"
+msgstr ""
+
+#: rustmaps_vote.py:199
+msgid "🗺️ Land"
+msgstr ""
+
+#: rustmaps_vote.py:204
+msgid "📍 Monuments"
+msgstr ""
+
+#: rustmaps_vote.py:207
+msgid "🔗 See full map"
+msgstr ""
+
+#: rustmaps_vote.py:208
+msgid "[rustmaps.com]({url})"
+msgstr ""
+
+#: rustmaps_vote.py:220
+msgid "RustMaps Vote • {total_maps} maps in this vote"
+msgstr ""
+
+#: rustmaps_vote.py:225
+msgid "🗳️ Rust map vote"
+msgstr ""
+
+#: rustmaps_vote.py:226
+msgid "Press the button with the number of the map you prefer."
+msgstr ""
+
+#: rustmaps_vote.py:231 rustmaps_vote.py:456
+msgid "Map {map_id}"
+msgstr ""
+
+#: rustmaps_vote.py:232
+msgid ""
+"🌱 Seed: `{seed}` • 📏 Size: `{size}`\n"
+"🗳️ **{vote_count}** vote(s) • [See map]({url})"
+msgstr ""
+
+#: rustmaps_vote.py:237
+msgid "{votes} vote(s) per person • {total_voters} voter(s) so far"
+msgstr ""
+
+#: rustmaps_vote.py:246
+msgid "🏁 Vote finished"
+msgstr ""
+
+#: rustmaps_vote.py:247
+msgid "No votes were cast."
+msgstr ""
+
+#: rustmaps_vote.py:250
+msgid "🏆 Map {map_id} wins!"
+msgstr ""
+
+#: rustmaps_vote.py:252
+msgid "🥇 Winner"
+msgstr ""
+
+#: rustmaps_vote.py:253
+msgid ""
+"**Map {map_id}** — Seed `{seed}`, Size `{size}`\n"
+"🗳️ {vote_count} vote(s)\n"
+"[See map]({url})"
+msgstr ""
+
+#: rustmaps_vote.py:256
+msgid "🥈 2nd place"
+msgstr ""
+
+#: rustmaps_vote.py:256
+msgid "🥉 3rd place"
+msgstr ""
+
+#: rustmaps_vote.py:260
+msgid "Map {map_id} — {vote_count} vote(s)"
+msgstr ""
+
+#: rustmaps_vote.py:264
+msgid "{total_votes} vote(s) from {total_voters} voter(s)"
+msgstr ""
+
+#: rustmaps_vote.py:270
+msgid "✅ Map added"
+msgstr ""
+
+#: rustmaps_vote.py:274
+msgid "🌱 Seed: `{seed}`"
+msgstr ""
+
+#: rustmaps_vote.py:275
+msgid "📏 Size: `{size}`"
+msgstr ""
+
+#: rustmaps_vote.py:278
+msgid "🏷️ Type: {map_type}"
+msgstr ""
+
+#: rustmaps_vote.py:280
+msgid "🏛️ Monuments: {total_monuments}"
+msgstr ""
+
+#: rustmaps_vote.py:281
+msgid "🗺️ Maps in the session: **{map_count}/{MAX_MAPS}**"
+msgstr ""
+
+#: rustmaps_vote.py:283
+msgid "Map {map_id} added"
+msgstr ""
+
+#: rustmaps_vote.py:321
+#, docstring
+msgid "Set the global RustMaps API key."
+msgstr ""
+
+#: rustmaps_vote.py:329
+msgid "✅ RustMaps API key set."
+msgstr ""
+
+#: rustmaps_vote.py:335
+#, docstring
+msgid "Set how many maps each person can vote for per vote (default 1)."
+msgstr ""
+
+#: rustmaps_vote.py:337
+msgid "❌ The number of votes must be at least 1."
+msgstr ""
+
+#: rustmaps_vote.py:341
+msgid ""
+"❌ The number of votes can't exceed the maximum number of maps ({MAX_MAPS})."
+msgstr ""
+
+#: rustmaps_vote.py:354
+msgid "✅ Each person can vote for **{amount}** map(s) per vote."
+msgstr ""
+
+#: rustmaps_vote.py:362
+#, docstring
+msgid "Add a map to the current vote."
+msgstr ""
+
+#: rustmaps_vote.py:365
+msgid ""
+"❌ A vote is already running. End it with `[p]votemap end` before adding more"
+" maps."
+msgstr ""
+
+#: rustmaps_vote.py:372
+msgid "❌ Set the API key first with `[p]votemap setapi <key>`."
+msgstr ""
+
+#: rustmaps_vote.py:395
+msgid "❌ That map is already in the vote."
+msgstr ""
+
+#: rustmaps_vote.py:400
+msgid "❌ You reached the maximum of {MAX_MAPS} maps per vote."
+msgstr ""
+
+#: rustmaps_vote.py:412
+#, docstring
+msgid "Remove a map from the current vote (before it starts)."
+msgstr ""
+
+#: rustmaps_vote.py:415
+msgid "❌ You can't remove maps while a vote is running. Use `[p]votemap end`."
+msgstr ""
+
+#: rustmaps_vote.py:422
+msgid "❌ No vote is being prepared."
+msgstr ""
+
+#: rustmaps_vote.py:426
+msgid "❌ Map number {map_id} does not exist."
+msgstr ""
+
+#: rustmaps_vote.py:431
+msgid "✅ Map removed. The vote was empty and has been cancelled."
+msgstr ""
+
+#: rustmaps_vote.py:436
+msgid "✅ Map removed. **{count}** map(s) left (renumbered from 1)."
+msgstr ""
+
+#: rustmaps_vote.py:441
+#, docstring
+msgid "Show the maps of the current vote."
+msgstr ""
+
+#: rustmaps_vote.py:444
+msgid "ℹ️ There is no active or prepared vote."
+msgstr ""
+
+#: rustmaps_vote.py:449
+msgid "🗺️ Maps in the vote"
+msgstr ""
+
+#: rustmaps_vote.py:453
+msgid "🌱 Seed: `{seed}` • 📏 Size: `{size}` • [See map]({url})"
+msgstr ""
+
+#: rustmaps_vote.py:455
+msgid ""
+"\n"
+"🗳️ {vote_count} vote(s)"
+msgstr ""
+
+#: rustmaps_vote.py:457 rustmaps_vote.py:621
+msgid "Running"
+msgstr ""
+
+#: rustmaps_vote.py:457 rustmaps_vote.py:621
+msgid "Being prepared"
+msgstr ""
+
+#: rustmaps_vote.py:459
+msgid ""
+"Status: {state} • {count}/{MAX_MAPS} maps • {max_votes_per_user} vote(s) per"
+" person"
+msgstr ""
+
+#: rustmaps_vote.py:466
+#, docstring
+msgid "Start the vote with embeds and buttons."
+msgstr ""
+
+#: rustmaps_vote.py:468
+msgid "❌ A vote is already running."
+msgstr ""
+
+#: rustmaps_vote.py:474
+msgid ""
+"❌ You need at least {MIN_MAPS} maps to start. Add them with `[p]votemap add "
+"<url>`."
+msgstr ""
+
+#: rustmaps_vote.py:513
+msgid "✅ Vote started in {channel}!"
+msgstr ""
+
+#: rustmaps_vote.py:515
+msgid "✅ Vote started!"
+msgstr ""
+
+#: rustmaps_vote.py:520
+#, docstring
+msgid "End the vote, clean up the previous messages and announce the winner."
+msgstr ""
+
+#: rustmaps_vote.py:525
+msgid "❌ No vote is running."
+msgstr ""
+
+#: rustmaps_vote.py:555
+msgid "✅ Vote finished."
+msgstr ""
+
+#: rustmaps_vote.py:584
+#, docstring
+msgid "Cancel the current vote or preparation without announcing a winner."
+msgstr ""
+
+#: rustmaps_vote.py:587
+msgid "ℹ️ There is no vote to cancel."
+msgstr ""
+
+#: rustmaps_vote.py:592
+msgid "🗑️ Vote cancelled."
+msgstr ""
+
+#: rustmaps_vote.py:597
+#, docstring
+msgid "Show the vote settings."
+msgstr ""
+
+#: rustmaps_vote.py:608
+msgid "⚙️ RustMaps Vote settings"
+msgstr ""
+
+#: rustmaps_vote.py:609
+msgid "🔑 API key"
+msgstr ""
+
+#: rustmaps_vote.py:609
+msgid "✅ Set"
+msgstr ""
+
+#: rustmaps_vote.py:609
+msgid "❌ Not set"
+msgstr ""
+
+#: rustmaps_vote.py:611
+msgid "🗳️ Votes per person"
+msgstr ""
+
+#: rustmaps_vote.py:616
+msgid "📢 Vote channel"
+msgstr ""
+
+#: rustmaps_vote.py:617
+msgid "Channel where `start` is used"
+msgstr ""
+
+#: rustmaps_vote.py:623 rustmaps_vote.py:628
+msgid "📊 Current session"
+msgstr ""
+
+#: rustmaps_vote.py:624
+msgid ""
+"Status: **{state}**\n"
+"Maps: **{count}/{MAX_MAPS}**\n"
+"Voters: **{total_voters}**"
+msgstr ""
+
+#: rustmaps_vote.py:628
+msgid "None"
+msgstr ""
+
+#: rustmaps_vote.py:637
+#, docstring
+msgid "Set the default channel for votes."
+msgstr ""
+
+#: rustmaps_vote.py:640
+msgid "✅ Votes will be posted in {channel}."
+msgstr ""
+
+#: rustmaps_vote.py:644
+msgid "✅ Votes will be posted in the channel where `start` is run."
+msgstr ""
+
+#: rustmaps_vote.py:677
+msgid "⚠️ This vote has already ended."
+msgstr ""
+
+#: rustmaps_vote.py:684
+msgid "❌ Invalid map."
+msgstr ""
+
+#: rustmaps_vote.py:688
+msgid ""
+"⚠️ You already used all your votes ({max_votes_per_user}). Press a map you "
+"already voted for again to free a vote."
+msgstr ""
+
+#: rustmaps_vote.py:698
+msgid "✅ You voted for **Map {map_id}**."
+msgstr ""
+
+#: rustmaps_vote.py:702
+msgid "↩️ You removed your vote from **Map {map_id}**."
+msgstr ""

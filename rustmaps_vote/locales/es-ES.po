@@ -1,0 +1,448 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rustmaps_vote\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: i18n_strings.py:11
+msgid "Rust map votes using rustmaps.com."
+msgstr "Votaciones de mapas de Rust usando rustmaps.com."
+
+#: rustmaps_vote.py:43
+msgid "Rust map voting using rustmaps.com. By Killerbite95"
+msgstr "Votación de mapas de Rust usando rustmaps.com. By Killerbite95"
+
+#: rustmaps_vote.py:109
+msgid ""
+"Invalid URL. It must look like `https://rustmaps.com/map/<size>_<seed>`."
+msgstr ""
+"URL no válida. Debe tener el formato "
+"`https://rustmaps.com/map/<size>_<seed>`."
+
+#: rustmaps_vote.py:117
+msgid "The RustMaps API key is not set."
+msgstr "La API key de RustMaps no está configurada."
+
+#: rustmaps_vote.py:130
+msgid "Invalid API key."
+msgstr "API key inválida."
+
+#: rustmaps_vote.py:132
+msgid "Map not found."
+msgstr "Mapa no encontrado."
+
+#: rustmaps_vote.py:134
+msgid "The map is still being generated, try again later."
+msgstr "El mapa todavía se está generando, inténtalo más tarde."
+
+#: rustmaps_vote.py:135
+msgid "RustMaps API error (HTTP {status})."
+msgstr "Error de la API de RustMaps (HTTP {status})."
+
+#: rustmaps_vote.py:137
+msgid "Timed out while contacting RustMaps."
+msgstr "Tiempo de espera agotado al contactar con RustMaps."
+
+#: rustmaps_vote.py:139
+msgid "Network error while contacting RustMaps: {exc}"
+msgstr "Error de red al contactar con RustMaps: {exc}"
+
+#: rustmaps_vote.py:176
+msgid "🗺️ Map {map_id}"
+msgstr "🗺️ Mapa {map_id}"
+
+#: rustmaps_vote.py:180
+msgid "**Type:** {map_type}"
+msgstr "**Tipo:** {map_type}"
+
+#: rustmaps_vote.py:182
+msgid "🌱 Seed"
+msgstr "🌱 Seed"
+
+#: rustmaps_vote.py:183
+msgid "📏 Size"
+msgstr "📏 Size"
+
+#: rustmaps_vote.py:186
+msgid "🏛️ Monuments"
+msgstr "🏛️ Monumentos"
+
+#: rustmaps_vote.py:191
+msgid "🌍 Biomes"
+msgstr "🌍 Biomas"
+
+#: rustmaps_vote.py:195
+msgid "🏔️ Terrain"
+msgstr "🏔️ Terreno"
+
+#: rustmaps_vote.py:199
+msgid "🗺️ Land"
+msgstr "🗺️ Tierra firme"
+
+#: rustmaps_vote.py:204
+msgid "📍 Monuments"
+msgstr "📍 Monumentos"
+
+#: rustmaps_vote.py:207
+msgid "🔗 See full map"
+msgstr "🔗 Ver mapa completo"
+
+#: rustmaps_vote.py:208
+msgid "[rustmaps.com]({url})"
+msgstr "[rustmaps.com]({url})"
+
+#: rustmaps_vote.py:220
+msgid "RustMaps Vote • {total_maps} maps in this vote"
+msgstr "RustMaps Vote • {total_maps} mapas en esta votación"
+
+#: rustmaps_vote.py:225
+msgid "🗳️ Rust map vote"
+msgstr "🗳️ Votación de mapas de Rust"
+
+#: rustmaps_vote.py:226
+msgid "Press the button with the number of the map you prefer."
+msgstr "Pulsa el botón con el número del mapa que prefieras."
+
+#: rustmaps_vote.py:231 rustmaps_vote.py:456
+msgid "Map {map_id}"
+msgstr "Mapa {map_id}"
+
+#: rustmaps_vote.py:232
+msgid ""
+"🌱 Seed: `{seed}` • 📏 Size: `{size}`\n"
+"🗳️ **{vote_count}** vote(s) • [See map]({url})"
+msgstr ""
+"🌱 Seed: `{seed}` • 📏 Size: `{size}`\n"
+"🗳️ **{vote_count}** voto(s) • [Ver mapa]({url})"
+
+#: rustmaps_vote.py:237
+msgid "{votes} vote(s) per person • {total_voters} voter(s) so far"
+msgstr ""
+"Tienes {votes} voto(s) por persona • {total_voters} votante(s) hasta ahora"
+
+#: rustmaps_vote.py:246
+msgid "🏁 Vote finished"
+msgstr "🏁 Votación finalizada"
+
+#: rustmaps_vote.py:247
+msgid "No votes were cast."
+msgstr "No se registró ningún voto."
+
+#: rustmaps_vote.py:250
+msgid "🏆 Map {map_id} wins!"
+msgstr "🏆 ¡Gana el Mapa {map_id}!"
+
+#: rustmaps_vote.py:252
+msgid "🥇 Winner"
+msgstr "🥇 Ganador"
+
+#: rustmaps_vote.py:253
+msgid ""
+"**Map {map_id}** — Seed `{seed}`, Size `{size}`\n"
+"🗳️ {vote_count} vote(s)\n"
+"[See map]({url})"
+msgstr ""
+"**Mapa {map_id}** — Seed `{seed}`, Size `{size}`\n"
+"🗳️ {vote_count} voto(s)\n"
+"[Ver mapa]({url})"
+
+#: rustmaps_vote.py:256
+msgid "🥈 2nd place"
+msgstr "🥈 2º lugar"
+
+#: rustmaps_vote.py:256
+msgid "🥉 3rd place"
+msgstr "🥉 3er lugar"
+
+#: rustmaps_vote.py:260
+msgid "Map {map_id} — {vote_count} vote(s)"
+msgstr "Mapa {map_id} — {vote_count} voto(s)"
+
+#: rustmaps_vote.py:264
+msgid "{total_votes} vote(s) from {total_voters} voter(s)"
+msgstr "{total_votes} voto(s) de {total_voters} votante(s)"
+
+#: rustmaps_vote.py:270
+msgid "✅ Map added"
+msgstr "✅ Mapa añadido"
+
+#: rustmaps_vote.py:274
+msgid "🌱 Seed: `{seed}`"
+msgstr "🌱 Seed: `{seed}`"
+
+#: rustmaps_vote.py:275
+msgid "📏 Size: `{size}`"
+msgstr "📏 Size: `{size}`"
+
+#: rustmaps_vote.py:278
+msgid "🏷️ Type: {map_type}"
+msgstr "🏷️ Tipo: {map_type}"
+
+#: rustmaps_vote.py:280
+msgid "🏛️ Monuments: {total_monuments}"
+msgstr "🏛️ Monumentos: {total_monuments}"
+
+#: rustmaps_vote.py:281
+msgid "🗺️ Maps in the session: **{map_count}/{MAX_MAPS}**"
+msgstr "🗺️ Mapas en la sesión: **{map_count}/{MAX_MAPS}**"
+
+#: rustmaps_vote.py:283
+msgid "Map {map_id} added"
+msgstr "Mapa {map_id} añadido correctamente"
+
+#: rustmaps_vote.py:321
+msgid "Set the global RustMaps API key."
+msgstr "Configura la API key global de RustMaps."
+
+#: rustmaps_vote.py:329
+msgid "✅ RustMaps API key set."
+msgstr "✅ API key de RustMaps configurada."
+
+#: rustmaps_vote.py:335
+msgid "Set how many maps each person can vote for per vote (default 1)."
+msgstr ""
+"Define cuántos mapas puede votar cada persona por votación (por defecto 1)."
+
+#: rustmaps_vote.py:337
+msgid "❌ The number of votes must be at least 1."
+msgstr "❌ El número de votos debe ser al menos 1."
+
+#: rustmaps_vote.py:341
+msgid ""
+"❌ The number of votes can't exceed the maximum number of maps ({MAX_MAPS})."
+msgstr ""
+"❌ El número de votos no puede superar el máximo de mapas ({MAX_MAPS})."
+
+#: rustmaps_vote.py:354
+msgid "✅ Each person can vote for **{amount}** map(s) per vote."
+msgstr "✅ Cada persona podrá votar **{amount}** mapa(s) por votación."
+
+#: rustmaps_vote.py:362
+msgid "Add a map to the current vote."
+msgstr "Añade un mapa a la votación actual."
+
+#: rustmaps_vote.py:365
+msgid ""
+"❌ A vote is already running. End it with `[p]votemap end` before adding more"
+" maps."
+msgstr ""
+"❌ Ya hay una votación en curso. Termínala con `[p]votemap end` antes de "
+"añadir más mapas."
+
+#: rustmaps_vote.py:372
+msgid "❌ Set the API key first with `[p]votemap setapi <key>`."
+msgstr "❌ Configura primero la API key con `[p]votemap setapi <key>`."
+
+#: rustmaps_vote.py:395
+msgid "❌ That map is already in the vote."
+msgstr "❌ Ese mapa ya está en la votación."
+
+#: rustmaps_vote.py:400
+msgid "❌ You reached the maximum of {MAX_MAPS} maps per vote."
+msgstr "❌ Has alcanzado el máximo de {MAX_MAPS} mapas por votación."
+
+#: rustmaps_vote.py:412
+msgid "Remove a map from the current vote (before it starts)."
+msgstr "Quita un mapa de la votación actual (antes de empezar)."
+
+#: rustmaps_vote.py:415
+msgid "❌ You can't remove maps while a vote is running. Use `[p]votemap end`."
+msgstr ""
+"❌ No puedes quitar mapas con una votación en curso. Usa `[p]votemap end`."
+
+#: rustmaps_vote.py:422
+msgid "❌ No vote is being prepared."
+msgstr "❌ No hay ninguna votación en preparación."
+
+#: rustmaps_vote.py:426
+msgid "❌ Map number {map_id} does not exist."
+msgstr "❌ No existe el mapa número {map_id}."
+
+#: rustmaps_vote.py:431
+msgid "✅ Map removed. The vote was empty and has been cancelled."
+msgstr "✅ Mapa quitado. La votación quedó vacía y se canceló."
+
+#: rustmaps_vote.py:436
+msgid "✅ Map removed. **{count}** map(s) left (renumbered from 1)."
+msgstr ""
+"✅ Mapa quitado. Quedan **{count}** mapa(s) (renumerados del 1 en adelante)."
+
+#: rustmaps_vote.py:441
+msgid "Show the maps of the current vote."
+msgstr "Muestra los mapas de la votación actual."
+
+#: rustmaps_vote.py:444
+msgid "ℹ️ There is no active or prepared vote."
+msgstr "ℹ️ No hay ninguna votación activa o en preparación."
+
+#: rustmaps_vote.py:449
+msgid "🗺️ Maps in the vote"
+msgstr "🗺️ Mapas en la votación"
+
+#: rustmaps_vote.py:453
+msgid "🌱 Seed: `{seed}` • 📏 Size: `{size}` • [See map]({url})"
+msgstr "🌱 Seed: `{seed}` • 📏 Size: `{size}` • [Ver mapa]({url})"
+
+#: rustmaps_vote.py:455
+msgid ""
+"\n"
+"🗳️ {vote_count} vote(s)"
+msgstr ""
+"\n"
+"🗳️ {vote_count} voto(s)"
+
+#: rustmaps_vote.py:457 rustmaps_vote.py:621
+msgid "Running"
+msgstr "En curso"
+
+#: rustmaps_vote.py:457 rustmaps_vote.py:621
+msgid "Being prepared"
+msgstr "En preparación"
+
+#: rustmaps_vote.py:459
+msgid ""
+"Status: {state} • {count}/{MAX_MAPS} maps • {max_votes_per_user} vote(s) per"
+" person"
+msgstr ""
+"Estado: {state} • {count}/{MAX_MAPS} mapas • {max_votes_per_user} voto(s) "
+"por persona"
+
+#: rustmaps_vote.py:466
+msgid "Start the vote with embeds and buttons."
+msgstr "Inicia la votación con embeds y botones."
+
+#: rustmaps_vote.py:468
+msgid "❌ A vote is already running."
+msgstr "❌ Ya hay una votación en curso."
+
+#: rustmaps_vote.py:474
+msgid ""
+"❌ You need at least {MIN_MAPS} maps to start. Add them with `[p]votemap add "
+"<url>`."
+msgstr ""
+"❌ Necesitas al menos {MIN_MAPS} mapas para empezar. Añádelos con `[p]votemap"
+" add <url>`."
+
+#: rustmaps_vote.py:513
+msgid "✅ Vote started in {channel}!"
+msgstr "✅ ¡Votación iniciada en {channel}!"
+
+#: rustmaps_vote.py:515
+msgid "✅ Vote started!"
+msgstr "✅ ¡Votación iniciada!"
+
+#: rustmaps_vote.py:520
+msgid "End the vote, clean up the previous messages and announce the winner."
+msgstr ""
+"Termina la votación, limpia los mensajes anteriores y anuncia al ganador."
+
+#: rustmaps_vote.py:525
+msgid "❌ No vote is running."
+msgstr "❌ No hay ninguna votación en curso."
+
+#: rustmaps_vote.py:555
+msgid "✅ Vote finished."
+msgstr "✅ Votación finalizada."
+
+#: rustmaps_vote.py:584
+msgid "Cancel the current vote or preparation without announcing a winner."
+msgstr "Cancela la votación o la preparación actual sin anunciar ganador."
+
+#: rustmaps_vote.py:587
+msgid "ℹ️ There is no vote to cancel."
+msgstr "ℹ️ No hay ninguna votación que cancelar."
+
+#: rustmaps_vote.py:592
+msgid "🗑️ Vote cancelled."
+msgstr "🗑️ Votación cancelada."
+
+#: rustmaps_vote.py:597
+msgid "Show the vote settings."
+msgstr "Muestra la configuración de las votaciones."
+
+#: rustmaps_vote.py:608
+msgid "⚙️ RustMaps Vote settings"
+msgstr "⚙️ Configuración de RustMaps Vote"
+
+#: rustmaps_vote.py:609
+msgid "🔑 API key"
+msgstr "🔑 API key"
+
+#: rustmaps_vote.py:609
+msgid "✅ Set"
+msgstr "✅ Configurada"
+
+#: rustmaps_vote.py:609
+msgid "❌ Not set"
+msgstr "❌ Sin configurar"
+
+#: rustmaps_vote.py:611
+msgid "🗳️ Votes per person"
+msgstr "🗳️ Votos por persona"
+
+#: rustmaps_vote.py:616
+msgid "📢 Vote channel"
+msgstr "📢 Canal de votación"
+
+#: rustmaps_vote.py:617
+msgid "Channel where `start` is used"
+msgstr "Canal donde se usa `start`"
+
+#: rustmaps_vote.py:623 rustmaps_vote.py:628
+msgid "📊 Current session"
+msgstr "📊 Sesión actual"
+
+#: rustmaps_vote.py:624
+msgid ""
+"Status: **{state}**\n"
+"Maps: **{count}/{MAX_MAPS}**\n"
+"Voters: **{total_voters}**"
+msgstr ""
+"Estado: **{state}**\n"
+"Mapas: **{count}/{MAX_MAPS}**\n"
+"Votantes: **{total_voters}**"
+
+#: rustmaps_vote.py:628
+msgid "None"
+msgstr "Ninguna"
+
+#: rustmaps_vote.py:637
+msgid "Set the default channel for votes."
+msgstr "Define el canal por defecto de las votaciones."
+
+#: rustmaps_vote.py:640
+msgid "✅ Votes will be posted in {channel}."
+msgstr "✅ Las votaciones se publicarán en {channel}."
+
+#: rustmaps_vote.py:644
+msgid "✅ Votes will be posted in the channel where `start` is run."
+msgstr "✅ Las votaciones se publicarán en el canal donde se ejecute `start`."
+
+#: rustmaps_vote.py:677
+msgid "⚠️ This vote has already ended."
+msgstr "⚠️ Esta votación ya ha terminado."
+
+#: rustmaps_vote.py:684
+msgid "❌ Invalid map."
+msgstr "❌ Mapa no válido."
+
+#: rustmaps_vote.py:688
+msgid ""
+"⚠️ You already used all your votes ({max_votes_per_user}). Press a map you "
+"already voted for again to free a vote."
+msgstr ""
+"⚠️ Ya has usado todos tus votos ({max_votes_per_user}). Pulsa de nuevo un "
+"mapa que ya votaste para liberar un voto."
+
+#: rustmaps_vote.py:698
+msgid "✅ You voted for **Map {map_id}**."
+msgstr "✅ Has votado por el **Mapa {map_id}**."
+
+#: rustmaps_vote.py:702
+msgid "↩️ You removed your vote from **Map {map_id}**."
+msgstr "↩️ Has retirado tu voto del **Mapa {map_id}**."

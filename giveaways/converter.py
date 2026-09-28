@@ -13,6 +13,9 @@ from redbot.core.commands import BadArgument, Converter
 from redbot.core.commands.converter import TimedeltaConverter
 
 from .menu import BUTTON_STYLE
+from redbot.core.i18n import Translator
+
+_ = Translator("Giveaways", __file__)
 
 
 class NoExitParser(argparse.ArgumentParser):
@@ -25,7 +28,7 @@ class Args(Converter):
 
     async def convert(self, ctx, argument):
         argument = argument.replace("—", "--")
-        parser = NoExitParser(description="Giveaway Created", add_help=False)
+        parser = NoExitParser(description=_("Giveaway Created"), add_help=False)
 
         # Required Arguments
 
@@ -79,16 +82,16 @@ class Args(Converter):
             vals = vars(parser.parse_args(argument.split(" ")))
         except Exception as error:
             raise BadArgument(
-                "Could not parse flags correctly, ensure flags are correctly used."
+                _("Could not parse flags correctly, ensure flags are correctly used.")
             ) from error
 
         if self._require_all:
             if not vals["prize"]:
-                raise BadArgument("You must specify a prize. Use `--prize` or `-p`")
+                raise BadArgument(_("You must specify a prize. Use `--prize` or `-p`"))
 
             if not any([vals["duration"], vals["end"]]):
                 raise BadArgument(
-                    "You must specify a duration or end date. Use `--duration` or `-d` or `--end` or `-e`"
+                    _("You must specify a duration or end date. Use `--duration` or `-d` or `--end` or `-e`")
                 )
 
         nums = [vals["cost"], vals["joined"], vals["created"], vals["winners"]]
@@ -96,7 +99,7 @@ class Args(Converter):
             if val is None:
                 continue
             if val < 1:
-                raise BadArgument("Number must be greater than 0")
+                raise BadArgument(_("Number must be greater than 0"))
 
         valid_multi_roles = []
         for role in vals["multi-roles"]:
@@ -104,7 +107,7 @@ class Args(Converter):
                 role = await RoleConverter().convert(ctx, role)
                 valid_multi_roles.append(role.id)
             except BadArgument:
-                raise BadArgument(f"The role {role} does not exist within this server.")
+                raise BadArgument(_("The role {role} does not exist within this server.").format(role=role))
         vals["multi-roles"] = valid_multi_roles
 
         valid_bypass_roles = []
@@ -113,12 +116,12 @@ class Args(Converter):
                 role = await RoleConverter().convert(ctx, role)
                 valid_bypass_roles.append(role.id)
             except BadArgument:
-                raise BadArgument(f"The role {role} does not exist within this server.")
+                raise BadArgument(_("The role {role} does not exist within this server.").format(role=role))
         vals["bypass-roles"] = valid_bypass_roles
 
         if vals["bypass-type"]:
             if vals["bypass-type"] not in ["or", "and"]:
-                raise BadArgument("Bypass type must be either `or` or `and` - default is `or`")
+                raise BadArgument(_("Bypass type must be either `or` or `and` - default is `or`"))
         else:
             vals["bypass-type"] = "or"
 
@@ -128,7 +131,7 @@ class Args(Converter):
                 role = await RoleConverter().convert(ctx, role)
                 valid_exclusive_roles.append(role.id)
             except BadArgument:
-                raise BadArgument(f"The role {role} does not exist within this server.")
+                raise BadArgument(_("The role {role} does not exist within this server.").format(role=role))
         vals["roles"] = valid_exclusive_roles
 
         valid_blacklist_roles = []
@@ -137,7 +140,7 @@ class Args(Converter):
                 role = await RoleConverter().convert(ctx, role)
                 valid_blacklist_roles.append(role.id)
             except BadArgument:
-                raise BadArgument(f"The role {role} does not exist within this server.")
+                raise BadArgument(_("The role {role} does not exist within this server.").format(role=role))
         vals["blacklist"] = valid_blacklist_roles
 
         valid_mentions = []
@@ -146,41 +149,41 @@ class Args(Converter):
                 role = await RoleConverter().convert(ctx, role)
                 valid_mentions.append(role.id)
             except BadArgument:
-                raise BadArgument(f"The role {role} does not exist within this server.")
+                raise BadArgument(_("The role {role} does not exist within this server.").format(role=role))
         vals["mentions"] = valid_mentions
 
         if vals["channel"]:
             try:
                 vals["channel"] = await TextChannelConverter().convert(ctx, vals["channel"])
             except BadArgument:
-                raise BadArgument("Invalid channel.")
+                raise BadArgument(_("Invalid channel."))
 
         if vals["levelreq"] or vals["repreq"]:
             cog = ctx.bot.get_cog("Leveler")
             if not cog:
-                raise BadArgument("Leveler cog not loaded.")
+                raise BadArgument(_("Leveler cog not loaded."))
             if not hasattr(cog, "db"):
                 raise BadArgument(
-                    "This may be the wrong leveling cog. Ensure you are using Fixators."
+                    _("This may be the wrong leveling cog. Ensure you are using Fixators.")
                 )
 
         if vals["tatsu_level"] or vals["tatsu_rep"]:
             token = await ctx.bot.get_shared_api_tokens("tatsumaki")
             if not token.get("authorization"):
                 raise BadArgument(
-                    f"You do not have a valid Tatsumaki API token. Check `{ctx.clean_prefix}gw integrations` for more info."
+                    _("You do not have a valid Tatsumaki API token. Check `{clean_prefix}gw integrations` for more info.").format(clean_prefix=ctx.clean_prefix)
                 )
 
         if vals["amari_level"] or vals["amari_weekly_xp"]:
             token = await ctx.bot.get_shared_api_tokens("amari")
             if not token.get("authorization"):
                 raise BadArgument(
-                    f"You do not have a valid Amari API token. Check `{ctx.clean_prefix}gw integrations` for more info."
+                    _("You do not have a valid Amari API token. Check `{clean_prefix}gw integrations` for more info.").format(clean_prefix=ctx.clean_prefix)
                 )
 
         if (vals["multi"] or vals["multi-roles"]) and not (vals["multi"] and vals["multi-roles"]):
             raise BadArgument(
-                "You must specify a multiplier and roles. Use `--multiplier` or `-m` and `--multi-roles` or `-mr`"
+                _("You must specify a multiplier and roles. Use `--multiplier` or `-m` and `--multi-roles` or `-mr`")
             )
 
         if (
@@ -189,26 +192,26 @@ class Args(Converter):
             and not ctx.channel.permissions_for(ctx.author).mention_everyone
         ):
             raise BadArgument(
-                "You do not have permission to mention everyone. Please ensure the bot and you have `Mention Everyone` permission."
+                _("You do not have permission to mention everyone. Please ensure the bot and you have `Mention Everyone` permission.")
             )
 
         if vals["description"]:
             vals["description"] = " ".join(vals["description"])
             if len(vals["description"]) > 1000:
-                raise BadArgument("Description must be less than 1000 characters.")
+                raise BadArgument(_("Description must be less than 1000 characters."))
 
         if vals["button-text"]:
             vals["button-text"] = " ".join(vals["button-text"])
             if len(vals["button-text"]) > 70:
-                raise BadArgument("Button text must be less than 70 characters.")
+                raise BadArgument(_("Button text must be less than 70 characters."))
         else:
-            vals["button-text"] = "Join Giveaway"
+            vals["button-text"] = _("Join Giveaway")
 
         if vals["button-style"]:
             vals["button-style"] = " ".join(vals["button-style"]).lower()
             if vals["button-style"] not in BUTTON_STYLE.keys():
                 raise BadArgument(
-                    f"Button style must be one of the following: {', '.join(BUTTON_STYLE.keys())}"
+                    _("Button style must be one of the following: {join}").format(join=', '.join(BUTTON_STYLE.keys()))
                 )
         else:
             vals["button-style"] = "green"
@@ -217,7 +220,7 @@ class Args(Converter):
             vals["hosted-by"] = " ".join(vals["hosted-by"])
             user = await MemberConverter().convert(ctx, vals["hosted-by"])
             if user is None:
-                raise BadArgument("Invalid user.")
+                raise BadArgument(_("Invalid user."))
             vals["hosted-by"] = user.id
 
         if vals["colour"]:
@@ -225,7 +228,7 @@ class Args(Converter):
             try:
                 vals["colour"] = await ColourConverter().convert(ctx, vals["colour"])
             except Exception:
-                raise BadArgument("Invalid colour.")
+                raise BadArgument(_("Invalid colour."))
 
         if vals["emoji"]:
             vals["emoji"] = " ".join(vals["emoji"]).rstrip().lstrip()
@@ -239,7 +242,7 @@ class Args(Converter):
                 await ctx.message.add_reaction(vals["emoji"])
                 await ctx.message.remove_reaction(vals["emoji"], ctx.me)
             except Exception:
-                raise BadArgument("Invalid emoji.")
+                raise BadArgument(_("Invalid emoji."))
             if custom:
                 vals["emoji"] = vals["emoji"].id
 
@@ -250,24 +253,24 @@ class Args(Converter):
                 duration = await tc.convert(ctx, " ".join(vals["duration"]))
                 vals["duration"] = duration
             except BadArgument:
-                raise BadArgument("Invalid duration. Use `--duration` or `-d`")
+                raise BadArgument(_("Invalid duration. Use `--duration` or `-d`"))
             else:
                 if duration.total_seconds() < 60:
-                    raise BadArgument("Duration must be greater than 60 seconds.")
+                    raise BadArgument(_("Duration must be greater than 60 seconds."))
         elif vals["end"]:
             try:
                 time = dateparser.parse(" ".join(vals["end"]))
                 if time.tzinfo is None:
                     time = time.replace(tzinfo=timezone.utc)
                 if datetime.now(timezone.utc) > time:
-                    raise BadArgument("End date must be in the future.")
+                    raise BadArgument(_("End date must be in the future."))
                 time = time - datetime.now(timezone.utc)
                 vals["duration"] = time
                 if time.total_seconds() < 60:
-                    raise BadArgument("End date must be at least 1 minute in the future.")
+                    raise BadArgument(_("End date must be at least 1 minute in the future."))
             except Exception:
                 raise BadArgument(
-                    "Invalid end date. Use `--end` or `-e`. Ensure to pass a timezone, otherwise it defaults to UTC."
+                    _("Invalid end date. Use `--end` or `-e`. Ensure to pass a timezone, otherwise it defaults to UTC.")
                 )
         vals["image"] = " ".join(vals["image"]) if vals["image"] else None
         vals["thumbnail"] = " ".join(vals["thumbnail"]) if vals["thumbnail"] else None

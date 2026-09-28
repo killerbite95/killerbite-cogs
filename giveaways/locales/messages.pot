@@ -1,0 +1,1117 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:43+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: converter.py:31
+msgid "Giveaway Created"
+msgstr ""
+
+#: converter.py:85
+msgid "Could not parse flags correctly, ensure flags are correctly used."
+msgstr ""
+
+#: converter.py:90
+msgid "You must specify a prize. Use `--prize` or `-p`"
+msgstr ""
+
+#: converter.py:94
+msgid ""
+"You must specify a duration or end date. Use `--duration` or `-d` or `--end`"
+" or `-e`"
+msgstr ""
+
+#: converter.py:102
+msgid "Number must be greater than 0"
+msgstr ""
+
+#: converter.py:110 converter.py:119 converter.py:134 converter.py:143
+#: converter.py:152
+msgid "The role {role} does not exist within this server."
+msgstr ""
+
+#: converter.py:124
+msgid "Bypass type must be either `or` or `and` - default is `or`"
+msgstr ""
+
+#: converter.py:159
+msgid "Invalid channel."
+msgstr ""
+
+#: converter.py:164
+msgid "Leveler cog not loaded."
+msgstr ""
+
+#: converter.py:167
+msgid "This may be the wrong leveling cog. Ensure you are using Fixators."
+msgstr ""
+
+#: converter.py:174
+msgid ""
+"You do not have a valid Tatsumaki API token. Check `{clean_prefix}gw "
+"integrations` for more info."
+msgstr ""
+
+#: converter.py:181
+msgid ""
+"You do not have a valid Amari API token. Check `{clean_prefix}gw "
+"integrations` for more info."
+msgstr ""
+
+#: converter.py:186
+msgid ""
+"You must specify a multiplier and roles. Use `--multiplier` or `-m` and "
+"`--multi-roles` or `-mr`"
+msgstr ""
+
+#: converter.py:195
+msgid ""
+"You do not have permission to mention everyone. Please ensure the bot and "
+"you have `Mention Everyone` permission."
+msgstr ""
+
+#: converter.py:201
+msgid "Description must be less than 1000 characters."
+msgstr ""
+
+#: converter.py:206 giveaways.py:1020
+msgid "Button text must be less than 70 characters."
+msgstr ""
+
+#: converter.py:208 giveaways.py:333
+msgid "Join Giveaway"
+msgstr ""
+
+#: converter.py:214
+msgid "Button style must be one of the following: {join}"
+msgstr ""
+
+#: converter.py:223
+msgid "Invalid user."
+msgstr ""
+
+#: converter.py:231
+msgid "Invalid colour."
+msgstr ""
+
+#: converter.py:245
+msgid "Invalid emoji."
+msgstr ""
+
+#: converter.py:256
+msgid "Invalid duration. Use `--duration` or `-d`"
+msgstr ""
+
+#: converter.py:259
+msgid "Duration must be greater than 60 seconds."
+msgstr ""
+
+#: converter.py:266
+msgid "End date must be in the future."
+msgstr ""
+
+#: converter.py:270
+msgid "End date must be at least 1 minute in the future."
+msgstr ""
+
+#: converter.py:273
+msgid ""
+"Invalid end date. Use `--end` or `-e`. Ensure to pass a timezone, otherwise "
+"it defaults to UTC."
+msgstr ""
+
+#: giveaways.py:36
+#, docstring
+msgid "Giveaway Commands"
+msgstr ""
+
+#: giveaways.py:43
+msgid ""
+"{pre_processed}\n"
+"Cog Version: {version}\n"
+"Author: {author}"
+msgstr ""
+
+#: giveaways.py:189
+msgid "Not enough entries to roll the giveaway."
+msgstr ""
+
+#: giveaways.py:196
+msgid "{winner} (Not Found)\n"
+msgstr ""
+
+#: giveaways.py:205
+msgid ""
+"Winner(s):\n"
+"{txt}"
+msgstr ""
+
+#: giveaways.py:210
+msgid "Reroll: {value}gw reroll {messageid} | Ended at"
+msgstr ""
+
+#: giveaways.py:213
+msgid "🎉 Giveaway Ended 🎉"
+msgstr ""
+
+#: giveaways.py:219
+msgid "Giveaway Ended"
+msgstr ""
+
+#: giveaways.py:220
+msgid ""
+"Congratulations to the {value}winner{value2} of [{prize}]({jump_url}).\n"
+"{txt}"
+msgstr ""
+
+#: giveaways.py:225
+msgid "Reroll: {value}gw reroll {messageid}"
+msgstr ""
+
+#: giveaways.py:240
+msgid "Congratulations! You won {prize} in the giveaway on {guild}!"
+msgstr ""
+
+#: giveaways.py:297
+msgid ""
+"{description}\n"
+"\n"
+"Click the button below to enter\n"
+"\n"
+"**Hosted by:** {hosted_by}\n"
+"\n"
+"Ends: <t:{timestamp}:R>"
+msgstr ""
+
+#: giveaways.py:304 giveaways.py:411 giveaways.py:1165 menu.py:181
+msgid "🎉 0 participants"
+msgstr ""
+
+#: giveaways.py:324
+msgid "🎉 Giveaway 🎉{txt}"
+msgstr ""
+
+#: giveaways.py:344 giveaways.py:443 giveaways.py:1203 menu.py:223
+msgid "Giveaway created!"
+msgstr ""
+
+#: giveaways.py:390
+#, docstring
+msgid ""
+"\n"
+"        Start a giveaway.\n"
+"\n"
+"        This by default will DM the winner and also DM a user if they cannot enter the giveaway.\n"
+"        "
+msgstr ""
+
+#: giveaways.py:408
+msgid ""
+"\n"
+"Click the button below to enter\n"
+"\n"
+"**Hosted by:** {author}\n"
+"\n"
+"Ends: <t:{timestamp}:R>"
+msgstr ""
+
+#: giveaways.py:454
+#, docstring
+msgid "Reroll a giveaway."
+msgstr ""
+
+#: giveaways.py:457 giveaways.py:491 giveaways.py:501 giveaways.py:537
+#: giveaways.py:587 giveaways.py:713 giveaways.py:716 giveaways.py:846
+#: giveaways.py:893
+msgid "Giveaway not found."
+msgstr ""
+
+#: giveaways.py:460
+msgid ""
+"Giveaway already running. Please wait for it to end or end it via "
+"`{clean_prefix}gw end {msgid}`."
+msgstr ""
+
+#: giveaways.py:488
+#, docstring
+msgid "End a giveaway."
+msgstr ""
+
+#: giveaways.py:509
+#, docstring
+msgid ""
+"Advanced creation of Giveaways.\n"
+"\n"
+"\n"
+"        `[p]gw explain` for a further full listing of the arguments.\n"
+"        "
+msgstr ""
+
+#: giveaways.py:522
+#, docstring
+msgid "List all entrants for a giveaway (active or ended)."
+msgstr ""
+
+#: giveaways.py:539
+msgid "No entrants."
+msgstr ""
+
+#: giveaways.py:554
+msgid "Entrants — {prize}"
+msgstr ""
+
+#: giveaways.py:556
+msgid "Total unique entrants: {count}"
+msgstr ""
+
+#: giveaways.py:568
+#, docstring
+msgid "Information about a giveaway (active or ended)."
+msgstr ""
+
+#: giveaways.py:572
+msgid ""
+"**Status:** 🟢 Active\n"
+"**Entrants:** {count}\n"
+"**End:** <t:{timestamp}:R>\n"
+msgstr ""
+
+#: giveaways.py:581 giveaways.py:604
+msgid "Giveaway ID #{msgid}"
+msgstr ""
+
+#: giveaways.py:593
+msgid "**Status:** {value}\n"
+msgstr ""
+
+#: giveaways.py:593
+msgid "🔴 Ended"
+msgstr ""
+
+#: giveaways.py:593
+msgid "⚪ Unknown"
+msgstr ""
+
+#: giveaways.py:594
+msgid "**Entrants:** {count}\n"
+msgstr ""
+
+#: giveaways.py:610
+#, docstring
+msgid "List all giveaways in the server."
+msgstr ""
+
+#: giveaways.py:612 giveaways.py:619
+msgid "No giveaways are running."
+msgstr ""
+
+#: giveaways.py:628
+msgid "Giveaways in {guild}"
+msgstr ""
+
+#: giveaways.py:638
+#, docstring
+msgid "Explanation of giveaway advanced and the arguments it supports."
+msgstr ""
+
+#: giveaways.py:642
+msgid "Giveaway Advanced — Required Arguments"
+msgstr ""
+
+#: giveaways.py:643
+msgid ""
+"**NOTE:** Giveaways are checked every 15 seconds, so they may end slightly later than specified.\n"
+"\n"
+"**Required arguments:**\n"
+"`--prize` / `-p`: The prize to be won.\n"
+"\n"
+"**Duration (one required):**\n"
+"`--duration` / `-d`: Duration like `2d3h30m`.\n"
+"`--end` / `-e`: End time like `tomorrow at 3am`, `2024-12-25T00:00:00Z`.\n"
+"\n"
+"**Optional:**\n"
+"`--channel`: The channel to post in (defaults to current).\n"
+"`--emoji`: Custom emoji for the giveaway.\n"
+"`--winners`: Number of winners to draw.\n"
+"`--description`: Description shown on the embed.\n"
+"`--hosted-by`: Override the host user."
+msgstr ""
+
+#: giveaways.py:655
+msgid "Page 1/3 — {clean_prefix}gw explain"
+msgstr ""
+
+#: giveaways.py:658
+msgid "Giveaway Advanced — Restrictions & Styling"
+msgstr ""
+
+#: giveaways.py:659
+msgid ""
+"**Restrictions:**\n"
+"`--roles`: Restrict to specific roles.\n"
+"`--blacklist`: Blacklisted roles.\n"
+"`--joined`: Minimum days in server.\n"
+"`--created`: Minimum account age in days.\n"
+"`--cost`: Credit cost to enter.\n"
+"`--bypass-roles`: Roles that bypass restrictions.\n"
+"`--bypass-type`: `or` (any role) or `and` (all roles).\n"
+"\n"
+"**Multipliers:**\n"
+"`--multiplier` / `-m`: Entry multiplier.\n"
+"`--multi-roles` / `-mr`: Roles that receive the multiplier.\n"
+"\n"
+"**Styling:**\n"
+"`--colour`: Embed color.\n"
+"`--image`: Embed image URL.\n"
+"`--thumbnail`: Embed thumbnail URL.\n"
+"`--button-text`: Custom button text.\n"
+"`--button-style`: `green`, `blurple`, `grey`, or `red`.\n"
+"`--mentions`: Roles to @mention.\n"
+"`--ateveryone` / `--athere`: Mention everyone/here."
+msgstr ""
+
+#: giveaways.py:678
+msgid "Page 2/3 — {clean_prefix}gw explain"
+msgstr ""
+
+#: giveaways.py:681
+msgid "Giveaway Advanced — Toggles & Integrations"
+msgstr ""
+
+#: giveaways.py:682
+msgid ""
+"**Toggles:**\n"
+"`--congratulate`: DM winners.\n"
+"`--notify`: DM users who fail to enter.\n"
+"`--multientry`: Allow multiple entries.\n"
+"`--announce`: Post a separate end message.\n"
+"`--show-requirements`: Show requirements in embed.\n"
+"`--update-button`: Update button with entrant count.\n"
+"\n"
+"**3rd Party Integrations:**\n"
+"`--level-req`: Red Leveler level.\n"
+"`--rep-req`: Red Leveler rep.\n"
+"`--tatsu-level` / `--tatsu-rep`: Tatsumaki.\n"
+"`--mee6-level`: MEE6 level.\n"
+"`--amari-level` / `--amari-weekly-xp`: Amari.\n"
+"\n"
+"**Examples:**\n"
+"`{clean_prefix}gw adv --prize Nitro --duration 1h30m --winners 2 --congratulate`\n"
+"`{clean_prefix}gw adv --prize VIP Role --end tomorrow at 6pm --roles @Members --cost 500`"
+msgstr ""
+
+#: giveaways.py:698
+msgid "Page 3/3 — {clean_prefix}gw explain"
+msgstr ""
+
+#: giveaways.py:708
+#, docstring
+msgid ""
+"Edit a giveaway.\n"
+"\n"
+"        See `[p]gw explain` for more info on the flags.\n"
+"        "
+msgstr ""
+
+#: giveaways.py:744
+msgid ""
+"{description}\n"
+"\n"
+"Click the button below to enter\n"
+"\n"
+"**Hosted by:** {hosted_by}\n"
+"\n"
+"Ends: <t:{endtime}:R>"
+msgstr ""
+
+#: giveaways.py:758
+#, docstring
+msgid "Various 3rd party integrations for giveaways."
+msgstr ""
+
+#: giveaways.py:760
+msgid ""
+"\n"
+"        3rd party integrations for giveaways.\n"
+"\n"
+"        You can use these integrations to integrate giveaways with other 3rd party services.\n"
+"\n"
+"        `--level-req`: Integrate with the Red Level system Must be Fixator's leveler.\n"
+"        `--rep-req`: Integrate with the Red Level Rep system Must be Fixator's leveler.\n"
+"        `--tatsu-level`: Integrate with the Tatsumaki's levelling system, must have a valid Tatsumaki API key set.\n"
+"        `--tatsu-rep`: Integrate with the Tatsumaki's rep system, must have a valid Tatsumaki API key set.\n"
+"        `--mee6-level`: Integrate with the MEE6 levelling system.\n"
+"        `--amari-level`: Integrate with the Amari's levelling system.\n"
+"        `--amari-weekly-xp`: Integrate with the Amari's weekly xp system."
+msgstr ""
+
+#: giveaways.py:775
+msgid ""
+"\n"
+"                **API Keys**\n"
+"                Tatsu's API key can be set with the following command (You must find where this key is yourself): `{prefix}set api tatsumaki authorization <key>`\n"
+"                Amari's API key can be set with the following command (Apply [here](https://docs.google.com/forms/d/e/1FAIpQLScQDCsIqaTb1QR9BfzbeohlUJYA3Etwr-iSb0CRKbgjA-fq7Q/viewform)): `{prefix}set api amari authorization <key>`\n"
+"\n"
+"\n"
+"                For any integration suggestions, suggest them via the [#support-flare-cogs](https://discord.gg/GET4DVk) channel on the support server or [flare-cogs](https://github.com/flaree/flare-cogs/issues/new/choose) github."
+msgstr ""
+
+#: giveaways.py:786
+msgid "3rd Party Integrations"
+msgstr ""
+
+#: giveaways.py:795
+msgid "<deleted role {role_id}>"
+msgstr ""
+
+#: giveaways.py:798
+msgid "**Roles:** {join}\n"
+msgstr ""
+
+#: giveaways.py:800
+msgid "**Multiplier:** {multi}\n"
+msgstr ""
+
+#: giveaways.py:802
+msgid "**Multiplier Roles:** {join}\n"
+msgstr ""
+
+#: giveaways.py:804
+msgid "**Cost:** {cost}\n"
+msgstr ""
+
+#: giveaways.py:806
+msgid "**Joined:** {joined} days\n"
+msgstr ""
+
+#: giveaways.py:808
+msgid "**Created:** {created} days\n"
+msgstr ""
+
+#: giveaways.py:810
+msgid "**Blacklist:** {join}\n"
+msgstr ""
+
+#: giveaways.py:812
+msgid "**Winners:** {winners}\n"
+msgstr ""
+
+#: giveaways.py:814
+msgid "**MEE6 Level:** {mee6_level}\n"
+msgstr ""
+
+#: giveaways.py:816
+msgid "**Amari Level:** {amari_level}\n"
+msgstr ""
+
+#: giveaways.py:818
+msgid "**Amari Weekly XP:** {amari_weekly_xp}\n"
+msgstr ""
+
+#: giveaways.py:820
+msgid "**Tatsu Level:** {tatsu_level}\n"
+msgstr ""
+
+#: giveaways.py:822
+msgid "**Tatsu Rep:** {tatsu_rep}\n"
+msgstr ""
+
+#: giveaways.py:824
+msgid "**Level Requirement:** {level_req}\n"
+msgstr ""
+
+#: giveaways.py:826
+msgid "**Rep Requirement:** {rep_req}\n"
+msgstr ""
+
+#: giveaways.py:828
+msgid "**Bypass Roles:** {join} ({bypasstype})\n"
+msgstr ""
+
+#: giveaways.py:841
+#, docstring
+msgid "Cancel a giveaway without drawing winners."
+msgstr ""
+
+#: giveaways.py:843
+msgid "Giveaway not found or already ended."
+msgstr ""
+
+#: giveaways.py:855
+msgid "🚫 Giveaway cancelled."
+msgstr ""
+
+#: giveaways.py:859
+msgid "Cancelled"
+msgstr ""
+
+#: giveaways.py:861
+msgid "🚫 Giveaway Cancelled"
+msgstr ""
+
+#: giveaways.py:868
+msgid "Giveaway for **{prize}** has been cancelled."
+msgstr ""
+
+#: giveaways.py:873
+#, docstring
+msgid "Remove all ended giveaways from the config for this server."
+msgstr ""
+
+#: giveaways.py:876
+msgid "No giveaway data found."
+msgstr ""
+
+#: giveaways.py:883
+msgid "No ended giveaways to clean up."
+msgstr ""
+
+#: giveaways.py:884
+msgid "Cleaned up **{removed}** ended giveaway(s) from the config."
+msgstr ""
+
+#: giveaways.py:890
+#, docstring
+msgid "Delete a specific giveaway from the config."
+msgstr ""
+
+#: giveaways.py:896
+msgid ""
+"This giveaway is still active. Use `{clean_prefix}gw end {msgid}` or "
+"`{clean_prefix}gw cancel {msgid}` first."
+msgstr ""
+
+#: giveaways.py:900
+msgid "Giveaway **{prize}** (ID: {msgid}) deleted from config."
+msgstr ""
+
+#: giveaways.py:909
+#, docstring
+msgid "View recent giveaway history (last 50)."
+msgstr ""
+
+#: giveaways.py:912
+msgid "No giveaway history yet."
+msgstr ""
+
+#: giveaways.py:922
+msgid "No winners"
+msgstr ""
+
+#: giveaways.py:923
+msgid ""
+"**{prize}** — <t:{ended_at}:R>\n"
+"  Winners: {winner_text} | Entrants: {entrant_count}\n"
+"\n"
+msgstr ""
+
+#: giveaways.py:929
+msgid "Giveaway History — {guild_name}"
+msgstr ""
+
+#: giveaways.py:946
+#, docstring
+msgid "Configure default giveaway settings for this server."
+msgstr ""
+
+#: giveaways.py:951
+#, docstring
+msgid "Show current default giveaway settings."
+msgstr ""
+
+#: giveaways.py:956
+msgid "❌ Off"
+msgstr ""
+
+#: giveaways.py:960
+msgid "Giveaway Defaults — {guild_name}"
+msgstr ""
+
+#: giveaways.py:961
+msgid "No defaults set."
+msgstr ""
+
+#: giveaways.py:964
+msgid "Use {clean_prefix}gw set <key> <value> to change"
+msgstr ""
+
+#: giveaways.py:970
+#, docstring
+msgid "Set whether to update the button with entrant count by default."
+msgstr ""
+
+#: giveaways.py:978
+#, docstring
+msgid "Set whether to DM winners by default."
+msgstr ""
+
+#: giveaways.py:986
+#, docstring
+msgid "Set whether to DM users when they fail to enter by default."
+msgstr ""
+
+#: giveaways.py:994
+#, docstring
+msgid "Set whether to show requirements on the embed by default."
+msgstr ""
+
+#: giveaways.py:1002
+#, docstring
+msgid "Set whether to post a separate announcement when a giveaway ends."
+msgstr ""
+
+#: giveaways.py:1010
+#, docstring
+msgid "Set the default emoji for giveaways."
+msgstr ""
+
+#: giveaways.py:1018
+#, docstring
+msgid "Set the default button text for giveaways."
+msgstr ""
+
+#: giveaways.py:1028
+#, docstring
+msgid "Set the default button style. Options: green, blurple, grey, red."
+msgstr ""
+
+#: giveaways.py:1031
+msgid "Style must be one of: {join}"
+msgstr ""
+
+#: giveaways.py:1043
+#, docstring
+msgid "Manage giveaway presets (reusable templates)."
+msgstr ""
+
+#: giveaways.py:1048
+#, docstring
+msgid ""
+"Save a giveaway preset. Use the same flags as `gw advanced`.\n"
+"\n"
+"        The preset stores your flags so you can reuse them.\n"
+"        Prize and duration are optional in presets.\n"
+"\n"
+"        Example: `[p]gw preset save weekly --winners 3 --congratulate --announce --roles @Members`\n"
+"        "
+msgstr ""
+
+#: giveaways.py:1058
+msgid "Invalid flags: {e}"
+msgstr ""
+
+#: giveaways.py:1061
+msgid "✅ Preset **{name}** saved."
+msgstr ""
+
+#: giveaways.py:1066
+#, docstring
+msgid ""
+"Use a preset to create a giveaway.\n"
+"\n"
+"        You can add extra flags to override preset values.\n"
+"        Prize and duration must be provided (in preset or extra flags).\n"
+"\n"
+"        Example: `[p]gw preset use weekly --prize Nitro --duration 2d`\n"
+"        "
+msgstr ""
+
+#: giveaways.py:1075
+msgid ""
+"Preset `{name}` not found. Use `{clean_prefix}gw preset list` to see all "
+"presets."
+msgstr ""
+
+#: giveaways.py:1080
+msgid "Error: {e}"
+msgstr ""
+
+#: giveaways.py:1087
+#, docstring
+msgid "List all saved presets."
+msgstr ""
+
+#: giveaways.py:1090
+msgid "No presets saved yet."
+msgstr ""
+
+#: giveaways.py:1095
+msgid "Giveaway Presets — {guild_name}"
+msgstr ""
+
+#: giveaways.py:1104
+#, docstring
+msgid "Delete a saved preset."
+msgstr ""
+
+#: giveaways.py:1107
+msgid "Preset `{name}` not found."
+msgstr ""
+
+#: giveaways.py:1109
+msgid "Preset **{name}** deleted."
+msgstr ""
+
+#: giveaways.py:1134
+#, docstring
+msgid ""
+"Create a giveaway with simple parameters.\n"
+"\n"
+"        Works with both prefix and slash commands.\n"
+"\n"
+"        Examples:\n"
+"        `[p]gw create Nitro 1h30m`\n"
+"        `[p]gw create \"Steam Key\" 2d 3 #giveaways`\n"
+"        `/giveaway create prize:Nitro duration:1h30m winners:2`\n"
+"        "
+msgstr ""
+
+#: giveaways.py:1160
+msgid ""
+"{desc_text}Click the button below to enter\n"
+"\n"
+"**Hosted by:** {author}\n"
+"\n"
+"Ends: <t:{timestamp}:R>"
+msgstr ""
+
+#: giveaways.py:1214
+#, docstring
+msgid "📖 Full guide for the Giveaway system."
+msgstr ""
+
+#: giveaways.py:1217
+msgid "🎉 Page {current}/{total} — Giveaways v{version}"
+msgstr ""
+
+#: giveaways.py:1221
+msgid "📖 Guide — Getting Started"
+msgstr ""
+
+#: giveaways.py:1222
+msgid ""
+"Welcome to the **Giveaway System**! 🎉\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"**Quick Start:**\n"
+"Use `{p}gw start #channel 1h Prize Name` to create a simple giveaway.\n"
+"\n"
+"**Interactive Creation:**\n"
+"Use `/gw create` (slash command) to create a giveaway with a form.\n"
+"\n"
+"**Advanced Giveaways:**\n"
+"Use `{p}gw advanced` with flags for full customization: role restrictions, multipliers, costs, descriptions, custom embeds, and more.\n"
+"\n"
+"**How it works:**\n"
+"Users click the button on the giveaway message to enter. When time is up, winners are drawn automatically and announced."
+msgstr ""
+
+#: giveaways.py:1241
+msgid "⚙️ Guide — Features"
+msgstr ""
+
+#: giveaways.py:1242
+msgid ""
+"The giveaway system includes many powerful features:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"🔒 **Role Restrictions** — Limit who can enter by roles.\n"
+"\n"
+"🚫 **Blacklists** — Block specific roles from entering.\n"
+"\n"
+"✖️ **Multipliers** — Give specific roles extra entries.\n"
+"\n"
+"💰 **Entry Cost** — Charge credits to enter.\n"
+"\n"
+"📅 **Account Age** — Minimum account/server age.\n"
+"\n"
+"👥 **Multiple Winners** — Draw more than one winner.\n"
+"\n"
+"🔄 **Rerolls** — Reroll ended giveaways if needed.\n"
+"\n"
+"🎨 **Customizable** — Colors, images, emojis, button styles.\n"
+"\n"
+"📨 **DM Notifications** — Notify winners and failed entries.\n"
+"\n"
+"🔗 **3rd Party** — MEE6, Tatsu, Amari, Leveler integrations."
+msgstr ""
+
+#: giveaways.py:1261
+msgid "🛠️ Guide — Defaults & Presets"
+msgstr ""
+
+#: giveaways.py:1262
+msgid ""
+"Customize defaults and save reusable templates:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"**Server Defaults:**\n"
+"Configure default settings that apply to all new giveaways.\n"
+"`{p}gw set show` — View current defaults\n"
+"`{p}gw set updatebutton true/false`\n"
+"`{p}gw set congratulate true/false`\n"
+"`{p}gw set notify true/false`\n"
+"`{p}gw set showrequirements true/false`\n"
+"`{p}gw set announce true/false`\n"
+"`{p}gw set emoji 🎁`\n"
+"`{p}gw set buttontext Join Now!`\n"
+"`{p}gw set buttonstyle blurple`\n"
+"\n"
+"**Presets (Templates):**\n"
+"Save commonly used flag combinations.\n"
+"`{p}gw preset save weekly --winners 3 --congratulate --roles @Members`\n"
+"`{p}gw preset use weekly --prize Nitro --duration 7d`\n"
+"`{p}gw preset list` — View all presets\n"
+"`{p}gw preset delete weekly`"
+msgstr ""
+
+#: giveaways.py:1288
+msgid "📋 Guide — Managing Giveaways"
+msgstr ""
+
+#: giveaways.py:1289
+msgid ""
+"Commands for managing active and ended giveaways:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
+"\n"
+"**While Active:**\n"
+"`{p}gw list` — List all active giveaways\n"
+"`{p}gw info <id>` — View giveaway details\n"
+"`{p}gw entrants <id>` — List all participants\n"
+"`{p}gw edit <id> [flags]` — Edit an active giveaway\n"
+"`{p}gw end <id>` — End and draw winners now\n"
+"`{p}gw cancel <id>` — Cancel without drawing\n"
+"\n"
+"**After Ended:**\n"
+"`{p}gw reroll <id>` — Reroll winners\n"
+"`{p}gw info <id>` — View ended giveaway info\n"
+"`{p}gw entrants <id>` — View entrants of ended giveaway\n"
+"`{p}gw history` — View recent giveaway history\n"
+"\n"
+"**Maintenance:**\n"
+"`{p}gw cleanup` — Remove all ended giveaways from config\n"
+"`{p}gw delete <id>` — Delete a specific ended giveaway"
+msgstr ""
+
+#: giveaways.py:1313
+msgid "📚 Guide — Command Reference"
+msgstr ""
+
+#: giveaways.py:1314
+msgid ""
+"Full list of available commands:\n"
+"━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+msgstr ""
+
+#: giveaways.py:1319
+msgid "🎉 Creation"
+msgstr ""
+
+#: giveaways.py:1320
+msgid ""
+"`{p}gw start [#ch] <time> <prize>` — Quick giveaway\n"
+"`{p}gw create [#ch]` — Interactive form (slash)\n"
+"`{p}gw advanced <flags>` — Full customization\n"
+"`{p}gw preset use <name> [flags]` — From template"
+msgstr ""
+
+#: giveaways.py:1327
+msgid "🔧 Management"
+msgstr ""
+
+#: giveaways.py:1328
+msgid ""
+"`{p}gw list` — Active giveaways\n"
+"`{p}gw info <id>` — Details\n"
+"`{p}gw entrants <id>` — Participants\n"
+"`{p}gw edit <id> <flags>` — Edit active\n"
+"`{p}gw end <id>` — End & draw\n"
+"`{p}gw cancel <id>` — Cancel\n"
+"`{p}gw reroll <id>` — Reroll winners"
+msgstr ""
+
+#: giveaways.py:1338
+msgid "⚙️ Configuration"
+msgstr ""
+
+#: giveaways.py:1339
+msgid ""
+"`{p}gw set show` — View defaults\n"
+"`{p}gw set <key> <value>` — Change default\n"
+"`{p}gw preset save/use/list/delete`\n"
+"`{p}gw history` — Winner history\n"
+"`{p}gw cleanup` — Clear ended data\n"
+"`{p}gw explain` — Flag reference\n"
+"`{p}gw integrations` — 3rd party info"
+msgstr ""
+
+#: i18n_strings.py:11
+msgid ""
+"\n"
+"        Manage the giveaway system.\n"
+"\n"
+"        Use `[p]gw guide` for a full interactive guide.\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:12
+msgid "Optional description for the giveaway."
+msgstr ""
+
+#: menu.py:64
+msgid "You have been removed from the giveaway."
+msgstr ""
+
+#: menu.py:71
+msgid "You have been entered into the giveaway for {prize}."
+msgstr ""
+
+#: menu.py:91
+msgid "🎉 {count} participant{value}"
+msgstr ""
+
+#: menu.py:109
+msgid "Prize"
+msgstr ""
+
+#: menu.py:110
+msgid "What's the prize?"
+msgstr ""
+
+#: menu.py:115
+msgid "Duration (e.g. 1h30m, 2d, 30m)"
+msgstr ""
+
+#: menu.py:121
+msgid "Number of Winners"
+msgstr ""
+
+#: menu.py:128
+msgid "Description (optional)"
+msgstr ""
+
+#: menu.py:129
+msgid "Optional description for the giveaway"
+msgstr ""
+
+#: menu.py:149
+msgid ""
+"Invalid duration. Use formats like `1h30m`, `2d`, `30m`. Minimum 1 minute."
+msgstr ""
+
+#: menu.py:159
+msgid "Number of winners must be a positive number."
+msgstr ""
+
+#: menu.py:176
+msgid ""
+"{desc_text}Click the button below to enter\n"
+"\n"
+"**Hosted by:** {user}\n"
+"\n"
+"Ends: <t:{timestamp}:R>"
+msgstr ""
+
+#: objects.py:60
+msgid "You have already entered this giveaway."
+msgstr ""
+
+#: objects.py:68
+msgid "You do not have the required roles to join this giveaway."
+msgstr ""
+
+#: objects.py:75
+msgid "Your role is blacklisted from this giveaway."
+msgstr ""
+
+#: objects.py:82
+msgid ""
+"Your account is too new to join this giveaway. You must have joined {joined}"
+" days ago."
+msgstr ""
+
+#: objects.py:92
+msgid ""
+"Your account is too new to join this giveaway. You must have created your "
+"account {created} days ago."
+msgstr ""
+
+#: objects.py:97
+msgid "You do not have enough credits to join this giveaway."
+msgstr ""
+
+#: objects.py:104 objects.py:115
+msgid "The Leveler cog is not installed."
+msgstr ""
+
+#: objects.py:109
+msgid ""
+"You do not meet the required level to join this giveaway. You must be level "
+"{levelreq} or higher."
+msgstr ""
+
+#: objects.py:120
+msgid ""
+"You do not meet the required rep to join this giveaway. You must have "
+"{repreq} or higher."
+msgstr ""
+
+#: objects.py:126
+msgid "The MEE6 Leaderboard is not available."
+msgstr ""
+
+#: objects.py:132
+msgid ""
+"You do not meet the required MEE6 level to join this giveaway. You must be "
+"level {mee6_level} or higher."
+msgstr ""
+
+#: objects.py:138 objects.py:154
+msgid "The Tatsu token is not set."
+msgstr ""
+
+#: objects.py:142 objects.py:158
+msgid ""
+"The Tatsu API did not return any data therefore you have not been entered."
+msgstr ""
+
+#: objects.py:148
+msgid ""
+"You do not meet the required Tatsu level to join this giveaway. You must be "
+"level {tatsu_level} or higher."
+msgstr ""
+
+#: objects.py:162
+msgid ""
+"You do not meet the required Tatsu rep to join this giveaway. You must have "
+"{tatsu_rep} or higher."
+msgstr ""
+
+#: objects.py:168 objects.py:184
+msgid "The Amari token is not set."
+msgstr ""
+
+#: objects.py:174 objects.py:190
+msgid ""
+"The Amari API did not return any data therefore you have not been entered."
+msgstr ""
+
+#: objects.py:178
+msgid ""
+"You do not meet the required Amari level to join this giveaway. You must be "
+"level {amari_level} or higher."
+msgstr ""
+
+#: objects.py:194
+msgid ""
+"You do not meet the required Amari weekly XP to join this giveaway. You must"
+" have {amari_weekly_xp} or higher."
+msgstr ""

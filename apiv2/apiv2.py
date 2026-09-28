@@ -32,6 +32,9 @@ from .routes.community import register_routes as register_community_routes
 from .routes.utilities import register_routes as register_utilities_routes
 from .routes.colacoins import register_routes as register_colacoins_routes
 from .dashboard_integration import DashboardIntegration
+from redbot.core.i18n import Translator, cog_i18n
+
+_ = Translator("APIv2", __file__)
 
 logger = logging.getLogger("red.killerbite95.apiv2")
 
@@ -39,6 +42,7 @@ DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8742
 
 
+@cog_i18n(_)
 class APIv2(DashboardIntegration, commands.Cog):
     """
     REST API server embedded in the bot for external integrations.
@@ -191,10 +195,10 @@ class APIv2(DashboardIntegration, commands.Cog):
             bot = request.app[APP_BOT_KEY]
             cog = bot.get_cog(cog_name)
             if cog is None:
-                return json_error(503, "cog_unavailable", f"Cog {cog_name} is not loaded")
+                return json_error(503, "cog_unavailable", _("Cog {cog_name} is not loaded").format(cog_name=cog_name))
             func = getattr(cog, method_name, None)
             if func is None:
-                return json_error(503, "cog_unavailable", f"Handler not available on {cog_name}")
+                return json_error(503, "cog_unavailable", _("Handler not available on {cog_name}").format(cog_name=cog_name))
             return await func(request)
 
         return handler
@@ -312,11 +316,11 @@ class APIv2(DashboardIntegration, commands.Cog):
 
         if not self._is_running():
             embed = discord.Embed(
-                title="APIv2 Status",
-                description="🔴 **Server is stopped**",
+                title=_("APIv2 Status"),
+                description=_("🔴 **Server is stopped**"),
                 color=discord.Color.red(),
             )
-            embed.add_field(name="Configured", value=f"`{host}:{port}`", inline=True)
+            embed.add_field(name=_("Configured"), value=f"`{host}:{port}`", inline=True)
             await ctx.send(embed=embed)
             return
 
@@ -329,13 +333,13 @@ class APIv2(DashboardIntegration, commands.Cog):
         active_keys = sum(1 for k in keys if k["active"])
 
         embed = discord.Embed(
-            title="APIv2 Status",
-            description="🟢 **Server is running**",
+            title=_("APIv2 Status"),
+            description=_("🟢 **Server is running**"),
             color=discord.Color.green(),
         )
-        embed.add_field(name="Listening", value=f"`{host}:{port}`", inline=True)
-        embed.add_field(name="Uptime", value=f"{hours}h {mins}m {secs}s", inline=True)
-        embed.add_field(name="API Keys", value=f"{active_keys} active", inline=True)
+        embed.add_field(name=_("Listening"), value=f"`{host}:{port}`", inline=True)
+        embed.add_field(name=_("Uptime"), value=f"{hours}h {mins}m {secs}s", inline=True)
+        embed.add_field(name=_("API Keys"), value=_("{active_keys} active").format(active_keys=active_keys), inline=True)
         await ctx.send(embed=embed)
 
     # ---- Restart ----
@@ -346,9 +350,9 @@ class APIv2(DashboardIntegration, commands.Cog):
         await self._stop_server()
         await self._start_server()
         if self._is_running():
-            await ctx.send("✅ APIv2 server restarted.")
+            await ctx.send(_("✅ APIv2 server restarted."))
         else:
-            await ctx.send("❌ Failed to restart. Check logs.")
+            await ctx.send(_("❌ Failed to restart. Check logs."))
 
     # ---- Key management ----
 
@@ -361,35 +365,33 @@ class APIv2(DashboardIntegration, commands.Cog):
         """Create a new API key. The key will be sent via DM."""
         # Validate name: alphanumeric, dashes, underscores only
         if not all(c.isalnum() or c in "-_" for c in name) or not name:
-            await ctx.send("❌ Key name must contain only letters, numbers, dashes or underscores.")
+            await ctx.send(_("❌ Key name must contain only letters, numbers, dashes or underscores."))
             return
 
         token = await self.key_manager.create_key(name)
         if token is None:
-            await ctx.send(f"❌ A key named `{name}` already exists.")
+            await ctx.send(_("❌ A key named `{name}` already exists.").format(name=name))
             return
 
         # Send token via DM
         try:
             embed = discord.Embed(
-                title="🔑 New API Key Created",
-                description=(
-                    f"**Name:** `{name}`\n"
-                    f"**Token:** ||`{token}`||\n\n"
+                title=_("🔑 New API Key Created"),
+                description=_("**Name:** `{name}`\n"
+                    "**Token:** ||`{token}`||\n\n"
                     "Use in header: `Authorization: Bearer <token>`\n\n"
                     "⚠️ **Save this token now. You can view it again with** "
-                    "`[p]apiv2 key show`**, but keep it secret.**"
-                ),
+                    "`[p]apiv2 key show`**, but keep it secret.**").format(name=name, token=token),
                 color=discord.Color.green(),
             )
             await ctx.author.send(embed=embed)
-            await ctx.send(f"✅ Key `{name}` created. Check your DMs for the token.")
+            await ctx.send(_("✅ Key `{name}` created. Check your DMs for the token.").format(name=name))
         except discord.Forbidden:
             # Can't DM — show in channel with spoiler
             await ctx.send(
-                f"✅ Key `{name}` created.\n"
-                f"Token: ||`{token}`||\n"
-                "⚠️ **Delete this message after saving the token!**"
+                _("✅ Key `{name}` created.\n"
+                "Token: ||`{token}`||\n"
+                "⚠️ **Delete this message after saving the token!**").format(name=name, token=token)
             )
 
     @key_group.command(name="revoke")
@@ -397,16 +399,16 @@ class APIv2(DashboardIntegration, commands.Cog):
         """Revoke an API key (immediate effect)."""
         success = await self.key_manager.revoke_key(name)
         if success:
-            await ctx.send(f"✅ Key `{name}` revoked. It can no longer be used.")
+            await ctx.send(_("✅ Key `{name}` revoked. It can no longer be used.").format(name=name))
         else:
-            await ctx.send(f"❌ Key `{name}` not found.")
+            await ctx.send(_("❌ Key `{name}` not found.").format(name=name))
 
     @key_group.command(name="list")
     async def cmd_key_list(self, ctx: commands.Context):
         """List all API keys."""
         keys = await self.key_manager.list_keys()
         if not keys:
-            await ctx.send("No API keys configured. Create one with `[p]apiv2 key create <name>`.")
+            await ctx.send(_("No API keys configured. Create one with `[p]apiv2 key create <name>`."))
             return
 
         lines = []
@@ -414,11 +416,11 @@ class APIv2(DashboardIntegration, commands.Cog):
             status = "🟢" if k["active"] else "🔴"
             created = k["created_at"][:10] if k["created_at"] else "?"
             last = k["last_used"][:16].replace("T", " ") if k.get("last_used") else "never"
-            rl = f" — rate: {k['rate_limit']}/min" if k.get("rate_limit") else ""
-            lines.append(f"{status} **{k['name']}** — created: {created} — last used: {last}{rl}")
+            rl = _(" — rate: {rate_limit}/min").format(rate_limit=k['rate_limit']) if k.get("rate_limit") else ""
+            lines.append(_("{status} **{name}** — created: {created} — last used: {last}{rl}").format(status=status, name=k['name'], created=created, last=last, rl=rl))
 
         embed = discord.Embed(
-            title="API Keys",
+            title=_("API Keys"),
             description="\n".join(lines),
             color=discord.Color.blue(),
         )
@@ -429,19 +431,19 @@ class APIv2(DashboardIntegration, commands.Cog):
         """Show the token for a key (sent via DM)."""
         token = await self.key_manager.get_key_token(name)
         if token is None:
-            await ctx.send(f"❌ Key `{name}` not found.")
+            await ctx.send(_("❌ Key `{name}` not found.").format(name=name))
             return
 
         try:
             embed = discord.Embed(
-                title=f"🔑 API Key: {name}",
-                description=f"**Token:** ||`{token}`||",
+                title=_("🔑 API Key: {name}").format(name=name),
+                description=_("**Token:** ||`{token}`||").format(token=token),
                 color=discord.Color.blue(),
             )
             await ctx.author.send(embed=embed)
-            await ctx.send(f"✅ Token for `{name}` sent to your DMs.")
+            await ctx.send(_("✅ Token for `{name}` sent to your DMs.").format(name=name))
         except discord.Forbidden:
-            await ctx.send("❌ I can't send you a DM. Please enable DMs from server members.")
+            await ctx.send(_("❌ I can't send you a DM. Please enable DMs from server members."))
 
     @key_group.command(name="ratelimit")
     async def cmd_key_ratelimit(self, ctx: commands.Context, name: str, limit: int = None):
@@ -454,15 +456,15 @@ class APIv2(DashboardIntegration, commands.Cog):
 
         success = await self.key_manager.set_rate_limit(name, limit)
         if not success:
-            await ctx.send(f"❌ Key `{name}` not found.")
+            await ctx.send(_("❌ Key `{name}` not found.").format(name=name))
             return
 
         self.rate_limiter.set_key_limit(name, limit)
 
         if limit is None:
-            await ctx.send(f"✅ Key `{name}` rate limit reset to global default (200/min).")
+            await ctx.send(_("✅ Key `{name}` rate limit reset to global default (200/min).").format(name=name))
         else:
-            await ctx.send(f"✅ Key `{name}` rate limit set to **{limit}** requests/min.")
+            await ctx.send(_("✅ Key `{name}` rate limit set to **{limit}** requests/min.").format(name=name, limit=limit))
 
     # ---- Webhooks ----
 
@@ -477,49 +479,47 @@ class APIv2(DashboardIntegration, commands.Cog):
         Events: member_join, member_remove, member_ban, member_unban, message
         """
         if not url.startswith(("https://", "http://")):
-            await ctx.send("❌ URL must start with `http://` or `https://`.")
+            await ctx.send(_("❌ URL must start with `http://` or `https://`."))
             return
 
         if not events:
             await ctx.send(
-                "❌ Specify at least one event.\n"
-                f"Supported: {', '.join(sorted(SUPPORTED_EVENTS))}"
+                _("❌ Specify at least one event.\n"
+                "Supported: {join}").format(join=', '.join(sorted(SUPPORTED_EVENTS)))
             )
             return
 
         invalid = set(events) - SUPPORTED_EVENTS
         if invalid:
             await ctx.send(
-                f"❌ Invalid events: {', '.join(sorted(invalid))}\n"
-                f"Supported: {', '.join(sorted(SUPPORTED_EVENTS))}"
+                _("❌ Invalid events: {join}\n"
+                "Supported: {join2}").format(join=', '.join(sorted(invalid)), join2=', '.join(sorted(SUPPORTED_EVENTS)))
             )
             return
 
         secret = await self.webhook_manager.create(name, url, list(events))
         if secret is None:
-            await ctx.send(f"❌ Webhook `{name}` already exists.")
+            await ctx.send(_("❌ Webhook `{name}` already exists.").format(name=name))
             return
 
         try:
             embed = discord.Embed(
-                title="🔗 Webhook Created",
-                description=(
-                    f"**Name:** `{name}`\n"
-                    f"**URL:** `{url}`\n"
-                    f"**Events:** {', '.join(events)}\n"
-                    f"**Secret:** ||`{secret}`||\n\n"
+                title=_("🔗 Webhook Created"),
+                description=_("**Name:** `{name}`\n"
+                    "**URL:** `{url}`\n"
+                    "**Events:** {join}\n"
+                    "**Secret:** ||`{secret}`||\n\n"
                     "Use the secret to verify HMAC-SHA256 signatures.\n"
-                    "Header: `X-APIv2-Signature: sha256=<hex>`"
-                ),
+                    "Header: `X-APIv2-Signature: sha256=<hex>`").format(name=name, url=url, join=', '.join(events), secret=secret),
                 color=discord.Color.green(),
             )
             await ctx.author.send(embed=embed)
-            await ctx.send(f"✅ Webhook `{name}` created. Signing secret sent to your DMs.")
+            await ctx.send(_("✅ Webhook `{name}` created. Signing secret sent to your DMs.").format(name=name))
         except discord.Forbidden:
             await ctx.send(
-                f"✅ Webhook `{name}` created.\n"
-                f"Secret: ||`{secret}`||\n"
-                "⚠️ Save the secret and delete this message!"
+                _("✅ Webhook `{name}` created.\n"
+                "Secret: ||`{secret}`||\n"
+                "⚠️ Save the secret and delete this message!").format(name=name, secret=secret)
             )
 
     @webhook_group.command(name="delete")
@@ -527,27 +527,27 @@ class APIv2(DashboardIntegration, commands.Cog):
         """Delete an outgoing webhook."""
         success = await self.webhook_manager.delete(name)
         if success:
-            await ctx.send(f"✅ Webhook `{name}` deleted.")
+            await ctx.send(_("✅ Webhook `{name}` deleted.").format(name=name))
         else:
-            await ctx.send(f"❌ Webhook `{name}` not found.")
+            await ctx.send(_("❌ Webhook `{name}` not found.").format(name=name))
 
     @webhook_group.command(name="list")
     async def cmd_webhook_list(self, ctx: commands.Context):
         """List all outgoing webhooks."""
         webhooks = await self.webhook_manager.list_webhooks()
         if not webhooks:
-            await ctx.send("No webhooks configured. Create one with `[p]apiv2 webhook create`.")
+            await ctx.send(_("No webhooks configured. Create one with `[p]apiv2 webhook create`."))
             return
 
         lines = []
         for wh in webhooks:
             status = "🟢" if wh["active"] else "🔴"
             evts = ", ".join(wh["events"])
-            guild = f" (guild: {wh['guild_id']})" if wh.get("guild_id") else ""
-            lines.append(f"{status} **{wh['name']}** → `{wh['url']}`\n   Events: {evts}{guild}")
+            guild = _(" (guild: {guild_id})").format(guild_id=wh['guild_id']) if wh.get("guild_id") else ""
+            lines.append(_("{status} **{name}** → `{url}`\n   Events: {evts}{guild}").format(status=status, name=wh['name'], url=wh['url'], evts=evts, guild=guild))
 
         embed = discord.Embed(
-            title="Outgoing Webhooks",
+            title=_("Outgoing Webhooks"),
             description="\n".join(lines),
             color=discord.Color.blue(),
         )
@@ -558,14 +558,14 @@ class APIv2(DashboardIntegration, commands.Cog):
         """Send a test ping to a webhook."""
         result = await self.webhook_manager.test(name)
         if result is None:
-            await ctx.send(f"❌ Webhook `{name}` not found.")
+            await ctx.send(_("❌ Webhook `{name}` not found.").format(name=name))
         elif isinstance(result, int):
             if result < 400:
-                await ctx.send(f"✅ Test ping to `{name}` — response: **{result}**")
+                await ctx.send(_("✅ Test ping to `{name}` — response: **{result}**").format(name=name, result=result))
             else:
-                await ctx.send(f"⚠️ Test ping to `{name}` — error response: **{result}**")
+                await ctx.send(_("⚠️ Test ping to `{name}` — error response: **{result}**").format(name=name, result=result))
         else:
-            await ctx.send(f"❌ Test ping to `{name}` failed: {result}")
+            await ctx.send(_("❌ Test ping to `{name}` failed: {result}").format(name=name, result=result))
 
     # ---- Settings ----
 
@@ -577,13 +577,13 @@ class APIv2(DashboardIntegration, commands.Cog):
     async def cmd_set_port(self, ctx: commands.Context, port: int):
         """Change the API server port. Requires restart."""
         if not 1024 <= port <= 65535:
-            await ctx.send("❌ Port must be between 1024 and 65535.")
+            await ctx.send(_("❌ Port must be between 1024 and 65535."))
             return
         await self.config.port.set(port)
-        await ctx.send(f"✅ Port set to `{port}`. Run `[p]apiv2 restart` to apply.")
+        await ctx.send(_("✅ Port set to `{port}`. Run `[p]apiv2 restart` to apply.").format(port=port))
 
     @set_group.command(name="host")
     async def cmd_set_host(self, ctx: commands.Context, host: str):
         """Change the API server bind address. Requires restart."""
         await self.config.host.set(host)
-        await ctx.send(f"✅ Host set to `{host}`. Run `[p]apiv2 restart` to apply.")
+        await ctx.send(_("✅ Host set to `{host}`. Run `[p]apiv2 restart` to apply.").format(host=host))

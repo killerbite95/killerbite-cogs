@@ -1,0 +1,361 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: apiv2\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: apiv2.py:47
+msgid ""
+"\n"
+"    REST API server embedded in the bot for external integrations.\n"
+"\n"
+"    Exposes authenticated HTTP endpoints to control the bot from\n"
+"    websites, scripts, and automations.\n"
+"    "
+msgstr ""
+"Servidor de API REST integrado en el bot para integraciones externas.\n"
+"\n"
+"    Expone endpoints HTTP autenticados para controlar el bot desde\n"
+"    webs, scripts y automatizaciones.\n"
+"    "
+
+#: apiv2.py:198
+msgid "Cog {cog_name} is not loaded"
+msgstr "El cog {cog_name} no está cargado"
+
+#: apiv2.py:201
+msgid "Handler not available on {cog_name}"
+msgstr "Función no disponible en {cog_name}"
+
+#: apiv2.py:307
+msgid "Manage the APIv2 REST server."
+msgstr "Gestionar el servidor REST de APIv2."
+
+#: apiv2.py:313
+msgid "Show the API server status."
+msgstr "Mostrar el estado del servidor de la API."
+
+#: apiv2.py:319 apiv2.py:336
+msgid "APIv2 Status"
+msgstr "Estado de APIv2"
+
+#: apiv2.py:320
+msgid "🔴 **Server is stopped**"
+msgstr "🔴 **El servidor está parado**"
+
+#: apiv2.py:323
+msgid "Configured"
+msgstr "Configurado"
+
+#: apiv2.py:337
+msgid "🟢 **Server is running**"
+msgstr "🟢 **El servidor está en marcha**"
+
+#: apiv2.py:340
+msgid "Listening"
+msgstr "Escuchando"
+
+#: apiv2.py:341
+msgid "Uptime"
+msgstr "Tiempo activo"
+
+#: apiv2.py:342 apiv2.py:423
+msgid "API Keys"
+msgstr "Claves de API"
+
+#: apiv2.py:342
+msgid "{active_keys} active"
+msgstr "{active_keys} activas"
+
+#: apiv2.py:349
+msgid "Restart the API server."
+msgstr "Reiniciar el servidor de la API."
+
+#: apiv2.py:353
+msgid "✅ APIv2 server restarted."
+msgstr "✅ Servidor de APIv2 reiniciado."
+
+#: apiv2.py:355
+msgid "❌ Failed to restart. Check logs."
+msgstr "❌ No se pudo reiniciar. Revisa los logs."
+
+#: apiv2.py:361
+msgid "Manage API keys."
+msgstr "Gestionar las claves de API."
+
+#: apiv2.py:365
+msgid "Create a new API key. The key will be sent via DM."
+msgstr "Crear una clave de API nueva. Se envía por MD."
+
+#: apiv2.py:368
+msgid "❌ Key name must contain only letters, numbers, dashes or underscores."
+msgstr ""
+"❌ El nombre de la clave solo puede tener letras, números, guiones y guiones "
+"bajos."
+
+#: apiv2.py:373
+msgid "❌ A key named `{name}` already exists."
+msgstr "❌ Ya existe una clave llamada `{name}`."
+
+#: apiv2.py:379
+msgid "🔑 New API Key Created"
+msgstr "🔑 Nueva clave de API creada"
+
+#: apiv2.py:380
+msgid ""
+"**Name:** `{name}`\n"
+"**Token:** ||`{token}`||\n"
+"\n"
+"Use in header: `Authorization: Bearer <token>`\n"
+"\n"
+"⚠️ **Save this token now. You can view it again with** `[p]apiv2 key show`**, but keep it secret.**"
+msgstr ""
+"**Nombre:** `{name}`\n"
+"**Token:** ||`{token}`||\n"
+"\n"
+"Úsalo en la cabecera: `Authorization: Bearer <token>`\n"
+"\n"
+"⚠️ **Guarda este token ahora. Puedes volver a verlo con** `[p]apiv2 key show`**, pero mantenlo en secreto.**"
+
+#: apiv2.py:388
+msgid "✅ Key `{name}` created. Check your DMs for the token."
+msgstr "✅ Clave `{name}` creada. Mira tus MD para ver el token."
+
+#: apiv2.py:392
+msgid ""
+"✅ Key `{name}` created.\n"
+"Token: ||`{token}`||\n"
+"⚠️ **Delete this message after saving the token!**"
+msgstr ""
+"✅ Clave `{name}` creada.\n"
+"Token: ||`{token}`||\n"
+"⚠️ **¡Borra este mensaje después de guardar el token!**"
+
+#: apiv2.py:399
+msgid "Revoke an API key (immediate effect)."
+msgstr "Revocar una clave de API (efecto inmediato)."
+
+#: apiv2.py:402
+msgid "✅ Key `{name}` revoked. It can no longer be used."
+msgstr "✅ Clave `{name}` revocada. Ya no se puede usar."
+
+#: apiv2.py:404 apiv2.py:434 apiv2.py:459
+msgid "❌ Key `{name}` not found."
+msgstr "❌ No se encontró la clave `{name}`."
+
+#: apiv2.py:408
+msgid "List all API keys."
+msgstr "Listar todas las claves de API."
+
+#: apiv2.py:411
+msgid "No API keys configured. Create one with `[p]apiv2 key create <name>`."
+msgstr "No hay claves de API. Crea una con `[p]apiv2 key create <nombre>`."
+
+#: apiv2.py:419
+msgid " — rate: {rate_limit}/min"
+msgstr " — límite: {rate_limit}/min"
+
+#: apiv2.py:420
+msgid "{status} **{name}** — created: {created} — last used: {last}{rl}"
+msgstr "{status} **{name}** — creada: {created} — último uso: {last}{rl}"
+
+#: apiv2.py:431
+msgid "Show the token for a key (sent via DM)."
+msgstr "Mostrar el token de una clave (se envía por MD)."
+
+#: apiv2.py:439
+msgid "🔑 API Key: {name}"
+msgstr "🔑 Clave de API: {name}"
+
+#: apiv2.py:440
+msgid "**Token:** ||`{token}`||"
+msgstr "**Token:** ||`{token}`||"
+
+#: apiv2.py:444
+msgid "✅ Token for `{name}` sent to your DMs."
+msgstr "✅ Token de `{name}` enviado por MD."
+
+#: apiv2.py:446
+msgid "❌ I can't send you a DM. Please enable DMs from server members."
+msgstr ""
+"❌ No puedo enviarte MD. Activa los mensajes directos de miembros del "
+"servidor."
+
+#: apiv2.py:450
+msgid ""
+"Set a custom rate limit for a key (requests/min).\n"
+"\n"
+"        Use 0 or omit to reset to the global default (200/min).\n"
+"        "
+msgstr ""
+"Fijar un límite propio para una clave (peticiones/min).\n"
+"\n"
+"        Usa 0 u omítelo para volver al valor global (200/min).\n"
+"        "
+
+#: apiv2.py:465
+msgid "✅ Key `{name}` rate limit reset to global default (200/min)."
+msgstr "✅ Límite de la clave `{name}` devuelto al valor global (200/min)."
+
+#: apiv2.py:467
+msgid "✅ Key `{name}` rate limit set to **{limit}** requests/min."
+msgstr "✅ Límite de la clave `{name}` fijado en **{limit}** peticiones/min."
+
+#: apiv2.py:473
+msgid "Manage outgoing webhooks."
+msgstr "Gestionar los webhooks salientes."
+
+#: apiv2.py:477
+msgid ""
+"Create an outgoing webhook.\n"
+"\n"
+"        Events: member_join, member_remove, member_ban, member_unban, message\n"
+"        "
+msgstr ""
+"Crear un webhook saliente.\n"
+"\n"
+"        Eventos: member_join, member_remove, member_ban, member_unban, message\n"
+"        "
+
+#: apiv2.py:482
+msgid "❌ URL must start with `http://` or `https://`."
+msgstr "❌ La URL debe empezar por `http://` o `https://`."
+
+#: apiv2.py:487
+msgid ""
+"❌ Specify at least one event.\n"
+"Supported: {join}"
+msgstr ""
+"❌ Indica al menos un evento.\n"
+"Disponibles: {join}"
+
+#: apiv2.py:495
+msgid ""
+"❌ Invalid events: {join}\n"
+"Supported: {join2}"
+msgstr ""
+"❌ Eventos no válidos: {join}\n"
+"Disponibles: {join2}"
+
+#: apiv2.py:502
+msgid "❌ Webhook `{name}` already exists."
+msgstr "❌ El webhook `{name}` ya existe."
+
+#: apiv2.py:507
+msgid "🔗 Webhook Created"
+msgstr "🔗 Webhook creado"
+
+#: apiv2.py:508
+msgid ""
+"**Name:** `{name}`\n"
+"**URL:** `{url}`\n"
+"**Events:** {join}\n"
+"**Secret:** ||`{secret}`||\n"
+"\n"
+"Use the secret to verify HMAC-SHA256 signatures.\n"
+"Header: `X-APIv2-Signature: sha256=<hex>`"
+msgstr ""
+"**Nombre:** `{name}`\n"
+"**URL:** `{url}`\n"
+"**Eventos:** {join}\n"
+"**Secreto:** ||`{secret}`||\n"
+"\n"
+"Usa el secreto para verificar las firmas HMAC-SHA256.\n"
+"Cabecera: `X-APIv2-Signature: sha256=<hex>`"
+
+#: apiv2.py:517
+msgid "✅ Webhook `{name}` created. Signing secret sent to your DMs."
+msgstr "✅ Webhook `{name}` creado. El secreto de firma se ha enviado por MD."
+
+#: apiv2.py:520
+msgid ""
+"✅ Webhook `{name}` created.\n"
+"Secret: ||`{secret}`||\n"
+"⚠️ Save the secret and delete this message!"
+msgstr ""
+"✅ Webhook `{name}` creado.\n"
+"Secreto: ||`{secret}`||\n"
+"⚠️ ¡Guarda el secreto y borra este mensaje!"
+
+#: apiv2.py:527
+msgid "Delete an outgoing webhook."
+msgstr "Borrar un webhook saliente."
+
+#: apiv2.py:530
+msgid "✅ Webhook `{name}` deleted."
+msgstr "✅ Webhook `{name}` borrado."
+
+#: apiv2.py:532 apiv2.py:561
+msgid "❌ Webhook `{name}` not found."
+msgstr "❌ No se encontró el webhook `{name}`."
+
+#: apiv2.py:536
+msgid "List all outgoing webhooks."
+msgstr "Listar los webhooks salientes."
+
+#: apiv2.py:539
+msgid "No webhooks configured. Create one with `[p]apiv2 webhook create`."
+msgstr "No hay webhooks. Crea uno con `[p]apiv2 webhook create`."
+
+#: apiv2.py:546
+msgid " (guild: {guild_id})"
+msgstr " (servidor: {guild_id})"
+
+#: apiv2.py:547
+msgid ""
+"{status} **{name}** → `{url}`\n"
+"   Events: {evts}{guild}"
+msgstr ""
+"{status} **{name}** → `{url}`\n"
+"   Eventos: {evts}{guild}"
+
+#: apiv2.py:550
+msgid "Outgoing Webhooks"
+msgstr "Webhooks salientes"
+
+#: apiv2.py:558
+msgid "Send a test ping to a webhook."
+msgstr "Enviar un ping de prueba a un webhook."
+
+#: apiv2.py:564
+msgid "✅ Test ping to `{name}` — response: **{result}**"
+msgstr "✅ Ping de prueba a `{name}` — respuesta: **{result}**"
+
+#: apiv2.py:566
+msgid "⚠️ Test ping to `{name}` — error response: **{result}**"
+msgstr "⚠️ Ping de prueba a `{name}` — respuesta de error: **{result}**"
+
+#: apiv2.py:568
+msgid "❌ Test ping to `{name}` failed: {result}"
+msgstr "❌ Falló el ping de prueba a `{name}`: {result}"
+
+#: apiv2.py:574
+msgid "Configure API server settings."
+msgstr "Configurar el servidor de la API."
+
+#: apiv2.py:578
+msgid "Change the API server port. Requires restart."
+msgstr "Cambiar el puerto del servidor de la API. Requiere reiniciar."
+
+#: apiv2.py:580
+msgid "❌ Port must be between 1024 and 65535."
+msgstr "❌ El puerto debe estar entre 1024 y 65535."
+
+#: apiv2.py:583
+msgid "✅ Port set to `{port}`. Run `[p]apiv2 restart` to apply."
+msgstr ""
+"✅ Puerto fijado en `{port}`. Ejecuta `[p]apiv2 restart` para aplicarlo."
+
+#: apiv2.py:587
+msgid "Change the API server bind address. Requires restart."
+msgstr ""
+"Cambiar la dirección de escucha del servidor de la API. Requiere reiniciar."
+
+#: apiv2.py:589
+msgid "✅ Host set to `{host}`. Run `[p]apiv2 restart` to apply."
+msgstr "✅ Host fijado en `{host}`. Ejecuta `[p]apiv2 restart` para aplicarlo."

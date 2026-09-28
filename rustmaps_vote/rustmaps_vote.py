@@ -28,6 +28,9 @@ from .models import (
 )
 from .views import VoteView
 from .dashboard_integration import DashboardIntegration
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("RustMapsVote", __file__)
 
 logger = logging.getLogger("red.killerbite95.rustmaps_vote")
 
@@ -35,8 +38,9 @@ URL_PATTERN = re.compile(r"rustmaps\.com/map/(\d+)_(\d+)")
 API_BASE = "https://api.rustmaps.com"
 
 
+@cog_i18n(_)
 class RustMapsVote(DashboardIntegration, commands.Cog):
-    """Votación de mapas de Rust usando rustmaps.com. By Killerbite95"""
+    """Rust map voting using rustmaps.com. By Killerbite95"""
 
     __author__ = "Killerbite95"
     __version__ = "1.0.0"
@@ -102,8 +106,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
         match = URL_PATTERN.search(url)
         if not match:
             raise ValueError(
-                "URL no válida. Debe tener el formato "
-                "`https://rustmaps.com/map/<size>_<seed>`."
+                _("Invalid URL. It must look like `https://rustmaps.com/map/<size>_<seed>`.")
             )
         return int(match.group(1)), int(match.group(2))
 
@@ -111,7 +114,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
         """Fetch raw map data from the RustMaps API v4."""
         api_key = await self.config.api_key()
         if not api_key:
-            raise ValueError("La API key de RustMaps no está configurada.")
+            raise ValueError(_("The RustMaps API key is not set."))
         if self.session is None:
             self.session = aiohttp.ClientSession()
 
@@ -124,16 +127,16 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
                 if response.status == 200:
                     return await response.json()
                 if response.status == 401:
-                    raise ValueError("API key inválida.")
+                    raise ValueError(_("Invalid API key."))
                 if response.status == 404:
-                    raise ValueError("Mapa no encontrado.")
+                    raise ValueError(_("Map not found."))
                 if response.status == 409:
-                    raise ValueError("El mapa todavía se está generando, inténtalo más tarde.")
-                raise ValueError(f"Error de la API de RustMaps (HTTP {response.status}).")
+                    raise ValueError(_("The map is still being generated, try again later."))
+                raise ValueError(_("RustMaps API error (HTTP {status}).").format(status=response.status))
         except asyncio.TimeoutError:
-            raise ValueError("Tiempo de espera agotado al contactar con RustMaps.")
+            raise ValueError(_("Timed out while contacting RustMaps."))
         except aiohttp.ClientError as exc:
-            raise ValueError(f"Error de red al contactar con RustMaps: {exc}")
+            raise ValueError(_("Network error while contacting RustMaps: {exc}").format(exc=exc))
 
     async def fetch_map_from_url(self, url: str) -> MapInfo:
         """Resolve a rustmaps URL into a MapInfo (map_id is assigned later)."""
@@ -170,39 +173,39 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
 
     def build_vote_embed(self, map_info: MapInfo, total_maps: int) -> discord.Embed:
         embed = discord.Embed(
-            title=f"🗺️ Mapa {map_info.map_id}",
+            title=_("🗺️ Map {map_id}").format(map_id=map_info.map_id),
             color=discord.Color.blue(),
         )
         if map_info.map_type:
-            embed.description = f"**Tipo:** {map_info.map_type}"
+            embed.description = _("**Type:** {map_type}").format(map_type=map_info.map_type)
 
-        embed.add_field(name="🌱 Seed", value=f"`{map_info.seed}`", inline=True)
-        embed.add_field(name="📏 Size", value=f"`{map_info.size}`", inline=True)
+        embed.add_field(name=_("🌱 Seed"), value=f"`{map_info.seed}`", inline=True)
+        embed.add_field(name=_("📏 Size"), value=f"`{map_info.size}`", inline=True)
         if map_info.total_monuments:
             embed.add_field(
-                name="🏛️ Monumentos", value=str(map_info.total_monuments), inline=True
+                name=_("🏛️ Monuments"), value=str(map_info.total_monuments), inline=True
             )
 
         biomes = map_info.biomes_display()
         if biomes:
-            embed.add_field(name="🌍 Biomas", value=biomes, inline=False)
+            embed.add_field(name=_("🌍 Biomes"), value=biomes, inline=False)
 
         terrain = map_info.terrain_display()
         if terrain:
-            embed.add_field(name="🏔️ Terreno", value=terrain, inline=False)
+            embed.add_field(name=_("🏔️ Terrain"), value=terrain, inline=False)
 
         if map_info.land_percentage is not None:
             embed.add_field(
-                name="🗺️ Tierra firme", value=f"{map_info.land_percentage}%", inline=True
+                name=_("🗺️ Land"), value=f"{map_info.land_percentage}%", inline=True
             )
 
         monuments = map_info.relevant_monuments_display()
         if monuments:
-            embed.add_field(name="📍 Monumentos", value=monuments, inline=False)
+            embed.add_field(name=_("📍 Monuments"), value=monuments, inline=False)
 
         embed.add_field(
-            name="🔗 Ver mapa completo",
-            value=f"[rustmaps.com]({map_info.url})",
+            name=_("🔗 See full map"),
+            value=_("[rustmaps.com]({url})").format(url=map_info.url),
             inline=False,
         )
 
@@ -214,30 +217,24 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
         elif map_info.image_url:
             embed.set_image(url=map_info.image_url)
 
-        embed.set_footer(text=f"RustMaps Vote • {total_maps} mapas en esta votación")
+        embed.set_footer(text=_("RustMaps Vote • {total_maps} maps in this vote").format(total_maps=total_maps))
         return embed
 
     def build_results_embed(self, session: VoteSession) -> discord.Embed:
         embed = discord.Embed(
-            title="🗳️ Votación de mapas de Rust",
-            description="Pulsa el botón con el número del mapa que prefieras.",
+            title=_("🗳️ Rust map vote"),
+            description=_("Press the button with the number of the map you prefer."),
             color=discord.Color.blurple(),
         )
         for m in session.maps:
             embed.add_field(
-                name=f"Mapa {m.map_id}",
-                value=(
-                    f"🌱 Seed: `{m.seed}` • 📏 Size: `{m.size}`\n"
-                    f"🗳️ **{m.vote_count}** voto(s) • [Ver mapa]({m.url})"
-                ),
+                name=_("Map {map_id}").format(map_id=m.map_id),
+                value=_("🌱 Seed: `{seed}` • 📏 Size: `{size}`\n🗳️ **{vote_count}** vote(s) • [See map]({url})").format(seed=m.seed, size=m.size, vote_count=m.vote_count, url=m.url),
                 inline=False,
             )
         votes = session.max_votes_per_user
         embed.set_footer(
-            text=(
-                f"Tienes {votes} voto(s) por persona • "
-                f"{session.total_voters} votante(s) hasta ahora"
-            )
+            text=_("{votes} vote(s) per person • {total_voters} voter(s) so far").format(votes=votes, total_voters=session.total_voters)
         )
         return embed
 
@@ -246,47 +243,44 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
         winner = ranking[0] if ranking else None
         embed = discord.Embed(color=discord.Color.gold())
         if not winner or session.total_votes == 0:
-            embed.title = "🏁 Votación finalizada"
-            embed.description = "No se registró ningún voto."
+            embed.title = _("🏁 Vote finished")
+            embed.description = _("No votes were cast.")
             return embed
 
-        embed.title = f"🏆 ¡Gana el Mapa {winner.map_id}!"
+        embed.title = _("🏆 Map {map_id} wins!").format(map_id=winner.map_id)
         embed.add_field(
-            name="🥇 Ganador",
-            value=(
-                f"**Mapa {winner.map_id}** — Seed `{winner.seed}`, Size `{winner.size}`\n"
-                f"🗳️ {winner.vote_count} voto(s)\n[Ver mapa]({winner.url})"
-            ),
+            name=_("🥇 Winner"),
+            value=_("**Map {map_id}** — Seed `{seed}`, Size `{size}`\n🗳️ {vote_count} vote(s)\n[See map]({url})").format(map_id=winner.map_id, seed=winner.seed, size=winner.size, vote_count=winner.vote_count, url=winner.url),
             inline=False,
         )
-        medals = ["🥈 2º lugar", "🥉 3er lugar"]
+        medals = [_("🥈 2nd place"), _("🥉 3rd place")]
         for medal, m in zip(medals, ranking[1:3]):
             embed.add_field(
                 name=medal,
-                value=f"Mapa {m.map_id} — {m.vote_count} voto(s)",
+                value=_("Map {map_id} — {vote_count} vote(s)").format(map_id=m.map_id, vote_count=m.vote_count),
                 inline=False,
             )
         embed.set_footer(
-            text=f"{session.total_votes} voto(s) de {session.total_voters} votante(s)"
+            text=_("{total_votes} vote(s) from {total_voters} voter(s)").format(total_votes=session.total_votes, total_voters=session.total_voters)
         )
         return embed
 
     def build_add_confirm_embed(self, map_info: MapInfo, map_count: int) -> discord.Embed:
         embed = discord.Embed(
-            title="✅ Mapa añadido",
+            title=_("✅ Map added"),
             color=discord.Color.green(),
         )
         lines = [
-            f"🌱 Seed: `{map_info.seed}`",
-            f"📏 Size: `{map_info.size}`",
+            _("🌱 Seed: `{seed}`").format(seed=map_info.seed),
+            _("📏 Size: `{size}`").format(size=map_info.size),
         ]
         if map_info.map_type:
-            lines.append(f"🏷️ Tipo: {map_info.map_type}")
+            lines.append(_("🏷️ Type: {map_type}").format(map_type=map_info.map_type))
         if map_info.total_monuments:
-            lines.append(f"🏛️ Monumentos: {map_info.total_monuments}")
-        lines.append(f"🗺️ Mapas en la sesión: **{map_count}/{MAX_MAPS}**")
+            lines.append(_("🏛️ Monuments: {total_monuments}").format(total_monuments=map_info.total_monuments))
+        lines.append(_("🗺️ Maps in the session: **{map_count}/{MAX_MAPS}**").format(map_count=map_count, MAX_MAPS=MAX_MAPS))
         embed.add_field(
-            name=f"Mapa {map_info.map_id} añadido correctamente",
+            name=_("Map {map_id} added").format(map_id=map_info.map_id),
             value="\n".join(lines),
             inline=False,
         )
@@ -316,7 +310,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     @commands.guild_only()
     @commands.hybrid_group(name="votemap")
     async def votemap(self, ctx: commands.Context) -> None:
-        """Votaciones de mapas de Rust usando rustmaps.com."""
+        """Rust map votes using rustmaps.com."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(ctx.command)
 
@@ -324,7 +318,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     @app_commands.describe(key="Tu API key de RustMaps (v4)")
     async def setapi(self, ctx: commands.Context, key: str) -> None:
-        """Configura la API key global de RustMaps."""
+        """Set the global RustMaps API key."""
         await self.config.api_key.set(key.strip())
         # Try to remove the message so the key isn't left visible in chat.
         if ctx.message and ctx.guild:
@@ -332,19 +326,19 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
                 await ctx.message.delete()
             except discord.HTTPException:
                 pass
-        await ctx.send("✅ API key de RustMaps configurada.", ephemeral=True)
+        await ctx.send(_("✅ RustMaps API key set."), ephemeral=True)
 
     @votemap.command(name="maxvotes")
     @checks.admin_or_permissions(administrator=True)
     @app_commands.describe(amount="Número de votos por persona (mínimo 1)")
     async def maxvotes(self, ctx: commands.Context, amount: int) -> None:
-        """Define cuántos mapas puede votar cada persona por votación (por defecto 1)."""
+        """Set how many maps each person can vote for per vote (default 1)."""
         if amount < 1:
-            await ctx.send("❌ El número de votos debe ser al menos 1.", ephemeral=True)
+            await ctx.send(_("❌ The number of votes must be at least 1."), ephemeral=True)
             return
         if amount > MAX_MAPS:
             await ctx.send(
-                f"❌ El número de votos no puede superar el máximo de mapas ({MAX_MAPS}).",
+                _("❌ The number of votes can't exceed the maximum number of maps ({MAX_MAPS}).").format(MAX_MAPS=MAX_MAPS),
                 ephemeral=True,
             )
             return
@@ -357,7 +351,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
             if await self.config.guild(ctx.guild).vote_session_active():
                 await self._update_voting_message(ctx.guild, session)
         await ctx.send(
-            f"✅ Cada persona podrá votar **{amount}** mapa(s) por votación.",
+            _("✅ Each person can vote for **{amount}** map(s) per vote.").format(amount=amount),
             ephemeral=True,
         )
 
@@ -365,18 +359,17 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     @app_commands.describe(url="URL del mapa en rustmaps.com")
     async def add(self, ctx: commands.Context, url: str) -> None:
-        """Añade un mapa a la votación actual."""
+        """Add a map to the current vote."""
         if await self.config.guild(ctx.guild).vote_session_active():
             await ctx.send(
-                "❌ Ya hay una votación en curso. Termínala con `[p]votemap end` "
-                "antes de añadir más mapas.",
+                _("❌ A vote is already running. End it with `[p]votemap end` before adding more maps."),
                 ephemeral=True,
             )
             return
 
         if not await self.config.api_key():
             await ctx.send(
-                "❌ Configura primero la API key con `[p]votemap setapi <key>`.",
+                _("❌ Set the API key first with `[p]votemap setapi <key>`."),
                 ephemeral=True,
             )
             return
@@ -399,12 +392,12 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
             )
 
         if session.has_duplicate(map_info.size, map_info.seed):
-            await ctx.send("❌ Ese mapa ya está en la votación.", ephemeral=True)
+            await ctx.send(_("❌ That map is already in the vote."), ephemeral=True)
             return
 
         if not session.add_map(map_info):
             await ctx.send(
-                f"❌ Has alcanzado el máximo de {MAX_MAPS} mapas por votación.",
+                _("❌ You reached the maximum of {MAX_MAPS} maps per vote.").format(MAX_MAPS=MAX_MAPS),
                 ephemeral=True,
             )
             return
@@ -416,72 +409,69 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     @app_commands.describe(map_id="Número del mapa a quitar")
     async def remove(self, ctx: commands.Context, map_id: int) -> None:
-        """Quita un mapa de la votación actual (antes de empezar)."""
+        """Remove a map from the current vote (before it starts)."""
         if await self.config.guild(ctx.guild).vote_session_active():
             await ctx.send(
-                "❌ No puedes quitar mapas con una votación en curso. Usa `[p]votemap end`.",
+                _("❌ You can't remove maps while a vote is running. Use `[p]votemap end`."),
                 ephemeral=True,
             )
             return
 
         session = await self.load_session(ctx.guild)
         if session is None or not session.maps:
-            await ctx.send("❌ No hay ninguna votación en preparación.", ephemeral=True)
+            await ctx.send(_("❌ No vote is being prepared."), ephemeral=True)
             return
 
         if not session.remove_map(map_id):
-            await ctx.send(f"❌ No existe el mapa número {map_id}.", ephemeral=True)
+            await ctx.send(_("❌ Map number {map_id} does not exist.").format(map_id=map_id), ephemeral=True)
             return
 
         if not session.maps:
             await self.clear_session(ctx.guild)
-            await ctx.send("✅ Mapa quitado. La votación quedó vacía y se canceló.")
+            await ctx.send(_("✅ Map removed. The vote was empty and has been cancelled."))
             return
 
         await self.save_session(ctx.guild, session)
         await ctx.send(
-            f"✅ Mapa quitado. Quedan **{len(session.maps)}** mapa(s) "
-            "(renumerados del 1 en adelante)."
+            _("✅ Map removed. **{count}** map(s) left (renumbered from 1).").format(count=len(session.maps))
         )
 
     @votemap.command(name="list")
     async def list_maps(self, ctx: commands.Context) -> None:
-        """Muestra los mapas de la votación actual."""
+        """Show the maps of the current vote."""
         session = await self.load_session(ctx.guild)
         if session is None or not session.maps:
-            await ctx.send("ℹ️ No hay ninguna votación activa o en preparación.", ephemeral=True)
+            await ctx.send(_("ℹ️ There is no active or prepared vote."), ephemeral=True)
             return
 
         active = await self.config.guild(ctx.guild).vote_session_active()
         embed = discord.Embed(
-            title="🗺️ Mapas en la votación",
+            title=_("🗺️ Maps in the vote"),
             color=discord.Color.blue(),
         )
         for m in session.maps:
-            value = f"🌱 Seed: `{m.seed}` • 📏 Size: `{m.size}` • [Ver mapa]({m.url})"
+            value = _("🌱 Seed: `{seed}` • 📏 Size: `{size}` • [See map]({url})").format(seed=m.seed, size=m.size, url=m.url)
             if active:
-                value += f"\n🗳️ {m.vote_count} voto(s)"
-            embed.add_field(name=f"Mapa {m.map_id}", value=value, inline=False)
-        state = "En curso" if active else "En preparación"
+                value += _("\n🗳️ {vote_count} vote(s)").format(vote_count=m.vote_count)
+            embed.add_field(name=_("Map {map_id}").format(map_id=m.map_id), value=value, inline=False)
+        state = _("Running") if active else _("Being prepared")
         embed.set_footer(
-            text=f"Estado: {state} • {len(session.maps)}/{MAX_MAPS} mapas "
-            f"• {session.max_votes_per_user} voto(s) por persona"
+            text=_("Status: {state} • {count}/{MAX_MAPS} maps • {max_votes_per_user} vote(s) per person").format(state=state, count=len(session.maps), MAX_MAPS=MAX_MAPS, max_votes_per_user=session.max_votes_per_user)
         )
         await ctx.send(embed=embed)
 
     @votemap.command(name="start")
     @checks.admin_or_permissions(administrator=True)
     async def start(self, ctx: commands.Context) -> None:
-        """Inicia la votación con embeds y botones."""
+        """Start the vote with embeds and buttons."""
         if await self.config.guild(ctx.guild).vote_session_active():
-            await ctx.send("❌ Ya hay una votación en curso.", ephemeral=True)
+            await ctx.send(_("❌ A vote is already running."), ephemeral=True)
             return
 
         session = await self.load_session(ctx.guild)
         if session is None or len(session.maps) < MIN_MAPS:
             await ctx.send(
-                f"❌ Necesitas al menos {MIN_MAPS} mapas para empezar. "
-                "Añádelos con `[p]votemap add <url>`.",
+                _("❌ You need at least {MIN_MAPS} maps to start. Add them with `[p]votemap add <url>`.").format(MIN_MAPS=MIN_MAPS),
                 ephemeral=True,
             )
             return
@@ -520,19 +510,19 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
         await self.config.guild(ctx.guild).vote_session_active.set(True)
 
         if channel.id != ctx.channel.id:
-            await ctx.send(f"✅ ¡Votación iniciada en {channel.mention}!", ephemeral=True)
+            await ctx.send(_("✅ Vote started in {channel}!").format(channel=channel.mention), ephemeral=True)
         else:
-            await ctx.send("✅ ¡Votación iniciada!", ephemeral=True)
+            await ctx.send(_("✅ Vote started!"), ephemeral=True)
 
     @votemap.command(name="end")
     @checks.admin_or_permissions(administrator=True)
     async def end(self, ctx: commands.Context) -> None:
-        """Termina la votación, limpia los mensajes anteriores y anuncia al ganador."""
+        """End the vote, clean up the previous messages and announce the winner."""
         async with self._get_lock(ctx.guild.id):
             session = await self.load_session(ctx.guild)
             active = await self.config.guild(ctx.guild).vote_session_active()
             if session is None or not active:
-                await ctx.send("❌ No hay ninguna votación en curso.", ephemeral=True)
+                await ctx.send(_("❌ No vote is running."), ephemeral=True)
                 return
 
             session.ended_at = datetime.utcnow()
@@ -562,7 +552,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
 
         await channel.send(embed=embed)
         if channel.id != ctx.channel.id:
-            await ctx.send("✅ Votación finalizada.", ephemeral=True)
+            await ctx.send(_("✅ Vote finished."), ephemeral=True)
 
     async def _disable_voting_message(
         self, guild: discord.Guild, session: VoteSession
@@ -591,20 +581,20 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     @votemap.command(name="cancel")
     @checks.admin_or_permissions(administrator=True)
     async def cancel(self, ctx: commands.Context) -> None:
-        """Cancela la votación o la preparación actual sin anunciar ganador."""
+        """Cancel the current vote or preparation without announcing a winner."""
         session = await self.load_session(ctx.guild)
         if session is None:
-            await ctx.send("ℹ️ No hay ninguna votación que cancelar.", ephemeral=True)
+            await ctx.send(_("ℹ️ There is no vote to cancel."), ephemeral=True)
             return
         if await self.config.guild(ctx.guild).vote_session_active():
             await self._disable_voting_message(ctx.guild, session)
         await self.clear_session(ctx.guild)
-        await ctx.send("🗑️ Votación cancelada.")
+        await ctx.send(_("🗑️ Vote cancelled."))
 
     @votemap.command(name="settings")
     @checks.admin_or_permissions(administrator=True)
     async def settings(self, ctx: commands.Context) -> None:
-        """Muestra la configuración de las votaciones."""
+        """Show the vote settings."""
         guild_conf = await self.config.guild(ctx.guild).all()
         api_set = bool(await self.config.api_key())
         session = await self.load_session(ctx.guild)
@@ -615,31 +605,27 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
             else None
         )
 
-        embed = discord.Embed(title="⚙️ Configuración de RustMaps Vote", color=discord.Color.blurple())
-        embed.add_field(name="🔑 API key", value="✅ Configurada" if api_set else "❌ Sin configurar", inline=True)
+        embed = discord.Embed(title=_("⚙️ RustMaps Vote settings"), color=discord.Color.blurple())
+        embed.add_field(name=_("🔑 API key"), value=_("✅ Set") if api_set else _("❌ Not set"), inline=True)
         embed.add_field(
-            name="🗳️ Votos por persona",
+            name=_("🗳️ Votes per person"),
             value=str(guild_conf["max_votes_per_user"]),
             inline=True,
         )
         embed.add_field(
-            name="📢 Canal de votación",
-            value=channel.mention if channel else "Canal donde se usa `start`",
+            name=_("📢 Vote channel"),
+            value=channel.mention if channel else _("Channel where `start` is used"),
             inline=True,
         )
         if session:
-            state = "En curso" if guild_conf["vote_session_active"] else "En preparación"
+            state = _("Running") if guild_conf["vote_session_active"] else _("Being prepared")
             embed.add_field(
-                name="📊 Sesión actual",
-                value=(
-                    f"Estado: **{state}**\n"
-                    f"Mapas: **{len(session.maps)}/{MAX_MAPS}**\n"
-                    f"Votantes: **{session.total_voters}**"
-                ),
+                name=_("📊 Current session"),
+                value=_("Status: **{state}**\nMaps: **{count}/{MAX_MAPS}**\nVoters: **{total_voters}**").format(state=state, count=len(session.maps), MAX_MAPS=MAX_MAPS, total_voters=session.total_voters),
                 inline=False,
             )
         else:
-            embed.add_field(name="📊 Sesión actual", value="Ninguna", inline=False)
+            embed.add_field(name=_("📊 Current session"), value=_("None"), inline=False)
         await ctx.send(embed=embed)
 
     @votemap.command(name="setchannel")
@@ -648,14 +634,14 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     async def setchannel(
         self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None
     ) -> None:
-        """Define el canal por defecto de las votaciones."""
+        """Set the default channel for votes."""
         if channel:
             await self.config.guild(ctx.guild).vote_channel_id.set(channel.id)
-            await ctx.send(f"✅ Las votaciones se publicarán en {channel.mention}.", ephemeral=True)
+            await ctx.send(_("✅ Votes will be posted in {channel}.").format(channel=channel.mention), ephemeral=True)
         else:
             await self.config.guild(ctx.guild).vote_channel_id.set(None)
             await ctx.send(
-                "✅ Las votaciones se publicarán en el canal donde se ejecute `start`.",
+                _("✅ Votes will be posted in the channel where `start` is run."),
                 ephemeral=True,
             )
 
@@ -669,6 +655,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
         custom_id = (interaction.data or {}).get("custom_id", "")
         if not custom_id.startswith("rustmaps_vote:vote:"):
             return
+        await set_contextual_locales_from_guild(self.bot, interaction.guild)
 
         parts = custom_id.split(":")
         if len(parts) != 4:
@@ -688,19 +675,18 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
             active = await self.config.guild(guild).vote_session_active()
             if session is None or not active or session.session_id != session_id:
                 await interaction.response.send_message(
-                    "⚠️ Esta votación ya ha terminado.", ephemeral=True
+                    _("⚠️ This vote has already ended."), ephemeral=True
                 )
                 return
 
             action = session.toggle_vote(interaction.user.id, map_id)
 
             if action == "invalid":
-                await interaction.response.send_message("❌ Mapa no válido.", ephemeral=True)
+                await interaction.response.send_message(_("❌ Invalid map."), ephemeral=True)
                 return
             if action == "limit":
                 await interaction.response.send_message(
-                    f"⚠️ Ya has usado todos tus votos ({session.max_votes_per_user}). "
-                    "Pulsa de nuevo un mapa que ya votaste para liberar un voto.",
+                    _("⚠️ You already used all your votes ({max_votes_per_user}). Press a map you already voted for again to free a vote.").format(max_votes_per_user=session.max_votes_per_user),
                     ephemeral=True,
                 )
                 return
@@ -710,9 +696,9 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
 
         if action == "added":
             await interaction.response.send_message(
-                f"✅ Has votado por el **Mapa {map_id}**.", ephemeral=True
+                _("✅ You voted for **Map {map_id}**.").format(map_id=map_id), ephemeral=True
             )
         else:  # removed
             await interaction.response.send_message(
-                f"↩️ Has retirado tu voto del **Mapa {map_id}**.", ephemeral=True
+                _("↩️ You removed your vote from **Map {map_id}**.").format(map_id=map_id), ephemeral=True
             )
