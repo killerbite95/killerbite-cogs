@@ -21,7 +21,7 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | **autoprune** | Borra automaticamente los creditos de los usuarios que siguen baneados |
 | **blackjack** | Blackjack card game for Discord |
 | **colacoins** | Virtual currency system with leaderboards |
-| **day_counter_cog** | Counts days since/until events |
+| **day_counter_cog** | Contadores de dias y cuentas atras con embeds, hitos y canal contador |
 | **gameservermonitor** | Monitors game servers (CS2, Minecraft, DayZ, Valheim, ARK, TF2, L4D2, 7DTD, Palworld, etc.) with live embeds, slash commands, and interactive buttons |
 | **listroles** | Lists server roles and their members |
 | **maptrack** | Obsoleto: integrado en GameServerMonitor (`!gsmalerts`) |

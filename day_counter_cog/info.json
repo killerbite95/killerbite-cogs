@@ -2,6 +2,15 @@
     "author": [
         "Killerbite95"
     ],
-    "end_user_data_statement": "Este cog almacena la fecha de inicio del contador por servidor.",
-    "description": "Cuenta de días desde una fecha."
+    "end_user_data_statement": "Este cog guarda las fechas de los contadores de cada servidor y el ID de quien creo cada uno.",
+    "description": "Varios contadores por servidor (dias desde una fecha o cuenta atras hasta una fecha), embeds con desglose y progreso, anuncios de hitos y un canal que se renombra con el numero de dias. Comandos hibridos (!dias o /dias) y pagina de dashboard.",
+    "name": "DayCounter",
+    "short": "Contadores de dias y cuentas atras con embeds, hitos y canal contador.",
+    "min_bot_version": "3.5.0",
+    "tags": [
+        "utility",
+        "counter",
+        "days",
+        "countdown"
+    ]
 }
