@@ -520,7 +520,7 @@ class PlayerHistory:
         
         # Agrupar entradas por intervalos de tiempo
         interval_minutes = (hours * 60) // width
-        buckets: List[List[PlayerHistoryEntry]] = [[] for _ in range(width)]
+        buckets: List[List[PlayerHistoryEntry]] = [[] for _i in range(width)]
         
         now = datetime.utcnow()
         start_time = now - timedelta(hours=hours)
