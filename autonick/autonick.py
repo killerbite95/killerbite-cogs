@@ -160,8 +160,7 @@ class AutoNick(DashboardIntegration, commands.Cog):
         """Main AutoNick command group.
         Use `/autonick help` to see every subcommand.
         """
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help("autonick")
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
 
     @autonick.command(name="setchannel")
     @checks.admin_or_permissions(manage_guild=True)

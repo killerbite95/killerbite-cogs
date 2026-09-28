@@ -311,8 +311,7 @@ class RustMapsVote(DashboardIntegration, commands.Cog):
     @commands.hybrid_group(name="votemap")
     async def votemap(self, ctx: commands.Context) -> None:
         """Rust map votes using rustmaps.com."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
 
     @votemap.command(name="setapi")
     @checks.admin_or_permissions(administrator=True)

@@ -719,8 +719,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def suggest_admin(self, ctx: commands.Context):
         """Suggestion administration commands."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
     
     @suggest_admin.command(name="resync")
     async def suggest_resync(self, ctx: commands.Context):
@@ -836,8 +835,7 @@ class SimpleSuggestions(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def suggest_set(self, ctx: commands.Context):
         """Suggestion system configuration."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help(ctx.command)
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
     
     @suggest_set.command(name="channel")
     async def set_channel(self, ctx: commands.Context, channel: discord.TextChannel):

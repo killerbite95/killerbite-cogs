@@ -458,8 +458,7 @@ class Blackjack(DashboardIntegration, commands.Cog):
         """Blackjack admin commands.
         Configure how cards are shown using emojis.
         """
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help()
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
 
     @bjadmin.command(name="setrank")
     async def set_rank(self, ctx, rank: str, emoji: str):

@@ -2166,8 +2166,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     @checks.admin_or_permissions(administrator=True)
     async def gsm_alerts(self, ctx: commands.Context) -> None:
         """Extra per-server alerts: map changes and outages (replaces MapTrack)."""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help()
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
 
     @gsm_alerts.command(name="map")
     async def gsm_alerts_map(

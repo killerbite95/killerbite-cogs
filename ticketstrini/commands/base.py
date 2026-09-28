@@ -31,8 +31,7 @@ class BaseCommands(MixinMeta):
     @commands.guild_only()
     async def ticket(self, ctx: commands.Context):
         """Manage your ticket (add/remove users, close, claim, notes...)"""
-        if ctx.invoked_subcommand is None:
-            await ctx.send_help()
+        # Sin subcomando Red ya muestra la ayuda (autohelp); enviarla aqui la duplicaba.
 
     @ticket.command(name="add", description=_("Add a user to your ticket"))
     @app_commands.describe(user="The Discord user you want to add to your ticket")
