@@ -32,6 +32,9 @@ from .constants import (
 )
 from .engine import EngineMixin
 from .views import DYNAMIC_ITEMS
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("TriniSecurity", __file__)
 
 log = logging.getLogger("red.killerbite95.trinisecurity")
 
@@ -49,8 +52,9 @@ DEFAULT_ANTINUKE = {
 MAX_SETTINGS_LOG = 500
 
 
+@cog_i18n(_)
 class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.Cog):
-    """Capa defensiva de La Trini: auditoria, autoridad, roles protegidos, anti-nuke e incidentes."""
+    """La Trini's defense layer: audit, authority, protected roles, anti-nuke and incidents."""
 
     __author__ = "Killerbite95"
     __version__ = "1.0.0"
@@ -83,7 +87,7 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
-        return f"{pre}\n\nVersion: {self.__version__}"
+        return _("{pre}\n\nVersion: {version}").format(pre=pre, version=self.__version__)
 
     async def red_delete_data_for_user(self, *, requester, user_id: int) -> None:
         for guild_id, data in (await self.config.all_guilds()).items():
@@ -100,7 +104,7 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
                         e["actor"] = None
                     if e.get("target") == user_id:
                         e["target"] = None
-                        e["target_name"] = "usuario eliminado"
+                        e["target_name"] = _("deleted user")
 
     async def cog_check(self, ctx: commands.Context) -> bool:
         # Los slash de discord.py NO heredan los checks del grupo en los
@@ -152,12 +156,12 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
         watch = await self.config.guild(guild).watch()
         if watch.get("enabled") and module == "Security":
             embed = discord.Embed(
-                title="⚙️ Cambio en la configuracion de Security",
+                title=_("⚙️ Security settings change"),
                 color=discord.Color.blurple(),
                 description=f"**{action}**\n{detail[:1000]}",
                 timestamp=discord.utils.utcnow(),
             )
-            embed.add_field(name="Por", value=actor.mention if actor else "sistema")
+            embed.add_field(name=_("By"), value=actor.mention if actor else "sistema")
             await self._send_log(guild, embed)
 
     # ------------------------------------------------------------------
@@ -188,16 +192,16 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
         watch = await g.watch()
         bonuses: List[Tuple[int, str]] = []
         if protected:
-            bonuses.append((5, f"Protected Roles activo ({len(protected)})"))
+            bonuses.append((5, _("Protected Roles active ({count})").format(count=len(protected))))
         if antinuke.get("enabled"):
-            bonuses.append((5, "Anti-Nuke activo"))
+            bonuses.append((5, _("Anti-Nuke active")))
         if watch.get("enabled"):
-            bonuses.append((3, "Security Watch activo"))
+            bonuses.append((3, _("Security Watch active")))
         backups = self.bot.get_cog("TriniBackups")
         if backups is not None and hasattr(backups, "is_scheduled"):
             try:
                 if await backups.is_scheduled(guild):
-                    bonuses.append((2, "Backups automaticos programados"))
+                    bonuses.append((2, _("Automatic backups scheduled")))
             except Exception:
                 pass
         hints: List[str] = []
@@ -231,13 +235,13 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
     async def compare_with_backup(self, guild: discord.Guild, before_ts: Optional[float]) -> Tuple[List[discord.Embed], Optional[str]]:
         backups = self.bot.get_cog("TriniBackups")
         if backups is None:
-            return [], "Trini Backups no esta cargado."
+            return [], _("Trini Backups isn't loaded.")
         if before_ts:
             meta = await backups.latest_snapshot_before(guild, before_ts)
         else:
             meta = await backups.latest_snapshot_before(guild, time.time() + 1)
         if meta is None:
-            return [], "No hay ningun backup previo con el que comparar."
+            return [], _("There's no previous backup to compare with.")
         embeds = await backups.diff_current_embeds(guild, meta["id"])
         return embeds, None
 
@@ -249,6 +253,7 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
     async def on_trini_settings_change(self, guild: discord.Guild, module: str, actor, action: str, detail: str) -> None:
         if module == "Security":
             return
+        await set_contextual_locales_from_guild(self.bot, guild)
         try:
             await self._settings_log(guild, actor, action, detail, module=module)
         except Exception:
@@ -259,6 +264,7 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
         profiles = self.bot.get_cog("TriniProfiles")
         if profiles is None:
             return
+        await set_contextual_locales_from_guild(self.bot, guild)
         try:
             data = await profiles.get_profile(guild)
             if "security" not in data.get("modules", {}):
@@ -269,12 +275,12 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
                 async with self.config.guild(guild).watch() as watch:
                     if not watch.get("enabled"):
                         watch["enabled"] = True
-                        changes.append("Security Watch activado")
+                        changes.append(_("Security Watch enabled"))
             if level == "strict":
                 async with self.config.guild(guild).antinuke() as an:
                     if not an.get("enabled"):
                         an["enabled"] = True
-                        changes.append("Anti-Nuke activado")
+                        changes.append(_("Anti-Nuke enabled"))
             if changes:
                 await self._settings_log(guild, actor, "profile_security_level", f"{profile_key}/{level}: " + ", ".join(changes))
         except Exception:
@@ -294,13 +300,13 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
         if same_guild and "authority" in data:
             await g.authority.set(data["authority"])
         elif "authority" in data:
-            warnings.append("Security: la autoridad (Extra Owners/Trusted Admins) no se importa entre servidores distintos.")
+            warnings.append(_("Security: authority (Extra Owners/Trusted Admins) isn't imported between different servers."))
         prot = await g.protected_roles()
         cleaned = {k: v for k, v in prot.items() if k.isdigit() and guild.get_role(int(k))}
         if len(cleaned) != len(prot):
             await g.protected_roles.set(cleaned)
-            warnings.append(f"Security: {len(prot) - len(cleaned)} roles protegidos no existen en este servidor.")
-        await self._settings_log(guild, None, "import", "Configuracion importada via Profiles")
+            warnings.append(_("Security: {value} protected roles don't exist in this server.").format(value=len(prot) - len(cleaned)))
+        await self._settings_log(guild, None, "import", _("Settings imported via Profiles"))
         return warnings
 
     # ------------------------------------------------------------------
@@ -314,6 +320,7 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
             self._restricted[guild_id] = {u: t for u, t in self._restricted[guild_id].items() if t > now}
         for guild in list(self.bot.guilds):
             try:
+                await set_contextual_locales_from_guild(self.bot, guild)
                 g = self.config.guild(guild)
                 temp = await g.temp_whitelist()
                 if temp:
@@ -358,38 +365,31 @@ class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.C
                        "everyone_change", "overwrite_update", "channel_delete", "channel_create", "webhook_create",
                        "bot_add", "guild_update", "member_role_update")
         embed = discord.Embed(
-            title="🔐 Security Digest",
+            title=_("🔐 Security Digest"),
             color=discord.Color.blurple(),
-            description=f"**Periodo:** <t:{int(start)}:d> — <t:{int(now)}:d>",
+            description=_("**Period:** <t:{start}:d> — <t:{now}:d>").format(start=int(start), now=int(now)),
         )
         embed.add_field(
-            name="Actividad",
-            value=(
-                f"Cambios administrativos: **{count(*admin_types)}**\n"
-                f"Cambios criticos: **{sum(1 for e in events if e['severity'] == 'critical')}**\n"
-                f"Roles modificados: **{count('role_update', 'admin_grant', 'dangerous_permission', 'everyone_change')}**\n"
-                f"Bots añadidos: **{count('bot_add')}**\n"
-                f"Webhooks creados: **{count('webhook_create')}**\n"
-                f"Cambios de configuracion: **{len(settings)}**"
-            ),
+            name=_("Activity"),
+            value=_("Administrative changes: **{value}**\nCritical changes: **{value2}**\nRoles modified: **{value3}**\nBots added: **{value4}**\nWebhooks created: **{value5}**\nSettings changes: **{count}**").format(value=count(*admin_types), value2=sum(1 for e in events if e['severity'] == 'critical'), value3=count('role_update', 'admin_grant', 'dangerous_permission', 'everyone_change'), value4=count('bot_add'), value5=count('webhook_create'), count=len(settings)),
             inline=False,
         )
         embed.add_field(
-            name="Anti-Nuke",
-            value=f"{len(incidents)} activacion(es)" + (
-                f" · {sum(1 for i in incidents if i['level'] == 'quarantine')} quarantine" if incidents else ""
+            name=_("Anti-Nuke"),
+            value=_("{count} activation(s)").format(count=len(incidents)) + (
+                _(" · {value} quarantine").format(value=sum(1 for i in incidents if i['level'] == 'quarantine')) if incidents else ""
             ),
             inline=True,
         )
-        embed.add_field(name="Protected Roles", value=f"{count('protected_role_violation')} intento(s) bloqueados", inline=True)
+        embed.add_field(name=_("Protected Roles"), value=_("{value} attempt(s) blocked").format(value=count('protected_role_violation')), inline=True)
         history = [h for h in await self.config.guild(guild).health_history() if h["ts"] >= start - 86400]
         if history:
             first, last = history[0], history[-1]
-            embed.add_field(name="Security Health", value=f"{first['score']} → **{last['score']}**", inline=False)
+            embed.add_field(name=_("Security Health"), value=f"{first['score']} → **{last['score']}**", inline=False)
             resolved = [f for f in first.get("findings", []) if f not in last.get("findings", [])]
             new = [f for f in last.get("findings", []) if f not in first.get("findings", [])]
             if resolved:
-                embed.add_field(name="Principales mejoras", value="\n".join(f"• {f}" for f in resolved[:6])[:1024], inline=False)
+                embed.add_field(name=_("Main improvements"), value="\n".join(f"• {f}" for f in resolved[:6])[:1024], inline=False)
             if new:
-                embed.add_field(name="Nuevos riesgos", value="\n".join(f"• {f}" for f in new[:6])[:1024], inline=False)
+                embed.add_field(name=_("New risks"), value="\n".join(f"• {f}" for f in new[:6])[:1024], inline=False)
         return embed

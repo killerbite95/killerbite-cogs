@@ -1,6 +1,14 @@
 from __future__ import annotations
 
 import discord
+from redbot.core.i18n import Translator
+
+_ = Translator("TriniSecurity", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
 
 # Permisos considerados "administrativos".
 ADMIN_PERMS = (
@@ -26,25 +34,25 @@ EVERYONE_DANGEROUS = ADMIN_PERMS + (
 )
 
 PERM_LABELS = {
-    "administrator": "Administrator",
-    "manage_guild": "Manage Guild",
-    "manage_roles": "Manage Roles",
-    "manage_channels": "Manage Channels",
-    "manage_webhooks": "Manage Webhooks",
-    "ban_members": "Ban Members",
-    "kick_members": "Kick Members",
-    "mention_everyone": "Mention @everyone",
-    "manage_messages": "Manage Messages",
-    "manage_threads": "Manage Threads",
-    "moderate_members": "Timeout Members",
-    "manage_nicknames": "Manage Nicknames",
-    "manage_events": "Manage Events",
-    "manage_expressions": "Manage Expressions",
-    "view_audit_log": "View Audit Log",
-    "create_instant_invite": "Create Invite",
-    "view_channel": "View Channel",
-    "send_messages": "Send Messages",
-    "connect": "Connect",
+    "administrator": N_("Administrator"),
+    "manage_guild": N_("Manage Guild"),
+    "manage_roles": N_("Manage Roles"),
+    "manage_channels": N_("Manage Channels"),
+    "manage_webhooks": N_("Manage Webhooks"),
+    "ban_members": N_("Ban Members"),
+    "kick_members": N_("Kick Members"),
+    "mention_everyone": N_("Mention @everyone"),
+    "manage_messages": N_("Manage Messages"),
+    "manage_threads": N_("Manage Threads"),
+    "moderate_members": N_("Timeout Members"),
+    "manage_nicknames": N_("Manage Nicknames"),
+    "manage_events": N_("Manage Events"),
+    "manage_expressions": N_("Manage Expressions"),
+    "view_audit_log": N_("View Audit Log"),
+    "create_instant_invite": N_("Create Invite"),
+    "view_channel": N_("View Channel"),
+    "send_messages": N_("Send Messages"),
+    "connect": N_("Connect"),
 }
 
 
@@ -53,7 +61,7 @@ PERM_ALIASES = {"read_messages": "view_channel", "manage_emojis": "manage_expres
 
 def perm_label(name: str) -> str:
     name = PERM_ALIASES.get(name, name)
-    return PERM_LABELS.get(name, name.replace("_", " ").title())
+    return _(PERM_LABELS[name]) if name in PERM_LABELS else name.replace("_", " ").title()
 
 
 # Umbrales anti-nuke por accion: (por minuto, por hora). 0 = sin limite.
@@ -88,32 +96,36 @@ DEFAULT_SCORES = {
 }
 
 ACTION_LABELS = {
-    "channel_delete": "Eliminar canal",
-    "channel_create": "Crear canal",
-    "channel_update": "Editar canal",
-    "role_delete": "Eliminar rol",
-    "role_create": "Crear rol",
-    "role_update": "Editar rol",
-    "admin_grant": "Otorgar Administrator",
-    "everyone_change": "Cambiar @everyone",
-    "dangerous_permission": "Permiso peligroso",
-    "webhook_create": "Crear webhook",
-    "webhook_delete": "Eliminar webhook",
-    "ban": "Ban",
-    "unban": "Unban",
-    "kick": "Kick",
-    "bot_add": "Añadir bot",
-    "prune": "Prune",
-    "member_role_update": "Cambio de roles",
-    "protected_role_violation": "Violacion de rol protegido",
-    "overwrite_update": "Cambio de permisos de canal",
-    "invite_create": "Crear invitacion",
-    "guild_update": "Editar servidor",
-    "hierarchy_change": "Cambio de jerarquia",
-    "quarantine": "Quarantine",
-    "lockdown": "Lockdown",
-    "security": "Trini Security",
+    "channel_delete": N_("Delete channel"),
+    "channel_create": N_("Create channel"),
+    "channel_update": N_("Edit channel"),
+    "role_delete": N_("Delete role"),
+    "role_create": N_("Create role"),
+    "role_update": N_("Edit role"),
+    "admin_grant": N_("Grant Administrator"),
+    "everyone_change": N_("Change @everyone"),
+    "dangerous_permission": N_("Dangerous permission"),
+    "webhook_create": N_("Create webhook"),
+    "webhook_delete": N_("Delete webhook"),
+    "ban": N_("Ban"),
+    "unban": N_("Unban"),
+    "kick": N_("Kick"),
+    "bot_add": N_("Add bot"),
+    "prune": N_("Prune"),
+    "member_role_update": N_("Role change"),
+    "protected_role_violation": N_("Protected role violation"),
+    "overwrite_update": N_("Channel permission change"),
+    "invite_create": N_("Create invite"),
+    "guild_update": N_("Edit server"),
+    "hierarchy_change": N_("Hierarchy change"),
+    "quarantine": N_("Quarantine"),
+    "lockdown": N_("Lockdown"),
+    "security": N_("Trini Security"),
 }
+
+def action_label(kind: str) -> str:
+    return _(ACTION_LABELS[kind]) if kind in ACTION_LABELS else kind
+
 
 # Niveles de respuesta escalonada.
 DEFAULT_LEVELS = {"alert": 30, "block": 50, "quarantine": 70}
@@ -134,11 +146,11 @@ AUTHORITY_LEVELS = {
 }
 
 AUTHORITY_LABELS = {
-    "owner": "👑 Server Owner",
-    "extra_owner": "🔱 Extra Owner",
-    "trusted_admin": "🛡 Trusted Admin",
-    "admin": "Administrador",
-    "member": "Miembro",
+    "owner": N_("👑 Server Owner"),
+    "extra_owner": N_("🔱 Extra Owner"),
+    "trusted_admin": N_("🛡 Trusted Admin"),
+    "admin": N_("Administrator"),
+    "member": N_("Member"),
 }
 
 WHITELIST_TYPES = ("users", "roles", "bots", "webhooks", "channels", "invites")
@@ -147,3 +159,7 @@ COLOR_OK = discord.Color.green()
 COLOR_WARN = discord.Color.orange()
 COLOR_CRIT = discord.Color.red()
 COLOR_INFO = discord.Color.from_rgb(52, 152, 219)
+
+
+def authority_label(level: str) -> str:
+    return _(AUTHORITY_LABELS[level]) if level in AUTHORITY_LABELS else level

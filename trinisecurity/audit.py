@@ -14,6 +14,9 @@ from typing import Any, Dict, Iterable, List, Sequence
 import discord
 
 from .constants import ADMIN_PERMS, EVERYONE_DANGEROUS, perm_label
+from redbot.core.i18n import Translator
+
+_ = Translator("TriniSecurity", __file__)
 
 log = logging.getLogger("red.killerbite95.trinisecurity.audit")
 
@@ -46,7 +49,7 @@ class AuditReport:
         extra = len(items) - len(shown)
         detail = detail_prefix + "\n".join(f"• {i}" for i in shown)
         if extra > 0:
-            detail += f"\n• … y {extra} mas"
+            detail += _("\n• … and {extra} more").format(extra=extra)
         self.add(severity, title, detail, min(cap, per_item * len(items)), category)
 
     @property
@@ -118,7 +121,7 @@ def permission_origins(member: discord.Member) -> Dict[str, List[str]]:
     origins: Dict[str, List[str]] = {}
     if member.guild.owner_id == member.id:
         for p in EVERYONE_DANGEROUS:
-            origins.setdefault(p, []).append("Server Owner")
+            origins.setdefault(p, []).append(_("Server Owner"))
     for role in member.roles:
         for p in EVERYONE_DANGEROUS:
             if getattr(role.permissions, p):
@@ -146,18 +149,18 @@ async def run_guild_audit(
     if ev_admin:
         report.add(
             "critical",
-            "@everyone tiene permisos administrativos",
+            _("@everyone has administrative permissions"),
             ", ".join(perm_label(p) for p in ev_admin),
             min(30, 15 * len(ev_admin)),
             "everyone",
         )
     if everyone.permissions.mention_everyone:
-        report.add("critical", "@everyone puede mencionar @everyone/@here", "", 10, "everyone")
+        report.add("critical", _("@everyone can mention @everyone/@here"), "", 10, "everyone")
     other = granted(everyone.permissions, [p for p in EVERYONE_DANGEROUS if p not in ADMIN_PERMS and p != "mention_everyone"])
     if other:
         report.add(
             "warning",
-            "@everyone tiene permisos de moderacion",
+            _("@everyone has moderation permissions"),
             ", ".join(perm_label(p) for p in other),
             min(10, 3 * len(other)),
             "everyone",
@@ -173,12 +176,12 @@ async def run_guild_audit(
             dangerous_ow.append(f"{channel.mention}: {', '.join(perm_label(p) for p in bad)}")
         if not isinstance(channel, discord.CategoryChannel) and channel.permissions_for(everyone).create_instant_invite and channel_visible_to_everyone(channel):
             invite_channels.append(channel.mention)
-    report.capped("critical", "Overwrites peligrosos para @everyone", dangerous_ow, 10, 20, "channels")
+    report.capped("critical", _("Dangerous overwrites for @everyone"), dangerous_ow, 10, 20, "channels")
     if invite_channels:
-        shown = ", ".join(invite_channels[:8]) + (f" y {len(invite_channels) - 8} mas" if len(invite_channels) > 8 else "")
+        shown = ", ".join(invite_channels[:8]) + (_(" and {value} more").format(value=len(invite_channels) - 8) if len(invite_channels) > 8 else "")
         report.add(
             "warning",
-            f"@everyone puede crear invitaciones en {len(invite_channels)} canal(es)",
+            _("@everyone can create invites in {count} channel(s)").format(count=len(invite_channels)),
             shown,
             5,
             "everyone",
@@ -189,40 +192,40 @@ async def run_guild_audit(
     if len(adm) > 3:
         report.add(
             "warning",
-            f"{len(adm)} roles tienen Administrator",
+            _("{count} roles have Administrator").format(count=len(adm)),
             ", ".join(r.mention for r in adm[:15]),
             5,
             "roles",
         )
     elif adm:
-        report.add("info", f"{len(adm)} rol(es) con Administrator", ", ".join(r.mention for r in adm), 0, "roles")
+        report.add("info", _("{count} role(s) with Administrator").format(count=len(adm)), ", ".join(r.mention for r in adm), 0, "roles")
 
     webhook_roles = [r for r in guild.roles if r.permissions.manage_webhooks and not r.permissions.administrator and not r.managed]
     if len(webhook_roles) > 3:
         report.add(
             "warning",
-            f"{len(webhook_roles)} roles tienen Manage Webhooks",
+            _("{count} roles have Manage Webhooks").format(count=len(webhook_roles)),
             ", ".join(r.mention for r in webhook_roles[:15]),
             3,
             "roles",
         )
 
     mention_roles = [r for r in guild.roles if r.permissions.mention_everyone and not r.permissions.administrator and not r.is_default()]
-    report.capped("warning", "Roles que pueden mencionar @everyone", [r.mention for r in mention_roles], 2, 6, "roles")
+    report.capped("warning", _("Roles that can mention @everyone"), [r.mention for r in mention_roles], 2, 6, "roles")
 
     crit_esc, warn_esc = [], []
     for role in guild.roles:
         if role.is_default() or role.managed:
             continue
         for target, extra in escalations(role):
-            text = f"{role.mention} puede asignar {target.mention} ({', '.join(perm_label(p) for p in extra)})"
+            text = _("{role} can assign {target} ({join})").format(role=role.mention, target=target.mention, join=', '.join(perm_label(p) for p in extra))
             if "administrator" in extra:
                 crit_esc.append(text)
             else:
                 warn_esc.append(text)
-    report.capped("critical", "Escalada de privilegios posible", crit_esc, 10, 20, "roles",
-                  "Un rol con Manage Roles por encima de roles mas poderosos:\n")
-    report.capped("warning", "Roles gestionables con mas permisos", warn_esc, 3, 9, "roles")
+    report.capped("critical", _("Possible privilege escalation"), crit_esc, 10, 20, "roles",
+                  _("A role with Manage Roles above more powerful roles:\n"))
+    report.capped("warning", _("Manageable roles with more permissions"), warn_esc, 3, 9, "roles")
 
     prot = set(protected_roles)
     if profile_hints:
@@ -234,7 +237,7 @@ async def run_guild_audit(
             and not r.is_default()
             and any(h in r.name.lower() for h in profile_hints)
         ]
-        report.capped("info", "El perfil recomienda proteger estos roles", suggested, 2, 6, "roles")
+        report.capped("info", _("The profile recommends protecting these roles"), suggested, 2, 6, "roles")
 
     # --- Miembros ---
     stacked = []
@@ -243,8 +246,8 @@ async def run_guild_audit(
             continue
         admin_like = [r for r in member.roles if granted(r.permissions, ADMIN_PERMS) and not r.is_default()]
         if len(admin_like) >= 3:
-            stacked.append(f"{member.mention}: {len(admin_like)} roles administrativos")
-    report.capped("info", "Usuarios que acumulan roles administrativos", stacked, 0, 0, "users")
+            stacked.append(_("{member}: {count} administrative roles").format(member=member.mention, count=len(admin_like)))
+    report.capped("info", _("Users stacking administrative roles"), stacked, 0, 0, "users")
 
     # --- Bots ---
     bots_admin = [
@@ -253,8 +256,8 @@ async def run_guild_audit(
     ]
     report.capped(
         "warning",
-        f"{len(bots_admin)} bot(s) con Administrator",
-        [f"{b.mention} — revisa si realmente lo necesita" for b in bots_admin],
+        _("{count} bot(s) with Administrator").format(count=len(bots_admin)),
+        [_("{b} — check whether it really needs it").format(b=b.mention) for b in bots_admin],
         4,
         10,
         "bots",
@@ -267,7 +270,7 @@ async def run_guild_audit(
     ]
     report.capped(
         "info",
-        "Bots con muchos permisos administrativos",
+        _("Bots with many administrative permissions"),
         [f"{b.mention}: {', '.join(perm_label(p) for p in granted(b.guild_permissions, ADMIN_PERMS))}" for b in risky_bots],
         1,
         4,
@@ -283,24 +286,24 @@ async def run_guild_audit(
             if ch.id in whitelists.get("channels", []):
                 continue
             if channel_visible_to_everyone(ch):
-                leaks.append(f"{ch.mention} es visible para @everyone dentro de **{category.name}**")
+                leaks.append(_("{ch} is visible to @everyone inside **{category_name}**").format(ch=ch.mention, category_name=category.name))
             elif not ch.permissions_synced:
                 unsynced.append(f"{ch.mention} ({category.name})")
-    report.capped("critical", "Canales expuestos en categorias privadas", leaks, 8, 16, "channels")
-    report.capped("info", "Canales privados que no heredan permisos", unsynced, 1, 5, "channels")
+    report.capped("critical", _("Exposed channels in private categories"), leaks, 8, 16, "channels")
+    report.capped("info", _("Private channels not synced with their category"), unsynced, 1, 5, "channels")
 
     # --- Configuracion del servidor ---
     if guild.mfa_level == discord.MFALevel.disabled:
-        report.add("warning", "2FA no es obligatorio para moderadores", "Server Settings → Safety Setup → Require 2FA.", 5, "guild")
+        report.add("warning", _("2FA isn't required for moderators"), _("Server Settings → Safety Setup → Require 2FA."), 5, "guild")
     if guild.verification_level == discord.VerificationLevel.none:
-        report.add("info", "Nivel de verificacion: ninguno", "", 3, "guild")
+        report.add("info", _("Verification level: none"), "", 3, "guild")
 
     # --- Permisos de La Trini ---
     missing = [p for p in ("view_audit_log", "manage_roles", "manage_webhooks", "kick_members") if not getattr(me.guild_permissions, p)]
     if missing:
         report.add(
             "warning",
-            "Trini Security no tiene todos los permisos que necesita",
+            _("Trini Security doesn't have all the permissions it needs"),
             ", ".join(perm_label(p) for p in missing),
             5,
             "bot",
@@ -320,14 +323,14 @@ async def run_guild_audit(
                 if unknown:
                     report.capped(
                         "info",
-                        f"{len(unknown)} webhook(s) no incluidos en whitelist",
-                        [f"`{h.name}` en <#{h.channel_id}> (ID {h.id})" for h in unknown],
+                        _("{count} webhook(s) not whitelisted").format(count=len(unknown)),
+                        [_("`{name}` in <#{channel_id}> (ID {id})").format(name=h.name, channel_id=h.channel_id, id=h.id) for h in unknown],
                         1,
                         5,
                         "webhooks",
                     )
                 else:
-                    report.add("ok", "No se detectaron webhooks desconocidos", "", 0, "webhooks")
+                    report.add("ok", _("No unknown webhooks detected"), "", 0, "webhooks")
             except discord.HTTPException:
                 pass
         if me.guild_permissions.manage_guild:
@@ -339,8 +342,8 @@ async def run_guild_audit(
                 ]
                 report.capped(
                     "warning",
-                    f"{len(perma)} invitacion(es) permanentes",
-                    [f"`{i.code}` por {i.inviter.mention if i.inviter else '?'} · {i.uses} usos" for i in perma],
+                    _("{count} permanent invite(s)").format(count=len(perma)),
+                    [_("`{code}` by {value} · {uses} uses").format(code=i.code, value=i.inviter.mention if i.inviter else '?', uses=i.uses) for i in perma],
                     2,
                     6,
                     "invites",
@@ -361,5 +364,5 @@ async def run_guild_audit(
             continue
 
     if not report.findings:
-        report.add("ok", "No se detectaron problemas", "", 0)
+        report.add("ok", _("No problems detected"), "", 0)
     return report

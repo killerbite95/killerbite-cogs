@@ -1,0 +1,2082 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: trinisecurity\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: audit.py:52
+msgid ""
+"\n"
+"• … and {extra} more"
+msgstr ""
+"\n"
+"• … y {extra} mas"
+
+#: audit.py:124
+msgid "Server Owner"
+msgstr "Server Owner"
+
+#: audit.py:152
+msgid "@everyone has administrative permissions"
+msgstr "@everyone tiene permisos administrativos"
+
+#: audit.py:158
+msgid "@everyone can mention @everyone/@here"
+msgstr "@everyone puede mencionar @everyone/@here"
+
+#: audit.py:163
+msgid "@everyone has moderation permissions"
+msgstr "@everyone tiene permisos de moderacion"
+
+#: audit.py:179
+msgid "Dangerous overwrites for @everyone"
+msgstr "Overwrites peligrosos para @everyone"
+
+#: audit.py:181
+msgid " and {value} more"
+msgstr " y {value} mas"
+
+#: audit.py:184
+msgid "@everyone can create invites in {count} channel(s)"
+msgstr "@everyone puede crear invitaciones en {count} canal(es)"
+
+#: audit.py:195
+msgid "{count} roles have Administrator"
+msgstr "{count} roles tienen Administrator"
+
+#: audit.py:201
+msgid "{count} role(s) with Administrator"
+msgstr "{count} rol(es) con Administrator"
+
+#: audit.py:207
+msgid "{count} roles have Manage Webhooks"
+msgstr "{count} roles tienen Manage Webhooks"
+
+#: audit.py:214
+msgid "Roles that can mention @everyone"
+msgstr "Roles que pueden mencionar @everyone"
+
+#: audit.py:221
+msgid "{role} can assign {target} ({join})"
+msgstr "{role} puede asignar {target} ({join})"
+
+#: audit.py:226
+msgid "Possible privilege escalation"
+msgstr "Escalada de privilegios posible"
+
+#: audit.py:227
+msgid "A role with Manage Roles above more powerful roles:\n"
+msgstr "Un rol con Manage Roles por encima de roles mas poderosos:\n"
+
+#: audit.py:228
+msgid "Manageable roles with more permissions"
+msgstr "Roles gestionables con mas permisos"
+
+#: audit.py:240
+msgid "The profile recommends protecting these roles"
+msgstr "El perfil recomienda proteger estos roles"
+
+#: audit.py:249
+msgid "{member}: {count} administrative roles"
+msgstr "{member}: {count} roles administrativos"
+
+#: audit.py:250
+msgid "Users stacking administrative roles"
+msgstr "Usuarios que acumulan roles administrativos"
+
+#: audit.py:259
+msgid "{count} bot(s) with Administrator"
+msgstr "{count} bot(s) con Administrator"
+
+#: audit.py:260
+msgid "{b} — check whether it really needs it"
+msgstr "{b} — revisa si realmente lo necesita"
+
+#: audit.py:273
+msgid "Bots with many administrative permissions"
+msgstr "Bots con muchos permisos administrativos"
+
+#: audit.py:289
+msgid "{ch} is visible to @everyone inside **{category_name}**"
+msgstr "{ch} es visible para @everyone dentro de **{category_name}**"
+
+#: audit.py:292
+msgid "Exposed channels in private categories"
+msgstr "Canales expuestos en categorias privadas"
+
+#: audit.py:293
+msgid "Private channels not synced with their category"
+msgstr "Canales privados que no heredan permisos"
+
+#: audit.py:297
+msgid "2FA isn't required for moderators"
+msgstr "2FA no es obligatorio para moderadores"
+
+#: audit.py:297
+msgid "Server Settings → Safety Setup → Require 2FA."
+msgstr "Server Settings → Safety Setup → Require 2FA."
+
+#: audit.py:299
+msgid "Verification level: none"
+msgstr "Nivel de verificacion: ninguno"
+
+#: audit.py:306
+msgid "Trini Security doesn't have all the permissions it needs"
+msgstr "Trini Security no tiene todos los permisos que necesita"
+
+#: audit.py:326
+msgid "{count} webhook(s) not whitelisted"
+msgstr "{count} webhook(s) no incluidos en whitelist"
+
+#: audit.py:327
+msgid "`{name}` in <#{channel_id}> (ID {id})"
+msgstr "`{name}` en <#{channel_id}> (ID {id})"
+
+#: audit.py:333
+msgid "No unknown webhooks detected"
+msgstr "No se detectaron webhooks desconocidos"
+
+#: audit.py:345
+msgid "{count} permanent invite(s)"
+msgstr "{count} invitacion(es) permanentes"
+
+#: audit.py:346
+msgid "`{code}` by {value} · {uses} uses"
+msgstr "`{code}` por {value} · {uses} usos"
+
+#: audit.py:367
+msgid "No problems detected"
+msgstr "No se detectaron problemas"
+
+#: commands.py:85
+msgid ""
+"🔒 You need to be **{value}** in Trini Security for this (your level: "
+"{value2})."
+msgstr ""
+"🔒 Necesitas ser **{value}** en Trini Security para esto (tu nivel: "
+"{value2})."
+
+#: commands.py:92
+msgid ""
+"Server: **{guild_name}**\n"
+"Health Score: **{score} / 100**\n"
+"\n"
+"🔴 Critical risks: **{count}**\n"
+"🟠 Warnings: **{count2}**\n"
+"🔵 Notes: **{count3}**"
+msgstr ""
+"Servidor: **{guild_name}**\n"
+"Health Score: **{score} / 100**\n"
+"\n"
+"🔴 Riesgos criticos: **{count}**\n"
+"🟠 Advertencias: **{count2}**\n"
+"🔵 Observaciones: **{count3}**"
+
+#: commands.py:101
+msgid "{title} (cont.)"
+msgstr "{title} (cont.)"
+
+#: commands.py:107
+msgid "Page {i}/{count} · Trini Security"
+msgstr "Pagina {i}/{count} · Trini Security"
+
+#: commands.py:128
+msgid "Full server security audit."
+msgstr "Auditoria completa de seguridad del servidor."
+
+#: commands.py:135
+msgid "🔐 Security Audit"
+msgstr "🔐 Security Audit"
+
+#: commands.py:139
+msgid "Health Score with its penalties and bonuses."
+msgstr "Health Score con sus penalizaciones y mejoras."
+
+#: commands.py:149 security.py:388
+msgid "Security Health"
+msgstr "Security Health"
+
+#: commands.py:150
+msgid ""
+"# {score} / 100\n"
+"Base {value} · penalties -{penalty} · bonuses +{bonus}\n"
+"\n"
+msgstr ""
+"# {score} / 100\n"
+"Base {value} · penalizaciones -{penalty} · mejoras +{bonus}\n"
+"\n"
+
+#: commands.py:151
+msgid "No penalties."
+msgstr "Sin penalizaciones."
+
+#: commands.py:156
+msgid "+5 Protected Roles (`security protectedrole add`)"
+msgstr "+5 Protected Roles (`security protectedrole add`)"
+
+#: commands.py:158
+msgid "+5 Anti-Nuke (`security antinuke enable`)"
+msgstr "+5 Anti-Nuke (`security antinuke enable`)"
+
+#: commands.py:160
+msgid "+3 Security Watch (`security watch enable`)"
+msgstr "+3 Security Watch (`security watch enable`)"
+
+#: commands.py:162
+msgid "+2 Automatic backups (`backup schedule daily`)"
+msgstr "+2 Backups automaticos (`backup schedule daily`)"
+
+#: commands.py:164
+msgid "How to raise the score"
+msgstr "Como subir la puntuacion"
+
+#: commands.py:169
+msgid "A user's effective permissions and where they really come from."
+msgstr "Permisos efectivos de un usuario y su origen real."
+
+#: commands.py:180
+msgid "Effective permissions"
+msgstr "Permisos efectivos"
+
+#: commands.py:182
+msgid "Source"
+msgstr "Origen"
+
+#: commands.py:183 i18n_strings.py:55
+msgid "Trini Security"
+msgstr "Trini Security"
+
+#: commands.py:184
+msgid "Highest role"
+msgstr "Rol mas alto"
+
+#: commands.py:187
+msgid "Status"
+msgstr "Estado"
+
+#: commands.py:187
+msgid "🔒 In quarantine"
+msgstr "🔒 En quarantine"
+
+#: commands.py:191
+msgid "⚠️ Possible escalation"
+msgstr "⚠️ Posible escalada"
+
+#: commands.py:197
+msgid "Stacked administrative roles"
+msgstr "Roles administrativos acumulados"
+
+#: commands.py:202
+msgid "Role audit: permissions, hierarchy and roles it can modify."
+msgstr "Auditoria de un rol: permisos, jerarquia y roles que puede modificar."
+
+#: commands.py:205
+msgid "Members"
+msgstr "Miembros"
+
+#: commands.py:206
+msgid "Position"
+msgstr "Posicion"
+
+#: commands.py:207
+msgid "Managed"
+msgstr "Gestionado"
+
+#: commands.py:207
+msgid "yes (integration/bot)"
+msgstr "si (integracion/bot)"
+
+#: commands.py:208 commands.py:277
+msgid "Sensitive permissions"
+msgstr "Permisos sensibles"
+
+#: commands.py:212
+msgid "Can modify ({count})"
+msgstr "Puede modificar ({count})"
+
+#: commands.py:219
+msgid "🔴 Privilege escalation"
+msgstr "🔴 Escalada de privilegios"
+
+#: commands.py:225
+msgid "Can assign it"
+msgstr "Pueden asignarlo"
+
+#: commands.py:228
+msgid "🛡 Protected role"
+msgstr "🛡 Rol protegido"
+
+#: commands.py:233
+msgid "Channel audit: overwrites, visibility and sync."
+msgstr "Auditoria de un canal: overwrites, visibilidad y herencia."
+
+#: commands.py:236
+msgid "Visible to @everyone"
+msgstr "Visible para @everyone"
+
+#: commands.py:239
+msgid "Category"
+msgstr "Categoria"
+
+#: commands.py:240
+msgid "Synced with category"
+msgstr "Hereda permisos"
+
+#: commands.py:242
+msgid "🔴 Risk"
+msgstr "🔴 Riesgo"
+
+#: commands.py:242
+msgid "Channel visible to @everyone inside a private category."
+msgstr "Canal visible para @everyone dentro de una categoria privada."
+
+#: commands.py:252
+msgid "Overwrites ({count})"
+msgstr "Overwrites ({count})"
+
+#: commands.py:255
+msgid "Roles with access"
+msgstr "Roles con acceso"
+
+#: commands.py:262
+msgid "🟠 Administrative overwrites"
+msgstr "🟠 Overwrites administrativos"
+
+#: commands.py:267
+msgid "Bot audit: permissions, whitelist and who added it."
+msgstr "Auditoria de un bot: permisos, whitelist y quien lo añadio."
+
+#: commands.py:269
+msgid "That member isn't a bot."
+msgstr "Ese miembro no es un bot."
+
+#: commands.py:273 i18n_strings.py:12
+msgid "Administrator"
+msgstr "Administrador"
+
+#: commands.py:273
+msgid "✅ (check whether it needs it)"
+msgstr "✅ (revisa si lo necesita)"
+
+#: commands.py:274
+msgid "Whitelist"
+msgstr "Whitelist"
+
+#: commands.py:275
+msgid "Added"
+msgstr "Añadido"
+
+#: commands.py:280
+msgid "Integration role"
+msgstr "Rol de integracion"
+
+#: commands.py:284 commands.py:289
+msgid "Added by"
+msgstr "Añadido por"
+
+#: commands.py:297
+msgid "List the server's webhooks and their whitelist status."
+msgstr "Listar webhooks del servidor y su estado de whitelist."
+
+#: commands.py:301
+msgid "I need the **Manage Webhooks** permission."
+msgstr "Necesito el permiso **Manage Webhooks**."
+
+#: commands.py:304
+msgid "🟢 There are no webhooks in the server."
+msgstr "🟢 No hay webhooks en el servidor."
+
+#: commands.py:308
+msgid " by {user}"
+msgstr " por {user}"
+
+#: commands.py:311
+msgid "🪝 Webhooks ({count})"
+msgstr "🪝 Webhooks ({count})"
+
+#: commands.py:315
+msgid "List invites, flagging permanent ones."
+msgstr "Listar invitaciones, marcando las permanentes."
+
+#: commands.py:319
+msgid "I need the **Manage Server** permission."
+msgstr "Necesito el permiso **Manage Server**."
+
+#: commands.py:322
+msgid "There are no active invites."
+msgstr "No hay invitaciones activas."
+
+#: commands.py:327
+msgid "expires <t:{timestamp}:R>"
+msgstr "expira <t:{timestamp}:R>"
+
+#: commands.py:328
+msgid "{icon} `{code}` · {value} · {uses} uses · {exp}"
+msgstr "{icon} `{code}` · {value} · {uses} usos · {exp}"
+
+#: commands.py:330
+msgid "✉️ Invites ({count})"
+msgstr "✉️ Invitaciones ({count})"
+
+#: commands.py:334
+msgid "Security event timeline. E.g.: `security timeline 15m @user`."
+msgstr ""
+"Timeline de eventos de seguridad. Ej: `security timeline 15m @usuario`."
+
+#: commands.py:337
+msgid "Invalid period. E.g.: `15m`, `2h`, `1d`."
+msgstr "Periodo no valido. Ej: `15m`, `2h`, `1d`."
+
+#: commands.py:344
+msgid "No events in the last {value}."
+msgstr "Sin eventos en los ultimos {value}."
+
+#: commands.py:354
+msgid "🕒 Security Timeline · {value}"
+msgstr "🕒 Security Timeline · {value}"
+
+#: commands.py:354
+msgid "{count} events · {i}/{count2}"
+msgstr "{count} eventos · {i}/{count2}"
+
+#: commands.py:361
+msgid "Who changed the Security settings (and other Trini modules)."
+msgstr "Quien cambio la configuracion de Security (y de otros modulos Trini)."
+
+#: commands.py:364
+msgid "No changes recorded."
+msgstr "Sin cambios registrados."
+
+#: commands.py:370
+msgid "⚙️ Security Settings Audit"
+msgstr "⚙️ Security Settings Audit"
+
+#: commands.py:375
+msgid "Status of every Trini Security module."
+msgstr "Estado de todos los modulos de Trini Security."
+
+#: commands.py:379
+msgid "🔐 Trini Security · status"
+msgstr "🔐 Trini Security · estado"
+
+#: commands.py:380
+msgid "Alert channel"
+msgstr "Canal de alertas"
+
+#: commands.py:380
+msgid "❌ not set"
+msgstr "❌ sin configurar"
+
+#: commands.py:381
+msgid "Alert role"
+msgstr "Rol de alerta"
+
+#: commands.py:382 i18n_strings.py:54
+msgid "Lockdown"
+msgstr "Lockdown"
+
+#: commands.py:382
+msgid "🔴 ACTIVE"
+msgstr "🔴 ACTIVO"
+
+#: commands.py:382
+msgid "🟢 no"
+msgstr "🟢 no"
+
+#: commands.py:383
+msgid "Security Watch"
+msgstr "Security Watch"
+
+#: commands.py:384 security.py:378
+msgid "Anti-Nuke"
+msgstr "Anti-Nuke"
+
+#: commands.py:384
+msgid "{value} window {value2}"
+msgstr "{value} ventana {value2}"
+
+#: commands.py:385 security.py:384
+msgid "Protected Roles"
+msgstr "Protected Roles"
+
+#: commands.py:386
+msgid "Authority"
+msgstr "Authority"
+
+#: commands.py:386
+msgid "{count} Extra Owners · {count2} Trusted Admins"
+msgstr "{count} Extra Owners · {count2} Trusted Admins"
+
+#: commands.py:387
+msgid "Whitelists"
+msgstr "Whitelists"
+
+#: commands.py:388 i18n_strings.py:53
+msgid "Quarantine"
+msgstr "Quarantine"
+
+#: commands.py:389
+msgid "Open incidents"
+msgstr "Incidentes abiertos"
+
+#: commands.py:390
+msgid "Recorded events"
+msgstr "Eventos registrados"
+
+#: commands.py:392
+msgid "Last Health Score"
+msgstr "Ultimo Health Score"
+
+#: commands.py:394
+msgid "Without **View Audit Log**, Trini Security can't attribute actions."
+msgstr "Sin **View Audit Log** Trini Security no puede atribuir acciones."
+
+#: commands.py:403
+msgid "Incidents rebuilt by Anti-Nuke."
+msgstr "Incidentes reconstruidos por Anti-Nuke."
+
+#: commands.py:407
+msgid "View an incident."
+msgstr "Ver un incidente."
+
+#: commands.py:410 commands.py:436 commands.py:446 views.py:91 views.py:126
+msgid "Incident not found."
+msgstr "Incidente no encontrado."
+
+#: commands.py:418
+msgid "List recent incidents."
+msgstr "Listar incidentes recientes."
+
+#: commands.py:421
+msgid "🟢 No incidents recorded."
+msgstr "🟢 No hay incidentes registrados."
+
+#: commands.py:423
+msgid "`#{id}` <t:{start}:f> · <@{actor}> · {level} · {count} events{value}"
+msgstr "`#{id}` <t:{start}:f> · <@{actor}> · {level} · {count} eventos{value}"
+
+#: commands.py:423
+msgid " · closed"
+msgstr " · cerrado"
+
+#: commands.py:426
+msgid "📁 Incidents"
+msgstr "📁 Incidentes"
+
+#: commands.py:430
+msgid "Close an incident."
+msgstr "Cerrar un incidente."
+
+#: commands.py:439
+msgid "Incident #{incident_id} closed."
+msgstr "Incidente #{incident_id} cerrado."
+
+#: commands.py:443
+msgid "Generate a text report for an incident."
+msgstr "Generar informe en texto de un incidente."
+
+#: commands.py:455
+msgid "Weekly security summary."
+msgstr "Resumen semanal de seguridad."
+
+#: commands.py:459
+msgid "Enable the weekly digest (in the given channel or the alert channel)."
+msgstr "Activar el digest semanal (en el canal indicado o en el de alertas)."
+
+#: commands.py:466
+msgid "alert channel"
+msgstr "canal de alertas"
+
+#: commands.py:467
+msgid "📬 Weekly digest enabled."
+msgstr "📬 Digest semanal activado."
+
+#: commands.py:471
+msgid "Disable the weekly digest."
+msgstr "Desactivar el digest semanal."
+
+#: commands.py:477
+msgid "Weekly digest disabled."
+msgstr "Digest semanal desactivado."
+
+#: commands.py:481
+msgid "View the digest for the last N days."
+msgstr "Ver el digest de los ultimos N dias."
+
+#: commands.py:490
+msgid "General Trini Security settings."
+msgstr "Configuracion general de Trini Security."
+
+#: commands.py:494
+msgid "Security alert channel."
+msgstr "Canal de alertas de seguridad."
+
+#: commands.py:499
+msgid "Alert channel: {value}."
+msgstr "Canal de alertas: {value}."
+
+#: commands.py:503
+msgid "Role to mention on critical alerts."
+msgstr "Rol a mencionar en alertas criticas."
+
+#: commands.py:508
+msgid "Alert role: {value}."
+msgstr "Rol de alerta: {value}."
+
+#: commands.py:512
+msgid "Optional role added to users in quarantine."
+msgstr "Rol opcional que se añade a los usuarios en quarantine."
+
+#: commands.py:518
+msgid "Quarantine role: {value}."
+msgstr "Rol de quarantine: {value}."
+
+#: commands.py:522
+msgid "What to do with non-whitelisted bots (with Anti-Nuke enabled)."
+msgstr "Que hacer con bots no incluidos en whitelist (con Anti-Nuke activo)."
+
+#: commands.py:528
+msgid "Unauthorized bot policy: `{policy}`."
+msgstr "Politica de bots no autorizados: `{policy}`."
+
+#: commands.py:536
+msgid "Trust model: Owner, Extra Owners and Trusted Admins."
+msgstr "Modelo de confianza: Owner, Extra Owners y Trusted Admins."
+
+#: commands.py:540
+msgid "Add an Extra Owner (Owner only) or Trusted Admin (Extra Owner+)."
+msgstr "Añadir un Extra Owner (solo Owner) o Trusted Admin (Extra Owner+)."
+
+#: commands.py:542
+msgid "A bot can't be given authority."
+msgstr "No se puede dar autoridad a un bot."
+
+#: commands.py:551
+msgid "{member} is now **{value}**."
+msgstr "{member} ahora es **{value}**."
+
+#: commands.py:555
+msgid "Remove a user's authority."
+msgstr "Quitar autoridad a un usuario."
+
+#: commands.py:564
+msgid "That user has no authority in Trini Security."
+msgstr "Ese usuario no tiene autoridad en Trini Security."
+
+#: commands.py:570
+msgid "{member} no longer has authority in Trini Security."
+msgstr "{member} ya no tiene autoridad en Trini Security."
+
+#: commands.py:574
+msgid "List the trust hierarchy."
+msgstr "Listar la jerarquia de confianza."
+
+#: commands.py:576
+msgid "🔱 Authority"
+msgstr "🔱 Authority"
+
+#: commands.py:577 i18n_strings.py:56
+msgid "👑 Server Owner"
+msgstr "👑 Server Owner"
+
+#: commands.py:578
+msgid "🔱 Extra Owners"
+msgstr "🔱 Extra Owners"
+
+#: commands.py:579
+msgid "🛡 Trusted Admins"
+msgstr "🛡 Trusted Admins"
+
+#: commands.py:582
+msgid "Administrators without Trini authority"
+msgstr "Administradores sin autoridad Trini"
+
+#: commands.py:583
+msgid ""
+"Having Administrator in Discord doesn't make you a Trusted Admin in Trini "
+"Security."
+msgstr ""
+"Tener Administrator en Discord no implica ser Trusted Admin en Trini "
+"Security."
+
+#: commands.py:592
+msgid "Critical roles that only authorized users can manage."
+msgstr "Roles criticos que solo pueden gestionar usuarios autorizados."
+
+#: commands.py:596
+msgid "Protect a role."
+msgstr "Proteger un rol."
+
+#: commands.py:600
+msgid "@everyone and integration-managed roles can't be protected."
+msgstr ""
+"No se puede proteger @everyone ni roles gestionados por integraciones."
+
+#: commands.py:602
+msgid ""
+"⚠️ The role is above the bot: I can detect violations but not revert them."
+msgstr ""
+"⚠️ El rol esta por encima del bot: podre detectar violaciones pero no "
+"revertirlas."
+
+#: commands.py:613
+msgid "🛡 {role} is now a protected role."
+msgstr "🛡 {role} ahora es un rol protegido."
+
+#: commands.py:617
+msgid "Stop protecting a role."
+msgstr "Dejar de proteger un rol."
+
+#: commands.py:622 commands.py:657 commands.py:778
+msgid "That role isn't protected."
+msgstr "Ese rol no esta protegido."
+
+#: commands.py:624
+msgid "{role} is no longer protected."
+msgstr "{role} ya no esta protegido."
+
+#: commands.py:628
+msgid "List protected roles."
+msgstr "Listar roles protegidos."
+
+#: commands.py:631
+msgid "There are no protected roles. `security protectedrole add @role`"
+msgstr "No hay roles protegidos. `security protectedrole add @rol`"
+
+#: commands.py:635
+msgid "~~{rid}~~ (deleted)"
+msgstr "~~{rid}~~ (eliminado)"
+
+#: commands.py:636
+msgid "🛡 {name} · allowed: {join} · self: {get} · bots: {get2}"
+msgstr "🛡 {name} · allowed: {join} · self: {get} · bots: {get2}"
+
+#: commands.py:637
+msgid "🛡 Protected Roles"
+msgstr "🛡 Protected Roles"
+
+#: commands.py:648
+msgid ""
+"Configure a protected role. With no option it shows the settings.\n"
+"\n"
+"        - allowed: allowed levels, e.g. `extra_owner,trusted_admin`\n"
+"        - self_assign / bots / temporary_whitelist: true/false\n"
+"        - allow_user / allow_role: add or remove (toggle) an authorized user or role\n"
+"        "
+msgstr ""
+"Configurar un rol protegido. Sin opcion muestra la configuracion.\n"
+"\n"
+"        - allowed: niveles permitidos, ej. `extra_owner,trusted_admin`\n"
+"        - self_assign / bots / temporary_whitelist: true/false\n"
+"        - allow_user / allow_role: añade o quita (toggle) un usuario o rol autorizado\n"
+"        "
+
+#: commands.py:660
+msgid ""
+"Protected role: {role}\n"
+"\n"
+"**Allowed:**\n"
+msgstr ""
+"Rol protegido: {role}\n"
+"\n"
+"**Allowed:**\n"
+
+#: commands.py:661
+msgid ""
+"\n"
+"\n"
+"self_assign: `{get}`\n"
+"bots: `{get2}`\n"
+"temporary_whitelist: `{get3}`"
+msgstr ""
+"\n"
+"\n"
+"self_assign: `{get}`\n"
+"bots: `{get2}`\n"
+"temporary_whitelist: `{get3}`"
+
+#: commands.py:662
+msgid ""
+"\n"
+"Authorized users: {join}"
+msgstr ""
+"\n"
+"Usuarios autorizados: {join}"
+
+#: commands.py:663
+msgid ""
+"\n"
+"Authorized roles: {join}"
+msgstr ""
+"\n"
+"Roles autorizados: {join}"
+
+#: commands.py:669
+msgid "The value is missing."
+msgstr "Falta el valor."
+
+#: commands.py:676
+msgid "Valid levels: `extra_owner`, `trusted_admin`."
+msgstr "Niveles validos: `extra_owner`, `trusted_admin`."
+
+#: commands.py:684
+msgid "User not found."
+msgstr "Usuario no encontrado."
+
+#: commands.py:691
+msgid "Role not found."
+msgstr "Rol no encontrado."
+
+#: commands.py:695
+msgid "✅ {role}: `{option}` updated."
+msgstr "✅ {role}: `{option}` actualizado."
+
+#: commands.py:703
+msgid "Whitelists by type: users, roles, bots, webhooks, channels, invites."
+msgstr "Whitelists por tipo: users, roles, bots, webhooks, channels, invites."
+
+#: commands.py:723
+msgid "Add to a whitelist. E.g.: `security whitelist add bots @MyBot`."
+msgstr "Añadir a una whitelist. Ej: `security whitelist add bots @MiBot`."
+
+#: commands.py:728
+msgid "Couldn't understand the target."
+msgstr "No se pudo interpretar el objetivo."
+
+#: commands.py:732
+msgid "It was already whitelisted."
+msgstr "Ya estaba en la whitelist."
+
+#: commands.py:735
+msgid "✅ Added to the **{wtype}** whitelist: `{value}`."
+msgstr "✅ Añadido a la whitelist de **{wtype}**: `{value}`."
+
+#: commands.py:739
+msgid "Remove from a whitelist."
+msgstr "Quitar de una whitelist."
+
+#: commands.py:746
+msgid "It wasn't whitelisted."
+msgstr "No estaba en la whitelist."
+
+#: commands.py:749
+msgid "🗑 Removed from the **{wtype}** whitelist: `{value}`."
+msgstr "🗑 Eliminado de la whitelist de **{wtype}**: `{value}`."
+
+#: commands.py:753
+msgid "View every whitelist."
+msgstr "Ver todas las whitelists."
+
+#: commands.py:759
+msgid "📃 Whitelists"
+msgstr "📃 Whitelists"
+
+#: commands.py:765
+msgid "Temporary (protected roles)"
+msgstr "Temporales (roles protegidos)"
+
+#: commands.py:773
+msgid ""
+"Temporary whitelist for a protected role. E.g.: `security whitelist temp "
+"@Admin @Pepe 1h`."
+msgstr ""
+"Whitelist temporal de un rol protegido. Ej: `security whitelist temp @Admin "
+"@Pepe 1h`."
+
+#: commands.py:780
+msgid "That role doesn't allow a temporary whitelist."
+msgstr "Ese rol no admite whitelist temporal."
+
+#: commands.py:783
+msgid "Invalid duration (max 7d)."
+msgstr "Duracion no valida (maximo 7d)."
+
+#: commands.py:787
+msgid "⏳ {member} temporarily whitelisted for {role} for **{value}**."
+msgstr "⏳ {member} en whitelist temporal para {role} durante **{value}**."
+
+#: commands.py:795
+msgid "Monitoring of sensitive administrative changes."
+msgstr "Vigilancia de cambios administrativos sensibles."
+
+#: commands.py:799
+msgid "Enable Security Watch."
+msgstr "Activar Security Watch."
+
+#: commands.py:805
+msgid "👁 Security Watch enabled."
+msgstr "👁 Security Watch activado."
+
+#: commands.py:807
+msgid ""
+"\n"
+"⚠️ Set a channel: `security config logchannel #channel`."
+msgstr ""
+"\n"
+"⚠️ Configura un canal: `security config logchannel #canal`."
+
+#: commands.py:812
+msgid "Disable Security Watch."
+msgstr "Desactivar Security Watch."
+
+#: commands.py:818
+msgid "Security Watch disabled."
+msgstr "Security Watch desactivado."
+
+#: commands.py:822
+msgid "Watch level."
+msgstr "Nivel de vigilancia."
+
+#: commands.py:828
+msgid "Security Watch level: `{level}`."
+msgstr "Nivel de Security Watch: `{level}`."
+
+#: commands.py:836
+msgid "Nuke detection by thresholds and risk score."
+msgstr "Deteccion de nukes por thresholds y risk score."
+
+#: commands.py:840
+msgid "Enable Anti-Nuke."
+msgstr "Activar Anti-Nuke."
+
+#: commands.py:846
+msgid ""
+"\n"
+"⚠️ I need **View Audit Log**."
+msgstr ""
+"\n"
+"⚠️ Necesito **View Audit Log**."
+
+#: commands.py:847
+msgid "💣 Anti-Nuke enabled."
+msgstr "💣 Anti-Nuke activado."
+
+#: commands.py:851
+msgid "Disable Anti-Nuke."
+msgstr "Desactivar Anti-Nuke."
+
+#: commands.py:857
+msgid "Anti-Nuke disabled."
+msgstr "Anti-Nuke desactivado."
+
+#: commands.py:861
+msgid "View thresholds, scores and levels."
+msgstr "Ver thresholds, puntuaciones y niveles."
+
+#: commands.py:866
+msgid ""
+"0 - {value}    Log\n"
+"{alert} - {value2}   Alert staff\n"
+"{block} - {value3}   Block sensitive actions\n"
+"{quarantine}+      Quarantine"
+msgstr ""
+"0 - {value}    Log\n"
+"{alert} - {value2}   Alertar staff\n"
+"{block} - {value3}   Bloquear acciones sensibles\n"
+"{quarantine}+      Quarantine"
+
+#: commands.py:867
+msgid "💣 Anti-Nuke {value}"
+msgstr "💣 Anti-Nuke {value}"
+
+#: commands.py:868
+msgid "Thresholds"
+msgstr "Thresholds"
+
+#: commands.py:869
+msgid "Risk score"
+msgstr "Risk score"
+
+#: commands.py:870
+msgid "Escalating response"
+msgstr "Respuesta escalonada"
+
+#: commands.py:871
+msgid "Window"
+msgstr "Ventana"
+
+#: commands.py:872
+msgid "Trusted Admins immune"
+msgstr "Trusted Admins inmunes"
+
+#: commands.py:873
+msgid "Unauthorized bots"
+msgstr "Bots no autorizados"
+
+#: commands.py:878
+msgid "Change an action's threshold (0 = no limit)."
+msgstr "Cambiar threshold de una accion (0 = sin limite)."
+
+#: commands.py:885
+msgid "{action}: {per_minute}/min {per_hour}/h"
+msgstr "{action}: {per_minute}/min {per_hour}/h"
+
+#: commands.py:886
+msgid "Threshold `{action}`: {per_minute}/min · {per_hour}/h."
+msgstr "Threshold `{action}`: {per_minute}/min · {per_hour}/h."
+
+#: commands.py:890
+msgid "Change an action's risk points."
+msgstr "Cambiar los puntos de riesgo de una accion."
+
+#: commands.py:898
+msgid "`{action}` = {points} points."
+msgstr "`{action}` = {points} puntos."
+
+#: commands.py:910
+msgid "Response levels: alert, block and quarantine."
+msgstr "Umbrales de respuesta: alerta, bloqueo y quarantine."
+
+#: commands.py:914
+msgid "It must hold that 0 < alert < block < quarantine."
+msgstr "Debe cumplirse 0 < alert < block < quarantine."
+
+#: commands.py:918
+msgid "Levels: alert {alert} · block {block} · quarantine {quarantine}."
+msgstr "Niveles: alerta {alert} · bloqueo {block} · quarantine {quarantine}."
+
+#: commands.py:922
+msgid "Risk score accumulation window. E.g.: `10m`."
+msgstr "Ventana de acumulacion del risk score. Ej: `10m`."
+
+#: commands.py:927
+msgid "Between 1m and 1h."
+msgstr "Entre 1m y 1h."
+
+#: commands.py:931
+msgid "Window: {value}."
+msgstr "Ventana: {value}."
+
+#: commands.py:935
+msgid "Whether Trusted Admins are immune to Anti-Nuke."
+msgstr "Si los Trusted Admins son inmunes a Anti-Nuke."
+
+#: commands.py:941
+msgid "Trusted Admins immune: `{enabled}`."
+msgstr "Trusted Admins inmunes: `{enabled}`."
+
+#: commands.py:945
+msgid "Restore default thresholds, scores and levels."
+msgstr "Restaurar thresholds, puntuaciones y niveles por defecto."
+
+#: commands.py:954
+msgid "Defaults restored."
+msgstr "Valores por defecto restaurados."
+
+#: commands.py:962
+msgid "Emergency Lockdown."
+msgstr "Emergency Lockdown."
+
+#: commands.py:966
+msgid "Enable emergency mode."
+msgstr "Activar el modo emergencia."
+
+#: commands.py:970
+msgid "Lockdown is already active."
+msgstr "El lockdown ya esta activo."
+
+#: commands.py:971
+msgid "Enable lockdown"
+msgstr "Activar lockdown"
+
+#: commands.py:972
+msgid ""
+"Enable **SECURITY LOCKDOWN**? Only the Owner and Extra Owners will be able "
+"to disable it."
+msgstr ""
+"¿Activar **SECURITY LOCKDOWN**? Solo Owner y Extra Owners podran "
+"desactivarlo."
+
+#: commands.py:975
+msgid "Cancelled."
+msgstr "Cancelado."
+
+#: commands.py:979
+msgid "🔐 SECURITY LOCKDOWN"
+msgstr "🔐 SECURITY LOCKDOWN"
+
+#: commands.py:981
+msgid ""
+"• New bots: **blocked**\n"
+"• New webhooks: **blocked**\n"
+"• Protected Roles: **blocked**\n"
+"• Administrative changes: **restricted**\n"
+"• Invites: **{value}**\n"
+"• Security Watch: **max level**"
+msgstr ""
+"• Nuevos bots: **bloqueados**\n"
+"• Webhooks nuevos: **bloqueados**\n"
+"• Protected Roles: **bloqueados**\n"
+"• Cambios administrativos: **restringidos**\n"
+"• Invitaciones: **{value}**\n"
+"• Security Watch: **maximo nivel**"
+
+#: commands.py:981
+msgid "unchanged"
+msgstr "sin cambios"
+
+#: commands.py:985
+msgid "Notes"
+msgstr "Notas"
+
+#: commands.py:986
+msgid "Enabled by {author} · security lockdown disable"
+msgstr "Activado por {author} · security lockdown disable"
+
+#: commands.py:992
+msgid "Exit emergency mode (Owner / Extra Owners)."
+msgstr "Salir del modo emergencia (Owner / Extra Owners)."
+
+#: commands.py:996
+msgid "There's no active lockdown."
+msgstr "No hay lockdown activo."
+
+#: commands.py:998
+msgid "🔓 Lockdown disabled"
+msgstr "🔓 Lockdown desactivado"
+
+#: commands.py:999
+msgid "By {author}"
+msgstr "Por {author}"
+
+#: commands.py:1005
+msgid "Lockdown status."
+msgstr "Estado del lockdown."
+
+#: commands.py:1008
+msgid "🔴 Lockdown **active** since <t:{at}:R> (by <@{by}>)."
+msgstr "🔴 Lockdown **activo** desde <t:{at}:R> (por <@{by}>)."
+
+#: commands.py:1010
+msgid "🟢 No lockdown."
+msgstr "🟢 Sin lockdown."
+
+#: commands.py:1018
+msgid "Users in quarantine."
+msgstr "Usuarios en quarantine."
+
+#: commands.py:1022
+msgid "List users in quarantine."
+msgstr "Listar usuarios en quarantine."
+
+#: commands.py:1025
+msgid "🟢 Nobody in quarantine."
+msgstr "🟢 Nadie en quarantine."
+
+#: commands.py:1026
+msgid "<@{uid}> · <t:{at}:R> · {count} roles saved · {reason}"
+msgstr "<@{uid}> · <t:{at}:R> · {count} roles guardados · {reason}"
+
+#: commands.py:1027
+msgid "🔒 Quarantine"
+msgstr "🔒 Quarantine"
+
+#: commands.py:1031
+msgid "Manually quarantine a user (removes dangerous roles)."
+msgstr ""
+"Poner manualmente a un usuario en quarantine (retira roles peligrosos)."
+
+#: commands.py:1037
+msgid "You can't quarantine someone with the same or higher authority level."
+msgstr ""
+"No puedes poner en quarantine a alguien con tu mismo nivel de autoridad o "
+"superior."
+
+#: commands.py:1038
+msgid "{reason} (by {author})"
+msgstr "{reason} (por {author})"
+
+#: commands.py:1044
+msgid "Release a user and restore their roles."
+msgstr "Liberar a un usuario y restaurar sus roles."
+
+#: commands.py:1048
+msgid "You can't release yourself."
+msgstr "No puedes liberarte a ti mismo."
+
+#: engine.py:170
+msgid ""
+"Lockdown active: only the Owner and Extra Owners can manage protected roles."
+msgstr ""
+"Lockdown activo: solo Owner y Extra Owners pueden gestionar roles "
+"protegidos."
+
+#: engine.py:173
+msgid "Bots can't assign this protected role."
+msgstr "Los bots no pueden asignar este rol protegido."
+
+#: engine.py:175
+msgid "Self-assigning this protected role isn't allowed."
+msgstr "No se permite auto-asignarse este rol protegido."
+
+#: engine.py:186
+msgid "The user isn't authorized to manage this role."
+msgstr "El usuario no esta autorizado para gestionar este rol."
+
+#: engine.py:251
+msgid ""
+"🔇 Too many alerts: non-critical ones are muted for a minute. Use `security "
+"timeline`."
+msgstr ""
+"🔇 Demasiadas alertas: se silencian las no criticas durante un minuto. Usa "
+"`security timeline`."
+
+#: engine.py:297
+msgid "Target"
+msgstr "Objetivo"
+
+#: engine.py:298
+msgid "Done by"
+msgstr "Ejecutado por"
+
+#: engine.py:298
+msgid "unknown"
+msgstr "desconocido"
+
+#: engine.py:300
+msgid "CHANGES"
+msgstr "CAMBIOS"
+
+#: engine.py:302
+msgid "RISK"
+msgstr "RIESGO"
+
+#: engine.py:304
+msgid "Action"
+msgstr "Accion"
+
+#: engine.py:312
+msgid "Security Score"
+msgstr "Security Score"
+
+#: engine.py:377
+msgid "Channel {target_name} deleted."
+msgstr "Canal {target_name} eliminado."
+
+#: engine.py:383
+msgid "name: {before_name} → {after_name}"
+msgstr "nombre: {before_name} → {after_name}"
+
+#: engine.py:399
+msgid "Role created with Administrator"
+msgstr "Rol creado con Administrator"
+
+#: engine.py:402
+msgid "Role created with "
+msgstr "Rol creado con "
+
+#: engine.py:408
+msgid "Role {target_name} deleted."
+msgstr "Rol {target_name} eliminado."
+
+#: engine.py:412
+msgid "Administrative role created"
+msgstr "Rol administrativo creado"
+
+#: engine.py:427
+msgid "Protected role deleted"
+msgstr "Rol protegido eliminado"
+
+#: engine.py:428
+msgid "Use `backup restore` to recover it if it wasn't intended."
+msgstr "Usa `backup restore` para recuperarlo si no era intencionado."
+
+#: engine.py:429
+msgid "Logged. A deleted role can't be reverted automatically."
+msgstr "Registrado. Un rol eliminado no se puede revertir automaticamente."
+
+#: engine.py:440 engine.py:460
+msgid "webhook `{value}`"
+msgstr "webhook `{value}`"
+
+#: engine.py:441
+msgid "in <#{channel_id}>"
+msgstr "en <#{channel_id}>"
+
+#: engine.py:450
+msgid "Webhook deleted."
+msgstr "Webhook eliminado."
+
+#: engine.py:451
+msgid "Webhook not found."
+msgstr "Webhook no encontrado."
+
+#: engine.py:456
+msgid "New webhook"
+msgstr "Nuevo webhook"
+
+#: engine.py:476
+msgid "Bot kicked automatically."
+msgstr "Bot expulsado automaticamente."
+
+#: engine.py:478
+msgid "Unauthorized bot"
+msgstr "Bot no autorizado"
+
+#: engine.py:478
+msgid "New bot"
+msgstr "Nuevo bot"
+
+#: engine.py:480
+msgid "It isn't in the bot whitelist (`security whitelist add bots`)."
+msgstr "No esta en la whitelist de bots (`security whitelist add bots`)."
+
+#: engine.py:497
+msgid "{removed} members kicked"
+msgstr "{removed} miembros expulsados"
+
+#: engine.py:498
+msgid "Member prune"
+msgstr "Prune de miembros"
+
+#: engine.py:504
+msgid "invite `{code}`"
+msgstr "invite `{code}`"
+
+#: engine.py:506
+msgid "permanent"
+msgstr "permanente"
+
+#: engine.py:506
+msgid "expires in {max_age}s"
+msgstr "expira en {max_age}s"
+
+#: engine.py:513
+msgid "Invite deleted (lockdown)."
+msgstr "Invitacion eliminada (lockdown)."
+
+#: engine.py:516
+msgid "Permanent invite created"
+msgstr "Invitacion permanente creada"
+
+#: engine.py:522
+msgid "Verification"
+msgstr "Verificacion"
+
+#: engine.py:522
+msgid "Vanity URL"
+msgstr "Vanity URL"
+
+#: engine.py:522
+msgid "Name"
+msgstr "Nombre"
+
+#: engine.py:528
+msgid "Server settings change"
+msgstr "Cambio de configuracion del servidor"
+
+#: engine.py:544
+msgid "protection"
+msgstr "proteccion"
+
+#: engine.py:544
+msgid "restricted user"
+msgstr "usuario restringido"
+
+#: engine.py:563
+msgid "Couldn't revert: {value}"
+msgstr "No se pudo revertir: {value}"
+
+#: engine.py:566
+msgid "Couldn't revert: {exc}"
+msgstr "No se pudo revertir: {exc}"
+
+#: engine.py:568
+msgid "revert #{id}"
+msgstr "revert #{id}"
+
+#: engine.py:613
+msgid "@everyone permissions changed"
+msgstr "Permisos de @everyone modificados"
+
+#: engine.py:613
+msgid "Private channel exposed to @everyone."
+msgstr "Canal privado expuesto a @everyone."
+
+#: engine.py:617
+msgid "Dangerous channel permissions"
+msgstr "Permisos peligrosos en canal"
+
+#: engine.py:620
+msgid "Private channel change"
+msgstr "Cambio en canal privado"
+
+#: engine.py:631
+msgid "Permissions of {ch_label} restored."
+msgstr "Permisos de {ch_label} restaurados."
+
+#: engine.py:658
+msgid "Permissions of {target_name} restored."
+msgstr "Permisos de {target_name} restaurados."
+
+#: engine.py:685
+msgid "This role can now modify:\n"
+msgstr "Este rol ahora puede modificar:\n"
+
+#: engine.py:685
+msgid ""
+"\n"
+"• … and {value} more"
+msgstr ""
+"\n"
+"• … y {value} mas"
+
+#: engine.py:687
+msgid "Critical change"
+msgstr "Cambio critico"
+
+#: engine.py:687
+msgid "Permission change"
+msgstr "Cambio de permisos"
+
+#: engine.py:723
+msgid "Attempt to assign "
+msgstr "Intento de asignar "
+
+#: engine.py:726
+msgid "Assignment reverted."
+msgstr "Asignacion revertida."
+
+#: engine.py:729
+msgid "⚠️ Couldn't revert (hierarchy/permissions)."
+msgstr "⚠️ No se pudo revertir (jerarquia/permisos)."
+
+#: engine.py:730
+msgid "🚨 Protected Role violation"
+msgstr "🚨 Protected Role violation"
+
+#: engine.py:731
+msgid ""
+"<@{user_id}> tried to assign:\n"
+"{join}\n"
+"\n"
+"To:\n"
+"{member}\n"
+"\n"
+"**Action:**\n"
+"{taken}\n"
+"\n"
+"**Reason:**\n"
+"{value}"
+msgstr ""
+"<@{user_id}> intento asignar:\n"
+"{join}\n"
+"\n"
+"A:\n"
+"{member}\n"
+"\n"
+"**Accion:**\n"
+"{taken}\n"
+"\n"
+"**Motivo:**\n"
+"{value}"
+
+#: engine.py:752
+msgid "Roles removed from {member}."
+msgstr "Roles retirados a {member}."
+
+#: engine.py:758 engine.py:941
+msgid "Administrator granted"
+msgstr "Administrator otorgado"
+
+#: engine.py:758
+msgid "Administrative roles assigned"
+msgstr "Roles administrativos asignados"
+
+#: engine.py:764
+msgid "Protected role removed"
+msgstr "Rol protegido retirado"
+
+#: engine.py:791
+msgid "Now above "
+msgstr "Ahora por encima de "
+
+#: engine.py:794 i18n_strings.py:52
+msgid "Hierarchy change"
+msgstr "Cambio de jerarquia"
+
+#: engine.py:795
+msgid "With Manage Roles it can now manage protected roles:\n"
+msgstr "Con Manage Roles ahora puede gestionar roles protegidos:\n"
+
+#: engine.py:837
+msgid "Sensitive actions temporarily blocked."
+msgstr "Acciones sensibles bloqueadas temporalmente."
+
+#: engine.py:850
+msgid "{get} {c_min}/min · {c_hour}/h"
+msgstr "{get} {c_min}/min · {c_hour}/h"
+
+#: engine.py:928
+msgid "INCIDENT #{id}"
+msgstr "INCIDENT #{id}"
+
+#: engine.py:933
+msgid ""
+"**Start:** <t:{start}:T>\n"
+"**End:** <t:{end}:T>\n"
+"\n"
+"**Main actor:** <@{actor}>\n"
+"**Level:** {level_label} · Max risk score **{max_score}**\n"
+msgstr ""
+"**Inicio:** <t:{start}:T>\n"
+"**Fin:** <t:{end}:T>\n"
+"\n"
+"**Responsable principal:** <@{actor}>\n"
+"**Nivel:** {level_label} · Risk score maximo **{max_score}**\n"
+
+#: engine.py:934
+msgid "**Threshold:** {threshold}\n"
+msgstr "**Threshold:** {threshold}\n"
+
+#: engine.py:935
+msgid ""
+"\n"
+"**Actor's events:** {count}\n"
+"**Related events:** {count2}"
+msgstr ""
+"\n"
+"**Eventos del responsable:** {count}\n"
+"**Eventos relacionados:** {count2}"
+
+#: engine.py:936
+msgid " · CLOSED"
+msgstr " · CERRADO"
+
+#: engine.py:939
+msgid "Channels deleted"
+msgstr "Canales eliminados"
+
+#: engine.py:939
+msgid "Channels created"
+msgstr "Canales creados"
+
+#: engine.py:940
+msgid "Roles deleted"
+msgstr "Roles eliminados"
+
+#: engine.py:940
+msgid "Roles modified"
+msgstr "Roles modificados"
+
+#: engine.py:941
+msgid "@everyone changes"
+msgstr "Cambios en @everyone"
+
+#: engine.py:942
+msgid "Dangerous permissions"
+msgstr "Permisos peligrosos"
+
+#: engine.py:942
+msgid "Users banned"
+msgstr "Usuarios baneados"
+
+#: engine.py:943
+msgid "Users kicked"
+msgstr "Usuarios expulsados"
+
+#: engine.py:943
+msgid "Webhooks created"
+msgstr "Webhooks creados"
+
+#: engine.py:944
+msgid "Bots added"
+msgstr "Bots añadidos"
+
+#: engine.py:944
+msgid "Protected role violations"
+msgstr "Violaciones de roles protegidos"
+
+#: engine.py:948
+msgid "Summary"
+msgstr "Resumen"
+
+#: engine.py:950
+msgid "Trini Security actions"
+msgstr "Acciones de Trini Security"
+
+#: engine.py:953
+msgid "Previous backup"
+msgstr "Backup previo"
+
+#: engine.py:954
+msgid "None"
+msgstr "Ninguno"
+
+#: engine.py:954
+msgid "Trini Backups not loaded"
+msgstr "Trini Backups no cargado"
+
+#: engine.py:993
+msgid "Trini Security · {guild_name}"
+msgstr "Trini Security · {guild_name}"
+
+#: engine.py:1017
+msgid "TRINI SECURITY - INCIDENT #{id}"
+msgstr "TRINI SECURITY - INCIDENT #{id}"
+
+#: engine.py:1018
+msgid "Server: {guild_name} ({guild_id})"
+msgstr "Servidor: {guild_name} ({guild_id})"
+
+#: engine.py:1019
+msgid "Start: {strftime} UTC"
+msgstr "Inicio: {strftime} UTC"
+
+#: engine.py:1020
+msgid "End:   {strftime} UTC"
+msgstr "Fin:    {strftime} UTC"
+
+#: engine.py:1021
+msgid "Main actor: {value}"
+msgstr "Responsable principal: {value}"
+
+#: engine.py:1022
+msgid "Level: {level} · Max risk score: {max_score}"
+msgstr "Nivel: {level} · Risk score maximo: {max_score}"
+
+#: engine.py:1023
+msgid "Threshold: {value}"
+msgstr "Threshold: {value}"
+
+#: engine.py:1024
+msgid "Previous backup: {value}"
+msgstr "Backup previo: {value}"
+
+#: engine.py:1026
+msgid "TRINI SECURITY ACTIONS"
+msgstr "ACCIONES DE TRINI SECURITY"
+
+#: engine.py:1039
+msgid "* = event attributed to the main actor"
+msgstr "* = evento atribuido al responsable principal"
+
+#: engine.py:1051
+msgid "{member} was already in quarantine."
+msgstr "{member} ya estaba en quarantine."
+
+#: engine.py:1059
+msgid "The Owner can't be quarantined."
+msgstr "No se puede poner en quarantine al Owner."
+
+#: engine.py:1061
+msgid "⚠️ Couldn't quarantine {member}: their role is above the bot."
+msgstr ""
+"⚠️ No se pudo aplicar quarantine a {member}: su rol esta por encima del bot."
+
+#: engine.py:1066
+msgid "Bot kicked · {reason}"
+msgstr "Bot expulsado · {reason}"
+
+#: engine.py:1067
+msgid "Bot {member} kicked (quarantine)."
+msgstr "Bot {member} expulsado (quarantine)."
+
+#: engine.py:1069
+msgid "Couldn't kick the bot {member}."
+msgstr "No se pudo expulsar al bot {member}."
+
+#: engine.py:1083
+msgid "Error applying quarantine: {exc}"
+msgstr "Error aplicando quarantine: {exc}"
+
+#: engine.py:1093
+msgid "{count} roles removed · {reason}"
+msgstr "{count} roles retirados · {reason}"
+
+#: engine.py:1096
+msgid "Quarantine applied to {member}: {count} role(s) removed."
+msgstr "Quarantine aplicada a {member}: {count} rol(es) retirados."
+
+#: engine.py:1103
+msgid "That user isn't in quarantine."
+msgstr "Ese usuario no esta en quarantine."
+
+#: engine.py:1120
+msgid "Quarantine removed but roles couldn't be restored: {exc}"
+msgstr "Quarantine eliminada pero no se pudieron restaurar roles: {exc}"
+
+#: engine.py:1123
+msgid "Released · {count} roles restored"
+msgstr "Liberada · {count} roles restaurados"
+
+#: engine.py:1126
+msgid "🔓 Quarantine released. Roles restored: {value}."
+msgstr "🔓 Quarantine liberada. Roles restaurados: {value}."
+
+#: engine.py:1126
+msgid "none"
+msgstr "ninguno"
+
+#: engine.py:1138
+msgid "Automatic backup: `{id}`"
+msgstr "Backup automatico: `{id}`"
+
+#: engine.py:1144
+msgid "Invites were already paused."
+msgstr "Las invitaciones ya estaban pausadas."
+
+#: engine.py:1149
+msgid "Invites paused."
+msgstr "Invitaciones pausadas."
+
+#: engine.py:1151
+msgid "⚠️ Couldn't pause invites."
+msgstr "⚠️ No se pudieron pausar las invitaciones."
+
+#: engine.py:1159
+msgid "Lockdown enabled"
+msgstr "Lockdown activado"
+
+#: engine.py:1169
+msgid "Invites resumed."
+msgstr "Invitaciones reactivadas."
+
+#: engine.py:1171
+msgid "⚠️ Couldn't resume invites."
+msgstr "⚠️ No se pudieron reactivar las invitaciones."
+
+#: engine.py:1177
+msgid "Lockdown disabled"
+msgstr "Lockdown desactivado"
+
+#: i18n_strings.py:11
+msgid "Trini Security: server audit and protection."
+msgstr "Trini Security: auditoria y proteccion del servidor."
+
+#: i18n_strings.py:13
+msgid "Manage Guild"
+msgstr "Manage Guild"
+
+#: i18n_strings.py:14
+msgid "Manage Roles"
+msgstr "Manage Roles"
+
+#: i18n_strings.py:15
+msgid "Manage Channels"
+msgstr "Manage Channels"
+
+#: i18n_strings.py:16
+msgid "Manage Webhooks"
+msgstr "Manage Webhooks"
+
+#: i18n_strings.py:17
+msgid "Ban Members"
+msgstr "Ban Members"
+
+#: i18n_strings.py:18
+msgid "Kick Members"
+msgstr "Kick Members"
+
+#: i18n_strings.py:19
+msgid "Mention @everyone"
+msgstr "Mention @everyone"
+
+#: i18n_strings.py:20
+msgid "Manage Messages"
+msgstr "Manage Messages"
+
+#: i18n_strings.py:21
+msgid "Manage Threads"
+msgstr "Manage Threads"
+
+#: i18n_strings.py:22
+msgid "Timeout Members"
+msgstr "Timeout Members"
+
+#: i18n_strings.py:23
+msgid "Manage Nicknames"
+msgstr "Manage Nicknames"
+
+#: i18n_strings.py:24
+msgid "Manage Events"
+msgstr "Manage Events"
+
+#: i18n_strings.py:25
+msgid "Manage Expressions"
+msgstr "Manage Expressions"
+
+#: i18n_strings.py:26
+msgid "View Audit Log"
+msgstr "View Audit Log"
+
+#: i18n_strings.py:27
+msgid "Create Invite"
+msgstr "Create Invite"
+
+#: i18n_strings.py:28
+msgid "View Channel"
+msgstr "View Channel"
+
+#: i18n_strings.py:29
+msgid "Send Messages"
+msgstr "Send Messages"
+
+#: i18n_strings.py:30
+msgid "Connect"
+msgstr "Connect"
+
+#: i18n_strings.py:31
+msgid "Delete channel"
+msgstr "Eliminar canal"
+
+#: i18n_strings.py:32
+msgid "Create channel"
+msgstr "Crear canal"
+
+#: i18n_strings.py:33
+msgid "Edit channel"
+msgstr "Editar canal"
+
+#: i18n_strings.py:34
+msgid "Delete role"
+msgstr "Eliminar rol"
+
+#: i18n_strings.py:35
+msgid "Create role"
+msgstr "Crear rol"
+
+#: i18n_strings.py:36
+msgid "Edit role"
+msgstr "Editar rol"
+
+#: i18n_strings.py:37
+msgid "Grant Administrator"
+msgstr "Otorgar Administrator"
+
+#: i18n_strings.py:38
+msgid "Change @everyone"
+msgstr "Cambiar @everyone"
+
+#: i18n_strings.py:39
+msgid "Dangerous permission"
+msgstr "Permiso peligroso"
+
+#: i18n_strings.py:40
+msgid "Create webhook"
+msgstr "Crear webhook"
+
+#: i18n_strings.py:41
+msgid "Delete webhook"
+msgstr "Eliminar webhook"
+
+#: i18n_strings.py:42
+msgid "Ban"
+msgstr "Ban"
+
+#: i18n_strings.py:43
+msgid "Unban"
+msgstr "Unban"
+
+#: i18n_strings.py:44
+msgid "Kick"
+msgstr "Kick"
+
+#: i18n_strings.py:45
+msgid "Add bot"
+msgstr "Añadir bot"
+
+#: i18n_strings.py:46
+msgid "Prune"
+msgstr "Prune"
+
+#: i18n_strings.py:47
+msgid "Role change"
+msgstr "Cambio de roles"
+
+#: i18n_strings.py:48
+msgid "Protected role violation"
+msgstr "Violacion de rol protegido"
+
+#: i18n_strings.py:49
+msgid "Channel permission change"
+msgstr "Cambio de permisos de canal"
+
+#: i18n_strings.py:50
+msgid "Create invite"
+msgstr "Crear invitacion"
+
+#: i18n_strings.py:51
+msgid "Edit server"
+msgstr "Editar servidor"
+
+#: i18n_strings.py:57
+msgid "🔱 Extra Owner"
+msgstr "🔱 Extra Owner"
+
+#: i18n_strings.py:58
+msgid "🛡 Trusted Admin"
+msgstr "🛡 Trusted Admin"
+
+#: i18n_strings.py:59
+msgid "Member"
+msgstr "Miembro"
+
+#: i18n_strings.py:60
+msgid "Continue"
+msgstr "Continuar"
+
+#: i18n_strings.py:61
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: security.py:57
+msgid ""
+"La Trini's defense layer: audit, authority, protected roles, anti-nuke and "
+"incidents."
+msgstr ""
+"Capa defensiva de La Trini: auditoria, autoridad, roles protegidos, anti-"
+"nuke e incidentes."
+
+#: security.py:90
+msgid ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+
+#: security.py:107
+msgid "deleted user"
+msgstr "usuario eliminado"
+
+#: security.py:159
+msgid "⚙️ Security settings change"
+msgstr "⚙️ Cambio en la configuracion de Security"
+
+#: security.py:164
+msgid "By"
+msgstr "Por"
+
+#: security.py:195
+msgid "Protected Roles active ({count})"
+msgstr "Protected Roles activo ({count})"
+
+#: security.py:197
+msgid "Anti-Nuke active"
+msgstr "Anti-Nuke activo"
+
+#: security.py:199
+msgid "Security Watch active"
+msgstr "Security Watch activo"
+
+#: security.py:204
+msgid "Automatic backups scheduled"
+msgstr "Backups automaticos programados"
+
+#: security.py:238
+msgid "Trini Backups isn't loaded."
+msgstr "Trini Backups no esta cargado."
+
+#: security.py:244
+msgid "There's no previous backup to compare with."
+msgstr "No hay ningun backup previo con el que comparar."
+
+#: security.py:278
+msgid "Security Watch enabled"
+msgstr "Security Watch activado"
+
+#: security.py:283
+msgid "Anti-Nuke enabled"
+msgstr "Anti-Nuke activado"
+
+#: security.py:303
+msgid ""
+"Security: authority (Extra Owners/Trusted Admins) isn't imported between "
+"different servers."
+msgstr ""
+"Security: la autoridad (Extra Owners/Trusted Admins) no se importa entre "
+"servidores distintos."
+
+#: security.py:308
+msgid "Security: {value} protected roles don't exist in this server."
+msgstr "Security: {value} roles protegidos no existen en este servidor."
+
+#: security.py:309
+msgid "Settings imported via Profiles"
+msgstr "Configuracion importada via Profiles"
+
+#: security.py:368
+msgid "🔐 Security Digest"
+msgstr "🔐 Security Digest"
+
+#: security.py:370
+msgid "**Period:** <t:{start}:d> — <t:{now}:d>"
+msgstr "**Periodo:** <t:{start}:d> — <t:{now}:d>"
+
+#: security.py:373
+msgid "Activity"
+msgstr "Actividad"
+
+#: security.py:374
+msgid ""
+"Administrative changes: **{value}**\n"
+"Critical changes: **{value2}**\n"
+"Roles modified: **{value3}**\n"
+"Bots added: **{value4}**\n"
+"Webhooks created: **{value5}**\n"
+"Settings changes: **{count}**"
+msgstr ""
+"Cambios administrativos: **{value}**\n"
+"Cambios criticos: **{value2}**\n"
+"Roles modificados: **{value3}**\n"
+"Bots añadidos: **{value4}**\n"
+"Webhooks creados: **{value5}**\n"
+"Cambios de configuracion: **{count}**"
+
+#: security.py:379
+msgid "{count} activation(s)"
+msgstr "{count} activacion(es)"
+
+#: security.py:380
+msgid " · {value} quarantine"
+msgstr " · {value} quarantine"
+
+#: security.py:384
+msgid "{value} attempt(s) blocked"
+msgstr "{value} intento(s) bloqueados"
+
+#: security.py:392
+msgid "Main improvements"
+msgstr "Principales mejoras"
+
+#: security.py:394
+msgid "New risks"
+msgstr "Nuevos riesgos"
+
+#: views.py:26
+msgid "You don't have permission for this."
+msgstr "No tienes permiso para esto."
+
+#: views.py:36
+msgid "Compare with backup"
+msgstr "Comparar con backup"
+
+#: views.py:68
+msgid "Generate report"
+msgstr "Generar informe"
+
+#: views.py:102
+msgid "Compare previous state"
+msgstr "Comparar estado anterior"
+
+#: views.py:137
+msgid "Release quarantine"
+msgstr "Liberar quarantine"
+
+#: views.py:161
+msgid ""
+"Only the Owner, Extra Owners or Trusted Admins can release a quarantine."
+msgstr ""
+"Solo Owner, Extra Owners o Trusted Admins pueden liberar una quarantine."
+
+#: views.py:198
+msgid "Only whoever ran the command can confirm."
+msgstr "Solo quien ejecuto el comando puede confirmar."
