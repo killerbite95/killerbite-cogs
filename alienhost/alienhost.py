@@ -25,6 +25,7 @@ from redbot.core.bot import Red
 from redbot.core.data_manager import cog_data_path
 from redbot.core.utils.chat_formatting import humanize_list
 
+from .dashboard_integration import DashboardIntegration
 from .api import PelicanClient, PelicanError, normalize_panel
 from .vault import Vault
 from .views import (
@@ -86,7 +87,7 @@ def fmt_uptime(ms: Optional[int]) -> str:
     return f"{d}d {h}h" if d else (f"{h}h {m}m" if h else f"{m}m")
 
 
-class AlienHost(commands.Cog):
+class AlienHost(DashboardIntegration, commands.Cog):
     """Integracion con AlienHost: vincula tu clave API de Pelican y controla tus servidores desde Discord."""
 
     __author__ = "Killerbite95"
@@ -136,6 +137,7 @@ class AlienHost(commands.Cog):
     async def cog_load(self) -> None:
         self.session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(total=15))
         self.alert_loop.start()
+        self._dashboard_register()
         try:
             prefixes = await self.bot.get_valid_prefixes()
             self.p = next((x for x in prefixes if not x.startswith("<@")), self.p)

@@ -22,6 +22,7 @@ from redbot.core import Config, commands
 from redbot.core.bot import Red
 
 from .audit import AuditReport, run_guild_audit
+from .dashboard_integration import DashboardIntegration
 from .commands import CommandsMixin, is_security_staff
 from .constants import (
     DEFAULT_LEVELS,
@@ -48,7 +49,7 @@ DEFAULT_ANTINUKE = {
 MAX_SETTINGS_LOG = 500
 
 
-class TriniSecurity(CommandsMixin, EngineMixin, commands.Cog):
+class TriniSecurity(CommandsMixin, EngineMixin, DashboardIntegration, commands.Cog):
     """Capa defensiva de La Trini: auditoria, autoridad, roles protegidos, anti-nuke e incidentes."""
 
     __author__ = "Killerbite95"
@@ -109,6 +110,7 @@ class TriniSecurity(CommandsMixin, EngineMixin, commands.Cog):
     async def cog_load(self) -> None:
         self.bot.add_dynamic_items(*DYNAMIC_ITEMS)
         self.maintenance_loop.start()
+        self._dashboard_register()
 
     async def cog_unload(self) -> None:
         self.maintenance_loop.cancel()

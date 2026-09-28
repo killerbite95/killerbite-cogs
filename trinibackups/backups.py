@@ -25,6 +25,7 @@ from redbot.core.data_manager import cog_data_path
 from redbot.core.utils.chat_formatting import box, humanize_list
 from redbot.core.utils.views import SimpleMenu
 
+from .dashboard_integration import DashboardIntegration
 from .snapshot import (
     FORMAT,
     VERSION,
@@ -152,7 +153,7 @@ class ConfirmView(discord.ui.View):
         await interaction.response.defer()
 
 
-class TriniBackups(commands.Cog):
+class TriniBackups(DashboardIntegration, commands.Cog):
     """Snapshots estructurales del servidor, diff, backups programados y restauracion segura."""
 
     __author__ = "Killerbite95"
@@ -188,6 +189,7 @@ class TriniBackups(commands.Cog):
 
     async def cog_load(self) -> None:
         self.schedule_loop.start()
+        self._dashboard_register()
 
     async def cog_unload(self) -> None:
         self.schedule_loop.cancel()

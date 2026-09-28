@@ -21,6 +21,7 @@ from discord.ext import tasks
 from redbot.core import Config, commands
 from redbot.core.bot import Red
 
+from .dashboard_integration import DashboardIntegration
 from .timeparse import (
     WEEKDAY_NAMES,
     WEEKDAYS,
@@ -65,7 +66,7 @@ def is_event_staff():
     return commands.check(predicate)
 
 
-class TriniEvents(commands.Cog):
+class TriniEvents(DashboardIntegration, commands.Cog):
     """Eventos de comunidad: inscripciones, reservas, recordatorios, roles/canales temporales y estadisticas."""
 
     __author__ = "Killerbite95"
@@ -118,6 +119,7 @@ class TriniEvents(commands.Cog):
     async def cog_load(self) -> None:
         self.bot.add_dynamic_items(EventButton)
         self.event_loop.start()
+        self._dashboard_register()
 
     async def cog_unload(self) -> None:
         self.event_loop.cancel()

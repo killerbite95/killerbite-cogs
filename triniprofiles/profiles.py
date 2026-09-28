@@ -17,6 +17,7 @@ from redbot.core import Config, commands
 from redbot.core.bot import Red
 from redbot.core.utils.chat_formatting import box, humanize_list, pagify
 
+from .dashboard_integration import DashboardIntegration
 from .portable import collect_references, export_cog, import_cog, remap_references
 from .registry import (
     LEVEL_LABELS,
@@ -274,7 +275,7 @@ class ModulesView(AuthorView):
                 pass
 
 
-class TriniProfiles(commands.Cog):
+class TriniProfiles(DashboardIntegration, commands.Cog):
     """Configuracion por perfiles de La Trini: plantillas, modulos, dependencias y presets."""
 
     __author__ = "Killerbite95"

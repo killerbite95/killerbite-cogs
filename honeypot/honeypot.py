@@ -154,6 +154,18 @@ class Honeypot(Cog):
         await self.settings.add_commands()
         # Register the view as persistent so the stats button keeps working after a restart.
         self.bot.add_view(HoneypotStatsView(cog=self))
+        # AAA3A_utils crea la pagina "settings" (con los mismos permisos que
+        # `sethoneypot`), pero hay que registrar el cog en el Dashboard.
+        dashboard_cog = self.bot.get_cog("Dashboard")
+        if dashboard_cog is not None and hasattr(dashboard_cog, "rpc"):
+            try:
+                dashboard_cog.rpc.third_parties_handler.add_third_party(self)
+            except Exception:
+                pass
+
+    @commands.Cog.listener()
+    async def on_dashboard_cog_add(self, dashboard_cog: commands.Cog) -> None:
+        dashboard_cog.rpc.third_parties_handler.add_third_party(self)
 
     def _get_image_file(self, locale: typing.Optional[str]) -> str:
         """Return the warning image file name matching the guild locale."""

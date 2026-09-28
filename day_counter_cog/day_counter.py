@@ -142,6 +142,7 @@ class DayCounter(DashboardIntegration, commands.Cog):
     _TRINI_LOCAL_KEYS = ()
 
     async def trini_export(self, guild):
+        await self.get_counters(guild)  # migra la fecha de la v1 antes de exportar
         conf = await self.config.guild(guild).all()
         return {k: v for k, v in conf.items() if k not in self._TRINI_RUNTIME_KEYS}
 
