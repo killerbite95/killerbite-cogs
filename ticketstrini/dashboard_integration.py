@@ -37,6 +37,8 @@ class DashboardIntegration:
         name=None,
         description="Panel de control de TicketsTrini — estadísticas y resumen",
         methods=("GET",),
+        # Muestra datos de TODOS los servidores del bot: solo el owner.
+        is_owner=True,
     )
     async def dashboard_main(self, **kwargs) -> typing.Dict[str, typing.Any]:
         # Gather stats from all guilds the bot is in
@@ -203,6 +205,8 @@ class DashboardIntegration:
         name="tickets",
         description="Ver todos los tickets activos por servidor",
         methods=("GET",),
+        # Muestra datos de TODOS los servidores del bot: solo el owner.
+        is_owner=True,
     )
     async def dashboard_tickets(self, **kwargs) -> typing.Dict[str, typing.Any]:
         all_guilds = await self.config.all_guilds()

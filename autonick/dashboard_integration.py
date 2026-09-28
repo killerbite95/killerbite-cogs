@@ -19,6 +19,31 @@ class DashboardIntegration:
     bot: Red
     config: typing.Any
 
+    async def _dashboard_denied(self, guild, kwargs, *, mod: bool = False):
+        """El Dashboard solo comprueba que el usuario este en el servidor:
+        cada pagina debe exigir sus propios permisos. Devuelve la respuesta
+        de error o ``None`` si puede pasar."""
+        user = kwargs.get("user")
+        user_id = getattr(user, "id", kwargs.get("user_id"))
+        if user_id is not None and user_id in self.bot.owner_ids:
+            return None
+        member = guild.get_member(user_id) if (guild is not None and user_id is not None) else None
+        allowed = False
+        if member is not None:
+            perms = member.guild_permissions
+            if perms.administrator or perms.manage_guild or await self.bot.is_admin(member):
+                allowed = True
+            elif mod and await self.bot.is_mod(member):
+                allowed = True
+        if allowed:
+            return None
+        return {
+            "status": 1,
+            "message": "Forbidden access.",
+            "error_code": 403,
+            "error_message": "No tienes permisos para acceder a esta pagina.",
+        }
+
     @commands.Cog.listener()
     async def on_dashboard_cog_add(self, dashboard_cog: commands.Cog) -> None:
         dashboard_cog.rpc.third_parties_handler.add_third_party(self)
@@ -40,6 +65,9 @@ class DashboardIntegration:
         guild = self.bot.get_guild(guild_id)
         if not guild:
             return {"status": 0, "web_content": {"source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Servidor no encontrado.</p></div>'}}
+        denied = await self._dashboard_denied(guild, kwargs)
+        if denied:
+            return denied
 
         method = kwargs.get("method", "GET")
         notifications = []
@@ -170,7 +198,7 @@ class DashboardIntegration:
     <div class="trini-tp-guild-header">
       <h4><i class="fa fa-ban me-1"></i> Palabras Prohibidas</h4>
       <span class="badge bg-gradient-warning">{{ forbidden|length }} palabras</span>
-      <small class="text-muted ms-2">(global, aplica a todos los servidores)</small>
+      <small class="text-muted ms-2">(solo este servidor)</small>
     </div>
 
     <form method="POST" class="mt-3">

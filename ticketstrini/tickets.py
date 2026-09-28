@@ -660,58 +660,74 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
             log.info("Pruned old ticket channels")
 
     # -------------------- Dashboard Integration --------------------
+    async def _dashboard_staff_denied(self, guild: discord.Guild, kwargs: dict):
+        """El Dashboard solo comprueba que el usuario este en el servidor.
+
+        Ver o cerrar tickets exige ser owner, admin/mod del bot, tener
+        Gestionar servidor o tener un rol de soporte de TicketsTrini."""
+        user = kwargs.get("user")
+        user_id = getattr(user, "id", kwargs.get("user_id"))
+        if user_id is not None and user_id in self.bot.owner_ids:
+            return None
+        member = guild.get_member(user_id) if user_id is not None else None
+        if member is not None:
+            if member.guild_permissions.manage_guild or await self.bot.is_mod(member):
+                return None
+            conf = await self.config.guild(guild).all()
+            support = {r[0] for r in conf.get("support_roles", [])}
+            for panel in conf.get("panels", {}).values():
+                support.update(r[0] for r in panel.get("roles", []))
+            if any(r.id in support for r in member.roles):
+                return None
+        return {
+            "status": 1,
+            "message": "Forbidden access.",
+            "error_code": 403,
+            "error_message": "No tienes permisos para ver los tickets de este servidor.",
+        }
+
     @dashboard_page(name="view_tickets", description="Ver tickets activos")
     async def rpc_view_tickets(self, guild_id: int, **kwargs) -> t.Dict[str, t.Any]:
-        """
-        Página del Dashboard para ver los tickets activos.
-        Se espera que se pase 'guild_id' (int) en los kwargs.
-        """
+        """Pagina del Dashboard para ver los tickets activos del servidor."""
         guild = self.bot.get_guild(guild_id)
         if not guild:
             return {"status": 1, "error": "Guild no encontrada."}
+        denied = await self._dashboard_staff_denied(guild, kwargs)
+        if denied:
+            return denied
         conf = await self.config.guild(guild).all()
-        opened = conf.get("opened", {})
-        html_content = """
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-              integrity="sha384-ENjdO4Dr2bkBIFxQG+8exIg2knQW4PuAtf3y5PxC5bl80k4CL8nAeZp3rNZZ8VC3"
-              crossorigin="anonymous">
-        <div class="container mt-4">
-          <h1 class="mb-4">Tickets Activos</h1>
-          <table class="table table-bordered table-striped">
-            <thead class="table-dark">
-              <tr>
-                <th scope="col">Usuario</th>
-                <th scope="col">ID del Canal</th>
-                <th scope="col">Panel</th>
-                <th scope="col">Abierto</th>
-              </tr>
-            </thead>
-            <tbody>
-        """
-        if not opened:
-            html_content += "<tr><td colspan='4'>No hay tickets activos</td></tr>"
-        else:
-            for uid, tickets in opened.items():
-                member = guild.get_member(int(uid))
-                member_name = member.display_name if member else "Desconocido"
-                for cid, ticket in tickets.items():
-                    opened_at = ticket.get("opened", "N/A")
-                    panel = ticket.get("panel", "N/A")
-                    html_content += f"""
-                      <tr>
-                        <td>{member_name}</td>
-                        <td>{cid}</td>
-                        <td>{panel}</td>
-                        <td>{opened_at}</td>
-                      </tr>
-                    """
-        html_content += """
-            </tbody>
-          </table>
-        </div>
-        """
-        return {"status": 0, "web_content": {"source": html_content}}
+        rows = []
+        for uid, tickets in conf.get("opened", {}).items():
+            member = guild.get_member(int(uid))
+            for cid, ticket in tickets.items():
+                channel = guild.get_channel_or_thread(int(cid))
+                rows.append({
+                    "member": member.display_name if member else f"ID: {uid}",
+                    "channel": f"#{channel.name}" if channel else str(cid),
+                    "panel": str(ticket.get("panel", "N/A")),
+                    "opened": str(ticket.get("opened", "N/A"))[:16].replace("T", " "),
+                })
+        # Los datos van como variables (Jinja los escapa), nunca dentro de la plantilla.
+        source = """
+<div class="trini-tp-settings">
+  <h3 class="trini-tp-title"><i class="fa fa-ticket"></i> Tickets activos</h3>
+  {% if rows|length > 0 %}
+  <div class="table-responsive">
+    <table class="table trini-table trini-tp-table">
+      <thead><tr><th>Usuario</th><th>Canal</th><th>Panel</th><th>Abierto</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr><td>{{ r.member }}</td><td>{{ r.channel }}</td><td>{{ r.panel }}</td><td><small>{{ r.opened }}</small></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="trini-tp-empty"><i class="fa fa-ticket fa-3x"></i><p>No hay tickets activos.</p></div>
+  {% endif %}
+</div>
+"""
+        return {"status": 0, "web_content": {"source": source, "rows": rows}}
 
     @dashboard_page(name="close_ticket", description="Cerrar un ticket", methods=("GET", "POST"))
     async def rpc_close_ticket(self, guild_id: int, **kwargs) -> t.Dict[str, t.Any]:
@@ -722,6 +738,9 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         guild = self.bot.get_guild(guild_id)
         if not guild:
             return {"status": 1, "error": "Guild no encontrada."}
+        denied = await self._dashboard_staff_denied(guild, kwargs)
+        if denied:
+            return denied
         import wtforms
         class CloseTicketForm(kwargs["Form"]):
             channel_id = wtforms.IntegerField("ID del canal del ticket", validators=[wtforms.validators.InputRequired()])
