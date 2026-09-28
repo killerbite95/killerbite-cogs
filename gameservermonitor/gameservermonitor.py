@@ -12,7 +12,7 @@ from discord import app_commands
 from discord.ext import tasks
 from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
-from redbot.core.i18n import Translator, cog_i18n
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
 from redbot.core.utils.views import ConfirmView
 from redbot.core.utils.chat_formatting import pagify
 import contextlib
@@ -50,7 +50,7 @@ _ = Translator("GameServerMonitor", __file__)
 
 @cog_i18n(_)
 class GameServerMonitor(DashboardIntegration, commands.Cog):
-    """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
+    """Monitors game servers and updates their status in Discord. By Killerbite95"""
     
     __author__ = "Killerbite95"
     __version__ = "2.4.0"
@@ -972,7 +972,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
 
             # El canal desapareció: el monitor falla en cada ciclo sin remedio posible.
             if channel is None:
-                candidate["reason"] = _("Su canal ya no existe")
+                candidate["reason"] = _("Its channel no longer exists")
                 candidate["offline_for"] = None
                 candidate["sort"] = datetime.timedelta.max
                 candidates.append(candidate)
@@ -986,7 +986,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                         datetime.timezone.utc
                     ).replace(tzinfo=None)
                 offline_for = now - last_online
-                reason = _("Sin responder desde hace {duration}").format(
+                reason = _("Unresponsive for {duration}").format(
                     duration=self._format_duration(offline_for)
                 )
             elif server_data.total_queries > 0:
@@ -994,7 +994,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 offline_for = datetime.timedelta(
                     seconds=server_data.total_queries * refresh_time
                 )
-                reason = _("Nunca respondió desde que se añadió")
+                reason = _("Never responded since it was added")
             else:
                 # Recién añadido y aún sin consultar: no es candidato.
                 continue
@@ -1054,7 +1054,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         shown = candidates[:20]
         for candidate in shown:
             channel = candidate["channel"]
-            channel_text = channel.mention if channel else _("canal eliminado")
+            channel_text = channel.mention if channel else _("deleted channel")
             lines.append(
                 f"**{candidate['display'][:60]}**\n"
                 f"`{candidate['server_key']}` · {candidate['game']} · {channel_text}\n"
@@ -1062,7 +1062,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             )
         if len(candidates) > len(shown):
             lines.append(
-                _("*... y {count} servidor(es) más.*").format(
+                _("*... and {count} more server(s).*").format(
                     count=len(candidates) - len(shown)
                 )
             )
@@ -1070,7 +1070,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         embed = discord.Embed(
             title=title,
             description=_(
-                "{count} servidor(es) llevan más de **{days}** día(s) sin responder.\n\n"
+                "{count} server(s) have been unresponsive for more than **{days}** day(s).\n\n"
             ).format(count=len(candidates), days=days) + "\n\n".join(lines),
             color=color
         )
@@ -1185,7 +1185,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         embed_config = EmbedConfig(**embed_config_data)
         
         # Título y color
-        suffix = " - Server Status"
+        suffix = _(" - Server Status")
         title = self._truncate_title(query_result.hostname, suffix)
         color = embed_config.get_color(query_result.status)
         
@@ -1271,7 +1271,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         embed_config = EmbedConfig(**embed_config_data)
         
         game_name = server_data.game.display_name if server_data.game else _("Game")
-        title = self._truncate_title(f"{game_name} Server", " - ❌ Offline")
+        title = self._truncate_title(_("{game} Server").format(game=game_name), _(" - ❌ Offline"))
         color = embed_config.get_color(ServerStatus.OFFLINE)
         
         embed = discord.Embed(title=title, color=color)
@@ -1459,18 +1459,18 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 extras["last_map_change"] = discord.utils.utcnow().isoformat()
                 if previous and extras.get("map_alert_channel"):
                     embed = discord.Embed(
-                        title=_("🗺️ Cambio de mapa"),
+                        title=_("🗺️ Map change"),
                         description=f"**{discord.utils.escape_markdown(name)}**\n{game_name}",
                         color=discord.Color.green(),
                         timestamp=discord.utils.utcnow(),
                     )
-                    embed.add_field(name=_("Mapa anterior"), value=previous, inline=True)
-                    embed.add_field(name=_("Mapa nuevo"), value=f"**{map_name}**", inline=True)
-                    embed.add_field(name=_("Jugadores"), value=query_result.player_display, inline=True)
+                    embed.add_field(name=_("Previous map"), value=previous, inline=True)
+                    embed.add_field(name=_("New map"), value=f"**{map_name}**", inline=True)
+                    embed.add_field(name=_("Players"), value=query_result.player_display, inline=True)
                     if connect_url:
-                        embed.add_field(name=_("Conectar"), value=f"[{ip_to_show}]({connect_url})", inline=False)
+                        embed.add_field(name=_("Connect"), value=f"[{ip_to_show}]({connect_url})", inline=False)
                     elif server_data.game == GameType.RUST:
-                        embed.add_field(name=_("Conectar (F1)"), value=f"`client.connect {ip_to_show}`", inline=False)
+                        embed.add_field(name=_("Connect (F1)"), value=f"`client.connect {ip_to_show}`", inline=False)
                     else:
                         embed.add_field(name=_("IP"), value=f"`{ip_to_show}`", inline=False)
                     await self._send_alert(guild, extras["map_alert_channel"], embed)
@@ -1484,15 +1484,15 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             came_back = old_status == ServerStatus.OFFLINE and new_status in (ServerStatus.ONLINE, ServerStatus.MAINTENANCE)
             if went_down or came_back:
                 embed = discord.Embed(
-                    title=_("🔴 Servidor caido") if went_down else _("✅ Servidor de nuevo online"),
+                    title=_("🔴 Server down") if went_down else _("✅ Server back online"),
                     description=f"**{discord.utils.escape_markdown(name)}**\n{game_name} · `{ip_to_show}`",
                     color=discord.Color.red() if went_down else discord.Color.green(),
                     timestamp=discord.utils.utcnow(),
                 )
                 if came_back and query_result.success:
-                    embed.add_field(name=_("Jugadores"), value=query_result.player_display, inline=True)
+                    embed.add_field(name=_("Players"), value=query_result.player_display, inline=True)
                     if map_name and server_data.game != GameType.MINECRAFT:
-                        embed.add_field(name=_("Mapa"), value=map_name, inline=True)
+                        embed.add_field(name=_("Map"), value=map_name, inline=True)
                 await self._send_alert(guild, channel_id, embed)
         return extras
 
@@ -1510,6 +1510,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             server_key: Clave del servidor (ip:puerto)
             first_time: Si es la primera vez (crear mensaje nuevo)
         """
+        # Se llama desde el bucle de monitorizacion: el idioma debe ser el del servidor.
+        await set_contextual_locales_from_guild(self.bot, guild)
         async with self.config.guild(guild).servers() as servers:
             server_dict = servers.get(server_key)
             if not server_dict:
@@ -1712,11 +1714,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         try:
             pytz.timezone(timezone)
         except pytz.UnknownTimeZoneError:
-            await ctx.send(_("❌ La zona horaria '{}' no es válida.").format(timezone))
+            await ctx.send(_("❌ Invalid timezone '{}'.").format(timezone))
             return
         
         await self.config.guild(ctx.guild).timezone.set(timezone)
-        await ctx.send(_("✅ Zona horaria establecida en **{}**").format(timezone))
+        await ctx.send(_("✅ Timezone set to **{}**").format(timezone))
     
     @commands.command(name="setpublicip")
     @checks.admin_or_permissions(administrator=True)
@@ -1730,11 +1732,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         if ip is None:
             await self.config.guild(ctx.guild).public_ip.set(None)
-            await ctx.send(_("✅ Reemplazo de IP pública desactivado."))
+            await ctx.send(_("✅ Public IP replacement disabled."))
         else:
             await self.config.guild(ctx.guild).public_ip.set(ip)
             await ctx.send(
-                _("✅ IP pública establecida en **{}**. Las IPs privadas serán reemplazadas.").format(ip)
+                _("✅ Public IP set to **{}**. Private IPs will be replaced.").format(ip)
             )
     
     @commands.command(name="setconnecturl")
@@ -1748,11 +1750,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         Example: `[p]setconnecturl https://mysite.com/connect?server={ip}`
         """
         if "{ip}" not in url:
-            await ctx.send(_("❌ La URL debe contener `{ip}` como placeholder."))
+            await ctx.send(_("❌ The URL must contain `{ip}` as placeholder."))
             return
         
         await self.config.guild(ctx.guild).connect_url_template.set(url)
-        await ctx.send(_("✅ URL de conexión establecida: {}").format(url))
+        await ctx.send(_("✅ Connection URL set to: {}").format(url))
     
     @commands.command(name="refreshtime")
     @checks.admin_or_permissions(administrator=True)
@@ -1765,12 +1767,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         Example: `[p]refreshtime 120`
         """
         if seconds < 10:
-            await ctx.send(_("❌ El tiempo debe ser al menos 10 segundos."))
+            await ctx.send(_("❌ Time must be at least 10 seconds."))
             return
         
         await self.config.guild(ctx.guild).refresh_time.set(seconds)
         self.server_monitor.change_interval(seconds=seconds)
-        await ctx.send(_("✅ Tiempo de actualización establecido en **{}** segundos.").format(seconds))
+        await ctx.send(_("✅ Refresh time set to **{}** seconds.").format(seconds))
     
     @commands.command(name="gameservermonitordebug")
     @checks.admin_or_permissions(administrator=True)
@@ -1781,8 +1783,8 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         Example: `[p]gameservermonitordebug true`
         """
         self.query_service.debug = state
-        status = _("activado") if state else _("desactivado")
-        await ctx.send(_("✅ Modo debug {}.").format(status))
+        status = _("enabled") if state else _("disabled")
+        await ctx.send(_("✅ Debug mode {}.").format(status))
     
     # ==================== Comandos de Servidores ====================
     
@@ -1819,7 +1821,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         if game_type is None:
             supported = ", ".join(GameType.supported_games())
             await ctx.send(
-                _("❌ Juego '{}' no soportado. Disponibles: {}").format(game, supported)
+                _("❌ Game '{}' not supported. Available: {}").format(game, supported)
             )
             return
         
@@ -1827,7 +1829,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         has_perms, missing = await self._check_channel_permissions(channel)
         if not has_perms:
             await ctx.send(
-                _("❌ Faltan permisos en {}: {}").format(channel.mention, ", ".join(missing))
+                _("❌ Missing permissions in {}: {}").format(channel.mention, ", ".join(missing))
             )
             return
         
@@ -1837,24 +1839,23 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             
             if game_port is None:
                 await ctx.send(
-                    _("❌ Para **DayZ** indica al menos `game_port` (ej. 2302).\n"
-                      "Ejemplo: `{}addserver 1.2.3.4 dayz 2302 27016 #canal`").format(ctx.prefix)
+                    _("❌ For **DayZ** provide at least `game_port` (e.g. 2302).\nExample: `{}addserver 1.2.3.4 dayz 2302 27016 #channel`").format(ctx.prefix)
                 )
                 return
             
             if not self._valid_port(game_port):
-                await ctx.send(_("❌ Puerto de juego inválido (1-65535)."))
+                await ctx.send(_("❌ Invalid game port (1-65535)."))
                 return
             
             if query_port is not None and not self._valid_port(query_port):
-                await ctx.send(_("❌ Puerto de query inválido (1-65535)."))
+                await ctx.send(_("❌ Invalid query port (1-65535)."))
                 return
             
             key = f"{host}:{game_port}"
             
             async with self.config.guild(ctx.guild).servers() as servers:
                 if key in servers:
-                    await ctx.send(_("❌ El servidor **{}** ya está siendo monitoreado.").format(key))
+                    await ctx.send(_("❌ Server **{}** is already being monitored.").format(key))
                     return
                 
                 servers[key] = {
@@ -1872,12 +1873,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                     "server_id": self._generate_server_id()  # Nuevo: ID único para botones
                 }
             
-            msg = _("✅ Servidor **{}** (DayZ) añadido en {}.\n"
-                   "Puertos → juego: **{}**").format(key, channel.mention, game_port)
+            msg = _("✅ Server **{}** (DayZ) added in {}.\nPorts → game: **{}**").format(key, channel.mention, game_port)
             if query_port:
                 msg += _(", query: **{}**").format(query_port)
             if domain:
-                msg += _("\nDominio: {}").format(domain)
+                msg += _("\nDomain: {}").format(domain)
             
             await ctx.send(msg)
             
@@ -1892,7 +1892,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         parsed = self._parse_server_ip(server_ip, game_type)
         if not parsed:
             await ctx.send(
-                _("❌ Formato inválido. Usa 'ip:puerto' o solo 'ip' (se usará puerto por defecto).")
+                _("❌ Invalid format. Use 'ip:port' or just 'ip' (default port will be used).")
             )
             return
 
@@ -1902,16 +1902,16 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         # En estos juegos el primer puerto posicional es el de juego/conexión (ya viene en
         # server_ip), por lo que solo necesitamos validar el query_port para la consulta A2S.
         if query_port is not None and not self._valid_port(query_port):
-            await ctx.send(_("❌ Puerto de query inválido (1-65535)."))
+            await ctx.send(_("❌ Invalid query port (1-65535)."))
             return
         if game_port is not None and not self._valid_port(game_port):
-            await ctx.send(_("❌ Puerto de juego inválido (1-65535)."))
+            await ctx.send(_("❌ Invalid game port (1-65535)."))
             return
 
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_key in servers:
                 await ctx.send(
-                    _("❌ El servidor **{}** ya está siendo monitoreado.").format(server_key)
+                    _("❌ Server **{}** is already being monitored.").format(server_key)
                 )
                 return
 
@@ -1930,13 +1930,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 "server_id": self._generate_server_id()  # Nuevo: ID único para botones
             }
 
-        msg = _("✅ Servidor **{}** ({}) añadido en {}.").format(
+        msg = _("✅ Server **{}** ({}) added in {}.").format(
             server_key, game_type.display_name, channel.mention
         )
         if query_port:
-            msg += _("\nPuerto de query: **{}**").format(query_port)
+            msg += _("\nQuery port: **{}**").format(query_port)
         if domain:
-            msg += _("\nDominio: {}").format(domain)
+            msg += _("\nDomain: {}").format(domain)
         
         await ctx.send(msg)
         
@@ -1961,12 +1961,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         if resolved:
             server_key = resolved
         elif ":" not in server_key:
-            await ctx.send(_("❌ Formato: `ip:puerto` o `server_id`"))
+            await ctx.send(_("❌ Format: `ip:port` or `server_id`"))
             return
         
         servers = await self.config.guild(ctx.guild).servers()
         if server_key not in servers:
-            await ctx.send(_("❌ No se encontró servidor con clave **{}**.").format(server_key))
+            await ctx.send(_("❌ Server with key **{}** not found.").format(server_key))
             return
 
         await self._delete_server_message(
@@ -1974,7 +1974,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             servers[server_key].get("message_id")
         )
         await self._forget_servers(ctx.guild, [server_key])
-        await ctx.send(_("✅ Servidor **{}** eliminado del monitoreo.").format(server_key))
+        await ctx.send(_("✅ Server **{}** removed from monitoring.").format(server_key))
 
     @commands.command(name="deadservers", aliases=["serversmuertos"])
     @checks.admin_or_permissions(administrator=True)
@@ -1994,25 +1994,25 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         days = days if days is not None else DEAD_SERVER_DEFAULT_DAYS
         if days < 1:
-            await ctx.send(_("❌ Los días deben ser al menos 1."))
+            await ctx.send(_("❌ Days must be at least 1."))
             return
 
         candidates = await self._find_dead_servers(ctx.guild, days)
         if not candidates:
             await ctx.send(
-                _("✅ Ningún servidor lleva más de **{days}** día(s) sin responder.").format(days=days)
+                _("✅ No server has been unresponsive for more than **{days}** day(s).").format(days=days)
             )
             return
 
         embed = self._build_dead_servers_embed(
             candidates,
             days,
-            title=_("💀 Servidores sin responder"),
+            title=_("💀 Unresponsive servers"),
             color=discord.Color.orange()
         )
         embed.add_field(
             name="​",
-            value=_("Usa `{prefix}purgeservers {days}` para eliminarlos.").format(
+            value=_("Use `{prefix}purgeservers {days}` to remove them.").format(
                 prefix=ctx.clean_prefix, days=days
             ),
             inline=False
@@ -2039,45 +2039,45 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         """
         days = days if days is not None else DEAD_SERVER_DEFAULT_DAYS
         if days < 1:
-            await ctx.send(_("❌ Los días deben ser al menos 1."))
+            await ctx.send(_("❌ Days must be at least 1."))
             return
 
         candidates = await self._find_dead_servers(ctx.guild, days)
         if not candidates:
             await ctx.send(
-                _("✅ Ningún servidor lleva más de **{days}** día(s) sin responder.").format(days=days)
+                _("✅ No server has been unresponsive for more than **{days}** day(s).").format(days=days)
             )
             return
 
         embed = self._build_dead_servers_embed(
             candidates,
             days,
-            title=_("🧹 Purgar servidores muertos"),
+            title=_("🧹 Purge dead servers"),
             color=discord.Color.red()
         )
         embed.add_field(
             name="​",
             value=_(
-                "⚠️ Se eliminarán del monitoreo junto con su embed de estado y su historial de jugadores. Esta acción no se puede deshacer."
+                "⚠️ They will be removed from monitoring along with their status embed and their player history. This action cannot be undone."
             ),
             inline=False
         )
 
         view = ConfirmView(ctx.author, disable_buttons=True)
         view.confirm_button.style = discord.ButtonStyle.red
-        view.confirm_button.label = _("Purgar {count}").format(count=len(candidates))
-        view.dismiss_button.label = _("Cancelar")
+        view.confirm_button.label = _("Purge {count}").format(count=len(candidates))
+        view.dismiss_button.label = _("Cancel")
         view.message = await ctx.send(embed=embed, view=view)
         await view.wait()
 
         if not view.result:
-            await ctx.send(_("❌ Purga cancelada. No se eliminó nada."))
+            await ctx.send(_("❌ Purge cancelled. Nothing was removed."))
             return
 
         # Volver a calcular: el estado pudo cambiar mientras se confirmaba.
         candidates = await self._find_dead_servers(ctx.guild, days)
         if not candidates:
-            await ctx.send(_("✅ Los servidores volvieron a responder. No se eliminó nada."))
+            await ctx.send(_("✅ The servers responded again. Nothing was removed."))
             return
 
         async with ctx.typing():
@@ -2093,7 +2093,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             len(server_keys), ctx.guild.name, ctx.guild.id, ", ".join(server_keys)
         )
         await ctx.send(
-            _("✅ **{count}** servidor(es) eliminados del monitoreo.").format(
+            _("✅ **{count}** server(s) removed from monitoring.").format(
                 count=len(server_keys)
             )
         )
@@ -2122,9 +2122,9 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 updated = True
         
         if updated:
-            await ctx.send(_("✅ Actualización forzada completada."))
+            await ctx.send(_("✅ Force update completed."))
         else:
-            await ctx.send(_("❌ No hay servidores monitoreados en este canal."))
+            await ctx.send(_("❌ No servers monitored in this channel."))
     
     @commands.command(name="gsmversion")
     async def gsm_version(self, ctx: commands.Context) -> None:
@@ -2139,7 +2139,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     async def _alert_target(self, ctx: commands.Context, server: str) -> Optional[str]:
         key = await self._resolve_server_key_by_id(ctx.guild, server) or await self._resolve_server_key(ctx.guild, server)
         if not key:
-            await ctx.send(_("❌ No se encontró el servidor **{}**. Usa `ip:puerto` o el server_id (`{}listservers`).").format(server, ctx.clean_prefix))
+            await ctx.send(_("❌ Server **{}** not found. Use `ip:port` or the server_id (`{}listservers`).").format(server, ctx.clean_prefix))
         return key
 
     async def _set_alert_channel(self, ctx, server: str, key_name: str, channel, label: str) -> None:
@@ -2149,23 +2149,23 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         if channel is not None:
             perms = channel.permissions_for(ctx.guild.me)
             if not (perms.send_messages and perms.embed_links):
-                await ctx.send(_("❌ Necesito *Enviar mensajes* e *Insertar enlaces* en {}.").format(channel.mention))
+                await ctx.send(_("❌ I need *Send Messages* and *Embed Links* in {}.").format(channel.mention))
                 return
         async with self.config.guild(ctx.guild).servers() as servers:
             if server_key not in servers:
-                await ctx.send(_("❌ Servidor no encontrado."))
+                await ctx.send(_("❌ Server not found."))
                 return
             servers[server_key][key_name] = channel.id if channel else None
         if channel:
-            await ctx.send(_("✅ Avisos de {} de **{}** en {}.").format(label, server_key, channel.mention))
+            await ctx.send(_("✅ {} alerts for **{}** in {}.").format(label, server_key, channel.mention))
         else:
-            await ctx.send(_("✅ Avisos de {} de **{}** desactivados.").format(label, server_key))
+            await ctx.send(_("✅ {} alerts for **{}** disabled.").format(label, server_key))
 
     @commands.group(name="gsmalerts", aliases=["gsmavisos"])
     @commands.guild_only()
     @checks.admin_or_permissions(administrator=True)
     async def gsm_alerts(self, ctx: commands.Context) -> None:
-        """Avisos extra por servidor: cambio de mapa y caidas (sustituye a MapTrack)."""
+        """Extra per-server alerts: map changes and outages (replaces MapTrack)."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help()
 
@@ -2174,26 +2174,28 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         self, ctx: commands.Context, server: str,
         channel: Optional[typing.Union[discord.TextChannel, discord.Thread]] = None
     ) -> None:
-        """Avisar en un canal cuando el servidor cambia de mapa. Sin canal lo desactiva.
+        """Alert in a channel when the server changes map. Without a channel it is disabled.
 
-        Example: `[p]gsmalerts map 1.2.3.4:28015 #cambios-de-mapa`
+                Example: `[p]gsmalerts map 1.2.3.4:28015 #map-changes`
+
         """
-        await self._set_alert_channel(ctx, server, "map_alert_channel", channel, _("cambio de mapa"))
+        await self._set_alert_channel(ctx, server, "map_alert_channel", channel, _("map change"))
 
     @gsm_alerts.command(name="status")
     async def gsm_alerts_status(
         self, ctx: commands.Context, server: str,
         channel: Optional[typing.Union[discord.TextChannel, discord.Thread]] = None
     ) -> None:
-        """Avisar en un canal cuando el servidor se cae o vuelve. Sin canal lo desactiva.
+        """Alert in a channel when the server goes down or comes back. Without a channel it is disabled.
 
-        Example: `[p]gsmalerts status 1.2.3.4:28015 #estado-servers`
+                Example: `[p]gsmalerts status 1.2.3.4:28015 #server-status`
+
         """
-        await self._set_alert_channel(ctx, server, "status_alert_channel", channel, _("caidas"))
+        await self._set_alert_channel(ctx, server, "status_alert_channel", channel, _("outage"))
 
     @gsm_alerts.command(name="list")
     async def gsm_alerts_list(self, ctx: commands.Context) -> None:
-        """Ver los avisos configurados y el mapa actual de cada servidor."""
+        """Show the configured alerts and the current map of each server."""
         servers = await self.config.guild(ctx.guild).servers()
         lines = []
         for server_key, data in servers.items():
@@ -2203,29 +2205,30 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             name = data.get("last_hostname") or server_key
             parts = [f"🗺️ {current}"]
             if map_ch:
-                parts.append(_("mapa → <#{}>").format(map_ch))
+                parts.append(_("map → <#{}>").format(map_ch))
             if st_ch:
-                parts.append(_("caidas → <#{}>").format(st_ch))
+                parts.append(_("outages → <#{}>").format(st_ch))
             lines.append(f"**{discord.utils.escape_markdown(name)}** (`{server_key}`)\n" + " · ".join(parts))
         if not lines:
-            await ctx.send(_("📋 No hay servidores siendo monitoreados."))
+            await ctx.send(_("📋 No servers being monitored."))
             return
         for page in pagify("\n\n".join(lines), delims=["\n\n"], page_length=3900):
-            await ctx.send(embed=discord.Embed(title=_("🔔 Avisos de servidores"), description=page, color=discord.Color.blue()))
+            await ctx.send(embed=discord.Embed(title=_("🔔 Server alerts"), description=page, color=discord.Color.blue()))
 
     @gsm_alerts.command(name="importmaptrack")
     async def gsm_alerts_import_maptrack(self, ctx: commands.Context) -> None:
-        """Importar los avisos de mapa configurados en el cog MapTrack.
+        """Import the map alerts configured in the MapTrack cog.
 
-        Busca cada servidor de MapTrack entre los de GameServerMonitor (por ip:puerto
-        o por la IP publica configurada). Los que no esten monitorizados se listan
-        para que los añadas con `addserver`.
+                Each MapTrack server is looked up among the GameServerMonitor ones (by ip:port
+                or by the configured public IP). Servers that are not monitored are listed
+                so you can add them with `addserver`.
+
         """
         mt_config = Config.get_conf(None, identifier=1234567890, cog_name="MapTrack")
         mt_config.register_guild(map_track_channels={})
         tracks = await mt_config.guild(ctx.guild).map_track_channels()
         if not tracks:
-            await ctx.send(_("MapTrack no tiene servidores configurados en este servidor."))
+            await ctx.send(_("MapTrack has no servers configured in this server."))
             return
         servers = await self.config.guild(ctx.guild).servers()
         imported, missing = [], []
@@ -2244,13 +2247,13 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 for key, channel_id in imported:
                     if key in current:
                         current[key]["map_alert_channel"] = channel_id
-        msg = _("✅ {} servidor(es) importados de MapTrack.").format(len(imported))
+        msg = _("✅ {} server(s) imported from MapTrack.").format(len(imported))
         if missing:
-            msg += "\n" + _("⚠️ No monitorizados en GameServerMonitor (añadelos con `{}addserver` y repite): {}").format(
+            msg += "\n" + _("⚠️ Not monitored by GameServerMonitor (add them with `{}addserver` and try again): {}").format(
                 ctx.clean_prefix, ", ".join(f"`{m}`" for m in missing)
             )
         else:
-            msg += "\n" + _("Ya puedes descargar MapTrack: `{}unload maptrack`.").format(ctx.clean_prefix)
+            msg += "\n" + _("You can now unload MapTrack: `{}unload maptrack`.").format(ctx.clean_prefix)
         await ctx.send(msg)
 
     @commands.command(name="listservers", aliases=["listaserver"])
@@ -2259,11 +2262,11 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
         servers = await self.config.guild(ctx.guild).servers()
         
         if not servers:
-            await ctx.send(_("📋 No hay servidores siendo monitoreados."))
+            await ctx.send(_("📋 No servers being monitored."))
             return
         
         embed = discord.Embed(
-            title=_("📋 Servidores Monitoreados"),
+            title=_("📋 Monitored Servers"),
             color=discord.Color.blue()
         )
         
@@ -2315,7 +2318,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
+            await ctx.send(_("❌ Server **{}** not found.").format(server), ephemeral=True)
             return
         
         # Defer ephemeral para slash, typing para prefijo
@@ -2370,7 +2373,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
+            await ctx.send(_("❌ Server **{}** not found.").format(server), ephemeral=True)
             return
         
         # Defer ephemeral para slash, typing para prefijo
@@ -2423,7 +2426,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
+            await ctx.send(_("❌ Server **{}** not found.").format(server), ephemeral=True)
             return
         
         # Defer ephemeral para slash, typing para prefijo
@@ -2476,7 +2479,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             resolved_key = await self._resolve_server_key(ctx.guild, server)
         
         if not resolved_key:
-            await ctx.send(_("❌ Servidor **{}** no encontrado.").format(server), ephemeral=True)
+            await ctx.send(_("❌ Server **{}** not found.").format(server), ephemeral=True)
             return
         
         # Defer ephemeral para slash, typing para prefijo
