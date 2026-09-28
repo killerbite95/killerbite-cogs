@@ -13,35 +13,35 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: i18n_strings.py:12
+#: i18n_strings.py:11
 msgid "Reduces sickness by 10 per piece"
 msgstr "Reduce el mareo en 10 por pieza"
 
-#: i18n_strings.py:13
+#: i18n_strings.py:12
 msgid "Reduces sickness by 20 per piece"
 msgstr "Reduce el mareo en 20 por pieza"
 
-#: i18n_strings.py:14
+#: i18n_strings.py:13
 msgid "Randomizes your sickness — gamble!"
 msgstr "Tu mareo pasa a un valor al azar — ¡apuesta!"
 
-#: i18n_strings.py:15
+#: i18n_strings.py:14
 msgid "Instantly resets sickness to 0"
 msgstr "Pone el mareo a 0 al instante"
 
-#: i18n_strings.py:16
+#: i18n_strings.py:15
 msgid "Protects you from theft"
 msgstr "Te protege de los robos"
 
-#: i18n_strings.py:17
+#: i18n_strings.py:16
 msgid "Worth 10× eaten count! No sickness."
 msgstr "¡Vale x10 en caramelos comidos! Sin mareo."
 
-#: i18n_strings.py:18
+#: i18n_strings.py:17
 msgid "🎃 The Candy Tax!"
 msgstr "🎃 ¡El impuesto de caramelos!"
 
-#: i18n_strings.py:19
+#: i18n_strings.py:18
 msgid ""
 "A shadowy figure appears from the darkness and demands a toll for passing "
 "through their territory..."
@@ -49,11 +49,11 @@ msgstr ""
 "Una figura sombría surge de la oscuridad y exige un peaje por cruzar su "
 "territorio..."
 
-#: i18n_strings.py:20
+#: i18n_strings.py:19
 msgid "🧙 Witch's Curse!"
 msgstr "🧙 ¡Maldición de la bruja!"
 
-#: i18n_strings.py:21
+#: i18n_strings.py:20
 msgid ""
 "A cackling witch leaps from behind a tombstone and hexes you with her "
 "crooked wand!"
@@ -61,32 +61,32 @@ msgstr ""
 "¡Una bruja carcajeante salta de detrás de una lápida y te hechiza con su "
 "varita torcida!"
 
-#: i18n_strings.py:22
+#: i18n_strings.py:21
 msgid "👻 Haunted House!"
 msgstr "👻 ¡Casa encantada!"
 
-#: i18n_strings.py:23
+#: i18n_strings.py:22
 msgid ""
 "You stumbled into a haunted house! Ghostly hands grab at your candy bag..."
 msgstr ""
 "¡Has entrado en una casa encantada! Unas manos fantasmales agarran tu bolsa "
 "de caramelos..."
 
-#: i18n_strings.py:24
+#: i18n_strings.py:23
 msgid "💨 Butterfingers!"
 msgstr "💨 ¡Manos de mantequilla!"
 
-#: i18n_strings.py:25
+#: i18n_strings.py:24
 msgid "You tripped over a jack-o'-lantern and candy scattered everywhere!"
 msgstr ""
 "¡Tropezaste con una calabaza y los caramelos salieron volando por todas "
 "partes!"
 
-#: i18n_strings.py:26
+#: i18n_strings.py:25
 msgid "☠️ Cursed Candy!"
 msgstr "☠️ ¡Caramelo maldito!"
 
-#: i18n_strings.py:27
+#: i18n_strings.py:26
 msgid ""
 "That candy had a strange glow... It was cursed! Your stomach churns "
 "violently!"
@@ -94,15 +94,15 @@ msgstr ""
 "Ese caramelo brillaba de forma extraña... ¡Estaba maldito! ¡Se te revuelve "
 "el estómago!"
 
-#: i18n_strings.py:28
+#: i18n_strings.py:27
 msgid "Eat candies collectively!"
 msgstr "¡Comed caramelos entre todos!"
 
-#: i18n_strings.py:29
+#: i18n_strings.py:28
 msgid "Collect candies via trick-or-treat!"
 msgstr "¡Recoged caramelos con truco o trato!"
 
-#: i18n_strings.py:30
+#: i18n_strings.py:29
 msgid "Steal candies from others!"
 msgstr "¡Robad caramelos a los demás!"
 
@@ -124,8 +124,8 @@ msgstr ""
 "    Original de aikaterna. Ampliado por Killerbite95.\n"
 "    "
 
-#: trickortreat.py:311 trickortreat.py:940 trickortreat.py:1869
-#: trickortreat.py:1909 trickortreat.py:1995
+#: trickortreat.py:311 trickortreat.py:940 trickortreat.py:1871
+#: trickortreat.py:1911 trickortreat.py:1997
 msgid "🎃 Trick or Treat v{version}"
 msgstr "🎃 Trick or Treat v{version}"
 
@@ -1484,130 +1484,130 @@ msgstr "Versión de Truco o trato."
 msgid "Trick or Treat version {version}"
 msgstr "Trick or Treat versión {version}"
 
-#: trickortreat.py:1743
+#: trickortreat.py:1745
 msgid "The thought of candy right now doesn't really sound like a good idea."
 msgstr "La idea de caramelos ahora mismo no suena como una buena idea."
 
-#: trickortreat.py:1744
+#: trickortreat.py:1746
 msgid "All the lights on this street are dark..."
 msgstr "Todas las luces de esta calle están apagadas..."
 
-#: trickortreat.py:1745
+#: trickortreat.py:1747
 msgid "It's starting to get late."
 msgstr "Se está haciendo tarde."
 
-#: trickortreat.py:1746
+#: trickortreat.py:1748
 msgid "The wind howls through the trees. Does it seem darker all of a sudden?"
 msgstr "El viento aúlla entre los árboles. ¿De repente parece más oscuro?"
 
-#: trickortreat.py:1747
+#: trickortreat.py:1749
 msgid "You start to walk the long distance to the next house..."
 msgstr "Empiezas a caminar la larga distancia hasta la siguiente casa..."
 
-#: trickortreat.py:1748
+#: trickortreat.py:1750
 msgid "You take a moment to count your candy before moving on."
 msgstr "Te tomas un momento para contar tus caramelos antes de continuar."
 
-#: trickortreat.py:1749
+#: trickortreat.py:1751
 msgid "The house you were approaching just turned the light off."
 msgstr "La casa a la que te acercabas acaba de apagar la luz."
 
-#: trickortreat.py:1750
+#: trickortreat.py:1752
 msgid "The wind starts to pick up as you look for the next house..."
 msgstr "El viento empieza a soplar mientras buscas la siguiente casa..."
 
-#: trickortreat.py:1780
+#: trickortreat.py:1782
 msgid "*You hear footsteps...*"
 msgstr "*Escuchas pasos...*"
 
-#: trickortreat.py:1781
+#: trickortreat.py:1783
 msgid ""
 "*You're left alone with your thoughts as you wait for the door to open...*"
 msgstr ""
 "*Te quedas solo con tus pensamientos mientras esperas a que se abra la "
 "puerta...*"
 
-#: trickortreat.py:1782
+#: trickortreat.py:1784
 msgid "*The wind howls through the trees...*"
 msgstr "*El viento aúlla entre los árboles...*"
 
-#: trickortreat.py:1783
+#: trickortreat.py:1785
 msgid "*Does it feel colder out here all of a sudden?*"
 msgstr "*¿De repente hace más frío aquí fuera?*"
 
-#: trickortreat.py:1784
+#: trickortreat.py:1786
 msgid "*Somewhere inside the house, you hear wood creaking...*"
 msgstr "*En algún lugar dentro de la casa, escuchas madera crujiendo...*"
 
-#: trickortreat.py:1785
+#: trickortreat.py:1787
 msgid "*You walk up the path to the door and knock...*"
 msgstr "*Caminas por el sendero hasta la puerta y tocas...*"
 
-#: trickortreat.py:1786
+#: trickortreat.py:1788
 msgid "*You knock on the door...*"
 msgstr "*Tocas la puerta...*"
 
-#: trickortreat.py:1787
+#: trickortreat.py:1789
 msgid "*There's a movement in the shadows by the side of the house...*"
 msgstr "*Hay un movimiento en las sombras al lado de la casa...*"
 
-#: trickortreat.py:1795
+#: trickortreat.py:1797
 msgid "*The door slowly opens...*"
 msgstr "*La puerta se abre lentamente...*"
 
-#: trickortreat.py:1796
+#: trickortreat.py:1798
 msgid "*The ancient wooden door starts to open...*"
 msgstr "*La antigua puerta de madera empieza a abrirse...*"
 
-#: trickortreat.py:1797
+#: trickortreat.py:1799
 msgid "*A light turns on overhead...*"
 msgstr "*Una luz se enciende arriba...*"
 
-#: trickortreat.py:1798
+#: trickortreat.py:1800
 msgid "*You hear a scuffling noise...*"
 msgstr "*Escuchas un ruido de arrastre...*"
 
-#: trickortreat.py:1799
+#: trickortreat.py:1801
 msgid "*There's someone talking inside...*"
 msgstr "*Hay alguien hablando dentro...*"
 
-#: trickortreat.py:1800
+#: trickortreat.py:1802
 msgid "*The wind whips around your feet...*"
 msgstr "*El viento azota tus pies...*"
 
-#: trickortreat.py:1801
+#: trickortreat.py:1803
 msgid "*A crow caws ominously...*"
 msgstr "*Un cuervo grazna ominosamente...*"
 
-#: trickortreat.py:1802
+#: trickortreat.py:1804
 msgid "*You hear an owl hooting in the distance...*"
 msgstr "*Escuchas un búho ululando a lo lejos...*"
 
-#: trickortreat.py:1852
+#: trickortreat.py:1854
 msgid "💔 Lost **{candy_lost}** candies!"
 msgstr "💔 ¡Perdiste **{candy_lost}** caramelos!"
 
-#: trickortreat.py:1855
+#: trickortreat.py:1857
 msgid "{value} Sickness: **+{sickness_gained}** ({value2} {new_sick}/100)"
 msgstr "{value} Mareo: **+{sickness_gained}** ({value2} {new_sick}/100)"
 
-#: trickortreat.py:1858
+#: trickortreat.py:1860
 msgid "*Better luck next time...* 👻"
 msgstr "*Mejor suerte la próxima vez...* 👻"
 
-#: trickortreat.py:1866
+#: trickortreat.py:1868
 msgid "🎃 TRICK! — {name}"
 msgstr "🎃 ¡TRUCO! — {name}"
 
-#: trickortreat.py:1886
+#: trickortreat.py:1888
 msgid "⚠️ *Sickness penalty: rewards quartered!*"
 msgstr "⚠️ *Penalización por enfermedad: ¡recompensas divididas entre 4!*"
 
-#: trickortreat.py:1894
+#: trickortreat.py:1896
 msgid "🤮 Too Sick!"
 msgstr "🤮 ¡Demasiado Enfermo!"
 
-#: trickortreat.py:1896
+#: trickortreat.py:1898
 msgid ""
 "You're so sick that you **dropped** {lost} candies!\n"
 "\n"
@@ -1619,75 +1619,75 @@ msgstr ""
 "{face} {bar} **{sickness}**/100\n"
 "*¡Come chocolate o piruletas para recuperarte!*"
 
-#: trickortreat.py:1914
+#: trickortreat.py:1916
 msgid "⚠️ *Sickness penalty: rewards halved!*"
 msgstr "⚠️ *Penalización por enfermedad: ¡recompensas a la mitad!*"
 
-#: trickortreat.py:1920
+#: trickortreat.py:1922
 msgid "Oh, hello. What a cute costume!"
 msgstr "Oh, hola. ¡Qué disfraz tan bonito!"
 
-#: trickortreat.py:1921
+#: trickortreat.py:1923
 msgid "Look at that costume!"
 msgstr "¡Mira ese disfraz!"
 
-#: trickortreat.py:1922
+#: trickortreat.py:1924
 msgid "Out this late at night?"
 msgstr "¿Fuera a estas horas de la noche?"
 
-#: trickortreat.py:1923
+#: trickortreat.py:1925
 msgid "Here's a little something for you."
 msgstr "Aquí tienes un detallito."
 
-#: trickortreat.py:1924
+#: trickortreat.py:1926
 msgid "The peppermint ones are my favorite."
 msgstr "Los de menta son mis favoritos."
 
-#: trickortreat.py:1925
+#: trickortreat.py:1927
 msgid "Come back again later if the light is still on."
 msgstr "Vuelve más tarde si la luz sigue encendida."
 
-#: trickortreat.py:1926
+#: trickortreat.py:1928
 msgid "Go ahead, take a few."
 msgstr "Adelante, coge unos cuantos."
 
-#: trickortreat.py:1927
+#: trickortreat.py:1929
 msgid "Aww, look at you. Here, take this."
 msgstr "Aww, mírate. Toma, llévate esto."
 
-#: trickortreat.py:1928
+#: trickortreat.py:1930
 msgid "Don't eat all those at once!"
 msgstr "¡No te los comas todos de una vez!"
 
-#: trickortreat.py:1929
+#: trickortreat.py:1931
 msgid "Well, I think this is the last of it."
 msgstr "Bueno, creo que esto es lo último."
 
-#: trickortreat.py:1937
+#: trickortreat.py:1939
 msgid " *(×{multiplier:.1f} streak!)*"
 msgstr " *(¡racha ×{multiplier:.1f}!)*"
 
-#: trickortreat.py:1938
+#: trickortreat.py:1940
 msgid "🍬 **+{candy}** Candies{streak_text}\n"
 msgstr "🍬 **+{candy}** caramelos{streak_text}\n"
 
-#: trickortreat.py:1957
+#: trickortreat.py:1959
 msgid "✨ **+1 Golden Candy!** *(LEGENDARY!)*"
 msgstr "✨ **¡+1 caramelo dorado!** *(¡LEGENDARIO!)*"
 
-#: trickortreat.py:1963
+#: trickortreat.py:1965
 msgid "🌶️ **+1 Ghost Pepper!** *(ULTRA RARE!)*"
 msgstr "🌶️ **¡+1 chile fantasma!** *(¡ULTRA RARO!)*"
 
-#: trickortreat.py:1966
+#: trickortreat.py:1968
 msgid "**Bonus Drops:**"
 msgstr "**Bonus Extra:**"
 
-#: trickortreat.py:1968
+#: trickortreat.py:1970
 msgid "🌟 **RARE DROPS:**"
 msgstr "🌟 **DROPS RAROS:**"
 
-#: trickortreat.py:1972
+#: trickortreat.py:1974
 msgid ""
 "\n"
 "🔥 **Streak:** {streak} day{value}"
@@ -1695,6 +1695,6 @@ msgstr ""
 "\n"
 "🔥 **Racha:** {streak} día{value}"
 
-#: trickortreat.py:1992
+#: trickortreat.py:1994
 msgid "🎃 TREAT! — {name}"
 msgstr "🎃 ¡DULCE! — {name}"

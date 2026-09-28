@@ -36,7 +36,7 @@ msgstr ""
 "      • /autonick admin listforbidden\n"
 "    "
 
-#: autonick.py:119
+#: autonick.py:120
 msgid ""
 "{author}, you must wait {remaining} seconds before changing your nickname "
 "again."
@@ -44,11 +44,11 @@ msgstr ""
 "{author}, debes esperar {remaining} segundos antes de cambiar tu apodo "
 "nuevamente."
 
-#: autonick.py:131
+#: autonick.py:132
 msgid "{author}, the nickname can't be longer than 32 characters."
 msgstr "{author}, el apodo no puede tener mas de 32 caracteres."
 
-#: autonick.py:138
+#: autonick.py:139
 msgid ""
 "{author}, that name contains forbidden words or names. Please choose another"
 " one."
@@ -56,19 +56,19 @@ msgstr ""
 "{author}, el nombre contiene palabras o nombres no permitidos. Por favor, "
 "elige otro."
 
-#: autonick.py:147
+#: autonick.py:148
 msgid "{author}, your nickname has been changed to: **{escape_markdown}**"
 msgstr "{author}, tu apodo ha sido cambiado a: **{escape_markdown}**"
 
-#: autonick.py:152
+#: autonick.py:153
 msgid "{author}, I don't have permission to change your nickname."
 msgstr "{author}, no tengo permisos para cambiar tu apodo."
 
-#: autonick.py:155
+#: autonick.py:156
 msgid "Error while changing the nickname: {e}"
 msgstr "Error al cambiar el apodo: {e}"
 
-#: autonick.py:168
+#: autonick.py:169
 msgid ""
 "Set the channel where nickname messages are read.\n"
 "        Example: `/autonick setchannel #channel-name`\n"
@@ -79,11 +79,11 @@ msgstr ""
 "        Ejemplo: `/autonick setchannel #nombre-del-canal`\n"
 "        "
 
-#: autonick.py:172
+#: autonick.py:173
 msgid "The AutoNick channel has been set to {channel}."
 msgstr "El canal para AutoNick ha sido establecido a {channel}."
 
-#: autonick.py:177
+#: autonick.py:178
 msgid ""
 "Set the cooldown (in seconds) between nickname changes.\n"
 "        Example: `/autonick setcooldown 30`\n"
@@ -94,15 +94,15 @@ msgstr ""
 "        Ejemplo: `/autonick setcooldown 30`\n"
 "        "
 
-#: autonick.py:181
+#: autonick.py:182
 msgid "The cooldown must be a positive number."
 msgstr "El cooldown debe ser un número positivo."
 
-#: autonick.py:183
+#: autonick.py:184
 msgid "The cooldown has been set to {seconds} seconds."
 msgstr "El cooldown ha sido establecido a {seconds} segundos."
 
-#: autonick.py:187
+#: autonick.py:188
 msgid ""
 "Show the current AutoNick settings.\n"
 "        Example: `/autonick info`\n"
@@ -113,27 +113,27 @@ msgstr ""
 "        Ejemplo: `/autonick info`\n"
 "        "
 
-#: autonick.py:193
+#: autonick.py:194
 msgid "AutoNick settings"
 msgstr "Configuración de AutoNick"
 
-#: autonick.py:194
+#: autonick.py:195
 msgid "Channel"
 msgstr "Canal"
 
-#: autonick.py:194
+#: autonick.py:195
 msgid "Not set"
 msgstr "No configurado"
 
-#: autonick.py:195
+#: autonick.py:196
 msgid "Cooldown"
 msgstr "Cooldown"
 
-#: autonick.py:195
+#: autonick.py:196
 msgid "{cooldown} seconds"
 msgstr "{cooldown} segundos"
 
-#: autonick.py:201
+#: autonick.py:202
 msgid ""
 "AutoNick admin commands.\n"
 "        Usage: `/autonick admin <subcommand>`\n"
@@ -144,7 +144,7 @@ msgstr ""
 "        Uso: `/autonick admin <subcomando>`\n"
 "        "
 
-#: autonick.py:210
+#: autonick.py:211
 msgid ""
 "Add a word or phrase to the forbidden names list.\n"
 "        Example: `/autonick admin addforbidden [word or phrase]`\n"
@@ -155,15 +155,15 @@ msgstr ""
 "        Ejemplo: `/autonick admin addforbidden [palabra o frase]`\n"
 "        "
 
-#: autonick.py:216
+#: autonick.py:217
 msgid "That word is already in the forbidden list."
 msgstr "Esa palabra ya se encuentra en la lista de prohibidos."
 
-#: autonick.py:219
+#: autonick.py:220
 msgid "The word '{word}' has been added to the forbidden list."
 msgstr "La palabra '{word}' ha sido añadida a la lista de prohibidos."
 
-#: autonick.py:224
+#: autonick.py:225
 msgid ""
 "Remove a word or phrase from the forbidden names list.\n"
 "        Example: `/autonick admin removeforbidden [word or phrase]`\n"
@@ -174,15 +174,15 @@ msgstr ""
 "        Ejemplo: `/autonick admin removeforbidden [palabra o frase]`\n"
 "        "
 
-#: autonick.py:230
+#: autonick.py:231
 msgid "That word is not in the forbidden list."
 msgstr "Esa palabra no se encuentra en la lista de prohibidos."
 
-#: autonick.py:233
+#: autonick.py:234
 msgid "The word '{word}' has been removed from the forbidden list."
 msgstr "La palabra '{word}' ha sido eliminada de la lista de prohibidos."
 
-#: autonick.py:237
+#: autonick.py:238
 msgid ""
 "Show every forbidden word or phrase.\n"
 "        Example: `/autonick admin listforbidden`\n"
@@ -193,20 +193,20 @@ msgstr ""
 "        Ejemplo: `/autonick admin listforbidden`\n"
 "        "
 
-#: autonick.py:242
+#: autonick.py:243
 msgid "The forbidden words list is empty."
 msgstr "La lista de palabras prohibidas está vacía."
 
-#: autonick.py:246
+#: autonick.py:247
 msgid "Forbidden words"
 msgstr "Palabras prohibidas"
 
 #: i18n_strings.py:11
 msgid ""
 "Main AutoNick command group.\n"
-"Use `/autonick help` to see every subcommand."
+"        Use `/autonick help` to see every subcommand.\n"
+"        "
 msgstr ""
-"\n"
-"        Grupo principal de comandos de AutoNick.\n"
+"Grupo principal de comandos de AutoNick.\n"
 "        Usa `/autonick help` para ver todos los subcomandos.\n"
 "        "

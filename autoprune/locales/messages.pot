@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:38+0000\n"
+"POT-Creation-Date: 2026-09-28 11:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -33,168 +33,168 @@ msgstr ""
 msgid "🧹 Banned users' credits deleted"
 msgstr ""
 
-#: prunebans.py:261
+#: prunebans.py:262
 msgid "🧹 AutoPrune"
 msgstr ""
 
-#: prunebans.py:262
+#: prunebans.py:263
 msgid ""
 "Deletes the credits of users who are still banned after some days.\n"
 "Bans and unbans are logged by modlog; this only reports cleanups."
 msgstr ""
 
-#: prunebans.py:263
+#: prunebans.py:264
 msgid "Status"
 msgstr ""
 
-#: prunebans.py:263
+#: prunebans.py:264
 msgid "🟢 Enabled"
 msgstr ""
 
-#: prunebans.py:263
+#: prunebans.py:264
 msgid "🔴 Disabled"
 msgstr ""
 
-#: prunebans.py:264
+#: prunebans.py:265
 msgid "Wait"
 msgstr ""
 
-#: prunebans.py:264
+#: prunebans.py:265
 msgid "{delay_days} days"
 msgstr ""
 
-#: prunebans.py:265
+#: prunebans.py:266
 msgid "Log channel"
 msgstr ""
 
-#: prunebans.py:266
+#: prunebans.py:267
 msgid "Tracked"
 msgstr ""
 
-#: prunebans.py:270 prunebans.py:275
+#: prunebans.py:271 prunebans.py:276
 msgid "Bank"
 msgstr ""
 
-#: prunebans.py:271
+#: prunebans.py:272
 msgid "Global · "
 msgstr ""
 
-#: prunebans.py:271
+#: prunebans.py:272
 msgid "accounts are deleted"
 msgstr ""
 
-#: prunebans.py:271
+#: prunebans.py:272
 msgid ""
 "⚠️ nothing is deleted (the owner can enable it with `autoprune globalbank "
 "true`)"
 msgstr ""
 
-#: prunebans.py:275
+#: prunebans.py:276
 msgid "Local (per server)"
 msgstr ""
 
-#: prunebans.py:287
+#: prunebans.py:288
 #, docstring
 msgid "Enable automatic cleanup in this server."
 msgstr ""
 
-#: prunebans.py:291
+#: prunebans.py:292
 msgid ""
 "✅ Enabled. Credits of users who are still banned will be deleted after **{days}** days.\n"
 "To also track users who were already banned: `{clean_prefix}autoprune sync`."
 msgstr ""
 
-#: prunebans.py:296
+#: prunebans.py:297
 #, docstring
 msgid "Disable automatic cleanup (tracking is kept)."
 msgstr ""
 
-#: prunebans.py:298
+#: prunebans.py:299
 msgid "⏸️ Disabled. Nothing will be deleted until you enable it again."
 msgstr ""
 
-#: prunebans.py:302
+#: prunebans.py:303
 #, docstring
 msgid ""
 "Days a user must stay banned before their credits are deleted (0 = next "
 "check)."
 msgstr ""
 
-#: prunebans.py:310
+#: prunebans.py:311
 msgid "✅ Wait set to **{days}** days (also applied to pending bans)."
 msgstr ""
 
-#: prunebans.py:314
+#: prunebans.py:315
 #, docstring
 msgid "Channel to report deleted credits. Without a channel it is removed."
 msgstr ""
 
-#: prunebans.py:316
+#: prunebans.py:317
 msgid "✅ Log channel: {channel}."
 msgstr ""
 
-#: prunebans.py:316
+#: prunebans.py:317
 msgid "✅ Log channel removed."
 msgstr ""
 
-#: prunebans.py:320
+#: prunebans.py:321
 #, docstring
 msgid "Tracked bans and when they will be cleaned up."
 msgstr ""
 
-#: prunebans.py:323
+#: prunebans.py:324
 msgid "There are no tracked bans."
 msgstr ""
 
-#: prunebans.py:330
+#: prunebans.py:331
 msgid "<@{uid_str}> (`{uid_str}`) · {amount} · cleanup {when}"
 msgstr ""
 
-#: prunebans.py:332
+#: prunebans.py:333
 msgid "⏳ Tracked bans ({count})"
 msgstr ""
 
-#: prunebans.py:338
+#: prunebans.py:339
 #, docstring
 msgid ""
 "Start tracking users who were already banned (the countdown starts today)."
 msgstr ""
 
-#: prunebans.py:346
+#: prunebans.py:347
 msgid "✅ {added} bans added to tracking."
 msgstr ""
 
-#: prunebans.py:350
+#: prunebans.py:351
 #, docstring
 msgid ""
 "Check expired bans now. With `true` it cleans every pending one without "
 "waiting."
 msgstr ""
 
-#: prunebans.py:352
+#: prunebans.py:353
 msgid ""
 "⚠️ The bank is global and the owner has not allowed deleting global "
 "accounts."
 msgstr ""
 
-#: prunebans.py:355
+#: prunebans.py:356
 msgid "🧹 Credits deleted from {count} user(s)."
 msgstr ""
 
-#: prunebans.py:359
+#: prunebans.py:360
 #, docstring
 msgid "Stop tracking a user (their credits will not be deleted)."
 msgstr ""
 
-#: prunebans.py:362
+#: prunebans.py:363
 msgid "✅ Removed from tracking."
 msgstr ""
 
-#: prunebans.py:362
+#: prunebans.py:363
 msgid "It was not tracked."
 msgstr ""
 
-#: prunebans.py:367
+#: prunebans.py:368
 #, docstring
 msgid ""
 "(Owner) Allow deleting accounts when Red's bank is global.\n"
@@ -204,10 +204,10 @@ msgid ""
 "        "
 msgstr ""
 
-#: prunebans.py:373
+#: prunebans.py:374
 msgid "✅ Global bank accounts will be deleted."
 msgstr ""
 
-#: prunebans.py:373
+#: prunebans.py:374
 msgid "✅ Global bank accounts will not be touched."
 msgstr ""

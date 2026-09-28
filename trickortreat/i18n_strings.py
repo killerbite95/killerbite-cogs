@@ -1,7 +1,6 @@
-"""Generado automaticamente: textos marcados con N_() en constantes de modulo.
-
-Este archivo no se importa. Solo existe para que ``redgettext`` extraiga estos
-textos al catalogo de traducciones; en el codigo se traducen con ``_()`` al usarse.
+"""Generado automaticamente. No se importa: solo sirve para que ``redgettext``
+extraiga al catalogo los textos que no detecta por si solo (constantes marcadas
+con N_(), docstrings de comandos hibridos y textos dentro de decoradores).
 """
 from redbot.core.i18n import Translator
 

@@ -1,1059 +1,3773 @@
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: vrt-cogs\n"
-"POT-Creation-Date: 2024-02-08 18:31-0500\n"
-"PO-Revision-Date: 2024-12-03 14:55\n"
-"Last-Translator: \n"
-"Language-Team: Spanish\n"
+"Project-Id-Version: ticketstrini\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: redgettext 3.4.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Crowdin-Project: vrt-cogs\n"
-"X-Crowdin-Project-ID: 550681\n"
-"X-Crowdin-Language: es-ES\n"
-"X-Crowdin-File: /[vertyco.vrt-cogs] main/tickets/locales/messages.pot\n"
-"X-Crowdin-File-ID: 13\n"
-"Language: es_ES\n"
 
-#: tickets.py:32
-#, docstring
-msgid "\n"
-"    Support ticket system with multi-panel functionality\n"
-"    "
-msgstr "Sistema de tickets de soporte con funcionalidad multipanel    "
+#: i18n_strings.py:11
+msgid "View active tickets"
+msgstr "Ver tickets activos"
 
-#: tickets.py:45
-#, docstring
-msgid "No data to delete"
-msgstr "No hay datos que borrar"
+#: i18n_strings.py:12
+msgid "Close a ticket"
+msgstr "Cerrar un ticket"
 
-#: tickets.py:274
-msgid "If you do not respond to this ticket within the next 20 minutes it will be closed automatically."
-msgstr "Si no responde a este ticket dentro de los próximos 20 minutos, se cerrará automáticamente."
-
-#: tickets.py:291
-msgid "(Auto-Close) Opened ticket with no response for "
-msgstr "(Cierre automático) Ticket abierto sin respuesta durante "
-
-#: tickets.py:338
-msgid "User left guild(Auto-Close)"
-msgstr "Usuario abandonó gremio (Auto-Cerrar)"
-
-# ============================================================================
-# v4.0.0 - New translations for CloseView buttons and messages
-# ============================================================================
-
-#: common/views.py - CloseView buttons
-msgid "Claim"
-msgstr "Reclamar"
-
-msgid "Claimed"
-msgstr "Reclamado"
-
-msgid "Close"
-msgstr "Cerrar"
-
-#: common/views.py - CloseView messages
-msgid "Only support staff can claim tickets."
-msgstr "Solo el personal de soporte puede reclamar tickets."
-
-msgid "This ticket no longer exists."
-msgstr "Este ticket ya no existe."
-
-msgid "Unknown"
-msgstr "Desconocido"
-
-msgid "You have released this ticket."
-msgstr "Has liberado este ticket."
-
-msgid "This ticket is already claimed by **{}**."
-msgstr "Este ticket ya está reclamado por **{}**."
-
-msgid "You have claimed this ticket!"
-msgstr "¡Has reclamado este ticket!"
-
-msgid "This ticket has already been closed! Please delete it manually."
-msgstr "¡Este ticket ya ha sido cerrado! Por favor, elimínalo manualmente."
-
-msgid "You do not have permissions to close this ticket"
-msgstr "No tienes permisos para cerrar este ticket"
-
-msgid "Something went wrong, please try again."
-msgstr "Algo salió mal, por favor inténtalo de nuevo."
-
-msgid "Closing..."
-msgstr "Cerrando..."
-
-#: common/views.py - LogView messages
-msgid "You have already been added to the ticket **{}**!"
-msgstr "¡Ya has sido añadido al ticket **{}**!"
-
-msgid "The maximum amount of staff have claimed this ticket!"
-msgstr "¡El número máximo de personal ha reclamado este ticket!"
-
-msgid "You already have access to the ticket **{}**!"
-msgstr "¡Ya tienes acceso al ticket **{}**!"
-
-msgid "{} was added to the ticket"
-msgstr "{} fue añadido al ticket"
-
-msgid "You have been added to the ticket **{}**"
-msgstr "Has sido añadido al ticket **{}**"
-
-msgid "Join Ticket"
-msgstr "Unirse al Ticket"
-
-#: common/views.py - CloseReasonModal
-msgid "Reason for closing"
-msgstr "Motivo del cierre"
-
-msgid "Enter a reason for closing this ticket"
-msgstr "Introduce un motivo para cerrar este ticket"
-
-#: common/utils.py - Claim system messages
-msgid "This is not a ticket channel."
-msgstr "Este no es un canal de ticket."
-
-msgid "This ticket is already claimed by {}."
-msgstr "Este ticket ya está reclamado por {}."
-
-msgid "You have reached your maximum claim limit of {} tickets."
-msgstr "Has alcanzado tu límite máximo de {} tickets reclamados."
-
-msgid "Ticket claimed successfully!"
-msgstr "¡Ticket reclamado correctamente!"
-
-msgid "This ticket is not claimed."
-msgstr "Este ticket no está reclamado."
-
-msgid "You can only unclaim tickets you have claimed."
-msgstr "Solo puedes liberar tickets que hayas reclamado."
-
-msgid "Ticket unclaimed successfully."
-msgstr "Ticket liberado correctamente."
-
-msgid "You cannot transfer to yourself."
-msgstr "No puedes transferir a ti mismo."
-
-msgid "Target user is not support staff."
-msgstr "El usuario destino no es personal de soporte."
-
-msgid "Ticket transferred successfully."
-msgstr "Ticket transferido correctamente."
-
-#: commands/admin.py - repairviews command
-msgid "Repaired **{}** ticket views.\n⚠️ **{}** tickets could not be repaired."
-msgstr "Reparadas **{}** vistas de tickets.\n⚠️ **{}** tickets no pudieron ser reparados."
-
-#: commands/admin.py - Blacklist messages
-msgid "Invalid duration format. Use: 1h, 2d, 1w, 30d, or permanent"
-msgstr "Formato de duración inválido. Usa: 1h, 2d, 1w, 30d, o permanent"
-
-msgid "Panel not found"
-msgstr "Panel no encontrado"
-
-#: commands/admin.py - Stats messages
-msgid "No statistics available yet."
-msgstr "Aún no hay estadísticas disponibles."
-
-msgid "Ticket Statistics"
-msgstr "Estadísticas de Tickets"
-
-msgid "Total Tickets"
-msgstr "Total de Tickets"
-
-msgid "Open Tickets"
-msgstr "Tickets Abiertos"
-
-msgid "Closed Tickets"
-msgstr "Tickets Cerrados"
-
-msgid "Average Claim Time"
-msgstr "Tiempo Promedio de Reclamación"
-
-msgid "Average Close Time"
-msgstr "Tiempo Promedio de Cierre"
-
-#: commands/admin.py - Quick Reply messages
-msgid "Quick reply '{}' created successfully!"
-msgstr "¡Respuesta rápida '{}' creada correctamente!"
-
-msgid "Quick reply '{}' not found."
-msgstr "Respuesta rápida '{}' no encontrada."
-
-msgid "Quick reply '{}' deleted."
-msgstr "Respuesta rápida '{}' eliminada."
-
-msgid "No quick replies configured."
-msgstr "No hay respuestas rápidas configuradas."
-
-msgid "Available Quick Replies"
-msgstr "Respuestas Rápidas Disponibles"
-
-#: commands/admin.py - Escalation messages
-msgid "Escalation channel set to {}"
-msgstr "Canal de escalación establecido en {}"
-
-msgid "Escalation role set to {}"
-msgstr "Rol de escalación establecido en {}"
-
-msgid "Escalation time set to {} minutes"
-msgstr "Tiempo de escalación establecido en {} minutos"
-
-#: commands/admin.py - Auto-close messages
-msgid "Auto-close (user inactivity) set to {} hours"
-msgstr "Auto-cierre (inactividad del usuario) establecido en {} horas"
-
-msgid "Auto-close (staff inactivity) set to {} hours"
-msgstr "Auto-cierre (inactividad del personal) establecido en {} horas"
-
-msgid "Warning time set to {} hours before auto-close"
-msgstr "Tiempo de aviso establecido en {} horas antes del auto-cierre"
-
-msgid "Reopen window set to {} hours"
-msgstr "Ventana de reapertura establecida en {} horas"
-
-#: commands/admin.py - Note messages
-msgid "Note added to ticket."
-msgstr "Nota añadida al ticket."
-
-msgid "No notes for this ticket."
-msgstr "No hay notas para este ticket."
-
-msgid "Ticket Notes"
-msgstr "Notas del Ticket"
-
-#: commands/admin.py - Preflight messages
-msgid "✅ Panel Check Passed"
-msgstr "✅ Verificación del Panel Aprobada"
-
-msgid "No issues found with panel '{}'"
-msgstr "No se encontraron problemas con el panel '{}'"
-
-msgid "⚠️ Panel Issues Found"
-msgstr "⚠️ Problemas Encontrados en el Panel"
-
-msgid "✅ All Panels OK"
-msgstr "✅ Todos los Paneles OK"
-
-msgid "No issues found with any panels"
-msgstr "No se encontraron problemas en ningún panel"
-
-msgid "⚠️ Issues Found"
-msgstr "⚠️ Problemas Encontrados"
-
-#: commands/admin.py - Audit messages
-msgid "Audit channel set to {}"
-msgstr "Canal de auditoría establecido en {}"
-
-msgid "Audit logging disabled"
-msgstr "Registro de auditoría desactivado"
-
-#: commands/base.py - User commands
-msgid "You have an open ticket"
-msgstr "Tienes un ticket abierto"
-
-msgid "You already have an open ticket in this panel."
-msgstr "Ya tienes un ticket abierto en este panel."
-
-msgid "Your ticket: {}"
-msgstr "Tu ticket: {}"
-
-#: Overview messages
-msgid "Active Tickets Overview"
-msgstr "Resumen de Tickets Activos"
-
-msgid "No active tickets"
-msgstr "No hay tickets activos"
-
-msgid "Page {} of {}"
-msgstr "Página {} de {}"
-
-msgid "Filter: {}"
-msgstr "Filtro: {}"
-
-msgid "All"
-msgstr "Todos"
-
-msgid "Open"
-msgstr "Abiertos"
-
-msgid "Claimed"
-msgstr "Reclamado"
-
-msgid "Unclaimed"
-msgstr "Sin Reclamar"
-
-#: Transcript messages  
-msgid "Transcript"
-msgstr "Transcripción"
-
-msgid "Ticket closed by {}"
-msgstr "Ticket cerrado por {}"
-
-msgid "Reason: {}"
-msgstr "Motivo: {}"
-
-#: Auto-close warning messages (tickets.py)
-msgid "(Auto-Close) User did not respond for {hours} hours"
-msgstr "(Auto-Cierre) El usuario no respondió durante {hours} horas"
-
-msgid "(Auto-Close) No staff response for {hours} hours"
-msgstr "(Auto-Cierre) Sin respuesta del personal durante {hours} horas"
-
-msgid "(Auto-Close) No response for {hours} hours"
-msgstr "(Auto-Cierre) Sin respuesta durante {hours} horas"
-
-msgid "⚠️ {mention}\n\nThis ticket will be **automatically closed** in approximately **{hours} hours** if you do not respond."
-msgstr "⚠️ {mention}\n\nEste ticket será **cerrado automáticamente** en aproximadamente **{hours} horas** si no respondes."
-
-msgid "⚠️ {mention}\n\nIf you do not respond to this ticket within the next 20 minutes it will be closed automatically."
-msgstr "⚠️ {mention}\n\nSi no respondes a este ticket en los próximos 20 minutos, será cerrado automáticamente."
-
-#: General
-msgid "minutes"
-msgstr "minutos"
-
-msgid "hours"
-msgstr "horas"
-
-msgid "days"
-msgstr "días"
-
-msgid "Enabled"
-msgstr "Activado"
-
-msgid "Disabled"
-msgstr "Desactivado"
-
+#: i18n_strings.py:13
 msgid "Yes"
 msgstr "Sí"
 
-msgid "No"
-msgstr "No"
-
-msgid "None"
-msgstr "Ninguno"
-
-msgid "Success"
-msgstr "Éxito"
-
-msgid "Error"
-msgstr "Error"
-
-msgid "Warning"
-msgstr "Advertencia"
-
-msgid "Info"
-msgstr "Información"
-# ============================================================================
-# Command Docstrings - Admin Commands
-# ============================================================================
-
-#, docstring
-msgid "Base support ticket settings"
-msgstr "Configuración base de tickets de soporte"
-
-#, docstring
-msgid "Ticket Setup Guide"
-msgstr "Guía de Configuración de Tickets"
-
-#, docstring
-msgid ""
-"Suspend the ticket system\n"
-"If a suspension message is set, any user that tries to open a ticket will receive this message"
-msgstr ""
-"Suspender el sistema de tickets\n"
-"Si se establece un mensaje de suspensión, cualquier usuario que intente abrir un ticket recibirá este mensaje"
-
-#, docstring
-msgid "Add a support ticket panel"
-msgstr "Añadir un panel de tickets de soporte"
-
-#, docstring
-msgid "Set the category ID for a ticket panel"
-msgstr "Establecer el ID de categoría para un panel de tickets"
-
-#, docstring
-msgid "Set the channel ID where a ticket panel is located"
-msgstr "Establecer el ID del canal donde se encuentra un panel de tickets"
-
-#, docstring
-msgid ""
-"Set the message ID of a ticket panel\n"
-"Run this command in the same channel as the ticket panel message"
-msgstr ""
-"Establecer el ID del mensaje de un panel de tickets\n"
-"Ejecuta este comando en el mismo canal que el mensaje del panel"
-
-#, docstring
-msgid "Set the button text for a support ticket panel"
-msgstr "Establecer el texto del botón para un panel de tickets"
-
-#, docstring
-msgid "Set the button color for a support ticket panel"
-msgstr "Establecer el color del botón para un panel de tickets"
-
-#, docstring
-msgid "Set the button emoji for a support ticket panel"
-msgstr "Establecer el emoji del botón para un panel de tickets"
-
-#, docstring
-msgid ""
-"Toggle a panel on/off\n\n"
-"Disabled panels will still show the button but it will be disabled"
-msgstr ""
-"Activar/desactivar un panel\n\n"
-"Los paneles desactivados seguirán mostrando el botón pero estará deshabilitado"
-
-#, docstring
-msgid ""
-"Set the default ticket channel name for a panel\n\n"
-"You can include the following in the name\n"
-"`{num}` - Ticket number\n"
-"`{user}` - user's name\n"
-"`{displayname}` - user's display name\n"
-"`{id}` - user's ID\n"
-"`{shortdate}` - mm-dd\n"
-"`{longdate}` - mm-dd-yyyy\n"
-"`{time}` - hh-mm AM/PM according to bot host system time\n\n"
-"You can set this to {default} to use default \"Ticket-Username"
-msgstr ""
-"Establecer el nombre predeterminado del canal de ticket para un panel\n\n"
-"Puedes incluir lo siguiente en el nombre\n"
-"`{num}` - Número de ticket\n"
-"`{user}` - nombre del usuario\n"
-"`{displayname}` - nombre para mostrar del usuario\n"
-"`{id}` - ID del usuario\n"
-"`{shortdate}` - mm-dd\n"
-"`{longdate}` - mm-dd-yyyy\n"
-"`{time}` - hh-mm AM/PM según la hora del sistema del bot\n\n"
-"Puedes establecerlo a {default} para usar el predeterminado \"Ticket-NombreUsuario"
-
-#, docstring
-msgid "Toggle whether a certain panel uses threads or channels"
-msgstr "Alternar si un panel usa hilos o canales"
-
-#, docstring
-msgid "Throw a modal when the close button is clicked to enter a reason"
-msgstr "Mostrar un modal cuando se hace clic en cerrar para introducir un motivo"
-
-#, docstring
-msgid "Set the logging channel for each panel's tickets"
-msgstr "Establecer el canal de registro para los tickets de cada panel"
-
-#, docstring
-msgid "Set a title for a ticket panel's modal"
-msgstr "Establecer un título para el modal de un panel de tickets"
-
-#, docstring
-msgid ""
-"Add a field to the modal for users to fill in before a ticket is opened\n\n"
-"**Fields:**\n"
-"- label (required): The name of the field\n"
-"- style: long (multi-line) or short (single-line)\n"
-"- placeholder: The placeholder text\n"
-"- default: The default value\n"
-"- min_length: The minimum length of the field\n"
-"- max_length: The maximum length of the field\n"
-"- required: Whether the field is required\n\n"
-"**Note:** Modals can only have up to 5 fields."
-msgstr ""
-"Añadir un campo al modal para que los usuarios completen antes de abrir un ticket\n\n"
-"**Campos:**\n"
-"- label (requerido): El nombre del campo\n"
-"- style: long (multi-línea) o short (una línea)\n"
-"- placeholder: El texto de marcador de posición\n"
-"- default: El valor predeterminado\n"
-"- min_length: La longitud mínima del campo\n"
-"- max_length: La longitud máxima del campo\n"
-"- required: Si el campo es obligatorio\n\n"
-"**Nota:** Los modales solo pueden tener hasta 5 campos."
-
-#, docstring
-msgid "View and manage modals for a ticket panel"
-msgstr "Ver y gestionar modales de un panel de tickets"
-
-#, docstring
-msgid "Add a message for when a ticket is opened"
-msgstr "Añadir un mensaje para cuando se abre un ticket"
-
-#, docstring
-msgid "View existing messages for a panel"
-msgstr "Ver los mensajes existentes de un panel"
-
-#, docstring
-msgid "View all ticket panels"
-msgstr "Ver todos los paneles de tickets"
-
-#, docstring
-msgid "View all ticket settings"
-msgstr "Ver todas las configuraciones de tickets"
-
-#, docstring
-msgid "Set max tickets a user can have open at once (0 is no limit)"
-msgstr "Establecer máximo de tickets que un usuario puede tener abiertos a la vez (0 = sin límite)"
-
-#, docstring
-msgid ""
-"Add support roles to respond to tickets\n\n"
-"To remove a role, run the command with the role again"
-msgstr ""
-"Añadir roles de soporte para responder tickets\n\n"
-"Para eliminar un rol, ejecuta el comando con el mismo rol de nuevo"
-
-#, docstring
-msgid ""
-"Assign a support role to a specific ticket panel\n\n"
-"The role will gain access to that panel's tickets only"
-msgstr ""
-"Asignar un rol de soporte a un panel de tickets específico\n\n"
-"El rol tendrá acceso solo a los tickets de ese panel"
-
-#, docstring
-msgid "Set the max tickets a staff member can claim"
-msgstr "Establecer el máximo de tickets que un miembro del staff puede reclamar"
-
-#, docstring
-msgid "Set a role that can be assigned tickets (also receives notifications)"
-msgstr "Establecer un rol que puede ser asignado a tickets (también recibe notificaciones)"
-
-#, docstring
-msgid ""
-"Set an alternate channel that tickets will be opened under for a specific panel\n\n"
-"Run the command on its own without a channel arg to disable"
-msgstr ""
-"Establecer un canal alternativo donde se abrirán los tickets para un panel específico\n\n"
-"Ejecuta el comando sin argumento de canal para desactivar"
-
-#, docstring
-msgid "Set priority for a panel, highest priority panels are checked first for max ticket limit"
-msgstr "Establecer prioridad para un panel, los paneles de mayor prioridad se verifican primero para el límite de tickets"
-
-#, docstring
-msgid "Set the row for a panel's button (0-4)"
-msgstr "Establecer la fila para el botón de un panel (0-4)"
-
-#, docstring
-msgid "Set hours before ticket is considered as having no response"
-msgstr "Establecer horas antes de que un ticket se considere sin respuesta"
-
-#, docstring
-msgid "List currently opened tickets"
-msgstr "Listar tickets actualmente abiertos"
-
-#, docstring
-msgid "Toggle whether ticket owners and staff are mentioned when a ticket is opened"
-msgstr "Alternar si los propietarios y staff son mencionados cuando se abre un ticket"
-
-#, docstring
-msgid "Cleanup closed ticket channels that still exist"
-msgstr "Limpiar canales de tickets cerrados que aún existen"
-
-#, docstring
-msgid "Repair views for open tickets"
-msgstr "Reparar vistas de tickets abiertos"
-
-#, docstring
-msgid "Get a message link from a message ID"
-msgstr "Obtener un enlace de mensaje desde un ID de mensaje"
-
-#, docstring
-msgid "Toggle DMs on ticket open"
-msgstr "Alternar DMs al abrir un ticket"
-
-#, docstring
-msgid "Toggle automatically closing thread tickets"
-msgstr "Alternar cierre automático de tickets de hilos"
-
-#, docstring
-msgid "Toggle whether users can rename their own tickets"
-msgstr "Alternar si los usuarios pueden renombrar sus propios tickets"
-
-#, docstring
-msgid "Toggle whether users can close their own tickets"
-msgstr "Alternar si los usuarios pueden cerrar sus propios tickets"
-
-#, docstring
-msgid "(Toggle all self-manage options: close, rename) for users"
-msgstr "(Alternar todas las opciones de auto-gestión: cerrar, renombrar) para usuarios"
-
-#, docstring
-msgid "Toggle whether support is auto-added to tickets on open"
-msgstr "Alternar si el soporte es añadido automáticamente a los tickets al abrirse"
-
-#, docstring
-msgid "Toggle ticket transcripts on or off"
-msgstr "Activar o desactivar transcripciones de tickets"
-
-#, docstring
-msgid "Toggle whether transcripts are interactive or static (HTML)"
-msgstr "Alternar si las transcripciones son interactivas o estáticas (HTML)"
-
-#, docstring
-msgid "Edit/Update an existing ticket panel message"
-msgstr "Editar/Actualizar un mensaje existente del panel de tickets"
-
-#, docstring
-msgid ""
-"Create an embed for ticket panels\n\n"
-"Valid color names are:\n"
-"- red, blue, green, yellow, orange, purple, pink, black, white, random"
-msgstr ""
-"Crear un embed para paneles de tickets\n\n"
-"Nombres de colores válidos:\n"
-"- red, blue, green, yellow, orange, purple, pink, black, white, random"
-
-#, docstring
-msgid "Open a ticket for another user"
-msgstr "Abrir un ticket para otro usuario"
-
-#, docstring
-msgid "Ticket cooldown settings"
-msgstr "Configuración de cooldown de tickets"
-
-#, docstring
-msgid "Set ticket cooldown"
-msgstr "Establecer cooldown de tickets"
-
-#, docstring
-msgid "View ticket cooldown settings"
-msgstr "Ver configuración de cooldown de tickets"
-
-#, docstring
-msgid "Set ticket rate limit"
-msgstr "Establecer límite de velocidad de tickets"
-
-#, docstring
-msgid "Requirements to open tickets based on account/server age"
-msgstr "Requisitos para abrir tickets basados en antigüedad de cuenta/servidor"
-
-#, docstring
-msgid "Set minimum account age to open tickets"
-msgstr "Establecer antigüedad mínima de cuenta para abrir tickets"
-
-#, docstring
-msgid "Set minimum time in server to open tickets"
-msgstr "Establecer tiempo mínimo en servidor para abrir tickets"
-
-#, docstring
-msgid "Manage ticket blacklist"
-msgstr "Gestionar lista negra de tickets"
-
-#, docstring
-msgid "Add a user to the blacklist"
-msgstr "Añadir un usuario a la lista negra"
-
-#, docstring
-msgid "Remove a user from the blacklist"
-msgstr "Eliminar un usuario de la lista negra"
-
-#, docstring
-msgid "List blacklisted users"
-msgstr "Listar usuarios en lista negra"
-
-#, docstring
-msgid "Smart auto-close settings"
-msgstr "Configuración de auto-cierre inteligente"
-
-#, docstring
-msgid "Set hours before auto-close when awaiting user response"
-msgstr "Establecer horas antes del auto-cierre cuando se espera respuesta del usuario"
-
-#, docstring
-msgid "Set hours before auto-close when awaiting staff response"
-msgstr "Establecer horas antes del auto-cierre cuando se espera respuesta del staff"
-
-#, docstring
-msgid ""
-"Set hours before auto-close to send warning\n\n"
-"Set to 0 to disable warnings"
-msgstr ""
-"Establecer horas antes del auto-cierre para enviar aviso\n\n"
-"Establecer a 0 para desactivar avisos"
-
-#, docstring
-msgid "Set the window where closed tickets can be reopened (in hours)"
-msgstr "Establecer la ventana donde los tickets cerrados pueden reabrirse (en horas)"
-
-#, docstring
-msgid "View auto-close settings"
-msgstr "Ver configuración de auto-cierre"
-
-#, docstring
-msgid "Ticket claim settings"
-msgstr "Configuración de reclamación de tickets"
-
-#, docstring
-msgid "Set max tickets a staff member can claim"
-msgstr "Establecer máximo de tickets que un miembro del staff puede reclamar"
-
-#, docstring
-msgid "View claim settings and currently claimed tickets"
-msgstr "Ver configuración de reclamación y tickets actualmente reclamados"
-
-#, docstring
-msgid "Escalation settings"
-msgstr "Configuración de escalación"
-
-#, docstring
-msgid "Set the channel for escalation notifications"
-msgstr "Establecer el canal para notificaciones de escalación"
-
-#, docstring
-msgid "Set the role to ping for escalations"
-msgstr "Establecer el rol a mencionar para escalaciones"
-
-#, docstring
-msgid "Set minutes before a ticket is escalated for no response"
-msgstr "Establecer minutos antes de que un ticket sea escalado por falta de respuesta"
-
-#, docstring
-msgid "View escalation settings"
-msgstr "Ver configuración de escalación"
-
-#, docstring
-msgid "Quick reply management"
-msgstr "Gestión de respuestas rápidas"
-
-#, docstring
-msgid "Add a quick reply"
-msgstr "Añadir una respuesta rápida"
-
-#, docstring
-msgid ""
-"Add a quick reply with advanced options\n\n"
-"Options for close_after: yes, no"
-msgstr ""
-"Añadir una respuesta rápida con opciones avanzadas\n\n"
-"Opciones para close_after: yes, no"
-
-#, docstring
-msgid "Remove a quick reply"
-msgstr "Eliminar una respuesta rápida"
-
-#, docstring
-msgid "List all quick replies"
-msgstr "Listar todas las respuestas rápidas"
-
-#, docstring
-msgid "Set the audit log channel for ticket actions"
-msgstr "Establecer el canal de registro de auditoría para acciones de tickets"
-
-#, docstring
-msgid "Export ticket configuration"
-msgstr "Exportar configuración de tickets"
-
-#, docstring
-msgid "Import ticket configuration from a JSON file"
-msgstr "Importar configuración de tickets desde un archivo JSON"
-
-#, docstring
-msgid ""
-"Run pre-flight checks on panel configuration\n\n"
-"This will verify permissions, channels, roles, and other settings"
-msgstr ""
-"Ejecutar verificaciones previas en la configuración del panel\n\n"
-"Esto verificará permisos, canales, roles y otras configuraciones"
-
-#, docstring
-msgid "Interactive embed builder for ticket panels"
-msgstr "Constructor interactivo de embeds para paneles de tickets"
-
-#, docstring
-msgid "View ticket overview with advanced filters"
-msgstr "Ver resumen de tickets con filtros avanzados"
-
-#, docstring
-msgid "View ticket statistics"
-msgstr "Ver estadísticas de tickets"
-
-#, docstring
-msgid "Transcript settings"
-msgstr "Configuración de transcripciones"
-
-#, docstring
-msgid "Set how long to keep transcripts (in days)"
-msgstr "Establecer cuánto tiempo mantener las transcripciones (en días)"
-
-#, docstring
-msgid "Set transcript formats (html, txt, json)"
-msgstr "Establecer formatos de transcripción (html, txt, json)"
-
-#, docstring
-msgid "View transcript settings"
-msgstr "Ver configuración de transcripciones"
-
-# ============================================================================
-# Command Docstrings - Base Commands
-# ============================================================================
-
-#, docstring
-msgid "Close your ticket"
-msgstr "Cerrar tu ticket"
-
-#, docstring
-msgid "Rename your ticket channel"
-msgstr "Renombrar tu canal de ticket"
-
-#, docstring
-msgid "Add a user to your ticket"
-msgstr "Añadir un usuario a tu ticket"
-
-#, docstring
-msgid "Remove a user from your ticket"
-msgstr "Eliminar un usuario de tu ticket"
-
-#, docstring
-msgid "Save a transcript of the ticket"
-msgstr "Guardar una transcripción del ticket"
-
-#, docstring
-msgid "Claim a ticket"
-msgstr "Reclamar un ticket"
-
-#, docstring
-msgid "Release a claimed ticket"
-msgstr "Liberar un ticket reclamado"
-
-#, docstring
-msgid "Transfer a ticket to another staff member"
-msgstr "Transferir un ticket a otro miembro del staff"
-
-#, docstring
-msgid "Add a note to the ticket"
-msgstr "Añadir una nota al ticket"
-
-#, docstring
-msgid "View notes for the ticket"
-msgstr "Ver notas del ticket"
-
-#, docstring
-msgid "Use a quick reply"
-msgstr "Usar una respuesta rápida"
-
-# ============================================================================
-# Common/Utils Translations
-# ============================================================================
-
-msgid "I am missing the `Manage Channels` permission to close this ticket!"
-msgstr "¡Me falta el permiso `Manage Channels` para cerrar este ticket!"
-
-msgid "I am missing the `Manage Threads` permission to close this ticket!"
-msgstr "¡Me falta el permiso `Manage Threads` para cerrar este ticket!"
-
-msgid "Ticket created by **{}-{}** has been closed.\n`PanelType: `{}\n`Opened on: `<t:{}:F>\n`Closed on: `<t:{}:F>\n`Closed by: `{}\n`Reason:    `{}\n"
-msgstr "El ticket creado por **{}-{}** ha sido cerrado.\n`Tipo de panel: `{}\n`Abierto el: `<t:{}:F>\n`Cerrado el: `<t:{}:F>\n`Cerrado por: `{}\n`Motivo:    `{}\n"
-
-msgid "`Thread:    `{}\n"
-msgstr "`Hilo:    `{}\n"
-
-msgid "Ticket Closed\n{}\nCurrently missing permissions to send embeds to this channel!"
-msgstr "¡Ticket Cerrado!\n{}\n¡Actualmente faltan permisos para enviar incrustaciones a este canal!"
-
-msgid "Ticket Closed"
-msgstr "Ticket cerrado"
-
-msgid "Archiving Ticket..."
-msgstr "Archivando Ticket..."
-
-msgid "Question: {}\nResponse: {}\n"
-msgstr "Pregunta: {}\nRespuesta: {}\n"
-
-msgid "Files uploaded: "
-msgstr "Archivos cargados: "
-
-msgid "View Transcript"
-msgstr "Ver Transcripción"
-
-msgid "There are no tickets stored in the database."
-msgstr "No hay tickets almacenados en la base de datos."
-
-msgid "ticket"
-msgstr "ticket"
-
-msgid "tickets"
-msgstr "tickets"
-
-msgid "Pruned `{}` invalid {}"
-msgstr "Podado `{}` inválido {}"
-
-msgid "There are no tickets to prune"
-msgstr "No hay tickets para podar"
-
-msgid "There are no active tickets."
-msgstr "No hay tickets activos."
-
-msgid "Ticket Overview"
-msgstr "Resumen de tickets"
-
-msgid "Too many active tickets to include in message!"
-msgstr "¡Demasiados tickets activos para incluir en el mensaje!"
-
-msgid "Active Tickets"
-msgstr "Tickets Activos"
-
-# ============================================================================
-# Common/Views Translations
-# ============================================================================
-
-msgid "cancel"
-msgstr "cancelar"
-
-msgid "You are not allowed to interact with this button."
-msgstr "No está permitido interactuar con este botón."
-
-msgid "Closing your ticket"
-msgstr "Cerrar tu ticket"
-
-msgid "You been blacklisted from creating tickets!"
-msgstr "¡Se te ha prohibido crear tickets!"
-
-msgid "You have a role that has been blacklisted from creating tickets!"
-msgstr "¡Tienes un rol que ha sido incluido en la lista negra para crear tickets!"
-
-msgid "You must have one of the following roles to open this ticket: "
-msgstr "Debes tener uno de los siguientes roles para abrir este ticket: "
-
-msgid "You have the maximum amount of tickets opened already!{}"
-msgstr "¡Ya tienes la cantidad máxima de tickets abiertos!{}"
-
-msgid "The category for this support panel cannot be found!\nplease contact an admin!"
-msgstr "¡No se puede encontrar la categoría para este panel de soporte!\n¡Por favor, contacta a un administrador!"
-
-msgid "Submission Info"
-msgstr "Información de envío"
-
-msgid "Unanswered"
-msgstr "Sin respuesta"
-
-msgid "Your response cannot contain the word 'Discord' in discoverable servers."
-msgstr "Tu respuesta no puede contener la palabra 'Discord' en servidores descubiertos."
-
-msgid "Your ticket is being created, one moment..."
-msgstr "Tu ticket se está creando, un momento..."
-
-msgid "{} ticket for {}"
-msgstr "Ticket {} para {}"
-
-msgid "I am missing the required permissions to create a ticket for you. Please contact an admin so they may fix my permissions."
-msgstr "Me faltan los permisos necesarios para crear un ticket para ti. Por favor, contacta a un administrador para que pueda solucionar mis permisos."
-
-msgid "There was an error while preparing your ticket, please contact an admin!\n{}"
-msgstr "Se ha producido un error al preparar tu ticket, por favor contacta a un administrador.\n{}"
-
-msgid "Welcome to your ticket channel "
-msgstr "Bienvenido a tu canal de ticket "
-
-msgid "\nYou or an admin can close this with the `{}ticket close` command"
-msgstr "\nTú o un administrador pueden cerrar esto con el comando `{}ticket close`"
-
-msgid "Ticket form questions"
-msgstr "Preguntas del formulario de ticket"
-
-msgid "I tried to pin the response message but don't have the manage messages permissions!"
-msgstr "¡Intenté fijar el mensaje de respuesta pero no tengo los permisos para gestionar mensajes!"
-
-msgid "Your ticket has been created! {}"
-msgstr "¡Tu ticket ha sido creado! {}"
-
-msgid "`Created By: `{user}\n`User ID:    `{userid}\n`Opened:     `{timestamp}\n`Ticket:     `{channelname}\n`Panel Name: `{panelname}\n**[Click to Jump!]({jumpurl})**"
-msgstr "`Creado por: `{user}\n`ID de usuario: `{userid}\n`Abierto:     `{timestamp}\n`Ticket:     `{channelname}\n`Nombre del panel: `{panelname}\n**[¡Clic para ir!]({jumpurl})**"
-
-msgid "Ticket Opened"
-msgstr "Ticket abierto"
-
-msgid "You have been added to the ticket **{}**"
-msgstr "Has sido añadido al ticket **{}**"
-
-msgid "Enter a reason for closing this ticket"
-msgstr "Introduce un motivo para cerrar este ticket"
-
-# ============================================================================
-# v4.1.0 - Claim display & closed ticket archiving
-# ============================================================================
-
-#: common/utils.py - Claim display (embed field + channel topic)
-msgid "Claimed by"
-msgstr "Reclamado por"
-
-msgid "🙋 Claimed by {} ({})"
-msgstr "🙋 Reclamado por {} ({})"
-
-#: commands/admin.py - Closed ticket archiving (closedcategory command)
-msgid "Closed ticket archiving has been **Disabled**. Tickets will be deleted on close."
-msgstr "El archivado de tickets cerrados ha sido **Desactivado**. Los tickets se eliminarán al cerrarse."
-
-msgid "I need the `Manage Channels` permission in that category to archive tickets there!"
-msgstr "¡Necesito el permiso `Gestionar Canales` en esa categoría para archivar tickets allí!"
-
-msgid "I need the `Manage Permissions` permission in that category to remove the opener's access!"
-msgstr "¡Necesito el permiso `Gestionar Permisos` en esa categoría para quitarle el acceso a quien abrió el ticket!"
-
-msgid "Closed tickets will now be archived under **{}** instead of deleted. The opener and any added users will lose access on close."
-msgstr "Los tickets cerrados ahora se archivarán en **{}** en lugar de eliminarse. Quien abrió el ticket y los usuarios añadidos perderán el acceso al cerrarse."
-
-#: commands/admin.py - Closed ticket status in settings view
-msgid "Closed tickets are archived under **{}** (opener loses access)"
-msgstr "Los tickets cerrados se archivan en **{}** (quien lo abrió pierde el acceso)"
-
-msgid "Closed tickets are deleted"
-msgstr "Los tickets cerrados se eliminan"
-
-#: common/views.py - Archived ticket state (Reopen/Delete buttons)
-msgid "Reopen"
-msgstr "Reabrir"
-
+#: i18n_strings.py:14 common/views.py:467
 msgid "Delete"
 msgstr "Eliminar"
 
-msgid "Status"
-msgstr "Estado"
+#: i18n_strings.py:15
+msgid "Cancel"
+msgstr "Cancelar"
 
+#: i18n_strings.py:16 common/views.py:204
+msgid "Claim"
+msgstr "Reclamar"
+
+#: i18n_strings.py:17
+msgid "Unclaim"
+msgstr "Liberar"
+
+#: i18n_strings.py:18 common/views.py:215
+msgid "Close"
+msgstr "Cerrar"
+
+#: i18n_strings.py:19
+msgid "Select by ID/Mention"
+msgstr "Elegir por ID/mención"
+
+#: i18n_strings.py:20
+msgid "Confirm & Create"
+msgstr "Confirmar y crear"
+
+#: i18n_strings.py:21
+msgid "📊 Stats"
+msgstr "📊 Estadísticas"
+
+#: i18n_strings.py:22
+msgid "🔄 Refresh"
+msgstr "🔄 Actualizar"
+
+#: i18n_strings.py:23 common/views.py:1829
+msgid "Set Title"
+msgstr "Título"
+
+#: i18n_strings.py:24 common/views.py:1838
+msgid "Set Description"
+msgstr "Descripción"
+
+#: i18n_strings.py:25 common/views.py:1847
+msgid "Set Footer"
+msgstr "Pie"
+
+#: i18n_strings.py:26 common/views.py:1855
+msgid "Set Color"
+msgstr "Color"
+
+#: i18n_strings.py:27 common/views.py:1868
+msgid "Set Thumbnail"
+msgstr "Miniatura"
+
+#: i18n_strings.py:28 common/views.py:1876
+msgid "Set Image"
+msgstr "Imagen"
+
+#: i18n_strings.py:29
+msgid "Add Field"
+msgstr "Añadir campo"
+
+#: i18n_strings.py:30
+msgid "Send"
+msgstr "Enviar"
+
+#: i18n_strings.py:31
+msgid "Open a ticket for another user"
+msgstr "Abrir un ticket para otro usuario"
+
+#: i18n_strings.py:32
+msgid "Ticket commands"
+msgstr "Comandos de tickets"
+
+#: i18n_strings.py:33
+msgid "Manage your ticket (add/remove users, close, claim, notes...)"
+msgstr ""
+"Gestiona tu ticket (añadir/quitar usuarios, cerrar, reclamar, notas...)"
+
+#: i18n_strings.py:34 commands/base.py:41
+msgid "Add a user to your ticket"
+msgstr "Añadir un usuario a tu ticket"
+
+#: i18n_strings.py:35 commands/base.py:85
+msgid "Remove a user from your ticket"
+msgstr "Eliminar un usuario de tu ticket"
+
+#: i18n_strings.py:36
+msgid "Rename your ticket"
+msgstr "Renombrar tu ticket"
+
+#: i18n_strings.py:37
+msgid "Close your ticket"
+msgstr "Cerrar tu ticket"
+
+#: i18n_strings.py:38
+msgid "Claim this ticket"
+msgstr "Reclamar este ticket"
+
+#: i18n_strings.py:39
+msgid "Unclaim this ticket"
+msgstr "Liberar este ticket"
+
+#: i18n_strings.py:40 commands/base.py:306
+msgid "Transfer this ticket to another staff member"
+msgstr "Transferir este ticket a otro miembro del staff"
+
+#: i18n_strings.py:41
+msgid "Add an internal note to this ticket"
+msgstr "Añadir una nota interna a este ticket"
+
+#: i18n_strings.py:42
+msgid "View notes for this ticket"
+msgstr "Ver las notas de este ticket"
+
+#: i18n_strings.py:43
+msgid "Send a quick reply template"
+msgstr "Enviar una respuesta rápida"
+
+#: i18n_strings.py:44
+msgid "View information about this ticket"
+msgstr "Ver información de este ticket"
+
+#: tickets.py:39
+msgid "Multi-panel support ticket system with buttons (Trini Edition)"
+msgstr ""
+"\n"
+"    Sistema de tickets de soporte multi-panel con botones (Trini Edition)\n"
+"    "
+
+#: tickets.py:45
+msgid ""
+"{helpcmd}\n"
+"Cog Version: {version}\n"
+"Author: {author}\n"
+msgstr ""
+"{helpcmd}\n"
+"Versión del cog: {version}\n"
+"Autor: {author}\n"
+
+#: tickets.py:101
+msgid ""
+"Tickets: post each panel again and link it with `[p]ticketst panelmessage "
+"<panel> <message>` ({panels})."
+msgstr ""
+"Tickets: vuelve a publicar cada panel y enlázalo con `[p]ticketst "
+"panelmessage <panel> <mensaje>` ({panels})."
+
+#: tickets.py:393
+msgid "(Auto-Close) User did not respond for {hours} hours"
+msgstr "(Auto-Cierre) El usuario no respondió durante {hours} horas"
+
+#: tickets.py:400
+msgid ""
+"⚠️ {mention}\n"
+"\n"
+"This ticket will be **automatically closed** in approximately **{hours} hours** if you do not respond."
+msgstr ""
+"⚠️ {mention}\n"
+"\n"
+"Este ticket será **cerrado automáticamente** en aproximadamente **{hours} horas** si no respondes."
+
+#: tickets.py:417
+msgid "(Auto-Close) No staff response for {hours} hours"
+msgstr "(Auto-Cierre) Sin respuesta del personal durante {hours} horas"
+
+#: tickets.py:432
+msgid ""
+"⚠️ {mention}\n"
+"\n"
+"If you do not respond to this ticket within the next 20 minutes it will be closed automatically."
+msgstr ""
+"⚠️ {mention}\n"
+"\n"
+"Si no respondes a este ticket en los próximos 20 minutos, será cerrado automáticamente."
+
+#: tickets.py:448
+msgid "(Auto-Close) No response for {hours} hours"
+msgstr "(Auto-Cierre) Sin respuesta durante {hours} horas"
+
+#: tickets.py:627
+msgid "User left guild(Auto-Close)"
+msgstr "Usuario abandonó gremio (Auto-Cerrar)"
+
+#: tickets.py:682
+msgid "Forbidden access."
+msgstr "Acceso denegado."
+
+#: tickets.py:684
+msgid "You don't have permission to see this server's tickets."
+msgstr "No tienes permisos para ver los tickets de este servidor."
+
+#: tickets.py:692 tickets.py:738
+msgid "Server not found."
+msgstr "Servidor no encontrado."
+
+#: tickets.py:744
+msgid "Ticket channel ID"
+msgstr "ID del canal del ticket"
+
+#: tickets.py:745
+msgid "Close ticket"
+msgstr "Cerrar ticket"
+
+#: tickets.py:751
+msgid "Channel not found."
+msgstr "Canal no encontrado."
+
+#: tickets.py:759
+msgid "Ticket not found in the configuration."
+msgstr "Ticket no encontrado en la configuración."
+
+#: tickets.py:770
+msgid "Ticket closed."
+msgstr "Ticket cerrado con éxito."
+
+#: common/functions.py:319 common/views.py:819
+msgid "{} ticket for {}"
+msgstr "Ticket {} para {}"
+
+#: common/functions.py:336 common/functions.py:365 common/views.py:840
+#: common/views.py:877
+msgid ""
+"I was not able to name the ticket properly due to Discord's filter!\n"
+"Intended name: {}"
+msgstr ""
+"¡No pude poner bien el nombre del ticket por el filtro de Discord!\n"
+"Nombre previsto: {}"
+
+#: common/functions.py:379 common/views.py:905
+msgid "Welcome to your ticket channel "
+msgstr "Bienvenido a tu canal de ticket "
+
+#: common/functions.py:382 common/views.py:907
+msgid ""
+"\n"
+"You or an admin can close this with the `{}ticket close` command"
+msgstr ""
+"\n"
+"Tú o un administrador pueden cerrar esto con el comando `{}ticket close`"
+
+#: common/functions.py:443 common/views.py:974
+msgid "Ticket form questions"
+msgstr "Preguntas del formulario de ticket"
+
+#: common/functions.py:445 common/views.py:976
+msgid ""
+"I tried to pin the response message but don't have the manage messages "
+"permissions!"
+msgstr ""
+"¡Intenté fijar el mensaje de respuesta pero no tengo los permisos para "
+"gestionar mensajes!"
+
+#: common/functions.py:458 common/views.py:1006
+msgid ""
+"`Created By: `{user}\n"
+"`User ID:    `{userid}\n"
+"`Opened:     `{timestamp}\n"
+"`Ticket:     `{channelname}\n"
+"`Panel Name: `{panelname}\n"
+"**[Click to Jump!]({jumpurl})**"
+msgstr ""
+"`Creado por: `{user}\n"
+"`ID de usuario: `{userid}\n"
+"`Abierto:     `{timestamp}\n"
+"`Ticket:     `{channelname}\n"
+"`Nombre del panel: `{panelname}\n"
+"**[¡Clic para ir!]({jumpurl})**"
+
+#: common/functions.py:467 common/views.py:1015
+msgid "Ticket Opened"
+msgstr "Ticket abierto"
+
+#: common/menu.py:63 common/views.py:98
+msgid "You are not allowed to interact with this button."
+msgstr "No está permitido interactuar con este botón."
+
+#: common/models.py:244
+msgid "📋 What We Need"
+msgstr "📋 Qué necesitamos"
+
+#: common/models.py:246
+msgid "📝 Steps"
+msgstr "📝 Pasos"
+
+#: common/models.py:248
+msgid "⏰ Response Time"
+msgstr "⏰ Tiempo de respuesta"
+
+#: common/models.py:250
+msgid "📜 Rules"
+msgstr "📜 Normas"
+
+#: common/models.py:401
+msgid "Create Private Threads"
+msgstr "Crear hilos privados"
+
+#: common/models.py:402
+msgid "Send Messages in Threads"
+msgstr "Enviar mensajes en hilos"
+
+#: common/models.py:403
+msgid "Manage Threads"
+msgstr "Gestionar hilos"
+
+#: common/models.py:419
+msgid "Manage Channels"
+msgstr "Gestionar canales"
+
+#: common/models.py:420
+msgid "Manage Permissions"
+msgstr "Gestionar permisos"
+
+#: common/models.py:421
+msgid "View Channel"
+msgstr "Ver canal"
+
+#: common/models.py:422
+msgid "Send Messages"
+msgstr "Enviar mensajes"
+
+#: common/models.py:423
+msgid "Read Message History"
+msgstr "Leer el historial de mensajes"
+
+#: common/models.py:424
+msgid "Embed Links"
+msgstr "Insertar enlaces"
+
+#: common/models.py:425
+msgid "Attach Files"
+msgstr "Adjuntar archivos"
+
+#: common/models.py:448
+msgid "Category not found"
+msgstr "Categoría no encontrada"
+
+#: common/models.py:452
+msgid "Missing in category: {join}"
+msgstr "Faltan en la categoría: {join}"
+
+#: common/models.py:455
+msgid "No category set for channel-based tickets"
+msgstr "No hay categoría para los tickets en canales"
+
+#: common/models.py:462
+msgid "Panel channel not found"
+msgstr "Canal del panel no encontrado"
+
+#: common/models.py:466
+msgid "Cannot view panel channel"
+msgstr "No puedo ver el canal del panel"
+
+#: common/models.py:468
+msgid "Cannot send messages in panel channel"
+msgstr "No puedo enviar mensajes en el canal del panel"
+
+#: common/models.py:474
+msgid "Missing thread permissions: {join}"
+msgstr "Faltan permisos de hilos: {join}"
+
+#: common/models.py:476
+msgid "No panel channel set"
+msgstr "No hay canal de panel"
+
+#: common/models.py:483
+msgid "Log channel not found"
+msgstr "Canal de logs no encontrado"
+
+#: common/models.py:487
+msgid "Missing permissions in log channel"
+msgstr "Faltan permisos en el canal de logs"
+
+#: common/utils.py:218
+msgid "User"
+msgstr "Usuario"
+
+#: common/utils.py:221
+msgid "Target"
+msgstr "Objetivo"
+
+#: common/utils.py:224
+msgid "Ticket"
+msgstr "Ticket"
+
+#: common/utils.py:227 commands/base.py:571
+msgid "Panel"
+msgstr "Panel"
+
+#: common/utils.py:232
+msgid "Details"
+msgstr "Detalles"
+
+#: common/utils.py:325
+msgid "Rate limit reached. Please try again later."
+msgstr "Has alcanzado el límite. Inténtalo más tarde."
+
+#: common/utils.py:354
+msgid "This panel has reached its maximum open ticket limit."
+msgstr "Este panel ha alcanzado su límite de tickets abiertos."
+
+#: common/utils.py:376
+msgid "Your account must be at least {} days old to open tickets."
+msgstr "Tu cuenta debe tener al menos {} días para abrir tickets."
+
+#: common/utils.py:394
+msgid "You must be a member for at least {} days to open tickets."
+msgstr "Debes llevar al menos {} días en el servidor para abrir tickets."
+
+#: common/utils.py:419
+msgid "You have been blacklisted from creating tickets."
+msgstr "Estás en la lista negra y no puedes crear tickets."
+
+#: common/utils.py:423
+msgid "You have a role that is blacklisted from creating tickets."
+msgstr "Tienes un rol en la lista negra y no puedes crear tickets."
+
+#: common/utils.py:437 common/utils.py:441
+msgid "No reason provided"
+msgstr "Sin motivo"
+
+#: common/utils.py:438
+msgid "You have been blacklisted: {}"
+msgstr "Estás en la lista negra: {}"
+
+#: common/utils.py:442
+msgid "You have a blacklisted role: {}"
+msgstr "Tienes un rol en la lista negra: {}"
+
+#: common/utils.py:544 common/utils.py:1141
+msgid "Claimed by"
+msgstr "Reclamado por"
+
+#: common/utils.py:571
+msgid "🙋 Claimed by {} ({})"
+msgstr "🙋 Reclamado por {} ({})"
+
+#: common/utils.py:573
+msgid "Unclaimed"
+msgstr "Sin Reclamar"
+
+#: common/utils.py:600 common/utils.py:675 common/utils.py:732
+#: common/utils.py:926
+msgid "This is not a ticket channel."
+msgstr "Este no es un canal de ticket."
+
+#: common/utils.py:606
+msgid "This ticket is already claimed by {}."
+msgstr "Este ticket ya está reclamado por {}."
+
+#: common/utils.py:618
+msgid "You have reached your maximum claim limit of {} tickets."
+msgstr "Has alcanzado tu límite máximo de {} tickets reclamados."
+
+#: common/utils.py:650
+msgid "Ticket claimed successfully!"
+msgstr "¡Ticket reclamado correctamente!"
+
+#: common/utils.py:678
+msgid "This ticket is not claimed."
+msgstr "Este ticket no está reclamado."
+
+#: common/utils.py:686
+msgid "You can only unclaim tickets you have claimed."
+msgstr "Solo puedes liberar tickets que hayas reclamado."
+
+#: common/utils.py:706
+msgid "Ticket unclaimed successfully!"
+msgstr "¡Ticket liberado!"
+
+#: common/utils.py:740
+msgid "You can only transfer tickets you have claimed."
+msgstr "Solo puedes transferir los tickets que has reclamado."
+
+#: common/utils.py:765
+msgid "Ticket transferred to {}."
+msgstr "Ticket transferido a {}."
+
+#: common/utils.py:878
+msgid "⚠️ **Ticket Escalation (Level {})**\n"
+msgstr "⚠️ **Escalado de ticket (nivel {})**\n"
+
+#: common/utils.py:879
+msgid "Ticket {} has been unclaimed for too long!\n"
+msgstr "¡El ticket {} lleva demasiado tiempo sin reclamar!\n"
+
+#: common/utils.py:880
+msgid "Panel: {}\n"
+msgstr "Panel: {}\n"
+
+#: common/utils.py:881
+msgid "Please claim and assist the user."
+msgstr "Reclamadlo y atended al usuario."
+
+#: common/utils.py:948
+msgid "Note added successfully!"
+msgstr "¡Nota añadida!"
+
+#: common/utils.py:984
+msgid "Invalid import data format."
+msgstr "Formato de datos de importación no válido."
+
+#: common/utils.py:990
+msgid "Import data is from a newer version. Please update the cog first."
+msgstr "Los datos son de una versión más nueva. Actualiza primero el cog."
+
+#: common/utils.py:1006
+msgid "Configuration imported successfully!"
+msgstr "¡Configuración importada correctamente!"
+
+#: common/utils.py:1009
+msgid "Failed to import configuration: {}"
+msgstr "No se pudo importar la configuración: {}"
+
+#: common/utils.py:1123
 msgid "🔒 Archived — closed by {}"
 msgstr "🔒 Archivado — cerrado por {}"
 
-msgid "\nReason: {}"
-msgstr "\nMotivo: {}"
+#: common/utils.py:1125
+msgid ""
+"\n"
+"Reason: {}"
+msgstr ""
+"\n"
+"Motivo: {}"
 
-msgid "Only support staff can reopen tickets."
-msgstr "Solo el personal de soporte puede reabrir tickets."
+#: common/utils.py:1127 common/utils.py:1141 commands/base.py:577
+msgid "Status"
+msgstr "Estado"
 
-msgid "Only support staff can delete tickets."
-msgstr "Solo el personal de soporte puede eliminar tickets."
-
-msgid "🔓 This ticket has been reopened by {}."
-msgstr "🔓 Este ticket ha sido reabierto por {}."
-
-msgid "⚠️ Permanently delete this archived ticket channel? This cannot be undone."
-msgstr "⚠️ ¿Eliminar permanentemente este canal de ticket archivado? Esta acción no se puede deshacer."
-
-msgid "Deleting..."
-msgstr "Eliminando..."
-
-msgid "Cancelled."
-msgstr "Cancelado."
-
+#: common/utils.py:1221
 msgid "This is not an archived ticket."
 msgstr "Este no es un ticket archivado."
 
+#: common/utils.py:1288
 msgid "Ticket reopened."
 msgstr "Ticket reabierto."
 
-#: commands/admin.py - Setup guide (setuphelp) additions
-msgid "<category>"
-msgstr "<categoría>"
+#: common/utils.py:1328
+msgid "I am missing the `Manage Channels` permission to close this ticket!"
+msgstr "¡Me falta el permiso `Manage Channels` para cerrar este ticket!"
 
+#: common/utils.py:1331
+msgid "I am missing the `Manage Threads` permission to close this ticket!"
+msgstr "¡Me falta el permiso `Manage Threads` para cerrar este ticket!"
+
+#: common/utils.py:1338
+msgid ""
+"Ticket created by **{}-{}** has been closed.\n"
+"`PanelType: `{}\n"
+"`Opened on: `<t:{}:F>\n"
+"`Closed on: `<t:{}:F>\n"
+"`Closed by: `{}\n"
+"`Reason:    `{}\n"
+msgstr ""
+"El ticket creado por **{}-{}** ha sido cerrado.\n"
+"`Tipo de panel: `{}\n"
+"`Abierto el: `<t:{}:F>\n"
+"`Cerrado el: `<t:{}:F>\n"
+"`Cerrado por: `{}\n"
+"`Motivo:    `{}\n"
+
+#: common/utils.py:1355
+msgid "`Thread:    `{}\n"
+msgstr "`Hilo:    `{}\n"
+
+#: common/utils.py:1357
+msgid ""
+"Ticket Closed\n"
+"{}\n"
+"Currently missing permissions to send embeds to this channel!"
+msgstr ""
+"¡Ticket Cerrado!\n"
+"{}\n"
+"¡Actualmente faltan permisos para enviar incrustaciones a este canal!"
+
+#: common/utils.py:1358
+msgid "Ticket Closed"
+msgstr "Ticket cerrado"
+
+#: common/utils.py:1376
+msgid "Archiving Ticket..."
+msgstr "Archivando Ticket..."
+
+#: common/utils.py:1404
+msgid ""
+"Question: {}\n"
+"Response: {}\n"
+msgstr ""
+"Pregunta: {}\n"
+"Respuesta: {}\n"
+
+#: common/utils.py:1429
+msgid "Files uploaded: "
+msgstr "Archivos cargados: "
+
+#: common/utils.py:1461
+msgid "View Thread"
+msgstr "Ver hilo"
+
+#: common/utils.py:1467
+msgid "View Transcript"
+msgstr "Ver Transcripción"
+
+#: common/utils.py:1633
+msgid "There are no tickets stored in the database."
+msgstr "No hay tickets almacenados en la base de datos."
+
+#: common/utils.py:1686
+msgid "ticket"
+msgstr "ticket"
+
+#: common/utils.py:1686
+msgid "tickets"
+msgstr "tickets"
+
+#: common/utils.py:1688
+msgid "Pruned `{}` invalid {}"
+msgstr "Podado `{}` inválido {}"
+
+#: common/utils.py:1691
+msgid "There are no tickets to prune"
+msgstr "No hay tickets para podar"
+
+#: common/utils.py:1745 common/utils.py:1815
+msgid "There are no active tickets."
+msgstr "No hay tickets activos."
+
+#: common/utils.py:1894 common/views.py:1761 commands/admin.py:2707
+msgid "Ticket Overview"
+msgstr "Resumen de tickets"
+
+#: common/utils.py:1917
+msgid "Too many active tickets to include in message!"
+msgstr "¡Demasiados tickets activos para incluir en el mensaje!"
+
+#: common/utils.py:1922
+msgid "Active Tickets"
+msgstr "Tickets Activos"
+
+#: common/utils.py:1944
+msgid "Failed to send overview message due to missing permissions"
+msgstr "No se pudo enviar el mensaje de resumen por falta de permisos"
+
+#: common/utils.py:2004
+msgid ""
+"⚠️ {mention}, this ticket will be automatically closed in **{hours} hours** "
+"due to inactivity. Please respond if you still need assistance."
+msgstr ""
+"⚠️ {mention}, este ticket se cerrará automáticamente en **{hours} horas** "
+"por inactividad. Responde si aún necesitas ayuda."
+
+#: common/utils.py:2009
+msgid ""
+"⚠️ **Staff Notice:** This ticket has been awaiting staff response. It will "
+"be automatically closed in **{hours} hours** if not addressed."
+msgstr ""
+"⚠️ **Aviso al staff:** este ticket está esperando respuesta del staff. Se "
+"cerrará automáticamente en **{hours} horas** si no se atiende."
+
+#: common/utils.py:2059
+msgid "Auto-closed: No response from user for {} hours"
+msgstr "Cerrado automáticamente: el usuario no respondió en {} horas"
+
+#: common/utils.py:2071
+msgid "Auto-closed: No staff response for {} hours"
+msgstr "Cerrado automáticamente: el staff no respondió en {} horas"
+
+#: common/utils.py:2095
+msgid "Ticket reopening is not enabled."
+msgstr "La reapertura de tickets no está activada."
+
+#: common/utils.py:2100
+msgid "Please open a new ticket and reference the previous one."
+msgstr "Abre un ticket nuevo y menciona el anterior."
+
+#: common/utils.py:2187
+msgid "=== Ticket Transcript ==="
+msgstr "=== Transcripción del ticket ==="
+
+#: common/utils.py:2188
+msgid "Channel: {channel_name} ({channel_id})"
+msgstr "Canal: {channel_name} ({channel_id})"
+
+#: common/utils.py:2189
+msgid "Owner: {member_name} ({member_id})"
+msgstr "Autor: {member_name} ({member_id})"
+
+#: common/utils.py:2190
+msgid "Panel: {get}"
+msgstr "Panel: {get}"
+
+#: common/utils.py:2191
+msgid "Opened: {get}"
+msgstr "Abierto: {get}"
+
+#: common/utils.py:2192 common/views.py:1767
+msgid "Status: {get}"
+msgstr "Estado: {get}"
+
+#: common/utils.py:2200
+msgid "=== Form Responses ==="
+msgstr "=== Respuestas del formulario ==="
+
+#: common/utils.py:2209
+msgid "=== Messages ==="
+msgstr "=== Mensajes ==="
+
+#: common/utils.py:2214
+msgid "  [Attachment: {filename}]"
+msgstr "  [Adjunto: {filename}]"
+
+#: common/views.py:60 commands/admin.py:940 commands/admin.py:1751
+#: commands/admin.py:1776 commands/admin.py:1794
+msgid "cancel"
+msgstr "cancelar"
+
+#: common/views.py:142
+msgid "Button Test"
+msgstr "Botón de prueba"
+
+#: common/views.py:154
+msgid "Closing your ticket"
+msgstr "Cerrar tu ticket"
+
+#: common/views.py:156
+msgid "Reason for closing"
+msgstr "Motivo del cierre"
+
+#: common/views.py:196
+msgid "Claimed"
+msgstr "Reclamado"
+
+#: common/views.py:274 common/views.py:1210
+msgid "Only support staff can claim tickets."
+msgstr "Solo el personal de soporte puede reclamar tickets."
+
+#: common/views.py:287
+msgid "This ticket no longer exists."
+msgstr "Este ticket ya no existe."
+
+#: common/views.py:296
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: common/views.py:313
+msgid "You have released this ticket."
+msgstr "Has liberado este ticket."
+
+#: common/views.py:321
+msgid "This ticket is already claimed by **{}**."
+msgstr "Este ticket ya está reclamado por **{}**."
+
+#: common/views.py:338
+msgid "You have claimed this ticket!"
+msgstr "¡Has reclamado este ticket!"
+
+#: common/views.py:357
+msgid "This ticket has already been closed! Please delete it manually."
+msgstr "¡Este ticket ya ha sido cerrado! Por favor, elimínalo manualmente."
+
+#: common/views.py:373 commands/base.py:197
+msgid "You do not have permissions to close this ticket"
+msgstr "No tienes permisos para cerrar este ticket"
+
+#: common/views.py:384
+msgid "Something went wrong, please try again."
+msgstr "Algo salió mal, por favor inténtalo de nuevo."
+
+#: common/views.py:395 common/views.py:397 common/views.py:1311
+#: common/views.py:1313 commands/base.py:234
+msgid "Closing..."
+msgstr "Cerrando..."
+
+#: common/views.py:424
+msgid "Deleting..."
+msgstr "Eliminando..."
+
+#: common/views.py:431
+msgid "Cancelled."
+msgstr "Cancelado."
+
+#: common/views.py:457
+msgid "Reopen"
+msgstr "Reabrir"
+
+#: common/views.py:507
+msgid "Only support staff can reopen tickets."
+msgstr "Solo el personal de soporte puede reabrir tickets."
+
+#: common/views.py:520
+msgid "🔓 This ticket has been reopened by {}."
+msgstr "🔓 Este ticket ha sido reabierto por {}."
+
+#: common/views.py:536
+msgid "Only support staff can delete tickets."
+msgstr "Solo el personal de soporte puede eliminar tickets."
+
+#: common/views.py:542
+msgid ""
+"⚠️ Permanently delete this archived ticket channel? This cannot be undone."
+msgstr ""
+"⚠️ ¿Eliminar permanentemente este canal de ticket archivado? Esta acción no "
+"se puede deshacer."
+
+#: common/views.py:623 commands/admin.py:167
+msgid "Ticket System Suspended"
+msgstr "Sistema de tickets suspendido"
+
+#: common/views.py:632
+msgid "You been blacklisted from creating tickets!"
+msgstr "¡Se te ha prohibido crear tickets!"
+
+#: common/views.py:638
+msgid "You have a role that has been blacklisted from creating tickets!"
+msgstr ""
+"¡Tienes un rol que ha sido incluido en la lista negra para crear tickets!"
+
+#: common/views.py:648
+msgid "You must have one of the following roles to open this ticket: "
+msgstr "Debes tener uno de los siguientes roles para abrir este ticket: "
+
+#: common/views.py:660
+msgid "You have the maximum amount of tickets opened already!{}"
+msgstr "¡Ya tienes la cantidad máxima de tickets abiertos!{}"
+
+#: common/views.py:668
+msgid ""
+"The category for this support panel cannot be found!\n"
+"please contact an admin!"
+msgstr ""
+"¡No se puede encontrar la categoría para este panel de soporte!\n"
+"¡Por favor, contacta a un administrador!"
+
+#: common/views.py:674
+msgid ""
+"The category for this support panel is not a category channel!\n"
+"please contact an admin!"
+msgstr ""
+"¡La categoría de este panel de soporte no es una categoría!\n"
+"Contacta con un admin."
+
+#: common/views.py:687
+msgid "{} Ticket"
+msgstr "Ticket de {}"
+
+#: common/views.py:691
+msgid "Submission Info"
+msgstr "Información de envío"
+
+#: common/views.py:712
+msgid "Unanswered"
+msgstr "Sin respuesta"
+
+#: common/views.py:717
+msgid ""
+"Your response cannot contain the word 'Discord' in discoverable servers."
+msgstr ""
+"Tu respuesta no puede contener la palabra 'Discord' en servidores "
+"descubiertos."
+
+#: common/views.py:734
+msgid "Your ticket is being created, one moment..."
+msgstr "Tu ticket se está creando, un momento..."
+
+#: common/views.py:811 common/views.py:829
+msgid "I don't have permissions to create threads!"
+msgstr "¡No tengo permisos para crear hilos!"
+
+#: common/views.py:861
+msgid "I don't have permissions to create channels!"
+msgstr "¡No tengo permisos para crear canales!"
+
+#: common/views.py:868
+msgid "I don't have permissions to create channels under this category!"
+msgstr "¡No tengo permisos para crear canales en esta categoría!"
+
+#: common/views.py:884
+msgid ""
+"I am missing the required permissions to create a ticket for you. Please "
+"contact an admin so they may fix my permissions."
+msgstr ""
+"Me faltan los permisos necesarios para crear un ticket para ti. Por favor, "
+"contacta a un administrador para que pueda solucionar mis permisos."
+
+#: common/views.py:893
+msgid ""
+"There was an error while preparing your ticket, please contact an admin!\n"
+"{}"
+msgstr ""
+"Se ha producido un error al preparar tu ticket, por favor contacta a un administrador.\n"
+"{}"
+
+#: common/views.py:980
+msgid "Your ticket has been created! {}"
+msgstr "¡Tu ticket ha sido creado! {}"
+
+#: common/views.py:1091
+msgid "Join Ticket"
+msgstr "Unirse al Ticket"
+
+#: common/views.py:1108
+msgid "You have already been added to the ticket **{}**!"
+msgstr "¡Ya has sido añadido al ticket **{}**!"
+
+#: common/views.py:1114
+msgid "The maximum amount of staff have claimed this ticket!"
+msgstr "¡El número máximo de personal ha reclamado este ticket!"
+
+#: common/views.py:1125
+msgid "You already have access to the ticket **{}**!"
+msgstr "¡Ya tienes acceso al ticket **{}**!"
+
+#: common/views.py:1130
+msgid "{} was added to the ticket"
+msgstr "{} fue añadido al ticket"
+
+#: common/views.py:1135
+msgid "You have been added to the ticket **{}**"
+msgstr "Has sido añadido al ticket **{}**"
+
+#: common/views.py:1228
+msgid "✅ {} claimed this ticket!"
+msgstr "✅ ¡{} ha reclamado este ticket!"
+
+#: common/views.py:1259
+msgid "🚫 {} unclaimed this ticket."
+msgstr "🚫 {} ha liberado este ticket."
+
+#: common/views.py:1287
+msgid "You do not have permission to close this ticket."
+msgstr "No tienes permiso para cerrar este ticket."
+
+#: common/views.py:1335
+msgid "Transfer Ticket"
+msgstr "Transferir ticket"
+
+#: common/views.py:1339
+msgid "Staff Member ID or @mention"
+msgstr "ID o @mención del miembro del staff"
+
+#: common/views.py:1341
+msgid "Enter user ID or @mention"
+msgstr "Escribe el ID o @menciona al usuario"
+
+#: common/views.py:1403
+msgid "🔄 Ticket transferred from {} to {}"
+msgstr "🔄 Ticket transferido de {} a {}"
+
+#: common/views.py:1410
+msgid "User not found in this server."
+msgstr "Usuario no encontrado en este servidor."
+
+#: common/views.py:1437
+msgid "Select a quick reply..."
+msgstr "Elige una respuesta rápida..."
+
+#: common/views.py:1463 commands/base.py:513
+msgid "Quick reply sent!"
+msgstr "¡Respuesta rápida enviada!"
+
+#: common/views.py:1512
+msgid "Add Internal Note"
+msgstr "Añadir nota interna"
+
+#: common/views.py:1516
+msgid "Note"
+msgstr "Nota"
+
+#: common/views.py:1518
+msgid "Enter your internal note (only visible to staff)..."
+msgstr "Escribe tu nota interna (solo la ve el staff)..."
+
+#: common/views.py:1557
+msgid "Select a ticket type..."
+msgstr "Elige un tipo de ticket..."
+
+#: common/views.py:1571
+msgid "Opening ticket for panel: **{}**..."
+msgstr "Abriendo ticket para el panel: **{}**..."
+
+#: common/views.py:1599
+msgid "Ticket creation cancelled."
+msgstr "Creación del ticket cancelada."
+
+#: common/views.py:1635
+msgid "All Panels"
+msgstr "Todos los paneles"
+
+#: common/views.py:1639
+msgid "Filter by panel"
+msgstr "Filtrar por panel"
+
+#: common/views.py:1648
+msgid "All Statuses"
+msgstr "Todos los estados"
+
+#: common/views.py:1649
+msgid "🟢 Open"
+msgstr "🟢 Abierto"
+
+#: common/views.py:1650
+msgid "🔵 Claimed"
+msgstr "🔵 Reclamado"
+
+#: common/views.py:1651
+msgid "🟡 Awaiting User"
+msgstr "🟡 Esperando al usuario"
+
+#: common/views.py:1652
+msgid "🟠 Awaiting Staff"
+msgstr "🟠 Esperando al staff"
+
+#: common/views.py:1655
+msgid "Filter by status"
+msgstr "Filtrar por estado"
+
+#: common/views.py:1690 commands/admin.py:2728
+msgid "📊 Ticket Statistics"
+msgstr "📊 Estadísticas de tickets"
+
+#: common/views.py:1696
+msgid "Current"
+msgstr "Ahora"
+
+#: common/views.py:1697
+msgid ""
+"**Total Open:** {total}\n"
+"**Open:** {open}\n"
+"**Claimed:** {claimed}\n"
+"**Awaiting User:** {awaiting_user}\n"
+"**Awaiting Staff:** {awaiting_staff}"
+msgstr ""
+"**Abiertos en total:** {total}\n"
+"**Abiertos:** {open}\n"
+"**Reclamados:** {claimed}\n"
+"**Esperando al usuario:** {awaiting_user}\n"
+"**Esperando al staff:** {awaiting_staff}"
+
+#: common/views.py:1714 commands/admin.py:2749
+msgid "All Time"
+msgstr "Histórico"
+
+#: common/views.py:1715 commands/admin.py:2750
+msgid ""
+"**Opened:** {opened}\n"
+"**Closed:** {closed}\n"
+"**Avg Claim Time:** {claim}\n"
+"**Avg Close Time:** {close}"
+msgstr ""
+"**Abiertos:** {opened}\n"
+"**Cerrados:** {closed}\n"
+"**Tiempo medio hasta reclamar:** {claim}\n"
+"**Tiempo medio hasta cerrar:** {close}"
+
+#: common/views.py:1733 commands/admin.py:2768
+msgid "By Panel"
+msgstr "Por panel"
+
+#: common/views.py:1765
+msgid "Panel: {filter_panel}"
+msgstr "Panel: {filter_panel}"
+
+#: common/views.py:1778 commands/admin.py:2713
+msgid "Page {}/{}"
+msgstr "Página {}/{}"
+
+#: common/views.py:1809 commands/admin.py:2655
+msgid "(No title)"
+msgstr "(Sin título)"
+
+#: common/views.py:1810 commands/admin.py:2656
+msgid "(No description)"
+msgstr "(Sin descripción)"
+
+#: common/views.py:1829
+msgid "Title"
+msgstr "Título"
+
+#: common/views.py:1838
+msgid "Description"
+msgstr "Descripción"
+
+#: common/views.py:1847
+msgid "Footer text"
+msgstr "Texto del pie"
+
+#: common/views.py:1855
+msgid "Hex color (e.g., #5865F2)"
+msgstr "Color hex (p. ej. #5865F2)"
+
+#: common/views.py:1868 common/views.py:1876
+msgid "Image URL"
+msgstr "URL de la imagen"
+
+#: common/views.py:1885
+msgid "Maximum 25 fields allowed."
+msgstr "Máximo 25 campos."
+
+#: common/views.py:1903
+msgid "Please set at least a title or description."
+msgstr "Pon al menos un título o una descripción."
+
+#: common/views.py:1909
+msgid "Send to Channel"
+msgstr "Enviar al canal"
+
+#: common/views.py:1909
+msgid "Channel ID or #mention"
+msgstr "ID o #mención del canal"
+
+#: common/views.py:1929
+msgid "✅ Embed sent to {}!"
+msgstr "✅ ¡Embed enviado a {}!"
+
+#: common/views.py:1936
+msgid "Failed to send embed: {}"
+msgstr "No se pudo enviar el embed: {}"
+
+#: common/views.py:1940
+msgid "Invalid channel."
+msgstr "Canal no válido."
+
+#: common/views.py:1945
+msgid "Embed creation cancelled."
+msgstr "Creación del embed cancelada."
+
+#: common/views.py:1952 commands/admin.py:2659
+msgid "Preview"
+msgstr "Vista previa"
+
+#: common/views.py:1990
+msgid "Add Embed Field"
+msgstr "Añadir campo al embed"
+
+#: common/views.py:1996
+msgid "Field Name"
+msgstr "Nombre del campo"
+
+#: common/views.py:2003
+msgid "Field Value"
+msgstr "Valor del campo"
+
+#: common/views.py:2010
+msgid "Inline? (yes/no)"
+msgstr "¿En línea? (sí/no)"
+
+#: commands/admin.py:48
+msgid "Base support ticket settings"
+msgstr "Configuración base de tickets de soporte"
+
+#: commands/admin.py:53 commands/admin.py:60
+msgid "Ticket Setup Guide"
+msgstr "Guía de Configuración de Tickets"
+
+#: commands/admin.py:55
+msgid "To create a support ticket panel, type "
+msgstr "Para crear un panel de tickets de soporte, escriba "
+
+#: commands/admin.py:56
+msgid "`{clean_prefix}tickets addpanel"
+msgstr "`{clean_prefix}tickets addpanel"
+
+#: commands/admin.py:57
+msgid " <panel_name>`"
+msgstr " <panel_name>"
+
+#: commands/admin.py:64
+msgid ""
+"Set the category ID that new tickets will be created under if using channel "
+"tickets.\n"
+msgstr ""
+"Establezca el ID de categoría bajo el cual se crearán los nuevos tickets si "
+"se utilizan tickets de canal.\n"
+
+#: commands/admin.py:67
+msgid "`{clean_prefix}tickets category "
+msgstr "`{clean_prefix}tickets category "
+
+#: commands/admin.py:67
+msgid "<panel_name> <category_id>`"
+msgstr "<nombre_panel> <id_categoría>`"
+
+#: commands/admin.py:70
+msgid "Step 1"
+msgstr "Primer paso"
+
+#: commands/admin.py:71
+msgid "Set the channel that the bots ticket panel will be located in.\n"
+msgstr ""
+"Establece el canal en el que se ubicará el panel de tickets de los bots.\n"
+
+#: commands/admin.py:72
+msgid "`{clean_prefix}tickets channel "
+msgstr "`{clean_prefix}tickets channel "
+
+#: commands/admin.py:72
+msgid "<panel_name> <channel_id>`"
+msgstr "<nombre_panel> <id_canal>`"
+
+#: commands/admin.py:75
+msgid "Step 2"
+msgstr "Paso 2"
+
+#: commands/admin.py:76
+msgid "Set the ID of the bots ticket panel message.\n"
+msgstr "Establece el ID del mensaje del panel de tickets de bots.\n"
+
+#: commands/admin.py:77
+msgid "`{clean_prefix}tickets panelmessage "
+msgstr "`{clean_prefix}tickets panelmessage "
+
+#: commands/admin.py:77
+msgid "<panel_name> <message_id>`\n"
+msgstr "<nombre_panel> <id_mensaje>`\n"
+
+#: commands/admin.py:80
+msgid ""
+"At this point the ticket panel will be activated, all following steps are for extra customization.\n"
+"If you need a message to add the buttons to, you can use the `{}tickets embed` command.\n"
+msgstr ""
+"En este punto se activará el panel de tickets, todos los pasos siguientes son para personalización extra.\n"
+"Si necesita un mensaje para añadir los botones, puede utilizar el comando `{}tickets embed`.\n"
+
+#: commands/admin.py:85
+msgid ""
+"If the bot is having trouble finding the message, run the command in the "
+"same channel as it."
+msgstr ""
+"Si el bot tiene problemas para encontrar el mensaje, ejecuta el comando en "
+"el mismo canal que él."
+
+#: commands/admin.py:88
+msgid "Step 3"
+msgstr "Paso 3"
+
+#: commands/admin.py:89
+msgid "Set the text of the ticket panel button.\n"
+msgstr "Establecer el texto del botón del panel de tickets.\n"
+
+#: commands/admin.py:90
+msgid "`{clean_prefix}tickets buttontext "
+msgstr "`{clean_prefix}tickets buttontext "
+
+#: commands/admin.py:90
+msgid "<panel_name> <button_text>`"
+msgstr "<nombre_panel> <texto_botón>`"
+
+#: commands/admin.py:93
+msgid "Button Text"
+msgstr "Texto del botón"
+
+#: commands/admin.py:94
+msgid "Set the ticket panel button color.\n"
+msgstr "Establezca el color del botón del panel de tickets.\n"
+
+#: commands/admin.py:95
+msgid "Valid colors are "
+msgstr "Los colores válidos son "
+
+#: commands/admin.py:95
+msgid "`red`, `blue`, `green`, and `grey`.\n"
+msgstr "`red`, `blue`, `green` y `grey`.\n"
+
+#: commands/admin.py:96
+msgid "`{clean_prefix}tickets buttoncolor "
+msgstr "`{clean_prefix}tickets buttoncolor "
+
+#: commands/admin.py:96
+msgid "<panel_name> <button_color>`"
+msgstr "<nombre_panel> <color_botón>`"
+
+#: commands/admin.py:99
+msgid "Button Color"
+msgstr "Color de los botones"
+
+#: commands/admin.py:100
+msgid "Set the button emoji for the ticket panel.\n"
+msgstr "Establezca el emoji del botón para el panel de entradas.\n"
+
+#: commands/admin.py:101
+msgid "`{clean_prefix}tickets buttonemoji "
+msgstr "`{clean_prefix}tickets buttonemoji "
+
+#: commands/admin.py:101
+msgid "<panel_name> <emoji>`"
+msgstr "<nombre_panel> <emoji>`"
+
+#: commands/admin.py:102
+msgid "Button Emoji"
+msgstr "Emoji de botón"
+
+#: commands/admin.py:104
+msgid "Use threads instead of channels for tickets\n"
+msgstr "Utilizar hilos en lugar de canales para los tickets\n"
+
+#: commands/admin.py:105
+msgid "`{clean_prefix}tickets usethreads "
+msgstr "`{clean_prefix}tickets usethreads "
+
+#: commands/admin.py:105 commands/admin.py:109 commands/admin.py:115
+msgid "<panel_name>`"
+msgstr "<nombre_panel>`"
+
+#: commands/admin.py:106 commands/admin.py:1170
+msgid "Thread Tickets"
+msgstr "Entradas de hilo"
+
+#: commands/admin.py:108
+msgid "Add a message the bot sends to the user in their ticket.\n"
+msgstr "Añade un mensaje que el bot envía al usuario en su ticket.\n"
+
+#: commands/admin.py:109
+msgid "`{clean_prefix}tickets addmessage "
+msgstr "`{clean_prefix}tickets addmessage "
+
+#: commands/admin.py:110
+msgid "Ticket Messages"
+msgstr "Mensajes de Ticket"
+
+#: commands/admin.py:112
+msgid "View and remove a messages the bot sends to the user in their ticket.\n"
+msgstr "Ver y eliminar los mensajes que el bot envía al usuario en su ticket.\n"
+
+#: commands/admin.py:115
+msgid "`{clean_prefix}tickets viewmessages "
+msgstr "`{clean_prefix}tickets viewmessages "
+
+#: commands/admin.py:116
+msgid "Remove/View Ticket Messages"
+msgstr "Eliminar/Ver mensajes de tickets"
+
+#: commands/admin.py:118
+msgid "Set the naming format for ticket channels that are opened.\n"
+msgstr ""
+"Establezca el formato de denominación para los canales de tickets que se "
+"abren.\n"
+
+#: commands/admin.py:119
+msgid "`{clean_prefix}tickets ticketname "
+msgstr "`{clean_prefix}tickets ticketname "
+
+#: commands/admin.py:119
+msgid "<panel_name> <name_format>`"
+msgstr "<nombre_panel> <formato_nombre>`"
+
+#: commands/admin.py:122
+msgid "Ticket Channel Name"
+msgstr "Nombre del canal de tickets"
+
+#: commands/admin.py:123
+msgid "Set log channel for a ticket panel.\n"
+msgstr "Establecer canal de registro para un panel de tickets.\n"
+
+#: commands/admin.py:124
+msgid "`{clean_prefix}tickets logchannel "
+msgstr "`{clean_prefix}tickets logchannel "
+
+#: commands/admin.py:124
+msgid "<panel_name> <channel>`"
+msgstr "<nombre_panel> <canal>`"
+
+#: commands/admin.py:127
+msgid "Log Channel"
+msgstr "Canal de registro"
+
+#: commands/admin.py:129
+msgid ""
+"Optionally archive closed tickets to a category instead of deleting them.\n"
+"The opener (and any added users) lose access; staff keep it. Archived tickets get Reopen/Delete buttons.\n"
+msgstr ""
+"Opcionalmente archiva los tickets cerrados en una categoría en lugar de eliminarlos.\n"
+"Quien abrió el ticket (y los usuarios añadidos) pierden el acceso; el staff lo conserva. Los tickets archivados muestran botones de Reabrir/Eliminar.\n"
+
+#: commands/admin.py:134
+msgid "`{clean_prefix}tickets closedcategory "
+msgstr "`{clean_prefix}tickets closedcategory "
+
+#: commands/admin.py:134
+msgid "<category>`"
+msgstr "<categoría>`"
+
+#: commands/admin.py:135
 msgid "Closed Tickets (Archive)"
 msgstr "Tickets Cerrados (Archivar)"
 
-msgid "Optionally archive closed tickets to a category instead of deleting them.\nThe opener (and any added users) lose access; staff keep it. Archived tickets get Reopen/Delete buttons.\n"
-msgstr "Opcionalmente archiva los tickets cerrados en una categoría en lugar de eliminarlos.\nQuien abrió el ticket (y los usuarios añadidos) pierden el acceso; el staff lo conserva. Los tickets archivados muestran botones de Reabrir/Eliminar.\n"
+#: commands/admin.py:137
+msgid ""
+"User commands now live under the `{prefix}ticket` group (e.g. "
+"`{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."
+msgstr ""
+"Los comandos de usuario ahora están bajo el grupo `{prefix}ticket` (ej. "
+"`{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."
 
+#: commands/admin.py:141
 msgid "User Commands"
 msgstr "Comandos de Usuario"
 
-msgid "User commands now live under the `{prefix}ticket` group (e.g. `{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."
-msgstr "Los comandos de usuario ahora están bajo el grupo `{prefix}ticket` (ej. `{prefix}ticket close`, `{prefix}ticket add`, `{prefix}ticket claim`)."
+#: commands/admin.py:143
+msgid ""
+"Tip: you can create multiple support panels using the same message for a "
+"multi-button panel"
+msgstr ""
+"Consejo: puedes crear múltiples paneles de soporte utilizando el mismo "
+"mensaje para un panel de varios botones"
+
+#: commands/admin.py:151
+msgid ""
+"\n"
+"        Suspend the ticket system\n"
+"        If a suspension message is set, any user that tries to open a ticket will receive this message\n"
+"        "
+msgstr ""
+"Suspender el sistema de tickets\n"
+"Si hay un mensaje de suspensión, quien intente abrir un ticket lo recibirá"
+
+#: commands/admin.py:160
+msgid "Ticket system is no longer suspended!"
+msgstr "¡El sistema de tickets ya no está suspendido!"
+
+#: commands/admin.py:163
+msgid "Message is too long! Must be less than 900 characters"
+msgstr "¡El mensaje es demasiado largo! Debe tener menos de 900 caracteres"
+
+#: commands/admin.py:172
+msgid ""
+"Ticket system is now suspended! Users trying to open a ticket will be met "
+"with this message"
+msgstr ""
+"¡El sistema de tickets está suspendido! Quien intente abrir un ticket verá "
+"este mensaje"
+
+#: commands/admin.py:180
+msgid "Add a support ticket panel"
+msgstr "Añadir un panel de tickets de soporte"
+
+#: commands/admin.py:183
+msgid " Panel Saved"
+msgstr " Panel Guardado"
+
+#: commands/admin.py:184
+msgid "Your panel has been added and will need to be configured."
+msgstr "Su panel ha sido añadido y necesitará ser configurado."
+
+#: commands/admin.py:189
+msgid "Panel already exists!"
+msgstr "¡El panel ya existe!"
+
+#: commands/admin.py:200
+msgid "Set the category ID for a ticket panel"
+msgstr "Establecer el ID de categoría para un panel de tickets"
+
+#: commands/admin.py:204
+msgid "I need the `manage channels` permission to set this category"
+msgstr "Necesito el permiso `manage channels` para establecer esta categoría"
+
+#: commands/admin.py:207
+msgid "I need `manage roles` enabled in this category"
+msgstr "Necesito `gestionar roles` activado en esta categoría"
+
+#: commands/admin.py:210
+msgid "I need the `attach files` permission to set this category"
+msgstr ""
+"Necesito el permiso `adjuntar archivos` para establecer esta categoría"
+
+#: commands/admin.py:213
+msgid "I cannot see that category!"
+msgstr "¡No puedo ver esa categoría!"
+
+#: commands/admin.py:215
+msgid "I cannot see message history in that category!"
+msgstr "¡No puedo ver el historial de mensajes en esa categoría!"
+
+#: commands/admin.py:218 commands/admin.py:238 commands/admin.py:262
+#: commands/admin.py:296 commands/admin.py:322 commands/admin.py:350
+#: commands/admin.py:369 commands/admin.py:405 commands/admin.py:416
+#: commands/admin.py:487 commands/admin.py:502 commands/admin.py:546
+#: commands/admin.py:798 commands/admin.py:890 commands/admin.py:968
+#: commands/admin.py:1256 commands/admin.py:1284 commands/admin.py:1304
+#: commands/admin.py:1346 commands/admin.py:1363 commands/admin.py:1378
+#: commands/admin.py:1866
+msgid "Panel does not exist!"
+msgstr "¡El panel no existe!"
+
+#: commands/admin.py:221
+msgid "New tickets will now be opened under that category!"
+msgstr "¡Las nuevas entradas ahora se abrirán bajo esa categoría!"
+
+#: commands/admin.py:230
+msgid "Set the channel ID where a ticket panel is located"
+msgstr "Establecer el ID del canal donde se encuentra un panel de tickets"
+
+#: commands/admin.py:233 commands/admin.py:476
+msgid "I cannot see that channel!"
+msgstr "¡No puedo ver ese canal!"
+
+#: commands/admin.py:235 commands/admin.py:478
+msgid "I cannot see message history in that channel!"
+msgstr "¡No puedo ver el historial de mensajes en ese canal!"
+
+#: commands/admin.py:246
+msgid ""
+"\n"
+"        Set the message ID of a ticket panel\n"
+"        Run this command in the same channel as the ticket panel message\n"
+"        "
+msgstr ""
+"\n"
+"Establecer el ID de mensaje de un panel de tickets\n"
+"Ejecute este comando en el mismo canal que el mensaje del panel de tickets        "
+
+#: commands/admin.py:252
+msgid "I cannot add buttons to messages sent by other users!"
+msgstr "¡No puedo añadir botones a mensajes de otros usuarios!"
+
+#: commands/admin.py:258
+msgid "Channel of message must be a TEXT CHANNEL!"
+msgstr "¡El mensaje debe estar en un CANAL DE TEXTO!"
+
+#: commands/admin.py:265
+msgid "Category ID must be set for this panel first!"
+msgstr "¡El ID de categoría debe establecerse primero para este panel!"
+
+#: commands/admin.py:270
+msgid "This message is part of a different channel from the one you set!"
+msgstr "¡Este mensaje es de un canal distinto al que configuraste!"
+
+#: commands/admin.py:283
+msgid "Set the button text for a support ticket panel"
+msgstr "Establecer el texto del botón para un panel de tickets"
+
+#: commands/admin.py:287
+msgid "The text content of a button must be less than 80 characters!"
+msgstr ""
+"¡El contenido del texto de un botón debe tener menos de 80 caracteres!"
+
+#: commands/admin.py:291
+msgid "This is what your button will look like with this text!"
+msgstr "¡Este es el aspecto que tendrá tu botón con este texto!"
+
+#: commands/admin.py:305
+msgid "Set the button color for a support ticket panel"
+msgstr "Establecer el color del botón para un panel de tickets"
+
+#: commands/admin.py:312
+msgid " is not valid, must be one of the following\n"
+msgstr " no es válido, debe ser uno de los siguientes\n"
+
+#: commands/admin.py:317
+msgid "This is what your button will look like with this color!"
+msgstr "¡Este es el aspecto que tendrá tu botón con este color!"
+
+#: commands/admin.py:335
+msgid "Set the button emoji for a support ticket panel"
+msgstr "Establecer el emoji del botón para un panel de tickets"
+
+#: commands/admin.py:340
+msgid "This is what your button will look like with this emoji!"
+msgstr "¡Este es el aspecto que tendrá tu botón con este emoji!"
+
+#: commands/admin.py:345
+msgid "Failed to create test button. Error:\n"
+msgstr "Error al crear el botón de prueba. Error:\n"
+
+#: commands/admin.py:361
+msgid ""
+"\n"
+"        Toggle a panel on/off\n"
+"\n"
+"        Disabled panels will still show the button but it will be disabled\n"
+"        "
+msgstr ""
+"\n"
+"        Alternar un panel encendido/apagado\n"
+"\n"
+"        Los paneles desactivados seguirán mostrando el botón pero estará desactivado\n"
+"        "
+
+#: commands/admin.py:375
+msgid "Panel **Enabled**"
+msgstr "Panel **Activado**"
+
+#: commands/admin.py:378
+msgid "Panel **Disabled**"
+msgstr "Panel **Desactivado**"
+
+#: commands/admin.py:387
+msgid ""
+"\n"
+"        Set the default ticket channel name for a panel\n"
+"\n"
+"        You can include the following in the name\n"
+"        `{num}` - Ticket number\n"
+"        `{user}` - user's name\n"
+"        `{displayname}` - user's display name\n"
+"        `{id}` - user's ID\n"
+"        `{shortdate}` - mm-dd\n"
+"        `{longdate}` - mm-dd-yyyy\n"
+"        `{time}` - hh-mm AM/PM according to bot host system time\n"
+"\n"
+"        You can set this to {default} to use default \"Ticket-Username\n"
+"        "
+msgstr ""
+"Establecer el nombre del canal de tickets por defecto para un panel\n"
+"\n"
+"Puede incluir lo siguiente en el nombre:\n"
+"- `{num}` - Número de ticket\n"
+"- `{user}` - Nombre del usuario\n"
+"- `{displayname}` - Nombre para mostrar del usuario\n"
+"- `{id}` - ID del usuario\n"
+"- `{shortdate}` - mm-dd\n"
+"- `{longdate}` - mm-dd-aaaa\n"
+"- `{time}` - hh-mm AM/PM según la hora del sistema del host del bot\n"
+"\n"
+"Puede establecer esto en {default} para utilizar el \"Ticket-Username\" predeterminado        "
+
+#: commands/admin.py:412
+msgid "Toggle whether a certain panel uses threads or channels"
+msgstr "Alternar si un panel usa hilos o canales"
+
+#: commands/admin.py:419
+msgid "Set a panel channel first!"
+msgstr "¡Configura primero un canal de panel!"
+
+#: commands/admin.py:423
+msgid "I am missing the `Create Private Threads` permission!"
+msgstr "¡Me falta el permiso `Crear hilos privados`!"
+
+#: commands/admin.py:427
+msgid "I am missing the `Send Messages in Threads` permission!"
+msgstr "¡Me falta el permiso `Enviar mensajes en hilos`!"
+
+#: commands/admin.py:433
+msgid "The {} panel will no longer use threads"
+msgstr "El panel {} ya no utilizará hilos"
+
+#: commands/admin.py:438
+msgid "The {} panel will now use threads"
+msgstr "El panel {} ahora utilizará hilos"
+
+#: commands/admin.py:444
+msgid "Throw a modal when the close button is clicked to enter a reason"
+msgstr ""
+"Mostrar un modal cuando se hace clic en cerrar para introducir un motivo"
+
+#: commands/admin.py:453
+msgid "The {} panel will no longer show a close reason modal"
+msgstr "El panel {} ya no mostrará un modal de razón de cierre"
+
+#: commands/admin.py:460
+msgid "The {} panel will now show a close reason modal"
+msgstr "El panel {} ahora mostrará un modal de motivo de cierre"
+
+#: commands/admin.py:473
+msgid "Set the logging channel for each panel's tickets"
+msgstr "Establecer el canal de registro para los tickets de cada panel"
+
+#: commands/admin.py:480
+msgid "I cannot send messages in that channel!"
+msgstr "¡No puedo enviar mensajes en ese canal!"
+
+#: commands/admin.py:482
+msgid "I cannot embed links in that channel!"
+msgstr "¡No puedo incrustar enlaces en ese canal!"
+
+#: commands/admin.py:484
+msgid "I cannot attach files in that channel!"
+msgstr "¡No puedo adjuntar archivos en ese canal!"
+
+#: commands/admin.py:496
+msgid "Set a title for a ticket panel's modal"
+msgstr "Establecer un título para el modal de un panel de tickets"
+
+#: commands/admin.py:498
+msgid "The max length is 45!"
+msgstr "¡La longitud máxima es 45!"
+
+#: commands/admin.py:505
+msgid "Modal title set!"
+msgstr "¡Título del modal establecido!"
+
+#: commands/admin.py:508
+msgid "Modal title removed!"
+msgstr "¡Título modal eliminado!"
+
+#: commands/admin.py:513
+msgid ""
+"\n"
+"        Add a modal field a ticket panel\n"
+"\n"
+"        Ticket panels can have up to 5 fields per modal for the user to fill out before opening a ticket.\n"
+"        If modal fields are added and have required fields,\n"
+"        the user will have to fill them out before they can open a ticket.\n"
+"\n"
+"        There is no toggle for modals, if a panel has them it will use them, if they don't then it just opens the ticket\n"
+"        When the ticket is opened, it sends the modal field responses in an embed below the ticket message\n"
+"\n"
+"        **Note**\n"
+"        `field_name` is just the name of the field stored in config,\n"
+"        it won't be shown in the modal and should not have spaces in it\n"
+"\n"
+"\n"
+"        Specify an existing field name to delete a modal field (non-case-sensitive)\n"
+"        "
+msgstr ""
+"Añadir un campo modal a un panel de tickets\n"
+"\n"
+"Los paneles de tickets pueden tener hasta 5 campos modales para que el usuario los complete antes de abrir un ticket.\n"
+"Si se agregan campos modales y tienen campos obligatorios,\n"
+"el usuario deberá completarlos antes de poder abrir un ticket.\n"
+"\n"
+"No hay un interruptor para los modales, si un panel los tiene, los utilizará; de lo contrario, simplemente se abrirá el ticket.\n"
+"Cuando se abre el ticket, se envían las respuestas de los campos modales en un incrustado debajo del mensaje del ticket.\n"
+"\n"
+"**Nota**\n"
+"`nombre_campo` es solo el nombre del campo almacenado en la configuración,\n"
+"no se mostrará en el modal y no debe contener espacios.\n"
+"\n"
+"Especifique un nombre de campo existente para eliminar un campo modal (sin distinguir mayúsculas de minúsculas)        "
+
+#: commands/admin.py:554
+msgid "Field for {} panel has been removed!"
+msgstr "¡Se ha eliminado el campo para el panel {}!"
+
+#: commands/admin.py:558
+msgid "The most fields a modal can have is 5!"
+msgstr "¡El máximo de campos que un modal puede tener es 5!"
+
+#: commands/admin.py:567
+msgid "Modal Preview"
+msgstr "Vista previa del formulario"
+
+#: commands/admin.py:576
+msgid "Modal field addition cancelled"
+msgstr "Se ha cancelado la adición del campo modal"
+
+#: commands/admin.py:580
+msgid "type 'cancel' to cancel at any time"
+msgstr "Escriba \"Cancelar\" para cancelar en cualquier momento"
+
+#: commands/admin.py:589
+msgid "What would you like the field label to be? (45 chars or less)"
+msgstr ""
+"¿Cómo le gustaría que se llame la etiqueta del campo? (45 caracteres o "
+"menos)"
+
+#: commands/admin.py:601
+msgid "Modal field labels must be 45 characters or less!"
+msgstr ""
+"¡Las etiquetas de los campos modales deben tener 45 caracteres o menos!"
+
+#: commands/admin.py:614
+msgid "What style would you like the text box to be? (long/short)"
+msgstr "¿Qué estilo te gustaría que tuviera el cuadro de texto? (largo/corto)"
+
+#: commands/admin.py:624
+msgid "Style must be long or short!"
+msgstr "¡El estilo debe ser largo o corto!"
+
+#: commands/admin.py:633
+msgid ""
+"Would you like to set a placeholder for the text field?\n"
+"This is text that shows up in the box before the user types."
+msgstr ""
+"¿Le gustaría establecer un marcador de posición para el campo de texto?\n"
+"Este es el texto que aparece en la caja antes de que el usuario escriba."
+
+#: commands/admin.py:645
+msgid "Type your desired placeholder below (100 chars max)"
+msgstr ""
+"Escriba a continuación el marcador de posición que desee (100 caracteres "
+"como máximo)"
+
+#: commands/admin.py:655
+msgid "Placeholders must be 100 characters or less!"
+msgstr "¡Los marcadores de posición deben tener 100 caracteres o menos!"
+
+#: commands/admin.py:664
+msgid "Would you like to set a default value for the text field?"
+msgstr "¿Desea establecer un valor predeterminado para el campo de texto?"
+
+#: commands/admin.py:673
+msgid "Type your desired default value below"
+msgstr "Escriba a continuación el valor por defecto que desee"
+
+#: commands/admin.py:686
+msgid "Would you like to make this field required?"
+msgstr "¿Desea que este campo sea obligatorio?"
+
+#: commands/admin.py:699
+msgid "Would you like to set a minimum length for this field?"
+msgstr "¿Desea establecer una longitud mínima para este campo?"
+
+#: commands/admin.py:709
+msgid "Type the minimum length for this field below (less than 1024)"
+msgstr "Escribe abajo la longitud mínima de este campo (menos de 1024)"
+
+#: commands/admin.py:721 commands/admin.py:754
+msgid "That is not a number!"
+msgstr "¡Eso no es un número!"
+
+#: commands/admin.py:733
+msgid "Would you like to set a maximum length for this field?"
+msgstr "¿Desea establecer una longitud máxima para este campo?"
+
+#: commands/admin.py:742
+msgid "Type the maximum length for this field below (up to 1024)"
+msgstr "Escribe abajo la longitud máxima de este campo (hasta 1024)"
+
+#: commands/admin.py:763
+msgid "Max length cannot be less than the minimum length 😑"
+msgstr "La longitud máxima no puede ser menor que la mínima 😑"
+
+#: commands/admin.py:782
+msgid "Your modal field has been added!"
+msgstr "¡Tu campo modal ha sido añadido!"
+
+#: commands/admin.py:784
+msgid "Your modal field has been edited!"
+msgstr "¡Tu campo modal ha sido editado!"
+
+#: commands/admin.py:794 commands/admin.py:957
+msgid "View/Delete a ticket message for a support ticket panel"
+msgstr "Ver/Borrar un mensaje de ticket para un panel de ticket de soporte"
+
+#: commands/admin.py:801
+msgid "This panel does not have any modal fields set!"
+msgstr "¡Este panel no tiene ningún campo modal configurado!"
+
+#: commands/admin.py:805
+msgid "`Label: `{}\n"
+msgstr "`Etiqueta: `{}\n"
+
+#: commands/admin.py:806
+msgid "`Style: `{}\n"
+msgstr "`Estilo: `{}\n"
+
+#: commands/admin.py:807
+msgid "`Placeholder: `{}\n"
+msgstr "`Marcador: `{}\n"
+
+#: commands/admin.py:808
+msgid "`Default:     `{}\n"
+msgstr "`Por defecto:     `{}\n"
+
+#: commands/admin.py:809
+msgid "`Required:    `{}\n"
+msgstr "`Requerido:    `{}\n"
+
+#: commands/admin.py:810
+msgid "`Min Length:  `{}\n"
+msgstr "`Longitud mínima:  `{}\n"
+
+#: commands/admin.py:811
+msgid "`Max Length:  `{}\n"
+msgstr "`Longitud máxima:  `{}\n"
+
+#: commands/admin.py:814 commands/admin.py:982
+msgid "Page"
+msgstr "Página"
+
+#: commands/admin.py:817
+msgid "Modal Fields for {}"
+msgstr "Campos modales para {}"
+
+#: commands/admin.py:836
+msgid "Editing {} modal field for {}!"
+msgstr "¡Editando {} campo modal para {}!"
+
+#: commands/admin.py:854
+msgid "Modal field has been deleted from "
+msgstr "Se ha eliminado el campo Modal de "
+
+#: commands/admin.py:859
+msgid "There are no more modal fields for this panel"
+msgstr "Este panel no tiene más campos de formulario"
+
+#: commands/admin.py:877
+msgid ""
+"\n"
+"        Add a message embed to be sent when a ticket is opened\n"
+"\n"
+"        You can include any of these in the embed to be replaced by their value when the message is sent\n"
+"        `{username}` - Person's Discord username\n"
+"        `{mention}` - This will mention the user\n"
+"        `{id}` - This is the ID of the user that created the ticket\n"
+"\n"
+"        The bot will walk you through a few steps to set up the embed\n"
+"        "
+msgstr ""
+"Añadir un mensaje incrustado que se enviará cuando se abra un ticket\n"
+"\n"
+"Puede incluir cualquiera de estos elementos en la incrustación para que se sustituyan por su valor cuando se envíe el mensaje:\n"
+"`{username}` - Nombre de usuario de Discord de la persona\n"
+"`{mention}` - Esto mencionará al usuario\n"
+"`{id}` - Este es el ID del usuario que creó el ticket\n"
+"\n"
+"El bot le guiará a través de unos pasos para configurar la incrustación        "
+
+#: commands/admin.py:891
+msgid "type 'cancel' to cancel the setup"
+msgstr "Escriba 'Cancelar' para cancelar la configuración"
+
+#: commands/admin.py:895
+msgid "Would you like this ticket embed to have a title?"
+msgstr "¿Le gustaría que este ticket incrustado tenga un título?"
+
+#: commands/admin.py:903
+msgid "Type your desired title below"
+msgstr "Escriba a continuación el título deseado"
+
+#: commands/admin.py:908 commands/admin.py:921 commands/admin.py:924
+#: commands/admin.py:941
+msgid "Ticket message addition cancelled"
+msgstr "Se cancela la adición de mensajes de entradas"
+
+#: commands/admin.py:914
+msgid "Type your desired ticket message below"
+msgstr "Escriba a continuación el mensaje deseado para el ticket"
+
+#: commands/admin.py:928
+msgid "Would you like this ticket embed to have a footer?"
+msgstr "¿Desea que este ticket incrustado tenga un pie de página?"
+
+#: commands/admin.py:936
+msgid "Type your footer"
+msgstr "Escriba su pie de página"
+
+#: commands/admin.py:951
+msgid "Your ticket message has been added!"
+msgstr "¡Su mensaje de ticket ha sido añadido!"
+
+#: commands/admin.py:962 commands/admin.py:1017
+msgid ""
+"There are no panels available!\n"
+"Use "
+msgstr ""
+"¡No hay paneles disponibles!\n"
+"Utilice "
+
+#: commands/admin.py:963 commands/admin.py:1018
+msgid "`{clean_prefix}tset addpanel` "
+msgstr "`{clean_prefix}tset addpanel` "
+
+#: commands/admin.py:964 commands/admin.py:1019
+msgid "to create one."
+msgstr "para crear uno."
+
+#: commands/admin.py:967
+msgid "Valid panels are: "
+msgstr "Los paneles válidos son: "
+
+#: commands/admin.py:971
+msgid "This panel does not have any messages added!"
+msgstr "¡Este panel no tiene ningún mensaje añadido!"
+
+#: commands/admin.py:974
+msgid "**Title**\n"
+msgstr "**Título**\n"
+
+#: commands/admin.py:975
+msgid "**Description**\n"
+msgstr "**Descripción**\n"
+
+#: commands/admin.py:976
+msgid "**Footer**\n"
+msgstr "**Pie de página**\n"
+
+#: commands/admin.py:978 commands/admin.py:992
+msgid "Ticket Messages for: "
+msgstr ""
+"Mensajes de entradas para:\n"
+"Mensajes de boletos para: "
+
+#: commands/admin.py:997
+msgid "Ticket message has been deleted from "
+msgstr "El mensaje del Tickets se ha eliminado de "
+
+#: commands/admin.py:1003
+msgid "There are no more messages for this panel"
+msgstr "Este panel no tiene más mensajes"
+
+#: commands/admin.py:1013
+msgid "View/Delete currently configured support ticket panels"
+msgstr "Ver/Borrar paneles de tickets de soporte configurados actualmente"
+
+#: commands/admin.py:1039
+msgid "(alt)"
+msgstr ""
+"(antiguo)\n"
+"Traduce el siguiente texto al español"
+
+#: commands/admin.py:1060
+msgid "`Disabled:       `"
+msgstr "`Desactivado:       `"
+
+#: commands/admin.py:1061
+msgid "`Category:       `"
+msgstr "`Categoría:       `"
+
+#: commands/admin.py:1062
+msgid "`Channel:        `"
+msgstr "`Canal:          `"
+
+#: commands/admin.py:1063
+msgid "`MessageID:      `"
+msgstr "`ID mensaje:     `"
+
+#: commands/admin.py:1064
+msgid "`ButtonText:     `"
+msgstr "`ButtonText:      `"
+
+#: commands/admin.py:1065
+msgid "`ButtonColor:    `"
+msgstr "`Color botón:    `"
+
+#: commands/admin.py:1066
+msgid "`ButtonEmoji:    `"
+msgstr "`Emoji botón:    `"
+
+#: commands/admin.py:1067
+msgid "`TicketNum:      `"
+msgstr "`TicketNum:      `"
+
+#: commands/admin.py:1068
+msgid "`Use Threads:    `"
+msgstr "`Usa hilos:      `"
+
+#: commands/admin.py:1069
+msgid "`TicketMessages: `"
+msgstr "`TicketMessages: `"
+
+#: commands/admin.py:1070
+msgid "`TicketName:     `"
+msgstr "`TicketName:     `"
+
+#: commands/admin.py:1071
+msgid "`Modal Fields:   `"
+msgstr "`Campos modales:   `"
+
+#: commands/admin.py:1072
+msgid "`Modal Title:    `"
+msgstr "`Título modal:   `"
+
+#: commands/admin.py:1073
+msgid "`LogChannel:     `"
+msgstr "`Canal de logs:  `"
+
+#: commands/admin.py:1074
+msgid "`Priority:       `"
+msgstr "`Prioridad:       `"
+
+#: commands/admin.py:1075
+msgid "`Button Row:     `"
+msgstr "`Fila del botón: `"
+
+#: commands/admin.py:1076
+msgid "`Reason Modal:   `"
+msgstr "`Motivo (modal): `"
+
+#: commands/admin.py:1077
+msgid "`Max Claims:     `"
+msgstr "`Máx. reclamos:  `"
+
+#: commands/admin.py:1085
+msgid "Panel Roles(Mention)"
+msgstr "Funciones del panel (Mención)"
+
+#: commands/admin.py:1087
+msgid "Required Roles to Open"
+msgstr "Funciones necesarias para abrir"
+
+#: commands/admin.py:1088
+msgid "Page "
+msgstr "Página "
+
+#: commands/admin.py:1100
+msgid " panel has been deleted!"
+msgstr " ¡El panel ha sido eliminado!"
+
+#: commands/admin.py:1108
+msgid "There are no more panels configured!"
+msgstr "¡No hay más paneles configurados!"
+
+#: commands/admin.py:1115
+msgid "View support ticket settings"
+msgstr "Ver la configuración de los tickets de soporte"
+
+#: commands/admin.py:1118
+msgid "hours"
+msgstr "horas"
+
+#: commands/admin.py:1119
+msgid "hour"
+msgstr "hora"
+
+#: commands/admin.py:1122 commands/admin.py:1916 commands/admin.py:1920
+#: commands/admin.py:2205 commands/admin.py:2209 commands/admin.py:2213
+#: commands/admin.py:2217 commands/admin.py:2221 commands/admin.py:2366
+msgid "Disabled"
+msgstr "Desactivado"
+
+#: commands/admin.py:1125
+msgid "Detailed"
+msgstr "Detallado"
+
+#: commands/admin.py:1125
+msgid "Simple"
+msgstr "Simple"
+
+#: commands/admin.py:1127
+msgid "`Max Tickets:      `"
+msgstr "`Máx. tickets:     `"
+
+#: commands/admin.py:1128
+msgid "`DM Alerts:        `"
+msgstr "`DM Alerts:        `"
+
+#: commands/admin.py:1129
+msgid "`Users can Rename: `"
+msgstr "`Pueden renombrar: `"
+
+#: commands/admin.py:1130
+msgid "`Users can Close:  `"
+msgstr "`Pueden cerrar:    `"
+
+#: commands/admin.py:1131
+msgid "`Users can Manage: `"
+msgstr "`Pueden gestionar: `"
+
+#: commands/admin.py:1132
+msgid "`Save Transcripts: `"
+msgstr "`Guardar transcripciones: `"
+
+#: commands/admin.py:1133
+msgid "`Auto Close:       `"
+msgstr "`Cierre automático:`"
+
+#: commands/admin.py:1133
+msgid "On"
+msgstr "En"
+
+#: commands/admin.py:1133
+msgid "Off"
+msgstr "Fuera de"
+
+#: commands/admin.py:1134
+msgid "`NoResponseDelete: `"
+msgstr "`NoResponseDelete: `"
+
+#: commands/admin.py:1153
+msgid "Invalid"
+msgstr "No válido"
+
+#: commands/admin.py:1155
+msgid "Tickets Core Settings"
+msgstr "Ajustes básicos de Tickets"
+
+#: commands/admin.py:1161
+msgid "Support Roles(Mention)"
+msgstr "Funciones de apoyo (Mención)"
+
+#: commands/admin.py:1164
+msgid "Blacklist"
+msgstr "Lista negra"
+
+#: commands/admin.py:1167
+msgid "Thread tickets will be closed/archived rather than deleted"
+msgstr ""
+"Las entradas de los hilos se cerrarán/archivarán en lugar de eliminarse"
+
+#: commands/admin.py:1169
+msgid "Thread tickets will be deleted instead of closed/archived"
+msgstr ""
+"Las entradas de los hilos se eliminarán en lugar de cerrarse/archivarse"
+
+#: commands/admin.py:1175
+msgid "Closed tickets are archived under **{}** (opener loses access)"
+msgstr ""
+"Los tickets cerrados se archivan en **{}** (quien lo abrió pierde el acceso)"
+
+#: commands/admin.py:1179
+msgid "Closed tickets are deleted"
+msgstr "Los tickets cerrados se eliminan"
+
+#: commands/admin.py:1180
+msgid "Closed Tickets"
+msgstr "Tickets Cerrados"
+
+#: commands/admin.py:1183
+msgid "Thread Ticket Auto-Add"
+msgstr "Auto-Agregar Entrada de Ticket"
+
+#: commands/admin.py:1184
+msgid "Auto-add support and panel roles to tickets that use threads: **{}**"
+msgstr ""
+"Añadir automáticamente funciones de soporte y panel a los tickets que "
+"utilizan hilos: **{}**"
+
+#: commands/admin.py:1190
+msgid "Suspended Message"
+msgstr "Mensaje de suspensión"
+
+#: commands/admin.py:1191
+msgid ""
+"Tickets are currently suspended, users will be met with the following message\n"
+"{}"
+msgstr ""
+"Los tickets están suspendidos; los usuarios verán este mensaje\n"
+"{}"
+
+#: commands/admin.py:1200
+msgid "Set the max tickets a user can have open at one time of any kind"
+msgstr ""
+"Establecer el máximo de tickets que un usuario puede tener abiertos a la vez"
+" de cualquier tipo"
+
+#: commands/admin.py:1202
+msgid "Max ticket amount must be greater than 0!"
+msgstr "¡El importe máximo del Tickets debe ser superior a 0!"
+
+#: commands/admin.py:1213
+msgid ""
+"\n"
+"        Add/Remove ticket support roles (one at a time)\n"
+"\n"
+"        **Optional**: include `true` for mention to have that role mentioned when a ticket is opened\n"
+"\n"
+"        To remove a role, simply run this command with it again to remove it\n"
+"        "
+msgstr ""
+"Añadir/eliminar roles de soporte de tickets (uno a la vez)\n"
+"\n"
+"**Opcional**: incluir `true` para mencionar ese rol cuando se abra un ticket\n"
+"\n"
+"Para eliminar un rol, simplemente ejecuta este comando nuevamente con el rol para eliminarlo        "
+
+#: commands/admin.py:1226
+msgid "{} has been removed from support roles"
+msgstr "Se ha eliminado {} de las funciones de apoyo"
+
+#: commands/admin.py:1231
+msgid " has been added to support roles"
+msgstr " se ha agregado para apoyar los roles"
+
+#: commands/admin.py:1242
+msgid ""
+"\n"
+"        Add/Remove roles for a specific panel\n"
+"\n"
+"        To remove a role, simply run this command with it again to remove it\n"
+"\n"
+"        **Optional**: include `true` for mention to have that role mentioned when a ticket is opened\n"
+"\n"
+"        These roles are a specialized subset of the main support roles.\n"
+"        Use this role type if you want to isolate specific groups to a certain panel.\n"
+"        "
+msgstr ""
+"Añadir/eliminar roles para un panel específico.\n"
+"\n"
+"Para eliminar un rol, simplemente ejecuta este comando nuevamente con el rol para eliminarlo.\n"
+"\n"
+"**Opcional**: incluye `true` para mencionar ese rol cuando se abre un ticket.\n"
+"\n"
+"Estos roles son un subconjunto especializado de los roles principales de soporte.\n"
+"Utiliza este tipo de rol si deseas aislar grupos específicos en un panel determinado        "
+
+#: commands/admin.py:1263
+msgid "{} has been removed from the {} panel roles"
+msgstr "Se ha eliminado {} de las funciones del panel {}"
+
+#: commands/admin.py:1272
+msgid " has been added to the {} panel roles"
+msgstr " se ha añadido a las funciones del panel {}"
+
+#: commands/admin.py:1280
+msgid ""
+"Set how many staff members can claim/join a ticket before the join button is"
+" disabled (If using threads)"
+msgstr ""
+"Establecer cuántos miembros del personal pueden reclamar/unirse a un ticket "
+"antes de que se desactive el botón de unirse (si se utilizan hilos)"
+
+#: commands/admin.py:1288
+msgid "Up to {} staff member(s) can claim a single ticket"
+msgstr "Hasta {} miembro(s) del personal puede(n) reclamar un solo ticket"
+
+#: commands/admin.py:1296
+msgid ""
+"\n"
+"        Add/Remove roles required to open a ticket for a specific panel\n"
+"\n"
+"        Specify the same role to remove it\n"
+"        "
+msgstr ""
+"\n"
+"Añadir/eliminar roles requeridos para abrir un ticket para un panel específico\n"
+"\n"
+"Especifique el mismo rol para eliminarlo        "
+
+#: commands/admin.py:1311
+msgid "{} has been removed from the {} panel's required open roles"
+msgstr ""
+"Se ha eliminado {} de las funciones abiertas obligatorias del panel {}"
+
+#: commands/admin.py:1319
+msgid " has been added to the {} panel's required open roles"
+msgstr " se ha añadido a las funciones abiertas obligatorias del panel {}"
+
+#: commands/admin.py:1333
+msgid ""
+"\n"
+"        Set an alternate channel that tickets will be opened under for a panel\n"
+"\n"
+"        If the panel uses threads, this needs to be a normal text channel.\n"
+"        If the panel uses channels, this needs to be a category.\n"
+"\n"
+"        If the panel is a channel type and a channel is used, the bot will use the category associated with the channel.\n"
+"\n"
+"        To remove the alt channel, specify the existing one\n"
+"        "
+msgstr ""
+"Establezca un canal alternativo en el que se abrirán los tickets para un panel.\n"
+"\n"
+"Si el panel utiliza hilos, este debe ser un canal de texto normal.\n"
+"Si el panel utiliza canales, este debe ser una categoría.\n"
+"\n"
+"Si el panel es de tipo canal y se utiliza un canal, el bot utilizará la categoría asociada al canal.\n"
+"\n"
+"Para eliminar el canal alternativo, especifique el existente        "
+
+#: commands/admin.py:1350
+msgid "Alt channel has been removed for this panel!"
+msgstr "¡Se ha eliminado el canal Alt para este panel!"
+
+#: commands/admin.py:1352
+msgid "Alt channel has been set to {}!"
+msgstr "¡El canal Alt ha sido ajustado a {}!"
+
+#: commands/admin.py:1357
+msgid "Set the priority order of a panel's button"
+msgstr "Establecer el orden de prioridad de un botón de un panel"
+
+#: commands/admin.py:1359
+msgid "Priority needs to be between 1 and 25"
+msgstr "La prioridad debe estar entre 1 y 25"
+
+#: commands/admin.py:1366
+msgid "Priority for this panel has been set to {}!"
+msgstr "¡La prioridad de este panel se ha establecido en {}!"
+
+#: commands/admin.py:1372
+msgid "Set the row of a panel's button (0 - 4)"
+msgstr "Establecer la fila del botón de un panel (0 - 4)"
+
+#: commands/admin.py:1374
+msgid "Row needs to be between 0 and 4"
+msgstr "La fila debe estar entre 0 y 4"
+
+#: commands/admin.py:1394
+msgid ""
+"This panel message already has the max amount of buttons for that specific "
+"row"
+msgstr ""
+"Este mensaje del panel ya tiene la cantidad máxima de botones para esa fila "
+"específica"
+
+#: commands/admin.py:1400
+msgid "The row number for this panel has been set to {}!"
+msgstr "¡El número de fila para este panel se ha establecido en {}!"
+
+#: commands/admin.py:1406
+msgid ""
+"\n"
+"        Auto-close ticket if opener doesn't say anything after X hours of opening\n"
+"\n"
+"        Set to 0 to disable this\n"
+"\n"
+"        If using thread tickets, this translates to the thread's \"Hide after inactivity\" setting.\n"
+"        Your options are:\n"
+"        - 1 hour\n"
+"        - 24 hours (1 day)\n"
+"        - 72 hours (3 days)\n"
+"        - 168 hours (1 week)\n"
+"        Tickets will default to the closest value you select.\n"
+"        "
+msgstr ""
+"\n"
+"        Cerrar el ticket automáticamente si el creador no dice nada después de X horas de abrirlo\n"
+"\n"
+"        Establecer en 0 para deshabilitar esto\n"
+"\n"
+"        Si usas tickets de hilo, esto se traduce a la configuración de \"Ocultar después de la inactividad\" del hilo.\n"
+"        Tus opciones son:\n"
+"        - 1 hora\n"
+"        - 24 horas (1 día)\n"
+"        - 72 horas (3 días)\n"
+"        - 168 horas (1 semana)\n"
+"        Los tickets se ajustarán al valor más cercano que seleccione.\n"
+"        "
+
+#: commands/admin.py:1429
+msgid ""
+"\n"
+"        Set a channel for the live overview message\n"
+"\n"
+"        The overview message shows all active tickets across all configured panels for a server.\n"
+"        "
+msgstr ""
+"Establecer un canal para el mensaje de resumen en directo.\n"
+"\n"
+"El mensaje de resumen muestra todos los tickets activos en todos los paneles configurados para un servidor        "
+
+#: commands/admin.py:1435
+msgid "Overview channel has been **Disabled**"
+msgstr "El canal de resumen ha sido **desactivado**"
+
+#: commands/admin.py:1439
+msgid "Overview channel has been set to {}"
+msgstr "El canal de resumen se ha establecido en {}"
+
+#: commands/admin.py:1449
+msgid "Toggle whether channels are mentioned in the active ticket overview"
+msgstr "Conmutar si los canales se mencionan en el resumen de tickets activos"
+
+#: commands/admin.py:1453
+msgid ""
+"Ticket channels will no longer be mentioned in the active ticket channel"
+msgstr ""
+"Los canales de tickets ya no se mencionarán en el canal de tickets activo"
+
+#: commands/admin.py:1458
+msgid "Ticket channels now be mentioned in the active ticket channel"
+msgstr ""
+"Los canales de tickets ahora se mencionan en el canal de tickets activo"
+
+#: commands/admin.py:1463
+msgid "Cleanup tickets that no longer exist"
+msgstr "Limpieza de tickets que ya no existen"
+
+#: commands/admin.py:1470
+msgid ""
+"\n"
+"        Repair ticket views for all open tickets\n"
+"        \n"
+"        This will update the Close/Claim buttons for tickets that were\n"
+"        created before the v4.0.0 update.\n"
+"        "
+msgstr ""
+"Reparar las vistas de todos los tickets abiertos\n"
+"\n"
+"Actualiza los botones Cerrar/Reclamar de los tickets\n"
+"creados antes de la versión v4.0.0."
+
+#: commands/admin.py:1533
+msgid ""
+"✅ Repaired **{}** ticket views.\n"
+"⚠️ **{}** tickets could not be repaired."
+msgstr ""
+"✅ Reparadas **{}** vistas de tickets.\n"
+"⚠️ **{}** tickets no se pudieron reparar."
+
+#: commands/admin.py:1540
+msgid "Refetch the transcript link for a ticket"
+msgstr "Volver a obtener el enlace de la transcripción de un ticket"
+
+#: commands/admin.py:1541
+msgid "This message does not have a transcript attached!"
+msgstr "¡Este mensaje no tiene ninguna transcripción adjunta!"
+
+#: commands/admin.py:1557
+msgid "(Toggle) The bot sending DM's for ticket alerts"
+msgstr "(Toggle) El bot que envía mensajes directos para alertas de boletos"
+
+#: commands/admin.py:1561
+msgid "DM alerts have been **Disabled**"
+msgstr "Las alertas de DM han sido **Desactivadas**"
+
+#: commands/admin.py:1564
+msgid "DM alerts have been **Enabled**"
+msgstr "Las alertas DM han sido **Habilitadas**"
+
+#: commands/admin.py:1568
+msgid "(Toggle) Thread tickets being closed & archived instead of deleted"
+msgstr "(Toggle) Tickets cerrados y archivados en vez de borrados"
+
+#: commands/admin.py:1572
+msgid "Closed ticket threads will be **Deleted**"
+msgstr "Los hilos de tickets cerrados serán **Borrados**"
+
+#: commands/admin.py:1575
+msgid "Closed ticket threads will be **Closed & Archived**"
+msgstr "Los hilos de tickets cerrados serán **Cerrados y Archivados**"
+
+#: commands/admin.py:1584
+msgid ""
+"\n"
+"        Set a category to archive closed tickets under instead of deleting them\n"
+"\n"
+"        When set, closing a ticket moves its channel to this category and removes\n"
+"        the opener (and any added users) so only staff keep access. The transcript,\n"
+"        log and DM still work as usual — this just keeps the channel as a memento.\n"
+"\n"
+"        Run without a category to disable archiving (tickets will be deleted on close again).\n"
+"        "
+msgstr ""
+"Fijar una categoría donde archivar los tickets cerrados en lugar de borrarlos\n"
+"\n"
+"Si está activa, al cerrar un ticket su canal se mueve a esta categoría y se quita\n"
+"el acceso al autor (y a los usuarios añadidos), así que solo el staff lo conserva. La\n"
+"transcripción, el log y el MD funcionan igual: solo se guarda el canal como recuerdo.\n"
+"\n"
+"Sin categoría se desactiva el archivado (los tickets se vuelven a borrar al cerrarlos)."
+
+#: commands/admin.py:1596
+msgid ""
+"Closed ticket archiving has been **Disabled**. Tickets will be deleted on "
+"close."
+msgstr ""
+"El archivado de tickets cerrados ha sido **Desactivado**. Los tickets se "
+"eliminarán al cerrarse."
+
+#: commands/admin.py:1600
+msgid ""
+"I need the `Manage Channels` permission in that category to archive tickets "
+"there!"
+msgstr ""
+"¡Necesito el permiso `Gestionar Canales` en esa categoría para archivar "
+"tickets allí!"
+
+#: commands/admin.py:1604
+msgid ""
+"I need the `Manage Permissions` permission in that category to remove the "
+"opener's access!"
+msgstr ""
+"¡Necesito el permiso `Gestionar Permisos` en esa categoría para quitarle el "
+"acceso a quien abrió el ticket!"
+
+#: commands/admin.py:1608
+msgid ""
+"Closed tickets will now be archived under **{}** instead of deleted. The "
+"opener and any added users will lose access on close."
+msgstr ""
+"Los tickets cerrados ahora se archivarán en **{}** en lugar de eliminarse. "
+"Quien abrió el ticket y los usuarios añadidos perderán el acceso al "
+"cerrarse."
+
+#: commands/admin.py:1616
+msgid "(Toggle) If users can rename their own tickets"
+msgstr "(Toggle) Si los usuarios pueden renombrar sus propios tickets"
+
+#: commands/admin.py:1620
+msgid "User can no longer rename their support channel"
+msgstr "Los usuarios ya no pueden cambiar el nombre de su canal de asistencia"
+
+#: commands/admin.py:1623
+msgid "User can now rename their support channel"
+msgstr "Ahora los usuarios pueden cambiar el nombre de su canal de asistencia"
+
+#: commands/admin.py:1627
+msgid "(Toggle) If users can close their own tickets"
+msgstr "(Alternar) Si los usuarios pueden cerrar sus propios tickets"
+
+#: commands/admin.py:1631
+msgid "User can no longer close their support ticket channel"
+msgstr "El usuario ya no puede cerrar su canal de ticket de soporte"
+
+#: commands/admin.py:1634
+msgid "User can now close their support ticket channel"
+msgstr "El usuario ahora puede cerrar su canal de tickets de soporte"
+
+#: commands/admin.py:1638
+msgid ""
+"\n"
+"        (Toggle) If users can manage their own tickets\n"
+"\n"
+"        Users will be able to add/remove others to their support ticket\n"
+"        "
+msgstr ""
+"(Si se puede alternar) Si los usuarios pueden gestionar sus propios tickets\n"
+"\n"
+"Los usuarios podrán agregar/eliminar a otros en su ticket de soporte        "
+
+#: commands/admin.py:1646
+msgid "User can no longer manage their support ticket channel"
+msgstr "El usuario ya no puede gestionar su canal de tickets de soporte"
+
+#: commands/admin.py:1649
+msgid "User can now manage their support ticket channel"
+msgstr "Los usuarios ahora pueden gestionar su canal de tickets de soporte"
+
+#: commands/admin.py:1653
+msgid ""
+"\n"
+"        (Toggle) Auto-add support and panel roles to thread tickets\n"
+"\n"
+"        Adding a user to a thread pings them, so this is off by default\n"
+"        "
+msgstr ""
+"(Toggle) Autoañadir roles de soporte y panel a los tickets de hilos\n"
+"\n"
+"Agregar a un usuario a un hilo les envía una notificación, por lo que esto está desactivado de forma predeterminada        "
+
+#: commands/admin.py:1662
+msgid "Support and panel roles will no longer be auto-added to thread tickets"
+msgstr ""
+"Los roles de soporte y panel ya no se añadirán automáticamente a los tickets"
+" de hilos"
+
+#: commands/admin.py:1669
+msgid "Support and panel roles will be auto-added to thread tickets"
+msgstr ""
+"Los roles de soporte y panel se añadirán automáticamente a los tickets de "
+"los hilos"
+
+#: commands/admin.py:1674
+msgid ""
+"\n"
+"        (Toggle) Ticket transcripts\n"
+"\n"
+"        Closed tickets will have their transcripts uploaded to the log channel\n"
+"        "
+msgstr ""
+"(Alternar) Transcripciones de tickets\n"
+"\n"
+"Los tickets cerrados tendrán sus transcripciones cargadas en el canal de registro        "
+
+#: commands/admin.py:1682
+msgid "Transcripts of closed tickets will no longer be saved"
+msgstr "Ya no se guardarán las transcripciones de los tickets cerrados"
+
+#: commands/admin.py:1685
+msgid "Transcripts of closed tickets will now be saved"
+msgstr "Ahora se guardarán las transcripciones de los tickets cerrados"
+
+#: commands/admin.py:1689
+msgid ""
+"\n"
+"        (Toggle) Interactive transcripts\n"
+"\n"
+"        Transcripts will be an interactive html file to visualize the conversation from your browser.\n"
+"        "
+msgstr ""
+"\n"
+"        (Alternar) Transcripciones interactivas\n"
+"\n"
+"        Las transcripciones serán un archivo html interactivo para visualizar la conversación desde su navegador.\n"
+"        "
+
+#: commands/admin.py:1698
+msgid "Transcripts of closed tickets will no longer be interactive"
+msgstr "Las transcripciones de tickets cerrados ya no serán interactivas"
+
+#: commands/admin.py:1702
+msgid "Transcripts of closed tickets will now be interactive"
+msgstr "Las transcripciones de tickets cerrados ahora serán interactivas"
+
+#: commands/admin.py:1711
+msgid ""
+"Update a message with another message (Target gets updated using the source)"
+msgstr ""
+"Actualizar un mensaje con otro mensaje (El destino se actualiza utilizando "
+"la fuente)"
+
+#: commands/admin.py:1723
+msgid "Failed to update message!"
+msgstr "No se ha podido actualizar el mensaje"
+
+#: commands/admin.py:1735
+msgid "Create an embed for ticket panel buttons to be added to"
+msgstr ""
+"Crear una incrustación para los botones del panel de tickets que se "
+"agregarán a"
+
+#: commands/admin.py:1736
+msgid "type 'cancel' to cancel"
+msgstr "escriba 'cancelar' para cancelar"
+
+#: commands/admin.py:1741
+msgid "Would you like this embed to have a footer?"
+msgstr "¿Le gustaría que este embed tenga un pie de página?"
+
+#: commands/admin.py:1747
+msgid "Enter the desired footer"
+msgstr "Introduzca el pie de página deseado"
+
+#: commands/admin.py:1752 commands/admin.py:1777 commands/admin.py:1795
+msgid "Embed creation cancelled"
+msgstr "Creación de incrustación cancelada"
+
+#: commands/admin.py:1759
+msgid "Would you like this embed to have a thumbnail?"
+msgstr "¿Te gustaría que este embed tenga una miniatura?"
+
+#: commands/admin.py:1772
+msgid "Enter a url for the thumbnail"
+msgstr "Introduzca una URL para la miniatura"
+
+#: commands/admin.py:1784
+msgid "Would you like this embed to have an image?"
+msgstr "¿Le gustaría que este embed tenga una imagen?"
+
+#: commands/admin.py:1790
+msgid "Enter a url for the image"
+msgstr "Introduce una URL para la imagen"
+
+#: commands/admin.py:1812
+msgid "Would you like to add a field to this embed?"
+msgstr "¿Te gustaría agregar un campo a esta incrustación?"
+
+#: commands/admin.py:1817
+msgid ""
+"Would you like to add another field to this embed?\n"
+"*There are currently {} fields*"
+msgstr ""
+"¿Desea agregar otro campo a esta incrustación?\n"
+"*Actualmente hay {} campos*"
+
+#: commands/admin.py:1825
+msgid "Enter the name of the field"
+msgstr "Introduzca el nombre del campo"
+
+#: commands/admin.py:1831
+msgid "Enter the value of the field"
+msgstr "Introduzca el valor del campo"
+
+#: commands/admin.py:1838
+msgid "Do you want this field to be inline?"
+msgstr "¿Desea que este campo esté en línea?"
+
+#: commands/admin.py:1851
+msgid "Your embed has been sent!"
+msgstr "¡Tu incrustación ha sido enviada!"
+
+#: commands/admin.py:1854
+msgid ""
+"Failed to send embed!\n"
+"Exception: {}"
+msgstr ""
+"No se pudo enviar la incrustación.\n"
+"Excepción: {}"
+
+#: commands/admin.py:1870
+msgid ""
+"Click the button below to open a {} ticket for {}\n"
+"This message will self-cleanup in 2 minutes."
+msgstr ""
+"Pulsa el botón de abajo para abrir un ticket de {} para {}\n"
+"Este mensaje se borrará solo en 2 minutos."
+
+#: commands/admin.py:1884
+msgid "Manage ticket creation cooldowns"
+msgstr "Gestionar las esperas entre tickets"
+
+#: commands/admin.py:1889
+msgid ""
+"\n"
+"        Set the cooldown between ticket creations per user\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Fijar la espera entre tickets por usuario\n"
+"\n"
+"Pon 0 para desactivarla"
+
+#: commands/admin.py:1895
+msgid "Cooldown must be 0 or greater"
+msgstr "La espera debe ser 0 o más"
+
+#: commands/admin.py:1899
+msgid "Ticket cooldown disabled"
+msgstr "Espera entre tickets desactivada"
+
+#: commands/admin.py:1901
+msgid "Users must now wait {} seconds between creating tickets"
+msgstr "Los usuarios deberán esperar {} segundos entre tickets"
+
+#: commands/admin.py:1905
+msgid "View the current cooldown settings"
+msgstr "Ver la configuración de esperas"
+
+#: commands/admin.py:1911
+msgid "Cooldown Settings"
+msgstr "Configuración de esperas"
+
+#: commands/admin.py:1915
+msgid "Per-User Cooldown"
+msgstr "Espera por usuario"
+
+#: commands/admin.py:1916
+msgid "{} seconds"
+msgstr "{} segundos"
+
+#: commands/admin.py:1919
+msgid "Global Rate Limit"
+msgstr "Límite global"
+
+#: commands/admin.py:1920
+msgid "{} tickets/hour"
+msgstr "{} tickets/hora"
+
+#: commands/admin.py:1926
+msgid ""
+"\n"
+"        Set the global rate limit for ticket creation (tickets per hour)\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Fijar el límite global de creación de tickets (tickets por hora)\n"
+"\n"
+"Pon 0 para desactivarlo"
+
+#: commands/admin.py:1932
+msgid "Rate limit must be 0 or greater"
+msgstr "El límite debe ser 0 o más"
+
+#: commands/admin.py:1936
+msgid "Global rate limit disabled"
+msgstr "Límite global desactivado"
+
+#: commands/admin.py:1938
+msgid "Maximum {} tickets can now be created per hour"
+msgstr "Ahora se pueden crear como máximo {} tickets por hora"
+
+#: commands/admin.py:1942
+msgid "Set account or server membership age requirements"
+msgstr "Fijar la antigüedad mínima de la cuenta o en el servidor"
+
+#: commands/admin.py:1947
+msgid ""
+"\n"
+"        Set minimum account age in days to open tickets\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Fijar la antigüedad mínima de la cuenta, en días, para abrir tickets\n"
+"\n"
+"Pon 0 para desactivarlo"
+
+#: commands/admin.py:1953 commands/admin.py:1969 commands/admin.py:2801
+msgid "Days must be 0 or greater"
+msgstr "Los días deben ser 0 o más"
+
+#: commands/admin.py:1957
+msgid "Account age requirement disabled"
+msgstr "Requisito de antigüedad de la cuenta desactivado"
+
+#: commands/admin.py:1959
+msgid "Users must now have accounts at least {} days old to open tickets"
+msgstr "Ahora las cuentas deben tener al menos {} días para abrir tickets"
+
+#: commands/admin.py:1963
+msgid ""
+"\n"
+"        Set minimum server membership age in days to open tickets\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Fijar los días mínimos en el servidor para abrir tickets\n"
+"\n"
+"Pon 0 para desactivarlo"
+
+#: commands/admin.py:1973
+msgid "Server membership age requirement disabled"
+msgstr "Requisito de antigüedad en el servidor desactivado"
+
+#: commands/admin.py:1975
+msgid "Users must now be server members for at least {} days to open tickets"
+msgstr ""
+"Ahora hay que llevar al menos {} días en el servidor para abrir tickets"
+
+#: commands/admin.py:1983
+msgid "Manage the ticket blacklist (advanced)"
+msgstr "Gestionar la lista negra de tickets (avanzado)"
+
+#: commands/admin.py:1995
+msgid ""
+"\n"
+"        Add a user to the ticket blacklist\n"
+"        \n"
+"        Duration can be: 1h, 2d, 1w, 30d, permanent\n"
+"        If no duration is specified, the ban is permanent\n"
+"        \n"
+"        Examples:\n"
+"        - `[p]tickets blacklist add @user` - permanent ban\n"
+"        - `[p]tickets blacklist add @user 7d spamming` - 7 day ban with reason\n"
+"        "
+msgstr ""
+"Añadir un usuario a la lista negra de tickets\n"
+"\n"
+"La duración puede ser: 1h, 2d, 1w, 30d, permanent\n"
+"Si no se indica duración, es permanente\n"
+"\n"
+"Ejemplos:\n"
+"- `[p]tickets blacklist add @usuario` - permanente\n"
+"- `[p]tickets blacklist add @usuario 7d spam` - 7 días con motivo"
+
+#: commands/admin.py:2011
+msgid "Invalid duration format. Use: 1h, 2d, 1w, 30d, or permanent"
+msgstr "Formato de duración inválido. Usa: 1h, 2d, 1w, 30d, o permanent"
+
+#: commands/admin.py:2030
+msgid "Duration: {value}, Reason: {value2}"
+msgstr "Duración: {value}, motivo: {value2}"
+
+#: commands/admin.py:2039
+msgid "Remove a user from the ticket blacklist"
+msgstr "Quitar un usuario de la lista negra de tickets"
+
+#: commands/admin.py:2053
+msgid "User removed from blacklist"
+msgstr "Usuario quitado de la lista negra"
+
+#: commands/admin.py:2062
+msgid "View the ticket blacklist"
+msgstr "Ver la lista negra de tickets"
+
+#: commands/admin.py:2070
+msgid "The blacklist is empty"
+msgstr "La lista negra está vacía"
+
+#: commands/admin.py:2073
+msgid "Ticket Blacklist"
+msgstr "Lista negra de tickets"
+
+#: commands/admin.py:2083 commands/admin.py:2089
+msgid "Unknown ({uid})"
+msgstr "Desconocido ({uid})"
+
+#: commands/admin.py:2084
+msgid "• **{name}** - Permanent (legacy)"
+msgstr "• **{name}** - Permanente (antiguo)"
+
+#: commands/admin.py:2107
+msgid ""
+"\n"
+"\n"
+"... and {} more"
+msgstr ""
+"\n"
+"\n"
+"... y {} más"
+
+#: commands/admin.py:2118
+msgid "Configure smart auto-close settings"
+msgstr "Configurar el cierre automático inteligente"
+
+#: commands/admin.py:2123
+msgid ""
+"\n"
+"        Set hours to auto-close if user doesn't respond after staff reply\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Horas para cerrar automáticamente si el usuario no responde tras el staff\n"
+"\n"
+"Pon 0 para desactivarlo"
+
+#: commands/admin.py:2129 commands/admin.py:2147 commands/admin.py:2165
+#: commands/admin.py:2183
+msgid "Hours must be 0 or greater"
+msgstr "Las horas deben ser 0 o más"
+
+#: commands/admin.py:2133
+msgid "User inactivity auto-close disabled"
+msgstr "Cierre automático por inactividad del usuario desactivado"
+
+#: commands/admin.py:2136
+msgid ""
+"Tickets will auto-close after {} hours if user doesn't respond to staff"
+msgstr ""
+"Los tickets se cerrarán solos a las {} horas si el usuario no responde al "
+"staff"
+
+#: commands/admin.py:2141
+msgid ""
+"\n"
+"        Set hours to auto-close if no staff responds\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Horas para cerrar automáticamente si no responde el staff\n"
+"\n"
+"Pon 0 para desactivarlo"
+
+#: commands/admin.py:2151
+msgid "Staff inactivity auto-close disabled"
+msgstr "Cierre automático por inactividad del staff desactivado"
+
+#: commands/admin.py:2154
+msgid "Tickets will auto-close after {} hours if no staff responds"
+msgstr "Los tickets se cerrarán solos a las {} horas si no responde el staff"
+
+#: commands/admin.py:2159
+msgid ""
+"\n"
+"        Set hours before auto-close to send warning\n"
+"        \n"
+"        Set to 0 to disable warnings\n"
+"        "
+msgstr ""
+"Horas antes del cierre automático para avisar\n"
+"\n"
+"Pon 0 para desactivar los avisos"
+
+#: commands/admin.py:2169
+msgid "Auto-close warnings disabled"
+msgstr "Avisos de auto-cierre desactivados"
+
+#: commands/admin.py:2172
+msgid "Users will be warned {} hours before ticket auto-closes"
+msgstr "Se avisará a los usuarios {} horas antes del cierre automático"
+
+#: commands/admin.py:2177
+msgid ""
+"\n"
+"        Set hours after close during which user can reopen ticket\n"
+"        \n"
+"        Set to 0 to disable reopening\n"
+"        "
+msgstr ""
+"Horas tras el cierre durante las que el usuario puede reabrir el ticket\n"
+"\n"
+"Pon 0 para desactivar la reapertura"
+
+#: commands/admin.py:2187
+msgid "Ticket reopening disabled"
+msgstr "Reapertura de tickets desactivada"
+
+#: commands/admin.py:2190
+msgid "Users can reopen tickets within {} hours of closing"
+msgstr "Los usuarios pueden reabrir tickets durante {} horas tras cerrarlos"
+
+#: commands/admin.py:2195
+msgid "View current auto-close settings"
+msgstr "Ver la configuración de cierre automático"
+
+#: commands/admin.py:2199
+msgid "Auto-Close Settings"
+msgstr "Cierre automático"
+
+#: commands/admin.py:2204
+msgid "Legacy Inactive Hours"
+msgstr "Horas de inactividad (antiguo)"
+
+#: commands/admin.py:2208
+msgid "User Inactivity"
+msgstr "Inactividad del usuario"
+
+#: commands/admin.py:2209 commands/admin.py:2213 commands/admin.py:2217
+#: commands/admin.py:2221
+msgid "{} hours"
+msgstr "{} horas"
+
+#: commands/admin.py:2212
+msgid "Staff Inactivity"
+msgstr "Inactividad del staff"
+
+#: commands/admin.py:2216
+msgid "Warning Before Close"
+msgstr "Aviso antes de cerrar"
+
+#: commands/admin.py:2220
+msgid "Reopen Window"
+msgstr "Plazo para reabrir"
+
+#: commands/admin.py:2232
+msgid "Configure ticket claim settings"
+msgstr "Configurar el reclamo de tickets"
+
+#: commands/admin.py:2237
+msgid ""
+"\n"
+"        Set maximum tickets a staff member can claim at once\n"
+"        \n"
+"        Set to 0 for unlimited\n"
+"        "
+msgstr ""
+"Fijar cuántos tickets puede reclamar a la vez un miembro del staff\n"
+"\n"
+"Pon 0 para no tener límite"
+
+#: commands/admin.py:2243
+msgid "Must be 0 or greater"
+msgstr "Debe ser 0 o más"
+
+#: commands/admin.py:2247
+msgid "Staff members can now claim unlimited tickets"
+msgstr "El staff ya puede reclamar tickets sin límite"
+
+#: commands/admin.py:2250
+msgid "Staff members can now claim a maximum of {} tickets"
+msgstr "El staff puede reclamar como máximo {} tickets"
+
+#: commands/admin.py:2255
+msgid "View current claim settings"
+msgstr "Ver la configuración de reclamos"
+
+#: commands/admin.py:2259
+msgid "Claim Settings"
+msgstr "Configuración de Reclamación"
+
+#: commands/admin.py:2265
+msgid "Max Claims Per Staff"
+msgstr "Máximo de Reclamaciones por Staff"
+
+#: commands/admin.py:2266 commands/admin.py:2844
+msgid "Unlimited"
+msgstr "Sin límite"
+
+#: commands/admin.py:2285
+msgid "Current Claims"
+msgstr "Reclamos actuales"
+
+#: commands/admin.py:2298
+msgid "Configure ticket escalation settings"
+msgstr "Configurar el escalado de tickets"
+
+#: commands/admin.py:2303
+msgid "Set the channel for escalation alerts (leave empty to disable)"
+msgstr "Fijar el canal de avisos de escalado (vacío para desactivarlo)"
+
+#: commands/admin.py:2306
+msgid "Escalation alerts will be sent to {}"
+msgstr "Los avisos de escalado se enviarán a {}"
+
+#: commands/admin.py:2309
+msgid "Escalation channel disabled"
+msgstr "Canal de escalado desactivado"
+
+#: commands/admin.py:2313
+msgid "Set the role to ping for escalations (leave empty to disable)"
+msgstr "Fijar el rol a mencionar en los escalados (vacío para desactivarlo)"
+
+#: commands/admin.py:2316
+msgid "Escalation alerts will mention {}"
+msgstr "Los avisos de escalado mencionarán a {}"
+
+#: commands/admin.py:2319
+msgid "Escalation role disabled"
+msgstr "Rol de escalado desactivado"
+
+#: commands/admin.py:2323
+msgid ""
+"\n"
+"        Set minutes of inactivity before escalating an unclaimed ticket\n"
+"        \n"
+"        Set to 0 to disable\n"
+"        "
+msgstr ""
+"Minutos de inactividad antes de escalar un ticket sin reclamar\n"
+"\n"
+"Pon 0 para desactivarlo"
+
+#: commands/admin.py:2329
+msgid "Minutes must be 0 or greater"
+msgstr "Los minutos deben ser 0 o más"
+
+#: commands/admin.py:2333
+msgid "Automatic escalation disabled"
+msgstr "Escalado automático desactivado"
+
+#: commands/admin.py:2336
+msgid "Tickets will be escalated after {} minutes without a claim"
+msgstr "Los tickets se escalarán tras {} minutos sin reclamar"
+
+#: commands/admin.py:2341
+msgid "View current escalation settings"
+msgstr "Ver la configuración de escalado"
+
+#: commands/admin.py:2345
+msgid "Escalation Settings"
+msgstr "Configuración de Escalación"
+
+#: commands/admin.py:2352
+msgid "Channel"
+msgstr "Canal"
+
+#: commands/admin.py:2353 commands/admin.py:2360
+msgid "Not set"
+msgstr "Sin configurar"
+
+#: commands/admin.py:2359
+msgid "Role"
+msgstr "Rol"
+
+#: commands/admin.py:2365
+msgid "Minutes"
+msgstr "Minutos"
+
+#: commands/admin.py:2377
+msgid "Manage quick reply templates"
+msgstr "Gestionar las respuestas rápidas"
+
+#: commands/admin.py:2382
+msgid ""
+"\n"
+"        Add a quick reply template\n"
+"        \n"
+"        Example: `[p]tickets quickreply add greeting Hello! How can I help you today?`\n"
+"        "
+msgstr ""
+"Añadir una respuesta rápida\n"
+"\n"
+"Ejemplo: `[p]tickets quickreply add saludo ¡Hola! ¿En qué te puedo ayudar?`"
+
+#: commands/admin.py:2391 commands/admin.py:2419
+msgid "A quick reply with that name already exists"
+msgstr "Ya existe una respuesta rápida con ese nombre"
+
+#: commands/admin.py:2400
+msgid "Quick reply '{}' added!"
+msgstr "¡Respuesta rápida '{}' añadida!"
+
+#: commands/admin.py:2410
+msgid ""
+"\n"
+"        Add an advanced quick reply with more options\n"
+"        \n"
+"        You will be prompted for title and content\n"
+"        "
+msgstr ""
+"Añadir una respuesta rápida avanzada con más opciones\n"
+"\n"
+"Se te pedirá el título y el contenido"
+
+#: commands/admin.py:2422
+msgid "Enter the title for this quick reply (or 'skip' for no title):"
+msgstr ""
+"Escribe el título de esta respuesta rápida (o 'skip' para dejarla sin "
+"título):"
+
+#: commands/admin.py:2427
+msgid "Enter the content/message for this quick reply:"
+msgstr "Escribe el contenido/mensaje de esta respuesta rápida:"
+
+#: commands/admin.py:2430
+msgid "Cancelled - no content provided"
+msgstr "Cancelado: no se indicó contenido"
+
+#: commands/admin.py:2440
+msgid "Advanced quick reply '{}' added!"
+msgstr "¡Respuesta rápida avanzada '{}' añadida!"
+
+#: commands/admin.py:2444
+msgid "Remove a quick reply template"
+msgstr "Quitar una respuesta rápida"
+
+#: commands/admin.py:2449
+msgid "Quick reply not found"
+msgstr "Respuesta rápida no encontrada"
+
+#: commands/admin.py:2452
+msgid "Quick reply '{}' removed!"
+msgstr "¡Respuesta rápida '{}' quitada!"
+
+#: commands/admin.py:2456
+msgid "List all quick reply templates"
+msgstr "Listar las respuestas rápidas"
+
+#: commands/admin.py:2461
+msgid "No quick replies configured"
+msgstr "No hay respuestas rápidas"
+
+#: commands/admin.py:2464
+msgid "Quick Replies"
+msgstr "Respuestas rápidas"
+
+#: commands/admin.py:2475
+msgid "Title: {value}"
+msgstr "Título: {value}"
+
+#: commands/admin.py:2478
+msgid "Closes after {delay}s"
+msgstr "Se cierra tras {delay} s"
+
+#: commands/admin.py:2478
+msgid "Closes immediately"
+msgstr "Se cierra al instante"
+
+#: commands/admin.py:2494
+msgid "Set the audit log channel for ticket actions (leave empty to disable)"
+msgstr ""
+"Fijar el canal de auditoría de acciones de tickets (vacío para desactivarlo)"
+
+#: commands/admin.py:2497
+msgid "Audit logs will be sent to {}"
+msgstr "Los registros de auditoría se enviarán a {}"
+
+#: commands/admin.py:2500
+msgid "Audit logging disabled"
+msgstr "Registro de auditoría desactivado"
+
+#: commands/admin.py:2508
+msgid "Export ticket configuration to a JSON file"
+msgstr "Exportar la configuración de tickets a un archivo JSON"
+
+#: commands/admin.py:2520
+msgid "Here's your ticket configuration export:"
+msgstr "Aquí tienes la exportación de la configuración de tickets:"
+
+#: commands/admin.py:2526
+msgid "Import ticket configuration from a JSON file"
+msgstr "Importar configuración de tickets desde un archivo JSON"
+
+#: commands/admin.py:2528
+msgid "Please attach a JSON file to import"
+msgstr "Adjunta un archivo JSON para importar"
+
+#: commands/admin.py:2532
+msgid "Please attach a JSON file"
+msgstr "Adjunta un archivo JSON"
+
+#: commands/admin.py:2538
+msgid "Invalid JSON file"
+msgstr "Archivo JSON no válido"
+
+#: commands/admin.py:2540
+msgid "Failed to read file: {}"
+msgstr "No se pudo leer el archivo: {}"
+
+#: commands/admin.py:2544
+msgid "⚠️ Import Configuration"
+msgstr "⚠️ Importar configuración"
+
+#: commands/admin.py:2545
+msgid ""
+"This will **overwrite** the following settings:\n"
+"• Support roles\n"
+"• Panel configurations\n"
+"• Quick replies\n"
+"• Blacklist\n"
+"• All other ticket settings\n"
+"\n"
+"**This action cannot be undone!**\n"
+"Are you sure you want to continue?"
+msgstr ""
+"Esto **sobrescribirá** estos ajustes:\n"
+"• Roles de soporte\n"
+"• Configuración de los paneles\n"
+"• Respuestas rápidas\n"
+"• Lista negra\n"
+"• El resto de ajustes de tickets\n"
+"\n"
+"**¡No se puede deshacer!**\n"
+"¿Seguro que quieres continuar?"
+
+#: commands/admin.py:2561
+msgid "Import cancelled"
+msgstr "Importación cancelada"
+
+#: commands/admin.py:2575
+msgid "Configuration imported"
+msgstr "Configuración importada"
+
+#: commands/admin.py:2589
+msgid ""
+"\n"
+"        Run preflight checks on panel configurations\n"
+"        \n"
+"        Checks permissions, channel validity, and other potential issues\n"
+"        "
+msgstr ""
+"Comprobar la configuración de los paneles\n"
+"\n"
+"Revisa permisos, que los canales existan y otros posibles problemas"
+
+#: commands/admin.py:2599
+msgid "Panel not found"
+msgstr "Panel no encontrado"
+
+#: commands/admin.py:2606
+msgid "✅ Panel Check Passed"
+msgstr "✅ Verificación del Panel Aprobada"
+
+#: commands/admin.py:2607
+msgid "No issues found with panel '{}'"
+msgstr "No se encontraron problemas con el panel '{}'"
+
+#: commands/admin.py:2612
+msgid "⚠️ Panel Issues Found"
+msgstr "⚠️ Problemas Encontrados en el Panel"
+
+#: commands/admin.py:2622
+msgid "✅ All Panels OK"
+msgstr "✅ Todos los Paneles OK"
+
+#: commands/admin.py:2623
+msgid "No issues found with any panels"
+msgstr "No se encontraron problemas en ningún panel"
+
+#: commands/admin.py:2628
+msgid "⚠️ Issues Found"
+msgstr "⚠️ Problemas Encontrados"
+
+#: commands/admin.py:2647
+msgid ""
+"\n"
+"        Interactive embed creation wizard with buttons\n"
+"        \n"
+"        Create embeds visually with live preview\n"
+"        "
+msgstr ""
+"Asistente interactivo para crear embeds con botones\n"
+"\n"
+"Crea embeds de forma visual con vista previa en directo"
+
+#: commands/admin.py:2662
+msgid "Use the buttons below to build your embed:"
+msgstr "Usa los botones de abajo para montar tu embed:"
+
+#: commands/admin.py:2673
+msgid "Embed sent to {}!"
+msgstr "¡Embed enviado a {}!"
+
+#: commands/admin.py:2686
+msgid ""
+"\n"
+"        Enhanced ticket overview with pagination, filters, and stats\n"
+"        "
+msgstr "Resumen mejorado de tickets con páginas, filtros y estadísticas"
+
+#: commands/admin.py:2723
+msgid "View ticket statistics and KPIs"
+msgstr "Ver estadísticas e indicadores de tickets"
+
+#: commands/admin.py:2735
+msgid "**Total Open:** {}"
+msgstr "**Abiertos en total:** {}"
+
+#: commands/admin.py:2742
+msgid "Current Tickets"
+msgstr "Tickets actuales"
+
+#: commands/admin.py:2743
+msgid "No open tickets"
+msgstr "No hay tickets abiertos"
+
+#: commands/admin.py:2780
+msgid "Claims by Staff"
+msgstr "Reclamos por miembro del staff"
+
+#: commands/admin.py:2790
+msgid "Configure transcript settings"
+msgstr "Configurar las transcripciones"
+
+#: commands/admin.py:2795
+msgid ""
+"\n"
+"        Set how many days to keep transcript logs\n"
+"        \n"
+"        Set to 0 for unlimited retention\n"
+"        "
+msgstr ""
+"Días que se guardan los registros de transcripciones\n"
+"\n"
+"Pon 0 para guardarlos siempre"
+
+#: commands/admin.py:2805
+msgid "Transcript retention set to unlimited"
+msgstr "Las transcripciones se guardarán siempre"
+
+#: commands/admin.py:2807
+msgid "Transcripts will be kept for {} days"
+msgstr "Las transcripciones se guardarán {} días"
+
+#: commands/admin.py:2811
+msgid ""
+"\n"
+"        Set transcript export formats\n"
+"        \n"
+"        Available formats: html, txt, json\n"
+"        Example: `[p]tickets transcript formats html txt`\n"
+"        "
+msgstr ""
+"Formatos de exportación de las transcripciones\n"
+"\n"
+"Formatos: html, txt, json\n"
+"Ejemplo: `[p]tickets transcript formats html txt`"
+
+#: commands/admin.py:2826
+msgid "Please specify at least one valid format: html, txt, json"
+msgstr "Indica al menos un formato válido: html, txt, json"
+
+#: commands/admin.py:2829
+msgid "Transcript formats set to: {}"
+msgstr "Formatos de transcripción: {}"
+
+#: commands/admin.py:2833
+msgid "View current transcript settings"
+msgstr "Ver la configuración de transcripciones"
+
+#: commands/admin.py:2837
+msgid "Transcript Settings"
+msgstr "Transcripciones"
+
+#: commands/admin.py:2843
+msgid "Retention"
+msgstr "Conservación"
+
+#: commands/admin.py:2844
+msgid "{} days"
+msgstr "{} días"
+
+#: commands/admin.py:2849
+msgid "Formats"
+msgstr "Formatos"
+
+#: commands/base.py:46 commands/base.py:90 commands/base.py:137
+msgid "This is not a ticket channel, or it has been removed from config"
+msgstr ""
+"Este no es un canal de tickets, o ha sido eliminado de la configuración"
+
+#: commands/base.py:67
+msgid "You do not have permissions to add users to this ticket"
+msgstr "No tienes permisos para agregar usuarios a este ticket"
+
+#: commands/base.py:77
+msgid "Failed to add user to ticket: {}"
+msgstr "Error al añadir usuario al ticket: {}"
+
+#: commands/base.py:79
+msgid "has been added to this ticket!"
+msgstr "¡se ha añadido a esta entrada!"
+
+#: commands/base.py:94
+msgid "You cannot remove the ticket owner from their own ticket"
+msgstr "No puedes quitar al autor de su propio ticket"
+
+#: commands/base.py:114
+msgid "You do not have permissions to remove users from this ticket"
+msgstr "No tienes permisos para quitar usuarios de este ticket"
+
+#: commands/base.py:124
+msgid "Failed to remove user from ticket: {}"
+msgstr "No se pudo quitar al usuario del ticket: {}"
+
+#: commands/base.py:126
+msgid "has been removed from this ticket!"
+msgstr "¡ha sido quitado de este ticket!"
+
+#: commands/base.py:132
+msgid "Rename your ticket channel"
+msgstr "Renombrar tu canal de ticket"
+
+#: commands/base.py:157
+msgid "You do not have permissions to rename this ticket"
+msgstr "No tienes permisos para cambiar el nombre de este ticket"
+
+#: commands/base.py:159
+msgid "I no longer have permission to edit this channel"
+msgstr "Ya no tengo permiso para editar este canal"
+
+#: commands/base.py:162
+msgid "Renaming channel to {}"
+msgstr "Renombrando canal a {}"
+
+#: commands/base.py:177
+msgid ""
+"\n"
+"        Close your ticket\n"
+"\n"
+"        **Examples**\n"
+"        `[p]ticket close` - closes ticket with no reason attached\n"
+"        `[p]ticket close thanks for helping!` - closes with reason \"thanks for helping!\"\n"
+"        `[p]ticket close 1h` - closes in 1 hour with no reason attached\n"
+"        `[p]ticket close 1m thanks for helping!` - closes in 1 minute with reason \"thanks for helping!\"\n"
+"        "
+msgstr ""
+"Cerrar tu ticket\n"
+"\n"
+"**Ejemplos**\n"
+"`[p]ticket close` - cierra el ticket sin motivo\n"
+"`[p]ticket close ¡gracias por la ayuda!` - cierra con el motivo \"¡gracias por la ayuda!\"\n"
+"`[p]ticket close 1h` - cierra dentro de 1 hora sin motivo\n"
+"`[p]ticket close 1m ¡gracias por la ayuda!` - cierra dentro de 1 minuto con motivo"
+
+#: commands/base.py:190
+msgid ""
+"Cannot find the owner of this ticket! Maybe it is not a ticket channel or "
+"was cleaned from the config?"
+msgstr ""
+"No puedo encontrar al propietario de este ticket Tal vez no es un canal de "
+"ticket o fue limpiado de la configuración?"
+
+#: commands/base.py:215
+msgid "This ticket will close {}"
+msgstr "Este ticket se cerrará {}"
+
+#: commands/base.py:223
+msgid "Closing cancelled!"
+msgstr "¡Cierre cancelado!"
+
+#: commands/base.py:253
+msgid "Claim this ticket as your own to handle"
+msgstr "Reclamar este ticket para atenderlo tú"
+
+#: commands/base.py:257 commands/base.py:289 commands/base.py:310
+#: commands/base.py:364 commands/base.py:415 commands/base.py:473
+#: commands/base.py:557
+msgid "This is not a ticket channel"
+msgstr "Este canal no es un ticket"
+
+#: commands/base.py:270
+msgid "Only support staff can claim tickets"
+msgstr "Solo el staff de soporte puede reclamar tickets"
+
+#: commands/base.py:285
+msgid "Unclaim this ticket so others can claim it"
+msgstr "Liberar este ticket para que otro lo reclame"
+
+#: commands/base.py:328
+msgid "Only staff or the current claimant can transfer tickets"
+msgstr "Solo el staff o quien lo ha reclamado puede transferir el ticket"
+
+#: commands/base.py:334
+msgid "The target user must be a support staff member"
+msgstr "El usuario de destino debe ser del staff de soporte"
+
+#: commands/base.py:356
+msgid ""
+"\n"
+"        Add an internal staff note to this ticket\n"
+"        \n"
+"        Notes are only visible to staff and stored with the ticket\n"
+"        "
+msgstr ""
+"Añadir una nota interna del staff a este ticket\n"
+"\n"
+"Las notas solo las ve el staff y se guardan con el ticket"
+
+#: commands/base.py:377
+msgid "Only support staff can add notes"
+msgstr "Solo el staff de soporte puede añadir notas"
+
+#: commands/base.py:389
+msgid "Please provide a note: `{}note Your note here`"
+msgstr "Escribe una nota: `{}note Tu nota aquí`"
+
+#: commands/base.py:402 commands/base.py:404
+msgid "📝 Note added!"
+msgstr "📝 ¡Nota añadida!"
+
+#: commands/base.py:406
+msgid "Failed to add note"
+msgstr "No se pudo añadir la nota"
+
+#: commands/base.py:411
+msgid "View all internal notes for this ticket"
+msgstr "Ver todas las notas internas de este ticket"
+
+#: commands/base.py:428
+msgid "Only support staff can view notes"
+msgstr "Solo el staff de soporte puede ver las notas"
+
+#: commands/base.py:434
+msgid "No notes for this ticket"
+msgstr "Este ticket no tiene notas"
+
+#: commands/base.py:437
+msgid "📝 Ticket Notes"
+msgstr "📝 Notas del ticket"
+
+#: commands/base.py:465
+msgid ""
+"\n"
+"        Send a quick reply template in this ticket\n"
+"        \n"
+"        Use without arguments to see a dropdown of available templates\n"
+"        "
+msgstr ""
+"Enviar una respuesta rápida en este ticket\n"
+"\n"
+"Sin argumentos muestra un desplegable con las disponibles"
+
+#: commands/base.py:486
+msgid "Only support staff can use quick replies"
+msgstr "Solo el staff de soporte puede usar respuestas rápidas"
+
+#: commands/base.py:490
+msgid "No quick reply templates configured"
+msgstr "No hay respuestas rápidas"
+
+#: commands/base.py:496
+msgid "Template '{}' not found"
+msgstr "No existe la plantilla '{}'"
+
+#: commands/base.py:544
+msgid "Select a quick reply:"
+msgstr "Elige una respuesta rápida:"
+
+#: commands/base.py:553
+msgid "View detailed information about this ticket"
+msgstr "Ver información detallada de este ticket"
+
+#: commands/base.py:562
+msgid "Unknown ({owner_id})"
+msgstr "Desconocido ({owner_id})"
+
+#: commands/base.py:565
+msgid "🎫 Ticket Information"
+msgstr "🎫 Información del ticket"
+
+#: commands/base.py:570
+msgid "Owner"
+msgstr "Autor"
+
+#: commands/base.py:583
+msgid "Unknown ({claimed_by})"
+msgstr "Desconocido ({claimed_by})"
+
+#: commands/base.py:584
+msgid "Claimed By"
+msgstr "Reclamado por"
+
+#: commands/base.py:588
+msgid "Claimed At"
+msgstr "Reclamado el"
+
+#: commands/base.py:594
+msgid "Opened"
+msgstr "Abierto"
+
+#: commands/base.py:602
+msgid "Last User Message"
+msgstr "Último mensaje del usuario"
+
+#: commands/base.py:610
+msgid "Last Staff Message"
+msgstr "Último mensaje del staff"
+
+#: commands/base.py:618
+msgid "Notes"
+msgstr "Notas"
+
+#: commands/base.py:622
+msgid "Escalated"
+msgstr "Escalado"
+
+#: commands/base.py:622
+msgid "⚠️ Yes"
+msgstr "⚠️ Sí"

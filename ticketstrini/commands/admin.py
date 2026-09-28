@@ -53,7 +53,7 @@ class AdminCommands(MixinMeta):
         """Ticket Setup Guide"""
         desc = (
             _("To create a support ticket panel, type ")
-            + f"`{ctx.clean_prefix}tickets addpanel"
+            + _("`{clean_prefix}tickets addpanel").format(clean_prefix=ctx.clean_prefix)
             + _(" <panel_name>`")
         )
         em = Embed(
@@ -64,17 +64,17 @@ class AdminCommands(MixinMeta):
         step1 = _(
             "Set the category ID that new tickets will be created under if using channel tickets.\n"
         )
-        step1 += f"`{ctx.clean_prefix}tickets category " + _(
+        step1 += _("`{clean_prefix}tickets category ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <category_id>`"
         )
         em.add_field(name=_("Step 1"), value=step1, inline=False)
         step2 = _("Set the channel that the bots ticket panel will be located in.\n")
-        step2 += f"`{ctx.clean_prefix}tickets channel " + _(
+        step2 += _("`{clean_prefix}tickets channel ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <channel_id>`"
         )
         em.add_field(name=_("Step 2"), value=step2, inline=False)
         step3 = _("Set the ID of the bots ticket panel message.\n")
-        step3 += f"`{ctx.clean_prefix}tickets panelmessage " + _(
+        step3 += _("`{clean_prefix}tickets panelmessage ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <message_id>`\n"
         )
         step3 += _(
@@ -87,41 +87,41 @@ class AdminCommands(MixinMeta):
         )
         em.add_field(name=_("Step 3"), value=step3, inline=False)
         step4 = _("Set the text of the ticket panel button.\n")
-        step4 += f"`{ctx.clean_prefix}tickets buttontext " + _(
+        step4 += _("`{clean_prefix}tickets buttontext ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <button_text>`"
         )
         em.add_field(name=_("Button Text"), value=step4, inline=False)
         step5 = _("Set the ticket panel button color.\n")
-        step5 += _("Valid colors are ") + "`red`, `blue`, `green`, and `grey`.\n"
-        step5 += f"`{ctx.clean_prefix}tickets buttoncolor " + _(
+        step5 += _("Valid colors are ") + _("`red`, `blue`, `green`, and `grey`.\n")
+        step5 += _("`{clean_prefix}tickets buttoncolor ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <button_color>`"
         )
         em.add_field(name=_("Button Color"), value=step5, inline=False)
         step6 = _("Set the button emoji for the ticket panel.\n")
-        step6 += f"`{ctx.clean_prefix}tickets buttonemoji " + _("<panel_name> <emoji>`")
+        step6 += _("`{clean_prefix}tickets buttonemoji ").format(clean_prefix=ctx.clean_prefix) + _("<panel_name> <emoji>`")
         em.add_field(name=_("Button Emoji"), value=step6, inline=False)
 
         step7 = _("Use threads instead of channels for tickets\n")
-        step7 += f"`{ctx.clean_prefix}tickets usethreads " + _("<panel_name>`")
+        step7 += _("`{clean_prefix}tickets usethreads ").format(clean_prefix=ctx.clean_prefix) + _("<panel_name>`")
         em.add_field(name=_("Thread Tickets"), value=step7, inline=False)
 
         step8 = _("Add a message the bot sends to the user in their ticket.\n")
-        step8 += f"`{ctx.clean_prefix}tickets addmessage " + _("<panel_name>`")
+        step8 += _("`{clean_prefix}tickets addmessage ").format(clean_prefix=ctx.clean_prefix) + _("<panel_name>`")
         em.add_field(name=_("Ticket Messages"), value=step8, inline=False)
 
         step9 = _(
             "View and remove a messages the bot sends to the user in their ticket.\n"
         )
-        step9 += f"`{ctx.clean_prefix}tickets viewmessages " + _("<panel_name>`")
+        step9 += _("`{clean_prefix}tickets viewmessages ").format(clean_prefix=ctx.clean_prefix) + _("<panel_name>`")
         em.add_field(name=_("Remove/View Ticket Messages"), value=step9, inline=False)
 
         step10 = _("Set the naming format for ticket channels that are opened.\n")
-        step10 += f"`{ctx.clean_prefix}tickets ticketname " + _(
+        step10 += _("`{clean_prefix}tickets ticketname ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <name_format>`"
         )
         em.add_field(name=_("Ticket Channel Name"), value=step10, inline=False)
         step11 = _("Set log channel for a ticket panel.\n")
-        step11 += f"`{ctx.clean_prefix}tickets logchannel " + _(
+        step11 += _("`{clean_prefix}tickets logchannel ").format(clean_prefix=ctx.clean_prefix) + _(
             "<panel_name> <channel>`"
         )
         em.add_field(name=_("Log Channel"), value=step11, inline=False)
@@ -131,7 +131,7 @@ class AdminCommands(MixinMeta):
             "The opener (and any added users) lose access; staff keep it. "
             "Archived tickets get Reopen/Delete buttons.\n"
         )
-        step12 += f"`{ctx.clean_prefix}tickets closedcategory " + _("<category>`")
+        step12 += _("`{clean_prefix}tickets closedcategory ").format(clean_prefix=ctx.clean_prefix) + _("<category>`")
         em.add_field(name=_("Closed Tickets (Archive)"), value=step12, inline=False)
 
         step13 = _(
@@ -564,7 +564,7 @@ class AdminCommands(MixinMeta):
                 if k == "answer":
                     continue
                 txt += f"{k}: {v}\n"
-            title = "Modal Preview"
+            title = _("Modal Preview")
             await mm.edit(
                 embed=discord.Embed(title=title, description=box(txt), color=color),
                 view=None,
@@ -856,7 +856,7 @@ class AdminCommands(MixinMeta):
         await interaction.response.send_message(embed=em, ephemeral=True)
         del instance.view.pages[index]
         if not len(instance.view.pages):
-            em = Embed(description="There are no more modal fields for this panel")
+            em = Embed(description=_("There are no more modal fields for this panel"))
             await interaction.followup.send(embed=em, ephemeral=True)
             instance.view.stop()
             return await instance.view.message.delete()
@@ -960,7 +960,7 @@ class AdminCommands(MixinMeta):
         if not panels:
             return await ctx.send(
                 _("There are no panels available!\nUse ")
-                + f"`{ctx.clean_prefix}tset addpanel` "
+                + _("`{clean_prefix}tset addpanel` ").format(clean_prefix=ctx.clean_prefix)
                 + _("to create one.")
             )
         if panel_name not in panels:
@@ -1000,7 +1000,7 @@ class AdminCommands(MixinMeta):
             await interaction.response.send_message(embed=em, ephemeral=True)
             del instance.view.pages[index]
             if not len(instance.view.pages):
-                em = Embed(description="There are no more messages for this panel")
+                em = Embed(description=_("There are no more messages for this panel"))
                 return await interaction.followup.send(embed=em, ephemeral=True)
             instance.view.page += 1
             instance.view.page %= len(instance.view.pages)
@@ -1015,7 +1015,7 @@ class AdminCommands(MixinMeta):
         if not panels:
             return await ctx.send(
                 _("There are no panels available!\nUse ")
-                + f"`{ctx.clean_prefix}tset addpanel` "
+                + _("`{clean_prefix}tset addpanel` ").format(clean_prefix=ctx.clean_prefix)
                 + _("to create one.")
             )
         embeds = []
@@ -2027,7 +2027,7 @@ class AdminCommands(MixinMeta):
                 action="blacklist_add",
                 user=user,
                 moderator=ctx.author,
-                details=f"Duration: {duration or 'permanent'}, Reason: {reason or 'None'}",
+                details=_("Duration: {value}, Reason: {value2}").format(value=duration or 'permanent', value2=reason or 'None'),
                 config=self.config,
                 conf=conf,
             )
@@ -2050,7 +2050,7 @@ class AdminCommands(MixinMeta):
                 action="blacklist_remove",
                 user=user,
                 moderator=ctx.author,
-                details="User removed from blacklist",
+                details=_("User removed from blacklist"),
                 config=self.config,
                 conf=conf,
             )
@@ -2080,13 +2080,13 @@ class AdminCommands(MixinMeta):
         # Simple blacklist entries
         for uid in simple_bl:
             member = ctx.guild.get_member(uid)
-            name = member.display_name if member else f"Unknown ({uid})"
-            lines.append(f"• **{name}** - Permanent (legacy)")
+            name = member.display_name if member else _("Unknown ({uid})").format(uid=uid)
+            lines.append(_("• **{name}** - Permanent (legacy)").format(name=name))
         
         # Advanced blacklist entries
         for uid, data in advanced_bl.items():
             member = ctx.guild.get_member(int(uid))
-            name = member.display_name if member else f"Unknown ({uid})"
+            name = member.display_name if member else _("Unknown ({uid})").format(uid=uid)
             
             expires = data.get("expires_at")
             if expires:
@@ -2472,10 +2472,10 @@ class AdminCommands(MixinMeta):
             
             extras = []
             if data.get("title"):
-                extras.append(f"Title: {data['title'][:30]}")
+                extras.append(_("Title: {value}").format(value=data['title'][:30]))
             if data.get("close_after"):
                 delay = data.get("delay_close", 0)
-                extras.append(f"Closes after {delay}s" if delay else "Closes immediately")
+                extras.append(_("Closes after {delay}s").format(delay=delay) if delay else _("Closes immediately"))
             
             value = content_preview
             if extras:
@@ -2572,7 +2572,7 @@ class AdminCommands(MixinMeta):
                 action="config_import",
                 user=ctx.author,
                 moderator=ctx.author,
-                details="Configuration imported",
+                details=_("Configuration imported"),
                 config=self.config,
                 conf=await self.config.guild(ctx.guild).all(),
             )

@@ -8,4 +8,4 @@ _ = Translator("AutoNick", __file__)
 
 
 def _strings() -> None:
-    _("Main AutoNick command group.\nUse `/autonick help` to see every subcommand.")
+    _("Main AutoNick command group.\n        Use `/autonick help` to see every subcommand.\n        ")

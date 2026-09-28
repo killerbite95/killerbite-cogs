@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:38+0000\n"
+"POT-Creation-Date: 2026-09-28 11:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -27,35 +27,35 @@ msgid ""
 "    "
 msgstr ""
 
-#: autonick.py:119
+#: autonick.py:120
 msgid ""
 "{author}, you must wait {remaining} seconds before changing your nickname "
 "again."
 msgstr ""
 
-#: autonick.py:131
+#: autonick.py:132
 msgid "{author}, the nickname can't be longer than 32 characters."
 msgstr ""
 
-#: autonick.py:138
+#: autonick.py:139
 msgid ""
 "{author}, that name contains forbidden words or names. Please choose another"
 " one."
 msgstr ""
 
-#: autonick.py:147
+#: autonick.py:148
 msgid "{author}, your nickname has been changed to: **{escape_markdown}**"
 msgstr ""
 
-#: autonick.py:152
+#: autonick.py:153
 msgid "{author}, I don't have permission to change your nickname."
 msgstr ""
 
-#: autonick.py:155
+#: autonick.py:156
 msgid "Error while changing the nickname: {e}"
 msgstr ""
 
-#: autonick.py:168
+#: autonick.py:169
 #, docstring
 msgid ""
 "Set the channel where nickname messages are read.\n"
@@ -63,11 +63,11 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:172
+#: autonick.py:173
 msgid "The AutoNick channel has been set to {channel}."
 msgstr ""
 
-#: autonick.py:177
+#: autonick.py:178
 #, docstring
 msgid ""
 "Set the cooldown (in seconds) between nickname changes.\n"
@@ -75,15 +75,15 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:181
+#: autonick.py:182
 msgid "The cooldown must be a positive number."
 msgstr ""
 
-#: autonick.py:183
+#: autonick.py:184
 msgid "The cooldown has been set to {seconds} seconds."
 msgstr ""
 
-#: autonick.py:187
+#: autonick.py:188
 #, docstring
 msgid ""
 "Show the current AutoNick settings.\n"
@@ -91,27 +91,27 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:193
+#: autonick.py:194
 msgid "AutoNick settings"
 msgstr ""
 
-#: autonick.py:194
+#: autonick.py:195
 msgid "Channel"
 msgstr ""
 
-#: autonick.py:194
+#: autonick.py:195
 msgid "Not set"
 msgstr ""
 
-#: autonick.py:195
+#: autonick.py:196
 msgid "Cooldown"
 msgstr ""
 
-#: autonick.py:195
+#: autonick.py:196
 msgid "{cooldown} seconds"
 msgstr ""
 
-#: autonick.py:201
+#: autonick.py:202
 #, docstring
 msgid ""
 "AutoNick admin commands.\n"
@@ -119,7 +119,7 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:210
+#: autonick.py:211
 #, docstring
 msgid ""
 "Add a word or phrase to the forbidden names list.\n"
@@ -127,15 +127,15 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:216
+#: autonick.py:217
 msgid "That word is already in the forbidden list."
 msgstr ""
 
-#: autonick.py:219
+#: autonick.py:220
 msgid "The word '{word}' has been added to the forbidden list."
 msgstr ""
 
-#: autonick.py:224
+#: autonick.py:225
 #, docstring
 msgid ""
 "Remove a word or phrase from the forbidden names list.\n"
@@ -143,15 +143,15 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:230
+#: autonick.py:231
 msgid "That word is not in the forbidden list."
 msgstr ""
 
-#: autonick.py:233
+#: autonick.py:234
 msgid "The word '{word}' has been removed from the forbidden list."
 msgstr ""
 
-#: autonick.py:237
+#: autonick.py:238
 #, docstring
 msgid ""
 "Show every forbidden word or phrase.\n"
@@ -159,16 +159,17 @@ msgid ""
 "        "
 msgstr ""
 
-#: autonick.py:242
+#: autonick.py:243
 msgid "The forbidden words list is empty."
 msgstr ""
 
-#: autonick.py:246
+#: autonick.py:247
 msgid "Forbidden words"
 msgstr ""
 
 #: i18n_strings.py:11
 msgid ""
 "Main AutoNick command group.\n"
-"Use `/autonick help` to see every subcommand."
+"        Use `/autonick help` to see every subcommand.\n"
+"        "
 msgstr ""

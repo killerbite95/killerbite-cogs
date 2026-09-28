@@ -92,11 +92,11 @@ msgstr ""
 msgid "Description must be less than 1000 characters."
 msgstr "La descripción debe tener menos de 1000 caracteres."
 
-#: converter.py:206 giveaways.py:1020
+#: converter.py:206 giveaways.py:1022
 msgid "Button text must be less than 70 characters."
 msgstr "El texto del botón debe tener menos de 70 caracteres."
 
-#: converter.py:208 giveaways.py:333
+#: converter.py:208 giveaways.py:335
 msgid "Join Giveaway"
 msgstr "Participar"
 
@@ -154,15 +154,15 @@ msgstr ""
 "Versión del cog: {version}\n"
 "Autor: {author}"
 
-#: giveaways.py:189
+#: giveaways.py:191
 msgid "Not enough entries to roll the giveaway."
 msgstr "No hay suficientes participantes para sortear."
 
-#: giveaways.py:196
+#: giveaways.py:198
 msgid "{winner} (Not Found)\n"
 msgstr "{winner} (no encontrado)\n"
 
-#: giveaways.py:205
+#: giveaways.py:207
 msgid ""
 "Winner(s):\n"
 "{txt}"
@@ -170,19 +170,19 @@ msgstr ""
 "Ganador(es):\n"
 "{txt}"
 
-#: giveaways.py:210
+#: giveaways.py:212
 msgid "Reroll: {value}gw reroll {messageid} | Ended at"
 msgstr "Repetir: {value}gw reroll {messageid} | Terminó"
 
-#: giveaways.py:213
+#: giveaways.py:215
 msgid "🎉 Giveaway Ended 🎉"
 msgstr "🎉 Sorteo terminado 🎉"
 
-#: giveaways.py:219
+#: giveaways.py:221
 msgid "Giveaway Ended"
 msgstr "Sorteo terminado"
 
-#: giveaways.py:220
+#: giveaways.py:222
 msgid ""
 "Congratulations to the {value}winner{value2} of [{prize}]({jump_url}).\n"
 "{txt}"
@@ -190,15 +190,15 @@ msgstr ""
 "¡Enhorabuena a {value}ganador{value2} de [{prize}]({jump_url})!\n"
 "{txt}"
 
-#: giveaways.py:225
+#: giveaways.py:227
 msgid "Reroll: {value}gw reroll {messageid}"
 msgstr "Repetir: {value}gw reroll {messageid}"
 
-#: giveaways.py:240
+#: giveaways.py:242
 msgid "Congratulations! You won {prize} in the giveaway on {guild}!"
 msgstr "¡Enhorabuena! Has ganado {prize} en el sorteo de {guild}."
 
-#: giveaways.py:297
+#: giveaways.py:299
 msgid ""
 "{description}\n"
 "\n"
@@ -216,19 +216,19 @@ msgstr ""
 "\n"
 "Termina: <t:{timestamp}:R>"
 
-#: giveaways.py:304 giveaways.py:411 giveaways.py:1165 menu.py:181
+#: giveaways.py:306 giveaways.py:413 giveaways.py:1167 menu.py:191
 msgid "🎉 0 participants"
 msgstr "🎉 0 participantes"
 
-#: giveaways.py:324
+#: giveaways.py:326
 msgid "🎉 Giveaway 🎉{txt}"
 msgstr "🎉 Sorteo 🎉{txt}"
 
-#: giveaways.py:344 giveaways.py:443 giveaways.py:1203 menu.py:223
+#: giveaways.py:346 giveaways.py:445 giveaways.py:1205 menu.py:233
 msgid "Giveaway created!"
 msgstr "¡Sorteo creado!"
 
-#: giveaways.py:390
+#: giveaways.py:392
 msgid ""
 "\n"
 "        Start a giveaway.\n"
@@ -241,7 +241,7 @@ msgstr ""
 "        Por defecto avisa por MD al ganador y también a quien no pueda participar.\n"
 "        "
 
-#: giveaways.py:408
+#: giveaways.py:410
 msgid ""
 "\n"
 "Click the button below to enter\n"
@@ -257,17 +257,17 @@ msgstr ""
 "\n"
 "Termina: <t:{timestamp}:R>"
 
-#: giveaways.py:454
+#: giveaways.py:456
 msgid "Reroll a giveaway."
 msgstr "Repetir el sorteo de un giveaway."
 
-#: giveaways.py:457 giveaways.py:491 giveaways.py:501 giveaways.py:537
-#: giveaways.py:587 giveaways.py:713 giveaways.py:716 giveaways.py:846
-#: giveaways.py:893
+#: giveaways.py:459 giveaways.py:493 giveaways.py:503 giveaways.py:539
+#: giveaways.py:589 giveaways.py:715 giveaways.py:718 giveaways.py:848
+#: giveaways.py:895
 msgid "Giveaway not found."
 msgstr "Sorteo no encontrado."
 
-#: giveaways.py:460
+#: giveaways.py:462
 msgid ""
 "Giveaway already running. Please wait for it to end or end it via "
 "`{clean_prefix}gw end {msgid}`."
@@ -275,11 +275,11 @@ msgstr ""
 "El sorteo sigue en marcha. Espera a que termine o termínalo con "
 "`{clean_prefix}gw end {msgid}`."
 
-#: giveaways.py:488
+#: giveaways.py:490
 msgid "End a giveaway."
 msgstr "Terminar un sorteo."
 
-#: giveaways.py:509
+#: giveaways.py:511
 msgid ""
 "Advanced creation of Giveaways.\n"
 "\n"
@@ -292,27 +292,27 @@ msgstr ""
 "        `[p]gw explain` para ver la lista completa de opciones.\n"
 "        "
 
-#: giveaways.py:522
+#: giveaways.py:524
 msgid "List all entrants for a giveaway (active or ended)."
 msgstr "Listar los participantes de un sorteo (activo o terminado)."
 
-#: giveaways.py:539
+#: giveaways.py:541
 msgid "No entrants."
 msgstr "Sin participantes."
 
-#: giveaways.py:554
+#: giveaways.py:556
 msgid "Entrants — {prize}"
 msgstr "Participantes — {prize}"
 
-#: giveaways.py:556
+#: giveaways.py:558
 msgid "Total unique entrants: {count}"
 msgstr "Participantes únicos: {count}"
 
-#: giveaways.py:568
+#: giveaways.py:570
 msgid "Information about a giveaway (active or ended)."
 msgstr "Información de un sorteo (activo o terminado)."
 
-#: giveaways.py:572
+#: giveaways.py:574
 msgid ""
 "**Status:** 🟢 Active\n"
 "**Entrants:** {count}\n"
@@ -322,47 +322,47 @@ msgstr ""
 "**Participantes:** {count}\n"
 "**Fin:** <t:{timestamp}:R>\n"
 
-#: giveaways.py:581 giveaways.py:604
+#: giveaways.py:583 giveaways.py:606
 msgid "Giveaway ID #{msgid}"
 msgstr "Sorteo ID #{msgid}"
 
-#: giveaways.py:593
+#: giveaways.py:595
 msgid "**Status:** {value}\n"
 msgstr "**Estado:** {value}\n"
 
-#: giveaways.py:593
+#: giveaways.py:595
 msgid "🔴 Ended"
 msgstr "🔴 Terminado"
 
-#: giveaways.py:593
+#: giveaways.py:595
 msgid "⚪ Unknown"
 msgstr "⚪ Desconocido"
 
-#: giveaways.py:594
+#: giveaways.py:596
 msgid "**Entrants:** {count}\n"
 msgstr "**Participantes:** {count}\n"
 
-#: giveaways.py:610
+#: giveaways.py:612
 msgid "List all giveaways in the server."
 msgstr "Listar todos los sorteos del servidor."
 
-#: giveaways.py:612 giveaways.py:619
+#: giveaways.py:614 giveaways.py:621
 msgid "No giveaways are running."
 msgstr "No hay sorteos en marcha."
 
-#: giveaways.py:628
+#: giveaways.py:630
 msgid "Giveaways in {guild}"
 msgstr "Sorteos en {guild}"
 
-#: giveaways.py:638
+#: giveaways.py:640
 msgid "Explanation of giveaway advanced and the arguments it supports."
 msgstr "Explicación de `gw advanced` y de las opciones que admite."
 
-#: giveaways.py:642
+#: giveaways.py:644
 msgid "Giveaway Advanced — Required Arguments"
 msgstr "Sorteo avanzado — Opciones obligatorias"
 
-#: giveaways.py:643
+#: giveaways.py:645
 msgid ""
 "**NOTE:** Giveaways are checked every 15 seconds, so they may end slightly later than specified.\n"
 "\n"
@@ -396,15 +396,15 @@ msgstr ""
 "`--description`: descripción del embed.\n"
 "`--hosted-by`: cambiar quién organiza."
 
-#: giveaways.py:655
+#: giveaways.py:657
 msgid "Page 1/3 — {clean_prefix}gw explain"
 msgstr "Página 1/3 — {clean_prefix}gw explain"
 
-#: giveaways.py:658
+#: giveaways.py:660
 msgid "Giveaway Advanced — Restrictions & Styling"
 msgstr "Sorteo avanzado — Restricciones y estilo"
 
-#: giveaways.py:659
+#: giveaways.py:661
 msgid ""
 "**Restrictions:**\n"
 "`--roles`: Restrict to specific roles.\n"
@@ -450,15 +450,15 @@ msgstr ""
 "`--mentions`: roles a mencionar.\n"
 "`--ateveryone` / `--athere`: mencionar a everyone/here."
 
-#: giveaways.py:678
+#: giveaways.py:680
 msgid "Page 2/3 — {clean_prefix}gw explain"
 msgstr "Página 2/3 — {clean_prefix}gw explain"
 
-#: giveaways.py:681
+#: giveaways.py:683
 msgid "Giveaway Advanced — Toggles & Integrations"
 msgstr "Sorteo avanzado — Interruptores e integraciones"
 
-#: giveaways.py:682
+#: giveaways.py:684
 msgid ""
 "**Toggles:**\n"
 "`--congratulate`: DM winners.\n"
@@ -498,11 +498,11 @@ msgstr ""
 "`{clean_prefix}gw adv --prize Nitro --duration 1h30m --winners 2 --congratulate`\n"
 "`{clean_prefix}gw adv --prize VIP Role --end tomorrow at 6pm --roles @Members --cost 500`"
 
-#: giveaways.py:698
+#: giveaways.py:700
 msgid "Page 3/3 — {clean_prefix}gw explain"
 msgstr "Página 3/3 — {clean_prefix}gw explain"
 
-#: giveaways.py:708
+#: giveaways.py:710
 msgid ""
 "Edit a giveaway.\n"
 "\n"
@@ -514,7 +514,7 @@ msgstr ""
 "        Mira `[p]gw explain` para ver las opciones.\n"
 "        "
 
-#: giveaways.py:744
+#: giveaways.py:746
 msgid ""
 "{description}\n"
 "\n"
@@ -532,11 +532,11 @@ msgstr ""
 "\n"
 "Termina: <t:{endtime}:R>"
 
-#: giveaways.py:758
+#: giveaways.py:760
 msgid "Various 3rd party integrations for giveaways."
 msgstr "Integraciones de terceros para sorteos."
 
-#: giveaways.py:760
+#: giveaways.py:762
 msgid ""
 "\n"
 "        3rd party integrations for giveaways.\n"
@@ -563,7 +563,7 @@ msgstr ""
 "        `--amari-level`: niveles de Amari.\n"
 "        `--amari-weekly-xp`: XP semanal de Amari."
 
-#: giveaways.py:775
+#: giveaways.py:777
 msgid ""
 "\n"
 "                **API Keys**\n"
@@ -580,125 +580,125 @@ msgstr ""
 "\n"
 "                Para proponer integraciones, usa el canal [#support-flare-cogs](https://discord.gg/GET4DVk) del servidor de soporte o el github de [flare-cogs](https://github.com/flaree/flare-cogs/issues/new/choose)."
 
-#: giveaways.py:786
+#: giveaways.py:788
 msgid "3rd Party Integrations"
 msgstr "Integraciones de terceros"
 
-#: giveaways.py:795
+#: giveaways.py:797
 msgid "<deleted role {role_id}>"
 msgstr "<rol borrado {role_id}>"
 
-#: giveaways.py:798
+#: giveaways.py:800
 msgid "**Roles:** {join}\n"
 msgstr "**Roles:** {join}\n"
 
-#: giveaways.py:800
+#: giveaways.py:802
 msgid "**Multiplier:** {multi}\n"
 msgstr "**Multiplicador:** {multi}\n"
 
-#: giveaways.py:802
+#: giveaways.py:804
 msgid "**Multiplier Roles:** {join}\n"
 msgstr "**Roles con multiplicador:** {join}\n"
 
-#: giveaways.py:804
+#: giveaways.py:806
 msgid "**Cost:** {cost}\n"
 msgstr "**Coste:** {cost}\n"
 
-#: giveaways.py:806
+#: giveaways.py:808
 msgid "**Joined:** {joined} days\n"
 msgstr "**En el servidor:** {joined} días\n"
 
-#: giveaways.py:808
+#: giveaways.py:810
 msgid "**Created:** {created} days\n"
 msgstr "**Cuenta creada:** {created} días\n"
 
-#: giveaways.py:810
+#: giveaways.py:812
 msgid "**Blacklist:** {join}\n"
 msgstr "**Excluidos:** {join}\n"
 
-#: giveaways.py:812
+#: giveaways.py:814
 msgid "**Winners:** {winners}\n"
 msgstr "**Ganadores:** {winners}\n"
 
-#: giveaways.py:814
+#: giveaways.py:816
 msgid "**MEE6 Level:** {mee6_level}\n"
 msgstr "**Nivel MEE6:** {mee6_level}\n"
 
-#: giveaways.py:816
+#: giveaways.py:818
 msgid "**Amari Level:** {amari_level}\n"
 msgstr "**Nivel Amari:** {amari_level}\n"
 
-#: giveaways.py:818
+#: giveaways.py:820
 msgid "**Amari Weekly XP:** {amari_weekly_xp}\n"
 msgstr "**XP semanal Amari:** {amari_weekly_xp}\n"
 
-#: giveaways.py:820
+#: giveaways.py:822
 msgid "**Tatsu Level:** {tatsu_level}\n"
 msgstr "**Nivel Tatsu:** {tatsu_level}\n"
 
-#: giveaways.py:822
+#: giveaways.py:824
 msgid "**Tatsu Rep:** {tatsu_rep}\n"
 msgstr "**Reputación Tatsu:** {tatsu_rep}\n"
 
-#: giveaways.py:824
+#: giveaways.py:826
 msgid "**Level Requirement:** {level_req}\n"
 msgstr "**Nivel requerido:** {level_req}\n"
 
-#: giveaways.py:826
+#: giveaways.py:828
 msgid "**Rep Requirement:** {rep_req}\n"
 msgstr "**Reputación requerida:** {rep_req}\n"
 
-#: giveaways.py:828
+#: giveaways.py:830
 msgid "**Bypass Roles:** {join} ({bypasstype})\n"
 msgstr "**Roles exentos:** {join} ({bypasstype})\n"
 
-#: giveaways.py:841
+#: giveaways.py:843
 msgid "Cancel a giveaway without drawing winners."
 msgstr "Cancelar un sorteo sin elegir ganadores."
 
-#: giveaways.py:843
+#: giveaways.py:845
 msgid "Giveaway not found or already ended."
 msgstr "Sorteo no encontrado o ya terminado."
 
-#: giveaways.py:855
+#: giveaways.py:857
 msgid "🚫 Giveaway cancelled."
 msgstr "🚫 Sorteo cancelado."
 
-#: giveaways.py:859
+#: giveaways.py:861
 msgid "Cancelled"
 msgstr "Cancelado"
 
-#: giveaways.py:861
+#: giveaways.py:863
 msgid "🚫 Giveaway Cancelled"
 msgstr "🚫 Sorteo cancelado"
 
-#: giveaways.py:868
+#: giveaways.py:870
 msgid "Giveaway for **{prize}** has been cancelled."
 msgstr "El sorteo de **{prize}** se ha cancelado."
 
-#: giveaways.py:873
+#: giveaways.py:875
 msgid "Remove all ended giveaways from the config for this server."
 msgstr ""
 "Borrar de la configuración todos los sorteos terminados de este servidor."
 
-#: giveaways.py:876
+#: giveaways.py:878
 msgid "No giveaway data found."
 msgstr "No hay datos de sorteos."
 
-#: giveaways.py:883
+#: giveaways.py:885
 msgid "No ended giveaways to clean up."
 msgstr "No hay sorteos terminados que limpiar."
 
-#: giveaways.py:884
+#: giveaways.py:886
 msgid "Cleaned up **{removed}** ended giveaway(s) from the config."
 msgstr ""
 "Se han borrado **{removed}** sorteo(s) terminados de la configuración."
 
-#: giveaways.py:890
+#: giveaways.py:892
 msgid "Delete a specific giveaway from the config."
 msgstr "Borrar un sorteo concreto de la configuración."
 
-#: giveaways.py:896
+#: giveaways.py:898
 msgid ""
 "This giveaway is still active. Use `{clean_prefix}gw end {msgid}` or "
 "`{clean_prefix}gw cancel {msgid}` first."
@@ -706,23 +706,23 @@ msgstr ""
 "Este sorteo sigue activo. Usa antes `{clean_prefix}gw end {msgid}` o "
 "`{clean_prefix}gw cancel {msgid}`."
 
-#: giveaways.py:900
+#: giveaways.py:902
 msgid "Giveaway **{prize}** (ID: {msgid}) deleted from config."
 msgstr "Sorteo **{prize}** (ID: {msgid}) borrado de la configuración."
 
-#: giveaways.py:909
+#: giveaways.py:911
 msgid "View recent giveaway history (last 50)."
 msgstr "Ver el historial reciente de sorteos (últimos 50)."
 
-#: giveaways.py:912
+#: giveaways.py:914
 msgid "No giveaway history yet."
 msgstr "Aún no hay historial de sorteos."
 
-#: giveaways.py:922
+#: giveaways.py:924
 msgid "No winners"
 msgstr "Sin ganadores"
 
-#: giveaways.py:923
+#: giveaways.py:925
 msgid ""
 "**{prize}** — <t:{ended_at}:R>\n"
 "  Winners: {winner_text} | Entrants: {entrant_count}\n"
@@ -732,76 +732,76 @@ msgstr ""
 "  Ganadores: {winner_text} | Participantes: {entrant_count}\n"
 "\n"
 
-#: giveaways.py:929
+#: giveaways.py:931
 msgid "Giveaway History — {guild_name}"
 msgstr "Historial de sorteos — {guild_name}"
 
-#: giveaways.py:946
+#: giveaways.py:948
 msgid "Configure default giveaway settings for this server."
 msgstr "Configurar los valores por defecto de los sorteos de este servidor."
 
-#: giveaways.py:951
+#: giveaways.py:953
 msgid "Show current default giveaway settings."
 msgstr "Mostrar los valores por defecto actuales."
 
-#: giveaways.py:956
+#: giveaways.py:958
 msgid "❌ Off"
 msgstr "❌ Desactivado"
 
-#: giveaways.py:960
+#: giveaways.py:962
 msgid "Giveaway Defaults — {guild_name}"
 msgstr "Valores por defecto — {guild_name}"
 
-#: giveaways.py:961
+#: giveaways.py:963
 msgid "No defaults set."
 msgstr "No hay valores por defecto."
 
-#: giveaways.py:964
+#: giveaways.py:966
 msgid "Use {clean_prefix}gw set <key> <value> to change"
 msgstr "Usa {clean_prefix}gw set <clave> <valor> para cambiarlos"
 
-#: giveaways.py:970
+#: giveaways.py:972
 msgid "Set whether to update the button with entrant count by default."
 msgstr "Mostrar por defecto el número de participantes en el botón."
 
-#: giveaways.py:978
+#: giveaways.py:980
 msgid "Set whether to DM winners by default."
 msgstr "Avisar por defecto a los ganadores por MD."
 
-#: giveaways.py:986
+#: giveaways.py:988
 msgid "Set whether to DM users when they fail to enter by default."
 msgstr "Avisar por defecto por MD a quien no pueda participar."
 
-#: giveaways.py:994
+#: giveaways.py:996
 msgid "Set whether to show requirements on the embed by default."
 msgstr "Mostrar por defecto los requisitos en el embed."
 
-#: giveaways.py:1002
+#: giveaways.py:1004
 msgid "Set whether to post a separate announcement when a giveaway ends."
 msgstr "Publicar un anuncio aparte cuando termine un sorteo."
 
-#: giveaways.py:1010
+#: giveaways.py:1012
 msgid "Set the default emoji for giveaways."
 msgstr "Fijar el emoji por defecto de los sorteos."
 
-#: giveaways.py:1018
+#: giveaways.py:1020
 msgid "Set the default button text for giveaways."
 msgstr "Fijar el texto por defecto del botón."
 
-#: giveaways.py:1028
+#: giveaways.py:1030
 msgid "Set the default button style. Options: green, blurple, grey, red."
 msgstr ""
 "Fijar el estilo por defecto del botón. Opciones: green, blurple, grey, red."
 
-#: giveaways.py:1031
+#: giveaways.py:1033
 msgid "Style must be one of: {join}"
 msgstr "El estilo debe ser uno de: {join}"
 
-#: giveaways.py:1043
+#: giveaways.py:1045
 msgid "Manage giveaway presets (reusable templates)."
 msgstr "Gestionar plantillas de sorteos reutilizables."
 
-#: giveaways.py:1048
+#: giveaways.py:1050
 msgid ""
 "Save a giveaway preset. Use the same flags as `gw advanced`.\n"
 "\n"
@@ -819,15 +819,15 @@ msgstr ""
 "        Ejemplo: `[p]gw preset save weekly --winners 3 --congratulate --announce --roles @Members`\n"
 "        "
 
-#: giveaways.py:1058
+#: giveaways.py:1060
 msgid "Invalid flags: {e}"
 msgstr "Opciones no válidas: {e}"
 
-#: giveaways.py:1061
+#: giveaways.py:1063
 msgid "✅ Preset **{name}** saved."
 msgstr "✅ Plantilla **{name}** guardada."
 
-#: giveaways.py:1066
+#: giveaways.py:1068
 msgid ""
 "Use a preset to create a giveaway.\n"
 "\n"
@@ -845,7 +845,7 @@ msgstr ""
 "        Ejemplo: `[p]gw preset use weekly --prize Nitro --duration 2d`\n"
 "        "
 
-#: giveaways.py:1075
+#: giveaways.py:1077
 msgid ""
 "Preset `{name}` not found. Use `{clean_prefix}gw preset list` to see all "
 "presets."
@@ -853,35 +853,35 @@ msgstr ""
 "No existe la plantilla `{name}`. Usa `{clean_prefix}gw preset list` para "
 "verlas todas."
 
-#: giveaways.py:1080
+#: giveaways.py:1082
 msgid "Error: {e}"
 msgstr "Error: {e}"
 
-#: giveaways.py:1087
+#: giveaways.py:1089
 msgid "List all saved presets."
 msgstr "Listar las plantillas guardadas."
 
-#: giveaways.py:1090
+#: giveaways.py:1092
 msgid "No presets saved yet."
 msgstr "Aún no hay plantillas guardadas."
 
-#: giveaways.py:1095
+#: giveaways.py:1097
 msgid "Giveaway Presets — {guild_name}"
 msgstr "Plantillas de sorteos — {guild_name}"
 
-#: giveaways.py:1104
+#: giveaways.py:1106
 msgid "Delete a saved preset."
 msgstr "Borrar una plantilla guardada."
 
-#: giveaways.py:1107
+#: giveaways.py:1109
 msgid "Preset `{name}` not found."
 msgstr "No existe la plantilla `{name}`."
 
-#: giveaways.py:1109
+#: giveaways.py:1111
 msgid "Preset **{name}** deleted."
 msgstr "Plantilla **{name}** borrada."
 
-#: giveaways.py:1134
+#: giveaways.py:1136
 msgid ""
 "Create a giveaway with simple parameters.\n"
 "\n"
@@ -903,7 +903,7 @@ msgstr ""
 "        `/giveaway create prize:Nitro duration:1h30m winners:2`\n"
 "        "
 
-#: giveaways.py:1160
+#: giveaways.py:1162
 msgid ""
 "{desc_text}Click the button below to enter\n"
 "\n"
@@ -917,19 +917,19 @@ msgstr ""
 "\n"
 "Termina: <t:{timestamp}:R>"
 
-#: giveaways.py:1214
+#: giveaways.py:1216
 msgid "📖 Full guide for the Giveaway system."
 msgstr "📖 Guía completa del sistema de sorteos."
 
-#: giveaways.py:1217
+#: giveaways.py:1219
 msgid "🎉 Page {current}/{total} — Giveaways v{version}"
 msgstr "🎉 Página {current}/{total} — Sorteos v{version}"
 
-#: giveaways.py:1221
+#: giveaways.py:1223
 msgid "📖 Guide — Getting Started"
 msgstr "📖 Guía — Primeros pasos"
 
-#: giveaways.py:1222
+#: giveaways.py:1224
 msgid ""
 "Welcome to the **Giveaway System**! 🎉\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -961,11 +961,11 @@ msgstr ""
 "**Cómo funciona:**\n"
 "Los usuarios pulsan el botón del sorteo para participar. Al acabar el tiempo se eligen y anuncian los ganadores automáticamente."
 
-#: giveaways.py:1241
+#: giveaways.py:1243
 msgid "⚙️ Guide — Features"
 msgstr "⚙️ Guía — Funciones"
 
-#: giveaways.py:1242
+#: giveaways.py:1244
 msgid ""
 "The giveaway system includes many powerful features:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -1013,11 +1013,11 @@ msgstr ""
 "\n"
 "🔗 **Terceros** — integración con MEE6, Tatsu, Amari y Leveler."
 
-#: giveaways.py:1261
+#: giveaways.py:1263
 msgid "🛠️ Guide — Defaults & Presets"
 msgstr "🛠️ Guía — Valores por defecto y plantillas"
 
-#: giveaways.py:1262
+#: giveaways.py:1264
 msgid ""
 "Customize defaults and save reusable templates:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -1063,11 +1063,11 @@ msgstr ""
 "`{p}gw preset list` — ver todas\n"
 "`{p}gw preset delete weekly`"
 
-#: giveaways.py:1288
+#: giveaways.py:1290
 msgid "📋 Guide — Managing Giveaways"
 msgstr "📋 Guía — Gestionar sorteos"
 
-#: giveaways.py:1289
+#: giveaways.py:1291
 msgid ""
 "Commands for managing active and ended giveaways:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
@@ -1111,11 +1111,11 @@ msgstr ""
 "`{p}gw cleanup` — borrar los sorteos terminados\n"
 "`{p}gw delete <id>` — borrar un sorteo terminado"
 
-#: giveaways.py:1313
+#: giveaways.py:1315
 msgid "📚 Guide — Command Reference"
 msgstr "📚 Guía — Referencia de comandos"
 
-#: giveaways.py:1314
+#: giveaways.py:1316
 msgid ""
 "Full list of available commands:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -1123,11 +1123,11 @@ msgstr ""
 "Lista completa de comandos:\n"
 "━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
-#: giveaways.py:1319
+#: giveaways.py:1321
 msgid "🎉 Creation"
 msgstr "🎉 Creación"
 
-#: giveaways.py:1320
+#: giveaways.py:1322
 msgid ""
 "`{p}gw start [#ch] <time> <prize>` — Quick giveaway\n"
 "`{p}gw create [#ch]` — Interactive form (slash)\n"
@@ -1139,11 +1139,11 @@ msgstr ""
 "`{p}gw advanced <opciones>` — personalización completa\n"
 "`{p}gw preset use <nombre> [opciones]` — desde plantilla"
 
-#: giveaways.py:1327
+#: giveaways.py:1329
 msgid "🔧 Management"
 msgstr "🔧 Gestión"
 
-#: giveaways.py:1328
+#: giveaways.py:1330
 msgid ""
 "`{p}gw list` — Active giveaways\n"
 "`{p}gw info <id>` — Details\n"
@@ -1161,11 +1161,11 @@ msgstr ""
 "`{p}gw cancel <id>` — cancelar\n"
 "`{p}gw reroll <id>` — repetir ganadores"
 
-#: giveaways.py:1338
+#: giveaways.py:1340
 msgid "⚙️ Configuration"
 msgstr "⚙️ Configuración"
 
-#: giveaways.py:1339
+#: giveaways.py:1341
 msgid ""
 "`{p}gw set show` — View defaults\n"
 "`{p}gw set <key> <value>` — Change default\n"
@@ -1200,53 +1200,53 @@ msgstr ""
 msgid "Optional description for the giveaway."
 msgstr "Descripción opcional del sorteo."
 
-#: menu.py:64
+#: menu.py:69
 msgid "You have been removed from the giveaway."
 msgstr "Has salido del sorteo."
 
-#: menu.py:71
+#: menu.py:76
 msgid "You have been entered into the giveaway for {prize}."
 msgstr "Estás participando en el sorteo de {prize}."
 
-#: menu.py:91
+#: menu.py:96
 msgid "🎉 {count} participant{value}"
 msgstr "🎉 {count} participante{value}"
 
-#: menu.py:109
+#: menu.py:114
 msgid "Prize"
 msgstr "Premio"
 
-#: menu.py:110
+#: menu.py:115
 msgid "What's the prize?"
 msgstr "¿Cuál es el premio?"
 
-#: menu.py:115
+#: menu.py:120
 msgid "Duration (e.g. 1h30m, 2d, 30m)"
 msgstr "Duración (p. ej. 1h30m, 2d, 30m)"
 
-#: menu.py:121
+#: menu.py:126
 msgid "Number of Winners"
 msgstr "Número de ganadores"
 
-#: menu.py:128
+#: menu.py:133
 msgid "Description (optional)"
 msgstr "Descripción (opcional)"
 
-#: menu.py:129
+#: menu.py:134
 msgid "Optional description for the giveaway"
 msgstr "Descripción opcional del sorteo"
 
-#: menu.py:149
+#: menu.py:159
 msgid ""
 "Invalid duration. Use formats like `1h30m`, `2d`, `30m`. Minimum 1 minute."
 msgstr ""
 "Duración no válida. Usa formatos como `1h30m`, `2d`, `30m`. Mínimo 1 minuto."
 
-#: menu.py:159
+#: menu.py:169
 msgid "Number of winners must be a positive number."
 msgstr "El número de ganadores debe ser positivo."
 
-#: menu.py:176
+#: menu.py:186
 msgid ""
 "{desc_text}Click the button below to enter\n"
 "\n"

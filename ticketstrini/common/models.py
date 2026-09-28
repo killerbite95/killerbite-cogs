@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional, Union
 import re
 
+from ..i18n import _
+
 
 @dataclass
 class TicketStats:
@@ -239,13 +241,13 @@ class WelcomeSections:
         """Convert sections to embed field tuples (name, value)"""
         fields = []
         if self.what_we_need:
-            fields.append(("📋 What We Need", self.what_we_need))
+            fields.append((_("📋 What We Need"), self.what_we_need))
         if self.steps:
-            fields.append(("📝 Steps", self.steps))
+            fields.append((_("📝 Steps"), self.steps))
         if self.sla:
-            fields.append(("⏰ Response Time", self.sla))
+            fields.append((_("⏰ Response Time"), self.sla))
         if self.rules:
-            fields.append(("📜 Rules", self.rules))
+            fields.append((_("📜 Rules"), self.rules))
         return fields
 
 
@@ -396,9 +398,9 @@ class PermissionChecker:
         missing = []
         
         perm_names = {
-            "create_private_threads": "Create Private Threads",
-            "send_messages_in_threads": "Send Messages in Threads",
-            "manage_threads": "Manage Threads",
+            "create_private_threads": _("Create Private Threads"),
+            "send_messages_in_threads": _("Send Messages in Threads"),
+            "manage_threads": _("Manage Threads"),
         }
         
         for perm in cls.THREAD_PERMISSIONS:
@@ -414,13 +416,13 @@ class PermissionChecker:
         missing = []
         
         perm_names = {
-            "manage_channels": "Manage Channels",
-            "manage_permissions": "Manage Permissions",
-            "view_channel": "View Channel",
-            "send_messages": "Send Messages",
-            "read_message_history": "Read Message History",
-            "embed_links": "Embed Links",
-            "attach_files": "Attach Files",
+            "manage_channels": _("Manage Channels"),
+            "manage_permissions": _("Manage Permissions"),
+            "view_channel": _("View Channel"),
+            "send_messages": _("Send Messages"),
+            "read_message_history": _("Read Message History"),
+            "embed_links": _("Embed Links"),
+            "attach_files": _("Attach Files"),
         }
         
         for perm in cls.CHANNEL_PERMISSIONS:
@@ -443,46 +445,46 @@ class PermissionChecker:
         if category_id:
             category = guild.get_channel(category_id)
             if not category:
-                issues.append("Category not found")
+                issues.append(_("Category not found"))
             else:
                 missing = cls.check_channel_permissions(category, bot_member)
                 if missing:
-                    issues.append(f"Missing in category: {', '.join(missing)}")
+                    issues.append(_("Missing in category: {join}").format(join=', '.join(missing)))
         else:
             if not panel.get("threads"):
-                issues.append("No category set for channel-based tickets")
+                issues.append(_("No category set for channel-based tickets"))
         
         # Check channel
         channel_id = panel.get("channel_id")
         if channel_id:
             channel = guild.get_channel(channel_id)
             if not channel:
-                issues.append("Panel channel not found")
+                issues.append(_("Panel channel not found"))
             else:
                 perms = channel.permissions_for(bot_member)
                 if not perms.view_channel:
-                    issues.append("Cannot view panel channel")
+                    issues.append(_("Cannot view panel channel"))
                 if not perms.send_messages:
-                    issues.append("Cannot send messages in panel channel")
+                    issues.append(_("Cannot send messages in panel channel"))
                 
                 # Thread-specific checks
                 if panel.get("threads"):
                     missing = cls.check_thread_permissions(channel, bot_member)
                     if missing:
-                        issues.append(f"Missing thread permissions: {', '.join(missing)}")
+                        issues.append(_("Missing thread permissions: {join}").format(join=', '.join(missing)))
         else:
-            issues.append("No panel channel set")
+            issues.append(_("No panel channel set"))
         
         # Check log channel
         log_channel_id = panel.get("log_channel")
         if log_channel_id:
             log_channel = guild.get_channel(log_channel_id)
             if not log_channel:
-                warnings.append("Log channel not found")
+                warnings.append(_("Log channel not found"))
             else:
                 perms = log_channel.permissions_for(bot_member)
                 if not perms.send_messages or not perms.embed_links:
-                    warnings.append("Missing permissions in log channel")
+                    warnings.append(_("Missing permissions in log channel"))
         
         return {
             "ok": len(issues) == 0,

@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:34+0000\n"
+"POT-Creation-Date: 2026-09-28 11:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -277,8 +277,8 @@ msgid "❌ That suggestion was not found."
 msgstr ""
 
 #: simplesuggestions.py:398 simplesuggestions.py:561 simplesuggestions.py:675
-#: simplesuggestions.py:710 simplesuggestions.py:778 views.py:162 views.py:172
-#: views.py:217 views.py:330 views.py:545
+#: simplesuggestions.py:710 simplesuggestions.py:778 views.py:178 views.py:188
+#: views.py:233 views.py:356 views.py:576
 msgid "❌ Suggestion not found."
 msgstr ""
 
@@ -286,7 +286,7 @@ msgstr ""
 msgid "❌ You can only edit your own suggestions."
 msgstr ""
 
-#: simplesuggestions.py:408 views.py:182
+#: simplesuggestions.py:408 views.py:198
 msgid "❌ You cannot edit a suggestion with status: {label}"
 msgstr ""
 
@@ -614,84 +614,84 @@ msgstr ""
 msgid "Describe your suggestion in detail..."
 msgstr ""
 
-#: views.py:56
+#: views.py:61
 msgid "Edit Suggestion"
 msgstr ""
 
-#: views.py:59
+#: views.py:64
 msgid "Suggestion content"
 msgstr ""
 
-#: views.py:79
+#: views.py:89
 msgid "Change to: {label}"
 msgstr ""
 
-#: views.py:82
+#: views.py:92
 msgid "Reason (optional)"
 msgstr ""
 
-#: views.py:84
+#: views.py:94
 msgid "Explain the reason for the status change..."
 msgstr ""
 
-#: views.py:131
+#: views.py:146
 msgid "View votes"
 msgstr ""
 
-#: views.py:140
+#: views.py:155
 msgid "Edit"
 msgstr ""
 
-#: views.py:176
+#: views.py:192
 msgid "❌ Only the author can edit this suggestion."
 msgstr ""
 
-#: views.py:202
+#: views.py:218
 msgid "✅ Suggestion edited."
 msgstr ""
 
-#: views.py:264
+#: views.py:280
 msgid "Approve"
 msgstr ""
 
-#: views.py:273
+#: views.py:289
 msgid "Deny"
 msgstr ""
 
-#: views.py:282
+#: views.py:298
 msgid "Change status"
 msgstr ""
 
-#: views.py:310
+#: views.py:331
 msgid "Select a status..."
 msgstr ""
 
-#: views.py:339
+#: views.py:365
 msgid "ℹ️ The suggestion already has the status: {emoji} {label}"
 msgstr ""
 
-#: views.py:363 views.py:571
+#: views.py:389 views.py:602
 msgid "❌ Error updating."
 msgstr ""
 
-#: views.py:410 views.py:611
+#: views.py:436 views.py:642
 msgid "✅ Status changed to: {emoji} {label}"
 msgstr ""
 
-#: views.py:502
+#: views.py:533
 msgid "❌ This command can only be used in a server."
 msgstr ""
 
-#: views.py:514
+#: views.py:545
 msgid "❌ Could not verify your membership in the server."
 msgstr ""
 
-#: views.py:532
+#: views.py:563
 msgid ""
 "❌ You don't have permission to perform this action.\n"
 "You need to be an **Administrator**, have **Manage Server** permission, or have the configured staff role."
 msgstr ""
 
-#: views.py:686
+#: views.py:718
 msgid "Select the new status:"
 msgstr ""

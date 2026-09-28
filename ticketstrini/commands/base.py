@@ -27,14 +27,14 @@ log = logging.getLogger("red.vrt.tickets.base")
 
 
 class BaseCommands(MixinMeta):
-    @commands.hybrid_group(name="ticket", description="Ticket commands")
+    @commands.hybrid_group(name="ticket", description=_("Ticket commands"))
     @commands.guild_only()
     async def ticket(self, ctx: commands.Context):
         """Manage your ticket (add/remove users, close, claim, notes...)"""
         if ctx.invoked_subcommand is None:
             await ctx.send_help()
 
-    @ticket.command(name="add", description="Add a user to your ticket")
+    @ticket.command(name="add", description=_("Add a user to your ticket"))
     @app_commands.describe(user="The Discord user you want to add to your ticket")
     @commands.guild_only()
     async def add_user_to_ticket(self, ctx: commands.Context, *, user: discord.Member):
@@ -78,7 +78,7 @@ class BaseCommands(MixinMeta):
             return await ctx.send(txt)
         await ctx.send(f"**{user.name}** " + _("has been added to this ticket!"))
 
-    @ticket.command(name="remove", description="Remove a user from your ticket")
+    @ticket.command(name="remove", description=_("Remove a user from your ticket"))
     @app_commands.describe(user="The Discord user you want to remove from your ticket")
     @commands.guild_only()
     async def remove_user_from_ticket(self, ctx: commands.Context, *, user: discord.Member):
@@ -125,7 +125,7 @@ class BaseCommands(MixinMeta):
             return await ctx.send(txt)
         await ctx.send(f"**{user.name}** " + _("has been removed from this ticket!"))
 
-    @ticket.command(name="rename", description="Rename your ticket")
+    @ticket.command(name="rename", description=_("Rename your ticket"))
     @app_commands.describe(new_name="The new name for your ticket")
     @commands.guild_only()
     async def rename_ticket(self, ctx: commands.Context, *, new_name: str):
@@ -170,7 +170,7 @@ class BaseCommands(MixinMeta):
 
         await ctx.channel.edit(name=new_name)
 
-    @ticket.command(name="close", description="Close your ticket")
+    @ticket.command(name="close", description=_("Close your ticket"))
     @app_commands.describe(reason="Reason for closing the ticket")
     @commands.guild_only()
     async def close_a_ticket(self, ctx: commands.Context, *, reason: Optional[str] = None):
@@ -247,7 +247,7 @@ class BaseCommands(MixinMeta):
     # Claim / Unclaim / Transfer Commands
     # ============================================================================
 
-    @ticket.command(name="claim", description="Claim this ticket")
+    @ticket.command(name="claim", description=_("Claim this ticket"))
     @commands.guild_only()
     async def claim_cmd(self, ctx: commands.Context):
         """Claim this ticket as your own to handle"""
@@ -279,7 +279,7 @@ class BaseCommands(MixinMeta):
         
         await ctx.send(message)
 
-    @ticket.command(name="unclaim", description="Unclaim this ticket")
+    @ticket.command(name="unclaim", description=_("Unclaim this ticket"))
     @commands.guild_only()
     async def unclaim_cmd(self, ctx: commands.Context):
         """Unclaim this ticket so others can claim it"""
@@ -299,7 +299,7 @@ class BaseCommands(MixinMeta):
         
         await ctx.send(message)
 
-    @ticket.command(name="transfer", description="Transfer this ticket to another staff member")
+    @ticket.command(name="transfer", description=_("Transfer this ticket to another staff member"))
     @app_commands.describe(new_staff="The staff member to transfer the ticket to")
     @commands.guild_only()
     async def transfer_cmd(self, ctx: commands.Context, new_staff: discord.Member):
@@ -349,7 +349,7 @@ class BaseCommands(MixinMeta):
     # Notes Command
     # ============================================================================
 
-    @ticket.command(name="note", description="Add an internal note to this ticket")
+    @ticket.command(name="note", description=_("Add an internal note to this ticket"))
     @app_commands.describe(note="The note to add (optional, will prompt if not provided)")
     @commands.guild_only()
     async def note_cmd(self, ctx: commands.Context, *, note: Optional[str] = None):
@@ -405,7 +405,7 @@ class BaseCommands(MixinMeta):
         else:
             await ctx.send(_("Failed to add note"))
 
-    @ticket.command(name="notes", description="View notes for this ticket")
+    @ticket.command(name="notes", description=_("View notes for this ticket"))
     @commands.guild_only()
     async def notes_list(self, ctx: commands.Context):
         """View all internal notes for this ticket"""
@@ -458,7 +458,7 @@ class BaseCommands(MixinMeta):
     # Quick Reply Command
     # ============================================================================
 
-    @ticket.command(name="quickreply", aliases=["qr"], description="Send a quick reply template")
+    @ticket.command(name="quickreply", aliases=["qr"], description=_("Send a quick reply template"))
     @app_commands.describe(template_name="Name of the quick reply template (optional)")
     @commands.guild_only()
     async def quick_reply_cmd(self, ctx: commands.Context, template_name: Optional[str] = None):
@@ -547,7 +547,7 @@ class BaseCommands(MixinMeta):
     # Ticket Info Command
     # ============================================================================
 
-    @ticket.command(name="info", description="View information about this ticket")
+    @ticket.command(name="info", description=_("View information about this ticket"))
     @commands.guild_only()
     async def ticket_info(self, ctx: commands.Context):
         """View detailed information about this ticket"""
@@ -559,7 +559,7 @@ class BaseCommands(MixinMeta):
         ticket_data = conf["opened"][owner_id][str(ctx.channel.id)]
         
         owner = ctx.guild.get_member(int(owner_id))
-        owner_name = owner.display_name if owner else f"Unknown ({owner_id})"
+        owner_name = owner.display_name if owner else _("Unknown ({owner_id})").format(owner_id=owner_id)
         
         embed = discord.Embed(
             title=_("🎫 Ticket Information"),
@@ -580,7 +580,7 @@ class BaseCommands(MixinMeta):
         claimed_by = ticket_data.get("claimed_by")
         if claimed_by:
             claimer = ctx.guild.get_member(claimed_by)
-            claimer_name = claimer.mention if claimer else f"Unknown ({claimed_by})"
+            claimer_name = claimer.mention if claimer else _("Unknown ({claimed_by})").format(claimed_by=claimed_by)
             embed.add_field(name=_("Claimed By"), value=claimer_name, inline=True)
             
             claimed_at = ticket_data.get("claimed_at")
@@ -619,6 +619,6 @@ class BaseCommands(MixinMeta):
         
         # Escalation
         if ticket_data.get("escalated"):
-            embed.add_field(name=_("Escalated"), value="⚠️ Yes", inline=True)
+            embed.add_field(name=_("Escalated"), value=_("⚠️ Yes"), inline=True)
         
         await ctx.send(embed=embed)

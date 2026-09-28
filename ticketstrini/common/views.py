@@ -101,7 +101,7 @@ class Confirm(View):
             return False
         return True
 
-    @discord.ui.button(label="Yes", style=ButtonStyle.green)
+    @discord.ui.button(label=_("Yes"), style=ButtonStyle.green)
     async def confirm(self, interaction: Interaction, button: Button):
         if not await self.interaction_check(interaction):
             return
@@ -139,7 +139,7 @@ class TestButton(View):
     def __init__(
         self,
         style: str = "grey",
-        label: str = "Button Test",
+        label: str = _("Button Test"),
         emoji: Union[discord.Emoji, discord.PartialEmoji, str] = None,
     ):
         super().__init__()
@@ -417,14 +417,14 @@ class ConfirmDeleteView(View):
         super().__init__(timeout=30)
         self.value = False
 
-    @discord.ui.button(label="Delete", style=ButtonStyle.danger, emoji="🗑️")
+    @discord.ui.button(label=_("Delete"), style=ButtonStyle.danger, emoji="🗑️")
     async def confirm(self, interaction: Interaction, button: Button):
         self.value = True
         with contextlib.suppress(discord.NotFound):
             await interaction.response.edit_message(content=_("Deleting..."), view=None)
         self.stop()
 
-    @discord.ui.button(label="Cancel", style=ButtonStyle.grey)
+    @discord.ui.button(label=_("Cancel"), style=ButtonStyle.grey)
     async def cancel(self, interaction: Interaction, button: Button):
         self.value = False
         with contextlib.suppress(discord.NotFound):
@@ -684,7 +684,7 @@ class SupportButton(Button):
         # Throw modal before creating ticket if the panel has one
         form_embed = discord.Embed()
         modal = panel.get("modal")
-        panel_title = panel.get("modal_title", "{} Ticket".format(self.panel_name))
+        panel_title = panel.get("modal_title", _("{} Ticket").format(self.panel_name))
         answers = {}
         has_response = False
         if modal:
@@ -808,7 +808,7 @@ class SupportButton(Button):
 
                 if not channel.permissions_for(guild.me).manage_threads:
                     return await interaction.followup.send(
-                        "I don't have permissions to create threads!", ephemeral=True
+                        _("I don't have permissions to create threads!"), ephemeral=True
                     )
 
                 archive = round(conf["inactive"] * 60)
@@ -1194,7 +1194,7 @@ class StaffActionsView(View):
         
         return False
     
-    @discord.ui.button(label="Claim", style=ButtonStyle.green, emoji="🙋", row=0)
+    @discord.ui.button(label=_("Claim"), style=ButtonStyle.green, emoji="🙋", row=0)
     async def claim_btn(self, interaction: Interaction, button: Button):
         # Set locale for translations in non-command context
         await set_contextual_locales_from_guild(self.bot, interaction.guild)
@@ -1231,7 +1231,7 @@ class StaffActionsView(View):
         else:
             await interaction.response.send_message(message, ephemeral=True)
     
-    @discord.ui.button(label="Unclaim", style=ButtonStyle.grey, emoji="🚫", row=0, disabled=True)
+    @discord.ui.button(label=_("Unclaim"), style=ButtonStyle.grey, emoji="🚫", row=0, disabled=True)
     async def unclaim_btn(self, interaction: Interaction, button: Button):
         # Set locale for translations in non-command context
         await set_contextual_locales_from_guild(self.bot, interaction.guild)
@@ -1262,7 +1262,7 @@ class StaffActionsView(View):
         else:
             await interaction.response.send_message(message, ephemeral=True)
     
-    @discord.ui.button(label="Close", style=ButtonStyle.danger, emoji="🔒", row=0)
+    @discord.ui.button(label=_("Close"), style=ButtonStyle.danger, emoji="🔒", row=0)
     async def close_btn(self, interaction: Interaction, button: Button):
         # Set locale for translations in non-command context
         await set_contextual_locales_from_guild(self.bot, interaction.guild)
@@ -1378,7 +1378,7 @@ class TransferView(View):
         self.from_staff = from_staff
         self.selected_staff = None
     
-    @discord.ui.button(label="Select by ID/Mention", style=ButtonStyle.blurple)
+    @discord.ui.button(label=_("Select by ID/Mention"), style=ButtonStyle.blurple)
     async def select_btn(self, interaction: Interaction, button: Button):
         modal = TransferModal()
         await interaction.response.send_modal(modal)
@@ -1587,13 +1587,13 @@ class TicketPreviewView(View):
         self.answers = answers
         self.confirmed = None
     
-    @discord.ui.button(label="Confirm & Create", style=ButtonStyle.green, emoji="✅")
+    @discord.ui.button(label=_("Confirm & Create"), style=ButtonStyle.green, emoji="✅")
     async def confirm(self, interaction: Interaction, button: Button):
         self.confirmed = True
         await interaction.response.defer()
         self.stop()
     
-    @discord.ui.button(label="Cancel", style=ButtonStyle.red, emoji="❌")
+    @discord.ui.button(label=_("Cancel"), style=ButtonStyle.red, emoji="❌")
     async def cancel(self, interaction: Interaction, button: Button):
         self.confirmed = False
         await interaction.response.send_message(_("Ticket creation cancelled."), ephemeral=True)
@@ -1632,7 +1632,7 @@ class OverviewView(View):
         # Add filter selects if there are panels
         panels = list(conf.get("panels", {}).keys())
         if panels:
-            panel_options = [discord.SelectOption(label="All Panels", value="all")] + [
+            panel_options = [discord.SelectOption(label=_("All Panels"), value="all")] + [
                 discord.SelectOption(label=p[:25], value=p) for p in panels[:24]
             ]
             self.panel_select = Select(
@@ -1645,11 +1645,11 @@ class OverviewView(View):
         
         # Status filter
         status_options = [
-            discord.SelectOption(label="All Statuses", value="all"),
-            discord.SelectOption(label="🟢 Open", value="open"),
-            discord.SelectOption(label="🔵 Claimed", value="claimed"),
-            discord.SelectOption(label="🟡 Awaiting User", value="awaiting_user"),
-            discord.SelectOption(label="🟠 Awaiting Staff", value="awaiting_staff"),
+            discord.SelectOption(label=_("All Statuses"), value="all"),
+            discord.SelectOption(label=_("🟢 Open"), value="open"),
+            discord.SelectOption(label=_("🔵 Claimed"), value="claimed"),
+            discord.SelectOption(label=_("🟡 Awaiting User"), value="awaiting_user"),
+            discord.SelectOption(label=_("🟠 Awaiting Staff"), value="awaiting_staff"),
         ]
         self.status_select = Select(
             placeholder=_("Filter by status"),
@@ -1682,7 +1682,7 @@ class OverviewView(View):
         self.page += 1
         await self.refresh(interaction)
     
-    @discord.ui.button(label="📊 Stats", style=ButtonStyle.blurple, row=2)
+    @discord.ui.button(label=_("📊 Stats"), style=ButtonStyle.blurple, row=2)
     async def show_stats(self, interaction: Interaction, button: Button):
         stats = get_overview_stats(self.guild, self.conf.get("opened", {}), self.conf)
         
@@ -1734,7 +1734,7 @@ class OverviewView(View):
         
         await interaction.response.send_message(embed=embed, ephemeral=True)
     
-    @discord.ui.button(label="🔄 Refresh", style=ButtonStyle.grey, row=2)
+    @discord.ui.button(label=_("🔄 Refresh"), style=ButtonStyle.grey, row=2)
     async def refresh_btn(self, interaction: Interaction, button: Button):
         self.conf = await self.config.guild(self.guild).all()
         await self.refresh(interaction)
@@ -1762,9 +1762,9 @@ class OverviewView(View):
         if self.filter_panel or self.filter_status:
             filters = []
             if self.filter_panel:
-                filters.append(f"Panel: {self.filter_panel}")
+                filters.append(_("Panel: {filter_panel}").format(filter_panel=self.filter_panel))
             if self.filter_status:
-                filters.append(f"Status: {TICKET_STATUSES.get(self.filter_status, self.filter_status)}")
+                filters.append(_("Status: {get}").format(get=TICKET_STATUSES.get(self.filter_status, self.filter_status)))
             title += f" ({', '.join(filters)})"
         
         embed = discord.Embed(
@@ -1824,7 +1824,7 @@ class EmbedWizardView(View):
             )
         return embed
     
-    @discord.ui.button(label="Set Title", style=ButtonStyle.blurple, row=0)
+    @discord.ui.button(label=_("Set Title"), style=ButtonStyle.blurple, row=0)
     async def set_title(self, interaction: Interaction, button: Button):
         modal = SingleFieldModal(_("Set Title"), _("Title"), max_length=256)
         await interaction.response.send_modal(modal)
@@ -1833,7 +1833,7 @@ class EmbedWizardView(View):
             self.embed_data["title"] = modal.value
             await self.update_preview(interaction)
     
-    @discord.ui.button(label="Set Description", style=ButtonStyle.blurple, row=0)
+    @discord.ui.button(label=_("Set Description"), style=ButtonStyle.blurple, row=0)
     async def set_description(self, interaction: Interaction, button: Button):
         modal = SingleFieldModal(_("Set Description"), _("Description"), style=TextStyle.long, max_length=4000)
         await interaction.response.send_modal(modal)
@@ -1842,7 +1842,7 @@ class EmbedWizardView(View):
             self.embed_data["description"] = modal.value
             await self.update_preview(interaction)
     
-    @discord.ui.button(label="Set Footer", style=ButtonStyle.grey, row=0)
+    @discord.ui.button(label=_("Set Footer"), style=ButtonStyle.grey, row=0)
     async def set_footer(self, interaction: Interaction, button: Button):
         modal = SingleFieldModal(_("Set Footer"), _("Footer text"), required=False)
         await interaction.response.send_modal(modal)
@@ -1850,7 +1850,7 @@ class EmbedWizardView(View):
         self.embed_data["footer"] = modal.value if modal.value else None
         await self.update_preview(interaction)
     
-    @discord.ui.button(label="Set Color", style=ButtonStyle.grey, row=1)
+    @discord.ui.button(label=_("Set Color"), style=ButtonStyle.grey, row=1)
     async def set_color(self, interaction: Interaction, button: Button):
         modal = SingleFieldModal(_("Set Color"), _("Hex color (e.g., #5865F2)"), required=False)
         await interaction.response.send_modal(modal)
@@ -1863,7 +1863,7 @@ class EmbedWizardView(View):
                 pass
         await self.update_preview(interaction)
     
-    @discord.ui.button(label="Set Thumbnail", style=ButtonStyle.grey, row=1)
+    @discord.ui.button(label=_("Set Thumbnail"), style=ButtonStyle.grey, row=1)
     async def set_thumbnail(self, interaction: Interaction, button: Button):
         modal = SingleFieldModal(_("Set Thumbnail"), _("Image URL"), required=False)
         await interaction.response.send_modal(modal)
@@ -1871,7 +1871,7 @@ class EmbedWizardView(View):
         self.embed_data["thumbnail"] = modal.value if modal.value else None
         await self.update_preview(interaction)
     
-    @discord.ui.button(label="Set Image", style=ButtonStyle.grey, row=1)
+    @discord.ui.button(label=_("Set Image"), style=ButtonStyle.grey, row=1)
     async def set_image(self, interaction: Interaction, button: Button):
         modal = SingleFieldModal(_("Set Image"), _("Image URL"), required=False)
         await interaction.response.send_modal(modal)
@@ -1879,7 +1879,7 @@ class EmbedWizardView(View):
         self.embed_data["image"] = modal.value if modal.value else None
         await self.update_preview(interaction)
     
-    @discord.ui.button(label="Add Field", style=ButtonStyle.grey, row=2)
+    @discord.ui.button(label=_("Add Field"), style=ButtonStyle.grey, row=2)
     async def add_field(self, interaction: Interaction, button: Button):
         if len(self.embed_data["fields"]) >= 25:
             await interaction.response.send_message(_("Maximum 25 fields allowed."), ephemeral=True)
@@ -1896,7 +1896,7 @@ class EmbedWizardView(View):
             })
             await self.update_preview(interaction)
     
-    @discord.ui.button(label="Send", style=ButtonStyle.green, emoji="✅", row=3)
+    @discord.ui.button(label=_("Send"), style=ButtonStyle.green, emoji="✅", row=3)
     async def send_embed(self, interaction: Interaction, button: Button):
         if not self.embed_data["title"] and not self.embed_data["description"]:
             await interaction.response.send_message(
@@ -1939,7 +1939,7 @@ class EmbedWizardView(View):
             else:
                 await interaction.followup.send(_("Invalid channel."), ephemeral=True)
     
-    @discord.ui.button(label="Cancel", style=ButtonStyle.red, emoji="❌", row=3)
+    @discord.ui.button(label=_("Cancel"), style=ButtonStyle.red, emoji="❌", row=3)
     async def cancel(self, interaction: Interaction, button: Button):
         self.cancelled = True
         await interaction.response.send_message(_("Embed creation cancelled."), ephemeral=True)

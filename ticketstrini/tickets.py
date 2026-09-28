@@ -36,15 +36,13 @@ log = logging.getLogger("red.killerbite95.ticketstrini")
 
 @cog_i18n(_)
 class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog, metaclass=CompositeMetaClass):
-    """
-    Sistema de tickets de soporte multi-panel con botones (Trini Edition)
-    """
+    """Multi-panel support ticket system with buttons (Trini Edition)"""
     __author__ = "[Killerbite95](https://github.com/killerbite95/killerbite-cogs)"
     __version__ = "4.1.0"
 
     def format_help_for_context(self, ctx):
         helpcmd = super().format_help_for_context(ctx)
-        info = f"{helpcmd}\nCog Version: {self.__version__}\nAuthor: {self.__author__}\n"
+        info = _("{helpcmd}\nCog Version: {version}\nAuthor: {author}\n").format(helpcmd=helpcmd, version=self.__version__, author=self.__author__)
         return info
 
     async def red_delete_data_for_user(self, *, requester, user_id: int):
@@ -100,8 +98,8 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                 panel["ticket_num"] = 1
             if panels:
                 warnings.append(
-                    "Tickets: vuelve a publicar cada panel y enlazalo con "
-                    "`[p]ticketst panelmessage <panel> <mensaje>` (" + ", ".join(sorted(panels)) + ")."
+                    _("Tickets: post each panel again and link it with "
+                      "`[p]ticketst panelmessage <panel> <message>` ({panels}).").format(panels=", ".join(sorted(panels)))
                 )
         async with self.config.guild(guild).all() as current:
             for key, value in data.items():
@@ -681,17 +679,17 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                 return None
         return {
             "status": 1,
-            "message": "Forbidden access.",
+            "message": _("Forbidden access."),
             "error_code": 403,
-            "error_message": "No tienes permisos para ver los tickets de este servidor.",
+            "error_message": _("You don't have permission to see this server's tickets."),
         }
 
-    @dashboard_page(name="view_tickets", description="Ver tickets activos")
+    @dashboard_page(name="view_tickets", description=_("View active tickets"))
     async def rpc_view_tickets(self, guild_id: int, **kwargs) -> t.Dict[str, t.Any]:
         """Pagina del Dashboard para ver los tickets activos del servidor."""
         guild = self.bot.get_guild(guild_id)
         if not guild:
-            return {"status": 1, "error": "Guild no encontrada."}
+            return {"status": 1, "error": _("Server not found.")}
         denied = await self._dashboard_staff_denied(guild, kwargs)
         if denied:
             return denied
@@ -729,7 +727,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
 """
         return {"status": 0, "web_content": {"source": source, "rows": rows}}
 
-    @dashboard_page(name="close_ticket", description="Cerrar un ticket", methods=("GET", "POST"))
+    @dashboard_page(name="close_ticket", description=_("Close a ticket"), methods=("GET", "POST"))
     async def rpc_close_ticket(self, guild_id: int, **kwargs) -> t.Dict[str, t.Any]:
         """
         Página del Dashboard para cerrar un ticket.
@@ -737,20 +735,20 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
         """
         guild = self.bot.get_guild(guild_id)
         if not guild:
-            return {"status": 1, "error": "Guild no encontrada."}
+            return {"status": 1, "error": _("Server not found.")}
         denied = await self._dashboard_staff_denied(guild, kwargs)
         if denied:
             return denied
         import wtforms
         class CloseTicketForm(kwargs["Form"]):
-            channel_id = wtforms.IntegerField("ID del canal del ticket", validators=[wtforms.validators.InputRequired()])
-            submit = wtforms.SubmitField("Cerrar Ticket")
+            channel_id = wtforms.IntegerField(_("Ticket channel ID"), validators=[wtforms.validators.InputRequired()])
+            submit = wtforms.SubmitField(_("Close ticket"))
         form = CloseTicketForm()
         if form.validate_on_submit():
             cid = form.channel_id.data
             channel = guild.get_channel(cid)
             if not channel:
-                return {"status": 1, "error": "Canal no encontrado."}
+                return {"status": 1, "error": _("Channel not found.")}
             conf = await self.config.guild(guild).all()
             ticket_owner = None
             for uid, tickets in conf.get("opened", {}).items():
@@ -758,7 +756,7 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                     ticket_owner = guild.get_member(int(uid))
                     break
             if not ticket_owner:
-                return {"status": 1, "error": "Ticket no encontrado en la configuración."}
+                return {"status": 1, "error": _("Ticket not found in the configuration.")}
             await close_ticket(
                 bot=self.bot,
                 member=ticket_owner,
@@ -769,6 +767,6 @@ class TicketsTrini(TicketCommands, Functions, DashboardIntegration, commands.Cog
                 closedby="Dashboard",
                 config=self.config,
             )
-            return {"status": 0, "notifications": [{"message": "Ticket cerrado con éxito.", "category": "success"}], "redirect_url": kwargs["request_url"]}
+            return {"status": 0, "notifications": [{"message": _("Ticket closed."), "category": "success"}], "redirect_url": kwargs["request_url"]}
         source = "{{ form|safe }}"
         return {"status": 0, "web_content": {"source": source, "form": form}}

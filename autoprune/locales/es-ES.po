@@ -35,11 +35,11 @@ msgstr ""
 msgid "🧹 Banned users' credits deleted"
 msgstr "🧹 Creditos de usuarios baneados eliminados"
 
-#: prunebans.py:261
+#: prunebans.py:262
 msgid "🧹 AutoPrune"
 msgstr "🧹 AutoPrune"
 
-#: prunebans.py:262
+#: prunebans.py:263
 msgid ""
 "Deletes the credits of users who are still banned after some days.\n"
 "Bans and unbans are logged by modlog; this only reports cleanups."
@@ -47,47 +47,47 @@ msgstr ""
 "Borra los creditos de los usuarios que siguen baneados pasados unos dias.\n"
 "Los baneos y desbaneos los registra el modlog; aqui solo se avisa al limpiar."
 
-#: prunebans.py:263
+#: prunebans.py:264
 msgid "Status"
 msgstr "Estado"
 
-#: prunebans.py:263
+#: prunebans.py:264
 msgid "🟢 Enabled"
 msgstr "🟢 Activado"
 
-#: prunebans.py:263
+#: prunebans.py:264
 msgid "🔴 Disabled"
 msgstr "🔴 Desactivado"
 
-#: prunebans.py:264
+#: prunebans.py:265
 msgid "Wait"
 msgstr "Espera"
 
-#: prunebans.py:264
+#: prunebans.py:265
 msgid "{delay_days} days"
 msgstr "{delay_days} dias"
 
-#: prunebans.py:265
+#: prunebans.py:266
 msgid "Log channel"
 msgstr "Canal de logs"
 
-#: prunebans.py:266
+#: prunebans.py:267
 msgid "Tracked"
 msgstr "En seguimiento"
 
-#: prunebans.py:270 prunebans.py:275
+#: prunebans.py:271 prunebans.py:276
 msgid "Bank"
 msgstr "Banco"
 
-#: prunebans.py:271
+#: prunebans.py:272
 msgid "Global · "
 msgstr "Global · "
 
-#: prunebans.py:271
+#: prunebans.py:272
 msgid "accounts are deleted"
 msgstr "se borran las cuentas"
 
-#: prunebans.py:271
+#: prunebans.py:272
 msgid ""
 "⚠️ nothing is deleted (the owner can enable it with `autoprune globalbank "
 "true`)"
@@ -95,15 +95,15 @@ msgstr ""
 "⚠️ no se borra nada (el owner puede activarlo con `autoprune globalbank "
 "true`)"
 
-#: prunebans.py:275
+#: prunebans.py:276
 msgid "Local (per server)"
 msgstr "Local (por servidor)"
 
-#: prunebans.py:287
+#: prunebans.py:288
 msgid "Enable automatic cleanup in this server."
 msgstr "Activar la limpieza automatica en este servidor."
 
-#: prunebans.py:291
+#: prunebans.py:292
 msgid ""
 "✅ Enabled. Credits of users who are still banned will be deleted after **{days}** days.\n"
 "To also track users who were already banned: `{clean_prefix}autoprune sync`."
@@ -111,15 +111,15 @@ msgstr ""
 "✅ Activado. Los creditos de quien siga baneado se borraran a los **{days}** dias.\n"
 "Para seguir tambien a los que ya estaban baneados: `{clean_prefix}autoprune sync`."
 
-#: prunebans.py:296
+#: prunebans.py:297
 msgid "Disable automatic cleanup (tracking is kept)."
 msgstr "Desactivar la limpieza automatica (no borra el seguimiento)."
 
-#: prunebans.py:298
+#: prunebans.py:299
 msgid "⏸️ Disabled. Nothing will be deleted until you enable it again."
 msgstr "⏸️ Desactivado. No se borrara nada hasta que lo vuelvas a activar."
 
-#: prunebans.py:302
+#: prunebans.py:303
 msgid ""
 "Days a user must stay banned before their credits are deleted (0 = next "
 "check)."
@@ -127,52 +127,52 @@ msgstr ""
 "Dias que tiene que seguir baneado antes de borrar sus creditos (0 = en la "
 "siguiente revision)."
 
-#: prunebans.py:310
+#: prunebans.py:311
 msgid "✅ Wait set to **{days}** days (also applied to pending bans)."
 msgstr ""
 "✅ Espera fijada en **{days}** dias (aplicado tambien a los baneos "
 "pendientes)."
 
-#: prunebans.py:314
+#: prunebans.py:315
 msgid "Channel to report deleted credits. Without a channel it is removed."
 msgstr "Canal donde avisar cuando se borran creditos. Sin canal lo quita."
 
-#: prunebans.py:316
+#: prunebans.py:317
 msgid "✅ Log channel: {channel}."
 msgstr "✅ Canal de logs: {channel}."
 
-#: prunebans.py:316
+#: prunebans.py:317
 msgid "✅ Log channel removed."
 msgstr "✅ Canal de logs quitado."
 
-#: prunebans.py:320
+#: prunebans.py:321
 msgid "Tracked bans and when they will be cleaned up."
 msgstr "Baneos en seguimiento y cuando se limpiaran."
 
-#: prunebans.py:323
+#: prunebans.py:324
 msgid "There are no tracked bans."
 msgstr "No hay baneos en seguimiento."
 
-#: prunebans.py:330
+#: prunebans.py:331
 msgid "<@{uid_str}> (`{uid_str}`) · {amount} · cleanup {when}"
 msgstr "<@{uid_str}> (`{uid_str}`) · {amount} · limpieza {when}"
 
-#: prunebans.py:332
+#: prunebans.py:333
 msgid "⏳ Tracked bans ({count})"
 msgstr "⏳ Baneos en seguimiento ({count})"
 
-#: prunebans.py:338
+#: prunebans.py:339
 msgid ""
 "Start tracking users who were already banned (the countdown starts today)."
 msgstr ""
 "Empieza a seguir a los usuarios que ya estaban baneados (la cuenta atras "
 "empieza hoy)."
 
-#: prunebans.py:346
+#: prunebans.py:347
 msgid "✅ {added} bans added to tracking."
 msgstr "✅ {added} baneos añadidos al seguimiento."
 
-#: prunebans.py:350
+#: prunebans.py:351
 msgid ""
 "Check expired bans now. With `true` it cleans every pending one without "
 "waiting."
@@ -180,30 +180,30 @@ msgstr ""
 "Revisar ya los baneos vencidos. Con `true` limpia todos los pendientes sin "
 "esperar."
 
-#: prunebans.py:352
+#: prunebans.py:353
 msgid ""
 "⚠️ The bank is global and the owner has not allowed deleting global "
 "accounts."
 msgstr ""
 "⚠️ El banco es global y el owner no ha permitido borrar cuentas globales."
 
-#: prunebans.py:355
+#: prunebans.py:356
 msgid "🧹 Credits deleted from {count} user(s)."
 msgstr "🧹 Creditos eliminados de {count} usuario(s)."
 
-#: prunebans.py:359
+#: prunebans.py:360
 msgid "Stop tracking a user (their credits will not be deleted)."
 msgstr "Dejar de seguir a un usuario (no se le borraran los creditos)."
 
-#: prunebans.py:362
+#: prunebans.py:363
 msgid "✅ Removed from tracking."
 msgstr "✅ Quitado del seguimiento."
 
-#: prunebans.py:362
+#: prunebans.py:363
 msgid "It was not tracked."
 msgstr "No estaba en seguimiento."
 
-#: prunebans.py:367
+#: prunebans.py:368
 msgid ""
 "(Owner) Allow deleting accounts when Red's bank is global.\n"
 "\n"
@@ -217,10 +217,10 @@ msgstr ""
 "        un servidor le quitaria los creditos en todos.\n"
 "        "
 
-#: prunebans.py:373
+#: prunebans.py:374
 msgid "✅ Global bank accounts will be deleted."
 msgstr "✅ Se borraran cuentas del banco global."
 
-#: prunebans.py:373
+#: prunebans.py:374
 msgid "✅ Global bank accounts will not be touched."
 msgstr "✅ No se tocaran cuentas del banco global."

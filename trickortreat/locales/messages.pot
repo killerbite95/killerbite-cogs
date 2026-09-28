@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:30+0000\n"
+"POT-Creation-Date: 2026-09-28 11:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,86 +11,86 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: redgettext 3.4.2\n"
 
-#: i18n_strings.py:12
+#: i18n_strings.py:11
 msgid "Reduces sickness by 10 per piece"
 msgstr ""
 
-#: i18n_strings.py:13
+#: i18n_strings.py:12
 msgid "Reduces sickness by 20 per piece"
 msgstr ""
 
-#: i18n_strings.py:14
+#: i18n_strings.py:13
 msgid "Randomizes your sickness — gamble!"
 msgstr ""
 
-#: i18n_strings.py:15
+#: i18n_strings.py:14
 msgid "Instantly resets sickness to 0"
 msgstr ""
 
-#: i18n_strings.py:16
+#: i18n_strings.py:15
 msgid "Protects you from theft"
 msgstr ""
 
-#: i18n_strings.py:17
+#: i18n_strings.py:16
 msgid "Worth 10× eaten count! No sickness."
 msgstr ""
 
-#: i18n_strings.py:18
+#: i18n_strings.py:17
 msgid "🎃 The Candy Tax!"
 msgstr ""
 
-#: i18n_strings.py:19
+#: i18n_strings.py:18
 msgid ""
 "A shadowy figure appears from the darkness and demands a toll for passing "
 "through their territory..."
 msgstr ""
 
-#: i18n_strings.py:20
+#: i18n_strings.py:19
 msgid "🧙 Witch's Curse!"
 msgstr ""
 
-#: i18n_strings.py:21
+#: i18n_strings.py:20
 msgid ""
 "A cackling witch leaps from behind a tombstone and hexes you with her "
 "crooked wand!"
 msgstr ""
 
-#: i18n_strings.py:22
+#: i18n_strings.py:21
 msgid "👻 Haunted House!"
 msgstr ""
 
-#: i18n_strings.py:23
+#: i18n_strings.py:22
 msgid ""
 "You stumbled into a haunted house! Ghostly hands grab at your candy bag..."
 msgstr ""
 
-#: i18n_strings.py:24
+#: i18n_strings.py:23
 msgid "💨 Butterfingers!"
 msgstr ""
 
-#: i18n_strings.py:25
+#: i18n_strings.py:24
 msgid "You tripped over a jack-o'-lantern and candy scattered everywhere!"
 msgstr ""
 
-#: i18n_strings.py:26
+#: i18n_strings.py:25
 msgid "☠️ Cursed Candy!"
 msgstr ""
 
-#: i18n_strings.py:27
+#: i18n_strings.py:26
 msgid ""
 "That candy had a strange glow... It was cursed! Your stomach churns "
 "violently!"
 msgstr ""
 
-#: i18n_strings.py:28
+#: i18n_strings.py:27
 msgid "Eat candies collectively!"
 msgstr ""
 
-#: i18n_strings.py:29
+#: i18n_strings.py:28
 msgid "Collect candies via trick-or-treat!"
 msgstr ""
 
-#: i18n_strings.py:30
+#: i18n_strings.py:29
 msgid "Steal candies from others!"
 msgstr ""
 
@@ -106,8 +106,8 @@ msgid ""
 "    "
 msgstr ""
 
-#: trickortreat.py:311 trickortreat.py:940 trickortreat.py:1869
-#: trickortreat.py:1909 trickortreat.py:1995
+#: trickortreat.py:311 trickortreat.py:940 trickortreat.py:1871
+#: trickortreat.py:1911 trickortreat.py:1997
 msgid "🎃 Trick or Treat v{version}"
 msgstr ""
 
@@ -1246,128 +1246,128 @@ msgstr ""
 msgid "Trick or Treat version {version}"
 msgstr ""
 
-#: trickortreat.py:1743
+#: trickortreat.py:1745
 msgid "The thought of candy right now doesn't really sound like a good idea."
 msgstr ""
 
-#: trickortreat.py:1744
+#: trickortreat.py:1746
 msgid "All the lights on this street are dark..."
 msgstr ""
 
-#: trickortreat.py:1745
+#: trickortreat.py:1747
 msgid "It's starting to get late."
 msgstr ""
 
-#: trickortreat.py:1746
+#: trickortreat.py:1748
 msgid "The wind howls through the trees. Does it seem darker all of a sudden?"
 msgstr ""
 
-#: trickortreat.py:1747
+#: trickortreat.py:1749
 msgid "You start to walk the long distance to the next house..."
 msgstr ""
 
-#: trickortreat.py:1748
+#: trickortreat.py:1750
 msgid "You take a moment to count your candy before moving on."
 msgstr ""
 
-#: trickortreat.py:1749
+#: trickortreat.py:1751
 msgid "The house you were approaching just turned the light off."
 msgstr ""
 
-#: trickortreat.py:1750
+#: trickortreat.py:1752
 msgid "The wind starts to pick up as you look for the next house..."
 msgstr ""
 
-#: trickortreat.py:1780
+#: trickortreat.py:1782
 msgid "*You hear footsteps...*"
 msgstr ""
 
-#: trickortreat.py:1781
+#: trickortreat.py:1783
 msgid ""
 "*You're left alone with your thoughts as you wait for the door to open...*"
 msgstr ""
 
-#: trickortreat.py:1782
+#: trickortreat.py:1784
 msgid "*The wind howls through the trees...*"
 msgstr ""
 
-#: trickortreat.py:1783
+#: trickortreat.py:1785
 msgid "*Does it feel colder out here all of a sudden?*"
 msgstr ""
 
-#: trickortreat.py:1784
+#: trickortreat.py:1786
 msgid "*Somewhere inside the house, you hear wood creaking...*"
 msgstr ""
 
-#: trickortreat.py:1785
+#: trickortreat.py:1787
 msgid "*You walk up the path to the door and knock...*"
 msgstr ""
 
-#: trickortreat.py:1786
+#: trickortreat.py:1788
 msgid "*You knock on the door...*"
 msgstr ""
 
-#: trickortreat.py:1787
+#: trickortreat.py:1789
 msgid "*There's a movement in the shadows by the side of the house...*"
 msgstr ""
 
-#: trickortreat.py:1795
+#: trickortreat.py:1797
 msgid "*The door slowly opens...*"
 msgstr ""
 
-#: trickortreat.py:1796
+#: trickortreat.py:1798
 msgid "*The ancient wooden door starts to open...*"
 msgstr ""
 
-#: trickortreat.py:1797
+#: trickortreat.py:1799
 msgid "*A light turns on overhead...*"
 msgstr ""
 
-#: trickortreat.py:1798
+#: trickortreat.py:1800
 msgid "*You hear a scuffling noise...*"
 msgstr ""
 
-#: trickortreat.py:1799
+#: trickortreat.py:1801
 msgid "*There's someone talking inside...*"
 msgstr ""
 
-#: trickortreat.py:1800
+#: trickortreat.py:1802
 msgid "*The wind whips around your feet...*"
 msgstr ""
 
-#: trickortreat.py:1801
+#: trickortreat.py:1803
 msgid "*A crow caws ominously...*"
 msgstr ""
 
-#: trickortreat.py:1802
+#: trickortreat.py:1804
 msgid "*You hear an owl hooting in the distance...*"
 msgstr ""
 
-#: trickortreat.py:1852
+#: trickortreat.py:1854
 msgid "💔 Lost **{candy_lost}** candies!"
 msgstr ""
 
-#: trickortreat.py:1855
+#: trickortreat.py:1857
 msgid "{value} Sickness: **+{sickness_gained}** ({value2} {new_sick}/100)"
 msgstr ""
 
-#: trickortreat.py:1858
+#: trickortreat.py:1860
 msgid "*Better luck next time...* 👻"
 msgstr ""
 
-#: trickortreat.py:1866
+#: trickortreat.py:1868
 msgid "🎃 TRICK! — {name}"
 msgstr ""
 
-#: trickortreat.py:1886
+#: trickortreat.py:1888
 msgid "⚠️ *Sickness penalty: rewards quartered!*"
 msgstr ""
 
-#: trickortreat.py:1894
+#: trickortreat.py:1896
 msgid "🤮 Too Sick!"
 msgstr ""
 
-#: trickortreat.py:1896
+#: trickortreat.py:1898
 msgid ""
 "You're so sick that you **dropped** {lost} candies!\n"
 "\n"
@@ -1375,80 +1375,80 @@ msgid ""
 "*Eat chocolate or lollipops to recover!*"
 msgstr ""
 
-#: trickortreat.py:1914
+#: trickortreat.py:1916
 msgid "⚠️ *Sickness penalty: rewards halved!*"
 msgstr ""
 
-#: trickortreat.py:1920
+#: trickortreat.py:1922
 msgid "Oh, hello. What a cute costume!"
 msgstr ""
 
-#: trickortreat.py:1921
+#: trickortreat.py:1923
 msgid "Look at that costume!"
 msgstr ""
 
-#: trickortreat.py:1922
+#: trickortreat.py:1924
 msgid "Out this late at night?"
 msgstr ""
 
-#: trickortreat.py:1923
+#: trickortreat.py:1925
 msgid "Here's a little something for you."
 msgstr ""
 
-#: trickortreat.py:1924
+#: trickortreat.py:1926
 msgid "The peppermint ones are my favorite."
 msgstr ""
 
-#: trickortreat.py:1925
+#: trickortreat.py:1927
 msgid "Come back again later if the light is still on."
 msgstr ""
 
-#: trickortreat.py:1926
+#: trickortreat.py:1928
 msgid "Go ahead, take a few."
 msgstr ""
 
-#: trickortreat.py:1927
+#: trickortreat.py:1929
 msgid "Aww, look at you. Here, take this."
 msgstr ""
 
-#: trickortreat.py:1928
+#: trickortreat.py:1930
 msgid "Don't eat all those at once!"
 msgstr ""
 
-#: trickortreat.py:1929
+#: trickortreat.py:1931
 msgid "Well, I think this is the last of it."
 msgstr ""
 
-#: trickortreat.py:1937
+#: trickortreat.py:1939
 msgid " *(×{multiplier:.1f} streak!)*"
 msgstr ""
 
-#: trickortreat.py:1938
+#: trickortreat.py:1940
 msgid "🍬 **+{candy}** Candies{streak_text}\n"
 msgstr ""
 
-#: trickortreat.py:1957
+#: trickortreat.py:1959
 msgid "✨ **+1 Golden Candy!** *(LEGENDARY!)*"
 msgstr ""
 
-#: trickortreat.py:1963
+#: trickortreat.py:1965
 msgid "🌶️ **+1 Ghost Pepper!** *(ULTRA RARE!)*"
 msgstr ""
 
-#: trickortreat.py:1966
+#: trickortreat.py:1968
 msgid "**Bonus Drops:**"
 msgstr ""
 
-#: trickortreat.py:1968
+#: trickortreat.py:1970
 msgid "🌟 **RARE DROPS:**"
 msgstr ""
 
-#: trickortreat.py:1972
+#: trickortreat.py:1974
 msgid ""
 "\n"
 "🔥 **Streak:** {streak} day{value}"
 msgstr ""
 
-#: trickortreat.py:1992
+#: trickortreat.py:1994
 msgid "🎃 TREAT! — {name}"
 msgstr ""

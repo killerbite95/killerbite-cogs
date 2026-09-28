@@ -423,15 +423,15 @@ msgstr "✅ Las votaciones se publicarán en {channel}."
 msgid "✅ Votes will be posted in the channel where `start` is run."
 msgstr "✅ Las votaciones se publicarán en el canal donde se ejecute `start`."
 
-#: rustmaps_vote.py:677
+#: rustmaps_vote.py:678
 msgid "⚠️ This vote has already ended."
 msgstr "⚠️ Esta votación ya ha terminado."
 
-#: rustmaps_vote.py:684
+#: rustmaps_vote.py:685
 msgid "❌ Invalid map."
 msgstr "❌ Mapa no válido."
 
-#: rustmaps_vote.py:688
+#: rustmaps_vote.py:689
 msgid ""
 "⚠️ You already used all your votes ({max_votes_per_user}). Press a map you "
 "already voted for again to free a vote."
@@ -439,10 +439,10 @@ msgstr ""
 "⚠️ Ya has usado todos tus votos ({max_votes_per_user}). Pulsa de nuevo un "
 "mapa que ya votaste para liberar un voto."
 
-#: rustmaps_vote.py:698
+#: rustmaps_vote.py:699
 msgid "✅ You voted for **Map {map_id}**."
 msgstr "✅ Has votado por el **Mapa {map_id}**."
 
-#: rustmaps_vote.py:702
+#: rustmaps_vote.py:703
 msgid "↩️ You removed your vote from **Map {map_id}**."
 msgstr "↩️ Has retirado tu voto del **Mapa {map_id}**."

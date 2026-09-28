@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:39+0000\n"
+"POT-Creation-Date: 2026-09-28 11:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,7 +11,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: redgettext 3.4.2\n"
 
-#: blackjack.py:42
+#: blackjack.py:43
 msgid ""
 "**Quick Blackjack rules:**\n"
 "• **Hit**: Draw another card.\n"
@@ -23,18 +23,18 @@ msgid ""
 "• Blackjack = 21 with 2 cards.\n"
 msgstr ""
 
-#: blackjack.py:62
+#: blackjack.py:64
 msgid "{author}, time is up: you stand automatically."
 msgstr ""
 
-#: blackjack.py:70
+#: blackjack.py:72
 #, docstring
 msgid ""
 "Advanced Blackjack cog with economy, interactive buttons, admin tools and an"
 " improved UI."
 msgstr ""
 
-#: blackjack.py:113
+#: blackjack.py:115
 #, docstring
 msgid ""
 "Start a Blackjack game with the given bet.\n"
@@ -42,170 +42,170 @@ msgid ""
 "        "
 msgstr ""
 
-#: blackjack.py:117
+#: blackjack.py:119
 msgid "The bet must be greater than 0."
 msgstr ""
 
-#: blackjack.py:119
+#: blackjack.py:121
 msgid ""
 "You already have a game in progress. Finish it before starting another one."
 msgstr ""
 
-#: blackjack.py:123
+#: blackjack.py:125
 msgid "You don't have enough balance for that bet."
 msgstr ""
 
-#: blackjack.py:149
+#: blackjack.py:151
 msgid "Blackjack: Hand #1"
 msgstr ""
 
-#: blackjack.py:151
+#: blackjack.py:153
 msgid ""
 "Base bet: {bet} | Balance after betting: {value}\n"
 "Use the buttons to play."
 msgstr ""
 
-#: blackjack.py:163 blackjack.py:192 blackjack.py:210 blackjack.py:250
+#: blackjack.py:165 blackjack.py:194 blackjack.py:212 blackjack.py:252
 msgid "You don't have an active game."
 msgstr ""
 
-#: blackjack.py:165 blackjack.py:194 blackjack.py:212 blackjack.py:252
+#: blackjack.py:167 blackjack.py:196 blackjack.py:214 blackjack.py:254
 msgid "That hand is already finished."
 msgstr ""
 
-#: blackjack.py:175
+#: blackjack.py:177
 msgid "Hand #{value} - You busted with {val}."
 msgstr ""
 
-#: blackjack.py:178
+#: blackjack.py:180
 msgid " Playing hand #{value}..."
 msgstr ""
 
-#: blackjack.py:185
+#: blackjack.py:187
 msgid "Blackjack: Hand #{value}"
 msgstr ""
 
-#: blackjack.py:198
+#: blackjack.py:200
 msgid "You stood on hand #{active_hand}."
 msgstr ""
 
-#: blackjack.py:200
+#: blackjack.py:202
 msgid "Hand #{value}..."
 msgstr ""
 
-#: blackjack.py:217
+#: blackjack.py:219
 msgid "You can only double down with 2 cards in hand."
 msgstr ""
 
-#: blackjack.py:219
+#: blackjack.py:221
 msgid "You already doubled down on this hand."
 msgstr ""
 
-#: blackjack.py:224
+#: blackjack.py:226
 msgid "You don't have enough balance to double the bet."
 msgstr ""
 
-#: blackjack.py:233
+#: blackjack.py:235
 msgid "Hand #{value} - You doubled the bet."
 msgstr ""
 
-#: blackjack.py:234 blackjack.py:285
+#: blackjack.py:236 blackjack.py:287
 msgid "Total bet: {total_bet} | Current balance: {value}"
 msgstr ""
 
-#: blackjack.py:236
+#: blackjack.py:238
 msgid " You busted with {val}."
 msgstr ""
 
-#: blackjack.py:240
+#: blackjack.py:242
 msgid " Now hand #{value}..."
 msgstr ""
 
-#: blackjack.py:257
+#: blackjack.py:259
 msgid "You can only split with exactly 2 cards."
 msgstr ""
 
-#: blackjack.py:259
+#: blackjack.py:261
 msgid "You can only split once in this version."
 msgstr ""
 
-#: blackjack.py:261
+#: blackjack.py:263
 msgid "You can only split if both cards have the same value."
 msgstr ""
 
-#: blackjack.py:266
+#: blackjack.py:268
 msgid "You don't have enough balance to split."
 msgstr ""
 
-#: blackjack.py:284
+#: blackjack.py:286
 msgid "You split your hand. You now have {count} hands."
 msgstr ""
 
-#: blackjack.py:316
+#: blackjack.py:318
 msgid "Hand {value}: ❌ You lost (busted)."
 msgstr ""
 
-#: blackjack.py:320
+#: blackjack.py:322
 msgid "Hand {value}: ✅ Dealer busted, you won {value2}!"
 msgstr ""
 
-#: blackjack.py:324
+#: blackjack.py:326
 msgid "Hand {value}: ✅ You won {value2} (your {val} vs dealer {dealer_val})."
 msgstr ""
 
-#: blackjack.py:326
+#: blackjack.py:328
 msgid "Hand {value}: ❌ You lost (your {val} vs dealer {dealer_val})."
 msgstr ""
 
-#: blackjack.py:329
+#: blackjack.py:331
 msgid "Hand {value}: ⚠️ Push, you get {portion_bet} back."
 msgstr ""
 
-#: blackjack.py:343
+#: blackjack.py:345
 msgid "Final result"
 msgstr ""
 
-#: blackjack.py:346
+#: blackjack.py:348
 msgid "Dealer"
 msgstr ""
 
-#: blackjack.py:346
+#: blackjack.py:348
 msgid "Value: **{dealer_val}**"
 msgstr ""
 
-#: blackjack.py:347
+#: blackjack.py:349
 msgid "Summary"
 msgstr ""
 
-#: blackjack.py:348
+#: blackjack.py:350
 msgid "Total winnings: {total_win} credits."
 msgstr ""
 
-#: blackjack.py:407
+#: blackjack.py:409
 msgid "Error: game not found."
 msgstr ""
 
-#: blackjack.py:411
+#: blackjack.py:413
 msgid "**Dealer:** {format_hand}"
 msgstr ""
 
-#: blackjack.py:413
+#: blackjack.py:415
 msgid " (Value: **{hand_value}**)"
 msgstr ""
 
-#: blackjack.py:417
+#: blackjack.py:419
 msgid "**Your hand #{value}**"
 msgstr ""
 
-#: blackjack.py:421
+#: blackjack.py:423
 msgid " - **BUSTED!**"
 msgstr ""
 
-#: blackjack.py:425
+#: blackjack.py:427
 msgid "Value: **{val}**"
 msgstr ""
 
-#: blackjack.py:456
+#: blackjack.py:458
 #, docstring
 msgid ""
 "Blackjack admin commands.\n"
@@ -213,7 +213,7 @@ msgid ""
 "        "
 msgstr ""
 
-#: blackjack.py:464
+#: blackjack.py:466
 #, docstring
 msgid ""
 "Set the emoji for a specific rank.\n"
@@ -222,15 +222,15 @@ msgid ""
 "        "
 msgstr ""
 
-#: blackjack.py:470
+#: blackjack.py:472
 msgid "Invalid rank. Allowed ranks: "
 msgstr ""
 
-#: blackjack.py:473
+#: blackjack.py:475
 msgid "Rank **{rank}** set to: {emoji}"
 msgstr ""
 
-#: blackjack.py:477
+#: blackjack.py:479
 #, docstring
 msgid ""
 "Set the emoji for a specific suit.\n"
@@ -239,38 +239,38 @@ msgid ""
 "        "
 msgstr ""
 
-#: blackjack.py:483
+#: blackjack.py:485
 msgid "Invalid suit. Allowed suits: "
 msgstr ""
 
-#: blackjack.py:486
+#: blackjack.py:488
 msgid "Suit **{suit}** set to: {emoji}"
 msgstr ""
 
-#: blackjack.py:490
+#: blackjack.py:492
 #, docstring
 msgid "Show the current card emoji settings."
 msgstr ""
 
-#: blackjack.py:491
+#: blackjack.py:493
 msgid ""
 "**Current card settings:**\n"
 "\n"
 "**Ranks:**\n"
 msgstr ""
 
-#: blackjack.py:494
+#: blackjack.py:496
 msgid ""
 "\n"
 "**Suits:**\n"
 msgstr ""
 
-#: blackjack.py:501
+#: blackjack.py:503
 #, docstring
 msgid "Reset the card emoji settings to the defaults."
 msgstr ""
 
-#: blackjack.py:508
+#: blackjack.py:510
 msgid "The card settings have been reset to the defaults."
 msgstr ""
 

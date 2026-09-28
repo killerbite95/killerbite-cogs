@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:35+0000\n"
+"POT-Creation-Date: 2026-09-28 11:53+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -132,11 +132,11 @@ msgstr ""
 msgid "Sanctions of {member}"
 msgstr ""
 
-#: adv_check.py:214
+#: adv_check.py:215
 msgid "Only whoever ran the command can use this menu."
 msgstr ""
 
-#: adv_check.py:247
+#: adv_check.py:248
 msgid "The selected section was not found."
 msgstr ""
 
@@ -144,14 +144,15 @@ msgstr ""
 msgid ""
 "Run a full check on the given user.\n"
 "\n"
-"Shows an interactive UI (ephemeral message) to browse:\n"
-"  • Basic info\n"
-"  • Roles\n"
-"  • Join date\n"
-"  • Avatar\n"
-"  • Permissions\n"
-"  • Activity\n"
-"  • Sanctions"
+"        Shows an interactive UI (ephemeral message) to browse:\n"
+"          • Basic info\n"
+"          • Roles\n"
+"          • Join date\n"
+"          • Avatar\n"
+"          • Permissions\n"
+"          • Activity\n"
+"          • Sanctions\n"
+"        "
 msgstr ""
 
 #: i18n_strings.py:12

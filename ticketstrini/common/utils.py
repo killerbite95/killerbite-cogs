@@ -215,21 +215,21 @@ async def log_audit_action(
         timestamp=datetime.now(),
     )
     
-    embed.add_field(name="User", value=f"{user.mention} ({user.id})", inline=True)
+    embed.add_field(name=_("User"), value=f"{user.mention} ({user.id})", inline=True)
     
     if target_user:
-        embed.add_field(name="Target", value=f"{target_user.mention} ({target_user.id})", inline=True)
+        embed.add_field(name=_("Target"), value=f"{target_user.mention} ({target_user.id})", inline=True)
     
     if ticket_channel:
-        embed.add_field(name="Ticket", value=ticket_channel.mention, inline=True)
+        embed.add_field(name=_("Ticket"), value=ticket_channel.mention, inline=True)
     
     if panel_name:
-        embed.add_field(name="Panel", value=panel_name, inline=True)
+        embed.add_field(name=_("Panel"), value=panel_name, inline=True)
     
     if details:
         details_str = "\n".join([f"**{k}:** {v}" for k, v in details.items()])
         if len(details_str) <= 1024:
-            embed.add_field(name="Details", value=details_str, inline=False)
+            embed.add_field(name=_("Details"), value=details_str, inline=False)
     
     try:
         await audit_channel.send(embed=embed)
@@ -1458,7 +1458,7 @@ async def close_ticket(
         view = discord.ui.View()
         view.add_item(
             discord.ui.Button(
-                label="View Thread",
+                label=_("View Thread"),
                 style=discord.ButtonStyle.link,
                 url=jump_url,
             )
@@ -2184,12 +2184,12 @@ async def export_transcript_txt(
     history = await fetch_channel_history(channel)
     
     lines = [
-        f"=== Ticket Transcript ===",
-        f"Channel: {channel.name} ({channel.id})",
-        f"Owner: {member.name} ({member.id})",
-        f"Panel: {ticket.get('panel')}",
-        f"Opened: {ticket.get('opened')}",
-        f"Status: {ticket.get('status')}",
+        _("=== Ticket Transcript ==="),
+        _("Channel: {channel_name} ({channel_id})").format(channel_name=channel.name, channel_id=channel.id),
+        _("Owner: {member_name} ({member_id})").format(member_name=member.name, member_id=member.id),
+        _("Panel: {get}").format(get=ticket.get('panel')),
+        _("Opened: {get}").format(get=ticket.get('opened')),
+        _("Status: {get}").format(get=ticket.get('status')),
         "=" * 30,
         "",
     ]
@@ -2197,7 +2197,7 @@ async def export_transcript_txt(
     # Add answers if any
     answers = ticket.get("answers", {})
     if answers:
-        lines.append("=== Form Responses ===")
+        lines.append(_("=== Form Responses ==="))
         for q, a in answers.items():
             lines.append(f"Q: {q}")
             lines.append(f"A: {a}")
@@ -2206,11 +2206,11 @@ async def export_transcript_txt(
         lines.append("")
     
     # Add messages
-    lines.append("=== Messages ===")
+    lines.append(_("=== Messages ==="))
     for msg in history:
         timestamp = msg.created_at.strftime("%Y-%m-%d %H:%M:%S")
         lines.append(f"[{timestamp}] {msg.author.name}: {msg.content}")
         for att in msg.attachments:
-            lines.append(f"  [Attachment: {att.filename}]")
+            lines.append(_("  [Attachment: {filename}]").format(filename=att.filename))
     
     return "\n".join(lines)
