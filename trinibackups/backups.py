@@ -39,6 +39,14 @@ from .snapshot import (
     plan_details,
     plan_summary,
 )
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("TriniBackups", __file__)
+
+
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
 
 log = logging.getLogger("red.killerbite95.trinibackups")
 
@@ -58,11 +66,11 @@ def _json_safe(value: Any) -> Any:
 
 class RestoreView(discord.ui.View):
     OPTIONS = (
-        ("roles", "Roles", "🎭"),
-        ("channels", "Canales", "#️⃣"),
-        ("permissions", "Permisos", "🔑"),
-        ("positions", "Jerarquia", "↕️"),
-        ("trini", "Config Trini", "⚙️"),
+        ("roles", N_("Roles"), "🎭"),
+        ("channels", N_("Channels"), "#️⃣"),
+        ("permissions", N_("Permissions"), "🔑"),
+        ("positions", N_("Hierarchy"), "↕️"),
+        ("trini", N_("Trini config"), "⚙️"),
     )
 
     def __init__(self, cog: "TriniBackups", ctx: commands.Context, meta: Dict[str, Any], snap: Dict[str, Any]):
@@ -76,7 +84,7 @@ class RestoreView(discord.ui.View):
         self.message: Optional[discord.Message] = None
         self.result: Optional[bool] = None
         for key, label, emoji in self.OPTIONS:
-            button = discord.ui.Button(label=label, emoji=emoji, row=0, custom_id=f"opt:{key}")
+            button = discord.ui.Button(label=_(label), emoji=emoji, row=0, custom_id=f"opt:{key}")
             button.callback = self._make_toggle(key)
             self.add_item(button)
         self._style_buttons()
@@ -97,64 +105,67 @@ class RestoreView(discord.ui.View):
     def build_embed(self) -> discord.Embed:
         self.plan = build_plan(self.ctx.guild, self.snap, self.options)
         embed = discord.Embed(
-            title=f"⏪ Restaurar backup `{self.meta['id']}`",
+            title=_("⏪ Restore backup `{id}`").format(id=self.meta['id']),
             description=box(plan_summary(self.plan), lang="diff"),
             color=discord.Color.orange(),
         )
         details = plan_details(self.plan)
         if details:
-            embed.add_field(name="Detalle", value=box("\n".join(details), lang="diff")[:1024], inline=False)
+            embed.add_field(name=_("Details"), value=box("\n".join(details), lang="diff")[:1024], inline=False)
         if self.plan.skipped:
-            embed.add_field(name="Se omitira", value="\n".join(f"• {s}" for s in self.plan.skipped[:10])[:1024], inline=False)
-        embed.set_footer(text=f"{self.meta.get('name') or ''} · {datetime.datetime.fromtimestamp(self.meta['created_at'], datetime.timezone.utc):%d/%m/%Y %H:%M} UTC · verde = incluido")
+            embed.add_field(name=_("Will be skipped"), value="\n".join(f"• {s}" for s in self.plan.skipped[:10])[:1024], inline=False)
+        embed.set_footer(text=_("{value} · {fromtimestamp:%d/%m/%Y %H:%M} UTC · green = included").format(value=self.meta.get('name') or '', fromtimestamp=datetime.datetime.fromtimestamp(self.meta['created_at'], datetime.timezone.utc)))
         return embed
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
         if interaction.user.id != self.ctx.author.id:
-            await interaction.response.send_message("Solo quien ejecuto el comando puede usar esto.", ephemeral=True)
+            await interaction.response.send_message(_("Only whoever ran the command can use this."), ephemeral=True)
             return False
         return True
 
-    @discord.ui.button(label="Continuar", style=discord.ButtonStyle.red, row=1)
+    @discord.ui.button(label=_("Continue"), style=discord.ButtonStyle.red, row=1)
     async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
         if self.plan is None or self.plan.empty:
-            return await interaction.response.send_message("No hay nada que restaurar.", ephemeral=True)
+            return await interaction.response.send_message(_("There is nothing to restore."), ephemeral=True)
         self.result = True
         self.stop()
         await interaction.response.edit_message(view=None)
 
-    @discord.ui.button(label="Cancelar", style=discord.ButtonStyle.grey, row=1)
+    @discord.ui.button(label=_("Cancel"), style=discord.ButtonStyle.grey, row=1)
     async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.result = False
         self.stop()
-        await interaction.response.edit_message(content="Restauracion cancelada.", embed=None, view=None)
+        await interaction.response.edit_message(content=_("Restore cancelled."), embed=None, view=None)
 
 
 class ConfirmView(discord.ui.View):
-    def __init__(self, author: discord.abc.User, label: str = "Confirmar"):
+    def __init__(self, author: discord.abc.User, label: Optional[str] = None):
         super().__init__(timeout=60)
         self.author = author
         self.value: Optional[bool] = None
-        self.yes.label = label
+        self.yes.label = label or _("Confirm")
 
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
         return interaction.user.id == self.author.id
 
-    @discord.ui.button(label="Confirmar", style=discord.ButtonStyle.red)
+    @discord.ui.button(label=_("Confirm"), style=discord.ButtonStyle.red)
     async def yes(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = True
         self.stop()
         await interaction.response.defer()
 
-    @discord.ui.button(label="Cancelar", style=discord.ButtonStyle.grey)
+    @discord.ui.button(label=_("Cancel"), style=discord.ButtonStyle.grey)
     async def no(self, interaction: discord.Interaction, button: discord.ui.Button):
         self.value = False
         self.stop()
         await interaction.response.defer()
 
 
+@cog_i18n(_)
 class TriniBackups(DashboardIntegration, commands.Cog):
-    """Snapshots estructurales del servidor, diff, backups programados y restauracion segura."""
+    """Structural server snapshots, diffs, scheduled backups and safe restores."""
 
     __author__ = "Killerbite95"
     __version__ = "1.0.0"
@@ -173,7 +184,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
-        return f"{pre}\n\nVersion: {self.__version__}"
+        return _("{pre}\n\nVersion: {version}").format(pre=pre, version=self.__version__)
 
     async def red_delete_data_for_user(self, **kwargs) -> None:
         return
@@ -300,11 +311,11 @@ class TriniBackups(DashboardIntegration, commands.Cog):
     async def diff_current_embeds(self, guild: discord.Guild, sid: str) -> List[discord.Embed]:
         snap = await self.load_snapshot(guild, sid)
         if snap is None:
-            return [discord.Embed(description="Backup no encontrado.", color=discord.Color.red())]
+            return [discord.Embed(description=_("Backup not found."), color=discord.Color.red())]
         current = await self.capture(guild)
         diff = diff_snapshots(snap, current)
-        subtitle = f"Backup: **{self._label(snap)}**\n<t:{int(snap['created_at'])}:f> → ahora"
-        return diff_to_embeds(diff, "📦 Diferencias desde", subtitle)
+        subtitle = _("Backup: **{label}**\n<t:{created_at}:f> → now").format(label=self._label(snap), created_at=int(snap['created_at']))
+        return diff_to_embeds(diff, _("📦 Differences since"), subtitle)
 
     def _label(self, meta: Dict[str, Any]) -> str:
         date = datetime.datetime.fromtimestamp(meta["created_at"], datetime.timezone.utc).strftime("%d/%m/%Y %H:%M")
@@ -406,7 +417,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
     async def execute_plan(
         self, guild: discord.Guild, snap: Dict[str, Any], plan: RestorePlan, author: discord.abc.User, progress
     ) -> List[str]:
-        reason = f"Trini Backups: restore {snap['id']} por {author}"
+        reason = _("Trini Backups: restore {id} by {author}").format(id=snap['id'], author=author)
         me = guild.me
         allowed_perms = discord.Permissions.all() if me.guild_permissions.administrator else me.guild_permissions
         log_lines: List[str] = []
@@ -427,7 +438,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
         for rs in sorted(plan.create_roles, key=lambda r: r["position"]):
             perms = discord.Permissions(rs["permissions"] & allowed_perms.value)
             role = await step(
-                f"Crear rol @{rs['name']}",
+                _("Create role @{name}").format(name=rs['name']),
                 guild.create_role(
                     name=rs["name"], permissions=perms, colour=discord.Colour(rs["color"]),
                     hoist=rs["hoist"], mentionable=rs["mentionable"], reason=reason,
@@ -435,18 +446,18 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             )
             if role is not None:
                 plan.role_map[rs["id"]] = role.id
-        await progress(f"Roles creados: {len(plan.create_roles)}")
+        await progress(_("Roles created: {count}").format(count=len(plan.create_roles)))
 
         # 2. Roles existentes
-        for role, changes, _ in plan.update_roles:
+        for role, changes, _details in plan.update_roles:
             if "permissions" in changes:
                 changes = {**changes, "permissions": discord.Permissions(changes["permissions"].value & allowed_perms.value)}
-            await step(f"Actualizar @{role.name}", role.edit(**changes, reason=reason))
+            await step(_("Update @{role_name}").format(role_name=role.name), role.edit(**changes, reason=reason))
 
         # 3. Jerarquia
         if plan.reorder_roles:
-            await step(f"Reordenar {len(plan.reorder_roles)} roles", guild.edit_role_positions(positions=plan.reorder_roles, reason=reason))
-        await progress("Roles actualizados")
+            await step(_("Reorder {count} roles").format(count=len(plan.reorder_roles)), guild.edit_role_positions(positions=plan.reorder_roles, reason=reason))
+        await progress(_("Roles updated"))
 
         # 4. Canales nuevos
         def build_overwrites(cs: Dict[str, Any]) -> Dict[Any, discord.PermissionOverwrite]:
@@ -467,7 +478,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             if not isinstance(category, discord.CategoryChannel):
                 category = None
             kind = cs["type"]
-            label = f"Crear {kind} {cs['name']}"
+            label = _("Create {kind} {name}").format(kind=kind, name=cs['name'])
             if kind == "category":
                 coro = guild.create_category(cs["name"], overwrites=overwrites, reason=reason)
             elif kind in ("text", "news"):
@@ -494,16 +505,16 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             channel = await step(label, coro)
             if channel is not None:
                 plan.channel_map[cs["id"]] = channel.id
-        await progress(f"Canales creados: {len(plan.create_channels)}")
+        await progress(_("Channels created: {count}").format(count=len(plan.create_channels)))
 
         # 5. Canales existentes
-        for channel, changes, _ in plan.update_channels:
+        for channel, changes, _details in plan.update_channels:
             changes = dict(changes)
             if "category_id" in changes:
                 cat = guild.get_channel(changes.pop("category_id"))
                 if isinstance(cat, discord.CategoryChannel):
                     changes["category"] = cat
-            await step(f"Actualizar {channel.name}", channel.edit(**changes, reason=reason))
+            await step(_("Update {channel_name}").format(channel_name=channel.name), channel.edit(**changes, reason=reason))
 
         # 6. Overwrites
         for snap_cid, ow, label in plan.overwrites:
@@ -514,8 +525,8 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             if target is None:
                 continue
             overwrite = discord.PermissionOverwrite.from_pair(discord.Permissions(ow["allow"]), discord.Permissions(ow["deny"]))
-            await step(f"Overwrite {label}", channel.set_permissions(target, overwrite=overwrite, reason=reason))
-        await progress("Permisos restaurados")
+            await step(_("Overwrite {label}").format(label=label), channel.set_permissions(target, overwrite=overwrite, reason=reason))
+        await progress(_("Permissions restored"))
 
         # 7. Configuracion Trini
         same_guild = snap.get("guild", {}).get("id") == guild.id
@@ -523,16 +534,16 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             cog = self.bot.get_cog(cog_name)
             importer = getattr(cog, "trini_import", None) if cog else None
             if importer is None:
-                log_lines.append(f"⚠️ {cog_name}: no cargado o sin soporte de importacion")
+                log_lines.append(_("⚠️ {cog_name}: not loaded or without import support").format(cog_name=cog_name))
                 continue
             try:
                 warnings = await importer(guild, snap["trini"][cog_name], same_guild=same_guild)
-                log_lines.append(f"✅ Config {cog_name}" + (f" ({'; '.join(warnings)})" if warnings else ""))
+                log_lines.append(_("✅ Config {cog_name}").format(cog_name=cog_name) + (f" ({'; '.join(warnings)})" if warnings else ""))
             except Exception as exc:
                 errors += 1
                 log.exception("Error restaurando configuracion de %s", cog_name)
-                log_lines.append(f"❌ Config {cog_name}: {exc}")
-        log_lines.insert(0, f"Errores: {errors}")
+                log_lines.append(_("❌ Config {cog_name}: {exc}").format(cog_name=cog_name, exc=exc))
+        log_lines.insert(0, _("Errors: {errors}").format(errors=errors))
         self.bot.dispatch("trini_settings_change", guild, "Backups", author, "restore", f"{snap['id']} ({errors} errores)")
         return log_lines
 
@@ -555,7 +566,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
     async def _resolve(self, ctx: commands.Context, sid: Optional[str]) -> Optional[Dict[str, Any]]:
         snaps = await self.config.guild(ctx.guild).snapshots()
         if not snaps:
-            await ctx.send("No hay backups. Crea uno con `backup create`.")
+            await ctx.send(_("There are no backups. Create one with `backup create`."))
             return None
         if sid is None or sid.lower() in ("latest", "ultimo", "último"):
             return max(snaps.values(), key=lambda m: m["created_at"])
@@ -564,38 +575,38 @@ class TriniBackups(DashboardIntegration, commands.Cog):
         matches = [m for m in snaps.values() if (m.get("name") or "").lower() == sid.lower() or m["id"].startswith(sid)]
         if len(matches) == 1:
             return matches[0]
-        await ctx.send("Backup no encontrado (usa el ID de `backup list`).")
+        await ctx.send(_("Backup not found (use the ID from `backup list`)."))
         return None
 
     @commands.hybrid_group(name="backup")
     @commands.guild_only()
     @commands.admin_or_permissions(administrator=True)
     async def backup(self, ctx: commands.Context):
-        """Snapshots estructurales del servidor."""
+        """Structural server snapshots."""
 
     @backup.command(name="create")
     async def backup_create(self, ctx: commands.Context, *, name: Optional[str] = None):
-        """Crear un snapshot. Ej: `backup create Antes del torneo`."""
+        """Create a snapshot. E.g.: `backup create Before the tournament`."""
         async with ctx.typing():
             meta = await self.create_snapshot(ctx.guild, name=(name or "").strip('"')[:80] or None, kind="manual", author=ctx.author)
         c = meta["counts"]
         embed = discord.Embed(
-            title="💾 Backup creado",
+            title=_("💾 Backup created"),
             color=COLOR,
             description=(
-                f"ID: `{meta['id']}`" + (f"\nNombre: **{meta['name']}**" if meta["name"] else "")
-                + f"\n\n🎭 {c['roles']} roles · 📁 {c['categories']} categorias · # {c['channels']} canales · 🤖 {c['bots']} bots"
-                + f"\n⚙️ Configuracion Trini: {c['trini']} modulos\n📦 {meta['size'] / 1024:.1f} KB"
+                f"ID: `{meta['id']}`" + (_("\nName: **{name}**").format(name=meta['name']) if meta["name"] else "")
+                + _("\n\n🎭 {roles} roles · 📁 {categories} categories · # {channels} channels · 🤖 {bots} bots").format(roles=c['roles'], categories=c['categories'], channels=c['channels'], bots=c['bots'])
+                + _("\n⚙️ Trini config: {trini} modules\n📦 {value:.1f} KB").format(trini=c['trini'], value=meta['size'] / 1024)
             ),
         )
         await ctx.send(embed=embed)
 
     @backup.command(name="list")
     async def backup_list(self, ctx: commands.Context):
-        """Listar backups."""
+        """List backups."""
         snaps = sorted((await self.config.guild(ctx.guild).snapshots()).values(), key=lambda m: -m["created_at"])
         if not snaps:
-            return await ctx.send("No hay backups. Crea uno con `backup create`.")
+            return await ctx.send(_("There are no backups. Create one with `backup create`."))
         lines = [
             f"{KIND_ICON.get(m['kind'], '•')} `{m['id']}` <t:{int(m['created_at'])}:f>{' · **' + m['name'] + '**' if m.get('name') else ''} · {m['counts']['roles']}R/{m['counts']['channels']}C"
             for m in snaps
@@ -604,8 +615,8 @@ class TriniBackups(DashboardIntegration, commands.Cog):
         sched = await self.config.guild(ctx.guild).schedule()
         embeds = []
         for i, page in enumerate(pages, 1):
-            e = discord.Embed(title=f"📦 Backups ({len(snaps)})", description="\n".join(page), color=COLOR)
-            e.set_footer(text=f"Programado: {sched['mode']} · 💾 manual · 🕒 auto · 🔐 seguridad · ⏪ pre-restore · {i}/{len(pages)}")
+            e = discord.Embed(title=_("📦 Backups ({count})").format(count=len(snaps)), description="\n".join(page), color=COLOR)
+            e.set_footer(text=_("Scheduled: {mode} · 💾 manual · 🕒 auto · 🔐 security · ⏪ pre-restore · {i}/{count}").format(mode=sched['mode'], i=i, count=len(pages)))
             embeds.append(e)
         if len(embeds) == 1:
             await ctx.send(embed=embeds[0])
@@ -614,20 +625,20 @@ class TriniBackups(DashboardIntegration, commands.Cog):
 
     @backup.command(name="inspect")
     async def backup_inspect(self, ctx: commands.Context, snapshot: Optional[str] = None):
-        """Ver el contenido de un backup."""
+        """Show the contents of a backup."""
         meta = await self._resolve(ctx, snapshot)
         if meta is None:
             return
         snap = await self.load_snapshot(ctx.guild, meta["id"])
         if snap is None:
-            return await ctx.send("El archivo del backup no existe.")
-        embed = discord.Embed(title=f"🔍 Backup {self._label(meta)}", color=COLOR)
-        embed.add_field(name="Creado", value=f"<t:{int(meta['created_at'])}:F>", inline=True)
-        embed.add_field(name="Tipo", value=f"{KIND_ICON.get(meta['kind'], '')} {meta['kind']}", inline=True)
-        embed.add_field(name="Autor", value=f"<@{meta['author']}>" if meta.get("author") else "sistema", inline=True)
+            return await ctx.send(_("The backup file does not exist."))
+        embed = discord.Embed(title=_("🔍 Backup {label}").format(label=self._label(meta)), color=COLOR)
+        embed.add_field(name=_("Created"), value=f"<t:{int(meta['created_at'])}:F>", inline=True)
+        embed.add_field(name=_("Type"), value=f"{KIND_ICON.get(meta['kind'], '')} {meta['kind']}", inline=True)
+        embed.add_field(name=_("Author"), value=f"<@{meta['author']}>" if meta.get("author") else "sistema", inline=True)
         roles = [r for r in snap["roles"] if not r["default"]]
         roles.sort(key=lambda r: -r["position"])
-        embed.add_field(name=f"Roles ({len(roles)})", value=", ".join(r["name"] for r in roles[:40])[:1024] or "—", inline=False)
+        embed.add_field(name=_("Roles ({count})").format(count=len(roles)), value=", ".join(r["name"] for r in roles[:40])[:1024] or "—", inline=False)
         cats = {c["id"]: c for c in snap["channels"] if c["type"] == "category"}
         tree: Dict[Optional[int], List[str]] = {}
         for c in sorted(snap["channels"], key=lambda c: c["position"]):
@@ -636,17 +647,17 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             tree.setdefault(c.get("category_id"), []).append(c["name"])
         lines = []
         for cid, names in tree.items():
-            header = f"📁 {cats[cid]['name']}" if cid in cats else "Sin categoria"
+            header = f"📁 {cats[cid]['name']}" if cid in cats else _("No category")
             lines.append(f"{header}: {', '.join(names[:12])}{'…' if len(names) > 12 else ''}")
-        embed.add_field(name=f"Canales ({sum(len(v) for v in tree.values())})", value="\n".join(lines)[:1024] or "—", inline=False)
-        embed.add_field(name="Bots", value=", ".join(b["name"] for b in snap.get("bots", []))[:1024] or "—", inline=False)
+        embed.add_field(name=_("Channels ({value})").format(value=sum(len(v) for v in tree.values())), value="\n".join(lines)[:1024] or "—", inline=False)
+        embed.add_field(name=_("Bots"), value=", ".join(b["name"] for b in snap.get("bots", []))[:1024] or "—", inline=False)
         if snap.get("trini"):
-            embed.add_field(name="Configuracion La Trini", value=humanize_list(list(snap["trini"].keys())), inline=False)
+            embed.add_field(name=_("La Trini configuration"), value=humanize_list(list(snap["trini"].keys())), inline=False)
         await ctx.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     @backup.command(name="diff")
     async def backup_diff(self, ctx: commands.Context, snapshot: Optional[str] = None):
-        """Comparar un backup (por defecto el ultimo) con el estado actual."""
+        """Compare a backup (the latest by default) with the current state."""
         meta = await self._resolve(ctx, snapshot)
         if meta is None:
             return
@@ -656,7 +667,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
 
     @backup.command(name="compare")
     async def backup_compare(self, ctx: commands.Context, old: str, new: str):
-        """Comparar dos backups entre si."""
+        """Compare two backups."""
         a = await self._resolve(ctx, old)
         b = await self._resolve(ctx, new) if a else None
         if a is None or b is None:
@@ -665,8 +676,8 @@ class TriniBackups(DashboardIntegration, commands.Cog):
             a, b = b, a
         sa, sb = await self.load_snapshot(ctx.guild, a["id"]), await self.load_snapshot(ctx.guild, b["id"])
         if sa is None or sb is None:
-            return await ctx.send("No se encontro el archivo de uno de los backups.")
-        embeds = diff_to_embeds(diff_snapshots(sa, sb), "📦 Comparacion de backups", f"**{self._label(a)}** → **{self._label(b)}**")
+            return await ctx.send(_("The file of one of the backups was not found."))
+        embeds = diff_to_embeds(diff_snapshots(sa, sb), _("📦 Backup comparison"), f"**{self._label(a)}** → **{self._label(b)}**")
         await self._send_embeds(ctx, embeds)
 
     async def _send_embeds(self, ctx: commands.Context, embeds: List[discord.Embed]) -> None:
@@ -689,40 +700,40 @@ class TriniBackups(DashboardIntegration, commands.Cog):
 
     @backup.command(name="delete")
     async def backup_delete(self, ctx: commands.Context, snapshot: str):
-        """Eliminar un backup."""
+        """Delete a backup."""
         meta = await self._resolve(ctx, snapshot)
         if meta is None:
             return
         view = ConfirmView(ctx.author, "Eliminar")
-        msg = await ctx.send(f"¿Eliminar el backup **{self._label(meta)}**? No se puede deshacer.", view=view)
+        msg = await ctx.send(_("Delete backup **{label}**? This can't be undone.").format(label=self._label(meta)), view=view)
         await view.wait()
         if not view.value:
-            return await msg.edit(content="Cancelado.", view=None)
+            return await msg.edit(content=_("Cancelled."), view=None)
         await self._delete(ctx.guild, meta["id"])
         self.bot.dispatch("trini_settings_change", ctx.guild, "Backups", ctx.author, "backup_delete", meta["id"])
-        await msg.edit(content=f"🗑 Backup `{meta['id']}` eliminado.", view=None)
+        await msg.edit(content=_("🗑 Backup `{id}` deleted.").format(id=meta['id']), view=None)
 
     @backup.command(name="restore")
     async def backup_restore(self, ctx: commands.Context, snapshot: str):
-        """Restauracion segura: previsualiza y solo crea/modifica, nunca elimina."""
+        """Safe restore: preview first; it only creates/updates, never deletes."""
         if not await self._can_restore(ctx.author):
-            return await ctx.send("🔒 Restaurar requiere ser Owner, Extra Owner o Trusted Admin en Trini Security.")
+            return await ctx.send(_("🔒 Restoring requires being Owner, Extra Owner or Trusted Admin in Trini Security."))
         meta = await self._resolve(ctx, snapshot)
         if meta is None:
             return
         snap = await self.load_snapshot(ctx.guild, meta["id"])
         if snap is None:
-            return await ctx.send("El archivo del backup no existe.")
+            return await ctx.send(_("The backup file does not exist."))
         view = RestoreView(self, ctx, meta, snap)
         view.message = await ctx.send(embed=view.build_embed(), view=view)
         await view.wait()
         if not view.result:
             if view.result is None:
-                await view.message.edit(content="Tiempo agotado.", view=None)
+                await view.message.edit(content=_("Timed out."), view=None)
             return
         plan = build_plan(ctx.guild, snap, view.options)
         pre = await self.create_snapshot(ctx.guild, name=f"pre-restore {meta['id']}", kind="pre-restore", author=ctx.author)
-        status = await ctx.send(f"⏳ Restaurando… (backup previo automatico: `{pre['id']}`)")
+        status = await ctx.send(_("⏳ Restoring… (automatic pre-restore backup: `{id}`)").format(id=pre['id']))
 
         async def progress(text: str) -> None:
             try:
@@ -732,7 +743,7 @@ class TriniBackups(DashboardIntegration, commands.Cog):
 
         results = await self.execute_plan(ctx.guild, snap, plan, ctx.author, progress)
         report = "\n".join(results)
-        await status.edit(content=f"✅ Restauracion completada. {results[0]}\nBackup previo: `{pre['id']}`")
+        await status.edit(content=_("✅ Restore completed. {value}\nPre-restore backup: `{id}`").format(value=results[0], id=pre['id']))
         await ctx.send(file=discord.File(io.BytesIO(report.encode()), filename=f"restore-{meta['id']}.txt"))
 
     @backup_delete.autocomplete("snapshot")
@@ -742,12 +753,12 @@ class TriniBackups(DashboardIntegration, commands.Cog):
 
     @backup.command(name="schedule")
     async def backup_schedule(self, ctx: commands.Context, mode: str, hour: Optional[int] = None):
-        """Backups automaticos: `off`, `daily` o `weekly`, a una hora UTC (0-23)."""
+        """Automatic backups: `off`, `daily` or `weekly`, at a UTC hour (0-23)."""
         mode = mode.lower()
         if mode not in ("off", "daily", "weekly"):
-            return await ctx.send("Modos: `off`, `daily`, `weekly`.")
+            return await ctx.send(_("Modes: `off`, `daily`, `weekly`."))
         if hour is not None and not 0 <= hour <= 23:
-            return await ctx.send("La hora debe estar entre 0 y 23 (UTC).")
+            return await ctx.send(_("The hour must be between 0 and 23 (UTC)."))
         async with self.config.guild(ctx.guild).schedule() as s:
             s["mode"] = mode
             if hour is not None:
@@ -756,57 +767,56 @@ class TriniBackups(DashboardIntegration, commands.Cog):
         ret = await self.config.guild(ctx.guild).retention()
         self.bot.dispatch("trini_settings_change", ctx.guild, "Backups", ctx.author, "schedule", f"{mode} {h}:00 UTC")
         if mode == "off":
-            return await ctx.send("Backups automaticos desactivados.")
+            return await ctx.send(_("Automatic backups disabled."))
         await ctx.send(
-            f"🕒 Backups automaticos: **{mode}** a las **{h:02d}:00 UTC**.\n"
-            f"Retencion: ultimos {ret['daily']} diarios · {ret['weekly']} semanales · {ret['monthly']} mensuales."
+            _("🕒 Automatic backups: **{mode}** at **{h:02d}:00 UTC**.\nRetention: last {daily} daily · {weekly} weekly · {monthly} monthly.").format(mode=mode, h=h, daily=ret['daily'], weekly=ret['weekly'], monthly=ret['monthly'])
         )
 
     @backup.command(name="retention")
     async def backup_retention(self, ctx: commands.Context, daily: int, weekly: int, monthly: int):
-        """Politica de retencion de backups automaticos."""
+        """Retention policy for automatic backups."""
         if not (1 <= daily <= 60 and 0 <= weekly <= 52 and 0 <= monthly <= 24):
-            return await ctx.send("Limites: diarios 1-60, semanales 0-52, mensuales 0-24.")
+            return await ctx.send(_("Limits: daily 1-60, weekly 0-52, monthly 0-24."))
         await self.config.guild(ctx.guild).retention.set({"daily": daily, "weekly": weekly, "monthly": monthly})
         removed = await self.apply_retention(ctx.guild)
         self.bot.dispatch("trini_settings_change", ctx.guild, "Backups", ctx.author, "retention", f"{daily}/{weekly}/{monthly}")
-        await ctx.send(f"Retencion: {daily} diarios · {weekly} semanales · {monthly} mensuales." + (f" ({len(removed)} backups antiguos eliminados)" if removed else ""))
+        await ctx.send(_("Retention: {daily} daily · {weekly} weekly · {monthly} monthly.").format(daily=daily, weekly=weekly, monthly=monthly) + (_(" ({count} old backups deleted)").format(count=len(removed)) if removed else ""))
 
     @backup.command(name="export")
     async def backup_export(self, ctx: commands.Context, snapshot: Optional[str] = None):
-        """Descargar un backup en JSON."""
+        """Download a backup as JSON."""
         meta = await self._resolve(ctx, snapshot)
         if meta is None:
             return
         snap = await self.load_snapshot(ctx.guild, meta["id"])
         if snap is None:
-            return await ctx.send("El archivo del backup no existe.")
+            return await ctx.send(_("The backup file does not exist."))
         fp = io.BytesIO(json.dumps(snap, indent=1, ensure_ascii=False).encode("utf-8"))
-        text = "⚠️ Incluye estructura y configuracion de La Trini. Compartelo con cuidado."
+        text = _("⚠️ It includes the structure and La Trini configuration. Share it carefully.")
         file = discord.File(fp, filename=f"trini-backup-{ctx.guild.id}-{meta['id']}.json")
         if ctx.interaction is not None:
             return await ctx.send(text, file=file, ephemeral=True)
         try:
             await ctx.author.send(text, file=file)
-            await ctx.send("📬 Te he enviado el backup por mensaje privado.")
+            await ctx.send(_("📬 I sent you the backup by DM."))
         except discord.HTTPException:
-            await ctx.send("No puedo enviarte mensajes privados. Activalos o usa la version slash del comando.")
+            await ctx.send(_("I can't send you DMs. Enable them or use the slash version of the command."))
 
     @backup.command(name="status")
     async def backup_status(self, ctx: commands.Context):
-        """Estado de los backups del servidor."""
+        """Backup status of the server."""
         data = await self.config.guild(ctx.guild).all()
         snaps = sorted(data["snapshots"].values(), key=lambda m: -m["created_at"])
-        embed = discord.Embed(title="📦 Trini Backups", color=COLOR)
-        embed.add_field(name="Backups", value=str(len(snaps)), inline=True)
-        embed.add_field(name="Espacio", value=f"{sum(m['size'] for m in snaps) / 1024:.1f} KB", inline=True)
+        embed = discord.Embed(title=_("📦 Trini Backups"), color=COLOR)
+        embed.add_field(name=_("Backups"), value=str(len(snaps)), inline=True)
+        embed.add_field(name=_("Storage"), value=f"{sum(m['size'] for m in snaps) / 1024:.1f} KB", inline=True)
         s = data["schedule"]
-        embed.add_field(name="Programado", value=f"{s['mode']} {s['hour']:02d}:00 UTC" if s["mode"] != "off" else "no", inline=True)
+        embed.add_field(name=_("Scheduled"), value=_("{mode} {hour:02d}:00 UTC").format(mode=s['mode'], hour=s['hour']) if s["mode"] != "off" else "no", inline=True)
         if snaps:
-            embed.add_field(name="Ultimo", value=f"`{snaps[0]['id']}` <t:{int(snaps[0]['created_at'])}:R>", inline=False)
+            embed.add_field(name=_("Latest"), value=f"`{snaps[0]['id']}` <t:{int(snaps[0]['created_at'])}:R>", inline=False)
         r = data["retention"]
-        embed.add_field(name="Retencion", value=f"{r['daily']} diarios · {r['weekly']} semanales · {r['monthly']} mensuales · max {data['max_manual']} manuales", inline=False)
+        embed.add_field(name=_("Retention"), value=_("{daily} daily · {weekly} weekly · {monthly} monthly · max {max_manual} manual").format(daily=r['daily'], weekly=r['weekly'], monthly=r['monthly'], max_manual=data['max_manual']), inline=False)
         missing = [p for p in ("manage_roles", "manage_channels") if not getattr(ctx.guild.me.guild_permissions, p)]
         if missing:
-            embed.add_field(name="⚠️ Permisos", value="Para restaurar necesito: " + ", ".join(missing), inline=False)
+            embed.add_field(name=_("⚠️ Permissions"), value=_("To restore I need: ") + ", ".join(missing), inline=False)
         await ctx.send(embed=embed)

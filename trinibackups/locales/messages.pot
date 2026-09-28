@@ -1,0 +1,555 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:55+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: backups.py:108
+msgid "⏪ Restore backup `{id}`"
+msgstr ""
+
+#: backups.py:114
+msgid "Details"
+msgstr ""
+
+#: backups.py:116
+msgid "Will be skipped"
+msgstr ""
+
+#: backups.py:117
+msgid "{value} · {fromtimestamp:%d/%m/%Y %H:%M} UTC · green = included"
+msgstr ""
+
+#: backups.py:122
+msgid "Only whoever ran the command can use this."
+msgstr ""
+
+#: backups.py:129
+msgid "There is nothing to restore."
+msgstr ""
+
+#: backups.py:138
+msgid "Restore cancelled."
+msgstr ""
+
+#: backups.py:146 i18n_strings.py:13
+msgid "Confirm"
+msgstr ""
+
+#: backups.py:166
+#, docstring
+msgid ""
+"Structural server snapshots, diffs, scheduled backups and safe restores."
+msgstr ""
+
+#: backups.py:185
+msgid ""
+"{pre}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+
+#: backups.py:312
+msgid "Backup not found."
+msgstr ""
+
+#: backups.py:315
+msgid ""
+"Backup: **{label}**\n"
+"<t:{created_at}:f> → now"
+msgstr ""
+
+#: backups.py:316
+msgid "📦 Differences since"
+msgstr ""
+
+#: backups.py:418
+msgid "Trini Backups: restore {id} by {author}"
+msgstr ""
+
+#: backups.py:439
+msgid "Create role @{name}"
+msgstr ""
+
+#: backups.py:447
+msgid "Roles created: {count}"
+msgstr ""
+
+#: backups.py:453
+msgid "Update @{role_name}"
+msgstr ""
+
+#: backups.py:457
+msgid "Reorder {count} roles"
+msgstr ""
+
+#: backups.py:458
+msgid "Roles updated"
+msgstr ""
+
+#: backups.py:479
+msgid "Create {kind} {name}"
+msgstr ""
+
+#: backups.py:506
+msgid "Channels created: {count}"
+msgstr ""
+
+#: backups.py:515
+msgid "Update {channel_name}"
+msgstr ""
+
+#: backups.py:526
+msgid "Overwrite {label}"
+msgstr ""
+
+#: backups.py:527
+msgid "Permissions restored"
+msgstr ""
+
+#: backups.py:535
+msgid "⚠️ {cog_name}: not loaded or without import support"
+msgstr ""
+
+#: backups.py:539
+msgid "✅ Config {cog_name}"
+msgstr ""
+
+#: backups.py:543
+msgid "❌ Config {cog_name}: {exc}"
+msgstr ""
+
+#: backups.py:544
+msgid "Errors: {errors}"
+msgstr ""
+
+#: backups.py:567 backups.py:607
+msgid "There are no backups. Create one with `backup create`."
+msgstr ""
+
+#: backups.py:576
+msgid "Backup not found (use the ID from `backup list`)."
+msgstr ""
+
+#: backups.py:587
+#, docstring
+msgid "Create a snapshot. E.g.: `backup create Before the tournament`."
+msgstr ""
+
+#: backups.py:592
+msgid "💾 Backup created"
+msgstr ""
+
+#: backups.py:595
+msgid ""
+"\n"
+"Name: **{name}**"
+msgstr ""
+
+#: backups.py:596
+msgid ""
+"\n"
+"\n"
+"🎭 {roles} roles · 📁 {categories} categories · # {channels} channels · 🤖 {bots} bots"
+msgstr ""
+
+#: backups.py:597
+msgid ""
+"\n"
+"⚙️ Trini config: {trini} modules\n"
+"📦 {value:.1f} KB"
+msgstr ""
+
+#: backups.py:604
+#, docstring
+msgid "List backups."
+msgstr ""
+
+#: backups.py:616
+msgid "📦 Backups ({count})"
+msgstr ""
+
+#: backups.py:617
+msgid ""
+"Scheduled: {mode} · 💾 manual · 🕒 auto · 🔐 security · ⏪ pre-restore · "
+"{i}/{count}"
+msgstr ""
+
+#: backups.py:626
+#, docstring
+msgid "Show the contents of a backup."
+msgstr ""
+
+#: backups.py:632 backups.py:724 backups.py:791
+msgid "The backup file does not exist."
+msgstr ""
+
+#: backups.py:633
+msgid "🔍 Backup {label}"
+msgstr ""
+
+#: backups.py:634
+msgid "Created"
+msgstr ""
+
+#: backups.py:635
+msgid "Type"
+msgstr ""
+
+#: backups.py:636
+msgid "Author"
+msgstr ""
+
+#: backups.py:639
+msgid "Roles ({count})"
+msgstr ""
+
+#: backups.py:648
+msgid "No category"
+msgstr ""
+
+#: backups.py:650
+msgid "Channels ({value})"
+msgstr ""
+
+#: backups.py:651
+msgid "Bots"
+msgstr ""
+
+#: backups.py:653
+msgid "La Trini configuration"
+msgstr ""
+
+#: backups.py:658
+#, docstring
+msgid "Compare a backup (the latest by default) with the current state."
+msgstr ""
+
+#: backups.py:668
+#, docstring
+msgid "Compare two backups."
+msgstr ""
+
+#: backups.py:677
+msgid "The file of one of the backups was not found."
+msgstr ""
+
+#: backups.py:678
+msgid "📦 Backup comparison"
+msgstr ""
+
+#: backups.py:701
+#, docstring
+msgid "Delete a backup."
+msgstr ""
+
+#: backups.py:706
+msgid "Delete backup **{label}**? This can't be undone."
+msgstr ""
+
+#: backups.py:709
+msgid "Cancelled."
+msgstr ""
+
+#: backups.py:712
+msgid "🗑 Backup `{id}` deleted."
+msgstr ""
+
+#: backups.py:716
+#, docstring
+msgid "Safe restore: preview first; it only creates/updates, never deletes."
+msgstr ""
+
+#: backups.py:718
+msgid ""
+"🔒 Restoring requires being Owner, Extra Owner or Trusted Admin in Trini "
+"Security."
+msgstr ""
+
+#: backups.py:730
+msgid "Timed out."
+msgstr ""
+
+#: backups.py:734
+msgid "⏳ Restoring… (automatic pre-restore backup: `{id}`)"
+msgstr ""
+
+#: backups.py:744
+msgid ""
+"✅ Restore completed. {value}\n"
+"Pre-restore backup: `{id}`"
+msgstr ""
+
+#: backups.py:754
+#, docstring
+msgid "Automatic backups: `off`, `daily` or `weekly`, at a UTC hour (0-23)."
+msgstr ""
+
+#: backups.py:757
+msgid "Modes: `off`, `daily`, `weekly`."
+msgstr ""
+
+#: backups.py:759
+msgid "The hour must be between 0 and 23 (UTC)."
+msgstr ""
+
+#: backups.py:768
+msgid "Automatic backups disabled."
+msgstr ""
+
+#: backups.py:770
+msgid ""
+"🕒 Automatic backups: **{mode}** at **{h:02d}:00 UTC**.\n"
+"Retention: last {daily} daily · {weekly} weekly · {monthly} monthly."
+msgstr ""
+
+#: backups.py:775
+#, docstring
+msgid "Retention policy for automatic backups."
+msgstr ""
+
+#: backups.py:777
+msgid "Limits: daily 1-60, weekly 0-52, monthly 0-24."
+msgstr ""
+
+#: backups.py:781
+msgid "Retention: {daily} daily · {weekly} weekly · {monthly} monthly."
+msgstr ""
+
+#: backups.py:781
+msgid " ({count} old backups deleted)"
+msgstr ""
+
+#: backups.py:785
+#, docstring
+msgid "Download a backup as JSON."
+msgstr ""
+
+#: backups.py:793
+msgid ""
+"⚠️ It includes the structure and La Trini configuration. Share it carefully."
+msgstr ""
+
+#: backups.py:799
+msgid "📬 I sent you the backup by DM."
+msgstr ""
+
+#: backups.py:801
+msgid ""
+"I can't send you DMs. Enable them or use the slash version of the command."
+msgstr ""
+
+#: backups.py:805
+#, docstring
+msgid "Backup status of the server."
+msgstr ""
+
+#: backups.py:808
+msgid "📦 Trini Backups"
+msgstr ""
+
+#: backups.py:809
+msgid "Backups"
+msgstr ""
+
+#: backups.py:810
+msgid "Storage"
+msgstr ""
+
+#: backups.py:812
+msgid "Scheduled"
+msgstr ""
+
+#: backups.py:812
+msgid "{mode} {hour:02d}:00 UTC"
+msgstr ""
+
+#: backups.py:814
+msgid "Latest"
+msgstr ""
+
+#: backups.py:816
+msgid "Retention"
+msgstr ""
+
+#: backups.py:816
+msgid ""
+"{daily} daily · {weekly} weekly · {monthly} monthly · max {max_manual} "
+"manual"
+msgstr ""
+
+#: backups.py:819
+msgid "⚠️ Permissions"
+msgstr ""
+
+#: backups.py:819
+msgid "To restore I need: "
+msgstr ""
+
+#: i18n_strings.py:11
+msgid "Continue"
+msgstr ""
+
+#: i18n_strings.py:12
+msgid "Cancel"
+msgstr ""
+
+#: i18n_strings.py:14
+msgid "Structural server snapshots."
+msgstr ""
+
+#: i18n_strings.py:15
+msgid "Roles"
+msgstr ""
+
+#: i18n_strings.py:16
+msgid "Channels"
+msgstr ""
+
+#: i18n_strings.py:17
+msgid "Permissions"
+msgstr ""
+
+#: i18n_strings.py:18
+msgid "Hierarchy"
+msgstr ""
+
+#: i18n_strings.py:19
+msgid "Trini config"
+msgstr ""
+
+#: snapshot.py:155
+msgid "CHANNEL PERMISSIONS"
+msgstr ""
+
+#: snapshot.py:155
+msgid "LA TRINI CONFIGURATION"
+msgstr ""
+
+#: snapshot.py:159
+msgid "Content filter"
+msgstr ""
+
+#: snapshot.py:160
+msgid "Moderation 2FA"
+msgstr ""
+
+#: snapshot.py:160
+msgid "Invites paused"
+msgstr ""
+
+#: snapshot.py:181 snapshot.py:223
+msgid "  name: {name} → {name2}"
+msgstr ""
+
+#: snapshot.py:201
+msgid "~ Hierarchy: {count} role(s) change position ({join}{value})"
+msgstr ""
+
+#: snapshot.py:225
+msgid "  category: {get} → {get2}"
+msgstr ""
+
+#: snapshot.py:252
+msgid ""
+"\n"
+"  … and {value} more"
+msgstr ""
+
+#: snapshot.py:276
+msgid ""
+"{subtitle}\n"
+"\n"
+"🟢 No differences."
+msgstr ""
+
+#: snapshot.py:293
+msgid "{section} (cont.)"
+msgstr ""
+
+#: snapshot.py:296
+msgid "{title} (cont.)"
+msgstr ""
+
+#: snapshot.py:346
+msgid "@{name} (bot/integration role)"
+msgstr ""
+
+#: snapshot.py:359
+msgid "@{live_name} (above the bot)"
+msgstr ""
+
+#: snapshot.py:371 snapshot.py:420
+msgid "name → {name}"
+msgstr ""
+
+#: snapshot.py:378
+msgid "mentionable → {mentionable}"
+msgstr ""
+
+#: snapshot.py:426
+msgid "NSFW → {get}"
+msgstr ""
+
+#: snapshot.py:429
+msgid "slowmode → {get}s"
+msgstr ""
+
+#: snapshot.py:462
+msgid "Will be done:"
+msgstr ""
+
+#: snapshot.py:464
+msgid "+ Create {count} roles"
+msgstr ""
+
+#: snapshot.py:468
+msgid "+ Create {count} categories"
+msgstr ""
+
+#: snapshot.py:470
+msgid "+ Create {count} channels"
+msgstr ""
+
+#: snapshot.py:473
+msgid "~ Change {perm_changes} permissions"
+msgstr ""
+
+#: snapshot.py:476
+msgid "~ Change {other_roles} roles"
+msgstr ""
+
+#: snapshot.py:478
+msgid "~ Reorder {count} roles"
+msgstr ""
+
+#: snapshot.py:480
+msgid "~ Change {count} channels"
+msgstr ""
+
+#: snapshot.py:482
+msgid "~ Restore configuration of {count} Trini modules"
+msgstr ""
+
+#: snapshot.py:484
+msgid "Nothing to restore: the server already matches the backup."
+msgstr ""
+
+#: snapshot.py:485
+msgid "No current element will be deleted."
+msgstr ""
+
+#: snapshot.py:495
+msgid "~ overwrite {label}"
+msgstr ""
+
+#: snapshot.py:497
+msgid "… and {value} more"
+msgstr ""

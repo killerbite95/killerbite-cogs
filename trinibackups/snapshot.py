@@ -9,6 +9,9 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 import discord
+from redbot.core.i18n import Translator
+
+_ = Translator("TriniBackups", __file__)
 
 FORMAT = "trini-backup"
 VERSION = 1
@@ -149,12 +152,12 @@ def _ow_state(ow: Optional[Dict[str, Any]], perm: str) -> Optional[bool]:
 
 def diff_snapshots(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, List[str]]:
     """Devuelve {seccion: [lineas]} con las diferencias de ``old`` a ``new``."""
-    out: Dict[str, List[str]] = {"SERVIDOR": [], "ROLES": [], "CANALES": [], "PERMISOS DE CANALES": [], "BOTS": [], "CONFIGURACION LA TRINI": []}
+    out: Dict[str, List[str]] = {"SERVIDOR": [], "ROLES": [], "CANALES": [], _("CHANNEL PERMISSIONS"): [], "BOTS": [], _("LA TRINI CONFIGURATION"): []}
 
     # Servidor
     og, ng = old.get("guild", {}), new.get("guild", {})
-    labels = {"name": "Nombre", "verification_level": "Verificacion", "explicit_content_filter": "Filtro de contenido",
-              "mfa_level": "2FA moderacion", "default_notifications": "Notificaciones", "invites_disabled": "Invitaciones pausadas"}
+    labels = {"name": "Nombre", "verification_level": "Verificacion", "explicit_content_filter": _("Content filter"),
+              "mfa_level": _("Moderation 2FA"), "default_notifications": "Notificaciones", "invites_disabled": _("Invites paused")}
     for key, label in labels.items():
         if og.get(key) != ng.get(key):
             out["SERVIDOR"].append(f"{label}: {og.get(key)} → {ng.get(key)}")
@@ -175,7 +178,7 @@ def diff_snapshots(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, List[s
             continue
         lines = []
         if o["name"] != n["name"]:
-            lines.append(f"  nombre: {o['name']} → {n['name']}")
+            lines.append(_("  name: {name} → {name2}").format(name=o['name'], name2=n['name']))
         if o["permissions"] != n["permissions"]:
             op, np_ = _perm_names(o["permissions"]), _perm_names(n["permissions"])
             lines += [f"  + {_label(p)}" for p in sorted(np_ - op)]
@@ -195,7 +198,7 @@ def diff_snapshots(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, List[s
     if moved and len(moved) <= len(common):
         # Solo se informan roles que cambian de orden relativo.
         names = [role_names[r] for r in moved[:10]]
-        out["ROLES"].append(f"~ Jerarquia: {len(moved)} rol(es) cambian de posicion ({', '.join(names)}{'…' if len(moved) > 10 else ''})")
+        out["ROLES"].append(_("~ Hierarchy: {count} role(s) change position ({join}{value})").format(count=len(moved), join=', '.join(names), value='…' if len(moved) > 10 else ''))
 
     # Canales
     old_ch = {c["id"]: c for c in old.get("channels", [])}
@@ -217,9 +220,9 @@ def diff_snapshots(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, List[s
             continue
         lines = []
         if o["name"] != n["name"]:
-            lines.append(f"  nombre: {o['name']} → {n['name']}")
+            lines.append(_("  name: {name} → {name2}").format(name=o['name'], name2=n['name']))
         if o.get("category_id") != n.get("category_id"):
-            lines.append(f"  categoria: {ch_names.get(o.get('category_id'), '—')} → {ch_names.get(n.get('category_id'), '—')}")
+            lines.append(_("  category: {get} → {get2}").format(get=ch_names.get(o.get('category_id'), '—'), get2=ch_names.get(n.get('category_id'), '—')))
         for key, label in (("topic", "topic"), ("nsfw", "NSFW"), ("slowmode", "slowmode"), ("bitrate", "bitrate"), ("user_limit", "limite")):
             if o.get(key) != n.get(key):
                 ov, nv = o.get(key), n.get(key)
@@ -246,7 +249,7 @@ def diff_snapshots(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, List[s
                 if sa != sb:
                     ow_lines.append(f"  {_label(p)}: {target} {STATE[sa]} → {STATE[sb]}")
         if ow_lines:
-            out["PERMISOS DE CANALES"].append(f"{cname(n)}\n" + "\n".join(ow_lines[:15]) + (f"\n  … y {len(ow_lines) - 15} mas" if len(ow_lines) > 15 else ""))
+            out["PERMISOS DE CANALES"].append(f"{cname(n)}\n" + "\n".join(ow_lines[:15]) + (_("\n  … and {value} more").format(value=len(ow_lines) - 15) if len(ow_lines) > 15 else ""))
 
     # Bots
     old_bots = {b["id"]: b for b in old.get("bots", [])}
@@ -270,7 +273,7 @@ def diff_snapshots(old: Dict[str, Any], new: Dict[str, Any]) -> Dict[str, List[s
 
 def diff_to_embeds(diff: Dict[str, List[str]], title: str, subtitle: str) -> List[discord.Embed]:
     if not diff:
-        return [discord.Embed(title=title, description=f"{subtitle}\n\n🟢 Sin diferencias.", color=discord.Color.green())]
+        return [discord.Embed(title=title, description=_("{subtitle}\n\n🟢 No differences.").format(subtitle=subtitle), color=discord.Color.green())]
     embeds: List[discord.Embed] = []
     current = discord.Embed(title=title, description=subtitle, color=discord.Color.orange())
     size = len(subtitle)
@@ -287,10 +290,10 @@ def diff_to_embeds(diff: Dict[str, List[str]], title: str, subtitle: str) -> Lis
         if chunk:
             parts.append("\n".join(chunk))
         for i, part in enumerate(parts):
-            name = section if i == 0 else f"{section} (cont.)"
+            name = section if i == 0 else _("{section} (cont.)").format(section=section)
             if len(current.fields) >= 10 or size + len(part) > 5200:
                 embeds.append(current)
-                current = discord.Embed(title=f"{title} (cont.)", color=discord.Color.orange())
+                current = discord.Embed(title=_("{title} (cont.)").format(title=title), color=discord.Color.orange())
                 size = 0
             current.add_field(name=name, value=f"```diff\n{part[:1000]}\n```"[:1024], inline=False)
             size += len(part) + len(name)
@@ -340,7 +343,7 @@ def build_plan(guild: discord.Guild, snap: Dict[str, Any], options: Dict[str, bo
             plan.role_map[rs["id"]] = live.id
             continue
         if rs.get("managed"):
-            plan.skipped.append(f"@{rs['name']} (rol de bot/integracion)")
+            plan.skipped.append(_("@{name} (bot/integration role)").format(name=rs['name']))
             continue
         if options.get("roles", True):
             plan.create_roles.append(rs)
@@ -353,7 +356,7 @@ def build_plan(guild: discord.Guild, snap: Dict[str, Any], options: Dict[str, bo
                 continue
             if not live.is_default() and live >= top:
                 if live.permissions.value != rs["permissions"]:
-                    plan.skipped.append(f"@{live.name} (por encima del bot)")
+                    plan.skipped.append(_("@{live_name} (above the bot)").format(live_name=live.name))
                 continue
             changes: Dict[str, Any] = {}
             desc: List[str] = []
@@ -365,14 +368,14 @@ def build_plan(guild: discord.Guild, snap: Dict[str, Any], options: Dict[str, bo
             if not live.is_default():
                 if live.name != rs["name"]:
                     changes["name"] = rs["name"]
-                    desc.append(f"nombre → {rs['name']}")
+                    desc.append(_("name → {name}").format(name=rs['name']))
                 if live.color.value != rs["color"]:
                     changes["colour"] = discord.Colour(rs["color"])
                 if live.hoist != rs["hoist"]:
                     changes["hoist"] = rs["hoist"]
                 if live.mentionable != rs["mentionable"]:
                     changes["mentionable"] = rs["mentionable"]
-                    desc.append(f"mencionable → {rs['mentionable']}")
+                    desc.append(_("mentionable → {mentionable}").format(mentionable=rs['mentionable']))
             if changes:
                 plan.update_roles.append((live, changes, desc))
 
@@ -384,8 +387,8 @@ def build_plan(guild: discord.Guild, snap: Dict[str, Any], options: Dict[str, bo
             if live is None or live.is_default() or live >= top:
                 continue
             pairs.append((rs["position"], live))
-        slots = sorted(r.position for _, r in pairs)
-        desired = [r for _, r in sorted(pairs, key=lambda p: p[0])]
+        slots = sorted(r.position for _pos, r in pairs)
+        desired = [r for _pos, r in sorted(pairs, key=lambda p: p[0])]
         for pos, role in zip(slots, desired):
             if role.position != pos:
                 plan.reorder_roles[role] = pos
@@ -414,16 +417,16 @@ def build_plan(guild: discord.Guild, snap: Dict[str, Any], options: Dict[str, bo
             desc = []
             if live.name != cs["name"]:
                 changes["name"] = cs["name"]
-                desc.append(f"nombre → {cs['name']}")
+                desc.append(_("name → {name}").format(name=cs['name']))
             if "topic" in cs and getattr(live, "topic", None) != cs.get("topic") and hasattr(live, "topic"):
                 changes["topic"] = cs.get("topic") or ""
                 desc.append("topic")
             if "nsfw" in cs and hasattr(live, "nsfw") and live.nsfw != cs.get("nsfw"):
                 changes["nsfw"] = cs.get("nsfw", False)
-                desc.append(f"NSFW → {cs.get('nsfw')}")
+                desc.append(_("NSFW → {get}").format(get=cs.get('nsfw')))
             if "slowmode" in cs and hasattr(live, "slowmode_delay") and live.slowmode_delay != (cs.get("slowmode") or 0):
                 changes["slowmode_delay"] = cs.get("slowmode") or 0
-                desc.append(f"slowmode → {cs.get('slowmode')}s")
+                desc.append(_("slowmode → {get}s").format(get=cs.get('slowmode')))
             if cs.get("category_id") and not isinstance(live, discord.CategoryChannel):
                 target_cat = plan.channel_map.get(cs["category_id"])
                 if target_cat and live.category_id != target_cat:
@@ -456,30 +459,30 @@ def build_plan(guild: discord.Guild, snap: Dict[str, Any], options: Dict[str, bo
 
 
 def plan_summary(plan: RestorePlan) -> str:
-    lines = ["Se realizaran:", ""]
+    lines = [_("Will be done:"), ""]
     if plan.create_roles:
-        lines.append(f"+ Crear {len(plan.create_roles)} roles")
+        lines.append(_("+ Create {count} roles").format(count=len(plan.create_roles)))
     cats = [c for c in plan.create_channels if c["type"] == "category"]
     chans = [c for c in plan.create_channels if c["type"] != "category"]
     if cats:
-        lines.append(f"+ Crear {len(cats)} categorias")
+        lines.append(_("+ Create {count} categories").format(count=len(cats)))
     if chans:
-        lines.append(f"+ Crear {len(chans)} canales")
-    perm_changes = len(plan.overwrites) + sum(1 for _, c, _ in plan.update_roles if "permissions" in c)
+        lines.append(_("+ Create {count} channels").format(count=len(chans)))
+    perm_changes = len(plan.overwrites) + sum(1 for _r, c, _d in plan.update_roles if "permissions" in c)
     if perm_changes:
-        lines.append(f"~ Modificar {perm_changes} permisos")
-    other_roles = sum(1 for _, c, _ in plan.update_roles if set(c) - {"permissions"})
+        lines.append(_("~ Change {perm_changes} permissions").format(perm_changes=perm_changes))
+    other_roles = sum(1 for _r, c, _d in plan.update_roles if set(c) - {"permissions"})
     if other_roles:
-        lines.append(f"~ Modificar {other_roles} roles")
+        lines.append(_("~ Change {other_roles} roles").format(other_roles=other_roles))
     if plan.reorder_roles:
-        lines.append(f"~ Reordenar {len(plan.reorder_roles)} roles")
+        lines.append(_("~ Reorder {count} roles").format(count=len(plan.reorder_roles)))
     if plan.update_channels:
-        lines.append(f"~ Modificar {len(plan.update_channels)} canales")
+        lines.append(_("~ Change {count} channels").format(count=len(plan.update_channels)))
     if plan.trini:
-        lines.append(f"~ Restaurar configuracion de {len(plan.trini)} modulos Trini")
+        lines.append(_("~ Restore configuration of {count} Trini modules").format(count=len(plan.trini)))
     if plan.empty:
-        lines.append("Nada que restaurar: el servidor ya coincide con el backup.")
-    lines += ["", "No se eliminara ningun elemento actual."]
+        lines.append(_("Nothing to restore: the server already matches the backup."))
+    lines += ["", _("No current element will be deleted.")]
     return "\n".join(lines)
 
 
@@ -487,11 +490,11 @@ def plan_details(plan: RestorePlan, limit: int = 25) -> List[str]:
     out = []
     out += [f"+ @{r['name']}" for r in plan.create_roles]
     out += [f"+ {TYPE_ICON.get(c['type'], '#')}{c['name']}" for c in plan.create_channels]
-    out += [f"~ @{r.name}: {'; '.join(d)}" for r, _, d in plan.update_roles if d]
-    out += [f"~ {TYPE_ICON.get(CHANNEL_TYPES.get(c.type, 'text'), '#')}{c.name}: {', '.join(d)}" for c, _, d in plan.update_channels]
-    out += [f"~ overwrite {label}" for _, _, label in plan.overwrites]
+    out += [f"~ @{r.name}: {'; '.join(d)}" for r, _c, d in plan.update_roles if d]
+    out += [f"~ {TYPE_ICON.get(CHANNEL_TYPES.get(c.type, 'text'), '#')}{c.name}: {', '.join(d)}" for c, _c, d in plan.update_channels]
+    out += [_("~ overwrite {label}").format(label=label) for _t, _o, label in plan.overwrites]
     if len(out) > limit:
-        out = out[:limit] + [f"… y {len(out) - limit} mas"]
+        out = out[:limit] + [_("… and {value} more").format(value=len(out) - limit)]
     return out
 
 
