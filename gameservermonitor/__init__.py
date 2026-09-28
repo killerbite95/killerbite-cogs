@@ -18,7 +18,7 @@ from redbot.core.bot import Red
 from .gameservermonitor import GameServerMonitor
 
 __all__ = ["GameServerMonitor", "setup"]
-__version__ = "2.2.0"
+__version__ = "2.4.0"
 __author__ = "Killerbite95"
 
 

@@ -24,7 +24,7 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | **day_counter_cog** | Counts days since/until events |
 | **gameservermonitor** | Monitors game servers (CS2, Minecraft, DayZ, Valheim, ARK, TF2, L4D2, 7DTD, Palworld, etc.) with live embeds, slash commands, and interactive buttons |
 | **listroles** | Lists server roles and their members |
-| **maptrack** | Tracks map changes in game servers |
+| **maptrack** | Obsoleto: integrado en GameServerMonitor (`!gsmalerts`) |
 | **suggestions** | Complete suggestion system with buttons, voting, and staff management |
 | **ticketstrini** | Multi-panel support ticket system with buttons (Trini Edition) |
 | **trinibackups** | Structural snapshots, diff, scheduled backups and safe (non-destructive) restore |

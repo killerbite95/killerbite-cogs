@@ -1,7 +1,9 @@
 {
     "author": [
-    "Killerbite95"
-  ],
-    "end_user_data_statement": "Este cog almacena la ID de usuario.",
-    "description": "Sistema de trackeo de mapas!"
+        "Killerbite95"
+    ],
+    "end_user_data_statement": "Este cog no guarda datos de usuarios.",
+    "description": "Obsoleto. Los avisos de cambio de mapa estan integrados en GameServerMonitor (!gsmalerts).",
+    "hidden": true,
+    "short": "Obsoleto: usa !gsmalerts de GameServerMonitor."
 }

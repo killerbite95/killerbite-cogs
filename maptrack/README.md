@@ -1,4 +1,6 @@
-# MapTrack
+# MapTrack (obsoleto)
+
+> ⚠️ **MapTrack esta integrado en GameServerMonitor.** Usa `!gsmalerts map <servidor> #canal` (y `!gsmalerts status` para caidas). Si ya lo tenias configurado: `!gsmalerts importmaptrack` y despues `!unload maptrack`. Este cog se mantiene solo para instalaciones antiguas y ya no aparece en el repo.
 
 Avisa en un canal o hilo cada vez que un servidor de juego cambia de mapa.
 

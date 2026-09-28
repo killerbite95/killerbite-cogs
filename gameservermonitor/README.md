@@ -28,6 +28,11 @@ Monitoriza servidores de juego (CS2, CSS, GMod, Rust, Minecraft, DayZ, Valheim, 
 6. Comprueba la lista con `!listservers`. Para quitar uno: `!removeserver <clave>` (la clave sale en la lista).
 7. Los usuarios pueden usar `!serverstats`, `!gsmplayers`, `!gsmmap` y `!gsmhistory <servidor> 24`.
 8. Mantenimiento: `!deadservers 7` lista los que no responden desde hace 7 dias y `!purgeservers 7` los elimina (con confirmacion).
+9. (Opcional) Avisos extra por servidor (sustituyen al cog MapTrack):
+   - Cambio de mapa: `!gsmalerts map 51.77.10.20:28015 #cambios-de-mapa`. Avisa con el mapa anterior, el nuevo, los jugadores y como conectarse.
+   - Caidas y vuelta a online: `!gsmalerts status 51.77.10.20:28015 #estado-servidores`.
+   - Para quitar un aviso, repite el comando sin canal. Revisalos con `!gsmalerts list`.
+   - Si usabas MapTrack: `!gsmalerts importmaptrack` copia sus canales a los servidores que ya monitorizas, y despues puedes hacer `!unload maptrack`.
 
 Mas detalle en [DOCUMENTATION.md](DOCUMENTATION.md).
 
@@ -46,6 +51,10 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor p
 | `!gsmplayers <server>` | Shows the list of players connected to a server. | Todos |
 | `!gsmversion` | Shows the current GameServerMonitor cog version. | Todos |
 | `!listservers` | Lists all monitored servers. Alias: `listaserver`. | Todos |
+| `!gsmalerts map <servidor> [canal]` | Aviso de cambio de mapa del servidor en un canal o hilo (sin canal lo quita). Alias del grupo: `gsmavisos`. | Admin o permiso Administrator |
+| `!gsmalerts status <servidor> [canal]` | Aviso cuando el servidor se cae o vuelve a estar online (sin canal lo quita). | Admin o permiso Administrator |
+| `!gsmalerts list` | Avisos configurados y mapa actual de cada servidor. | Admin o permiso Administrator |
+| `!gsmalerts importmaptrack` | Importa los canales de avisos de mapa del cog MapTrack. | Admin o permiso Administrator |
 | `!purgeservers [days]` | Removes servers that stopped responding, after confirmation. Alias: `purgedeadservers`, `limpiarservers`. | Admin o permiso Administrator |
 | `!refreshtime <seconds>` | Sets the refresh interval in seconds. | Admin o permiso Administrator |
 | `!removeserver <server_key>` | Removes a server from monitoring. | Admin o permiso Administrator |

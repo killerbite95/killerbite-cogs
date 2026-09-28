@@ -14,6 +14,7 @@ from redbot.core import commands, Config, checks
 from redbot.core.bot import Red
 from redbot.core.i18n import Translator, cog_i18n
 from redbot.core.utils.views import ConfirmView
+from redbot.core.utils.chat_formatting import pagify
 import contextlib
 import datetime
 import ipaddress
@@ -52,7 +53,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
     """Monitoriza servidores de juegos y actualiza su estado en Discord. By Killerbite95"""
     
     __author__ = "Killerbite95"
-    __version__ = "2.3.0"
+    __version__ = "2.4.0"
     
     def __init__(self, bot: Red) -> None:
         self.bot: Red = bot
@@ -1407,6 +1408,94 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
                 server_key=server_key
             )
     
+    # ==================== Avisos extra (antiguo MapTrack) ====================
+
+    # Claves por servidor que no forman parte de ServerData y deben conservarse al guardar.
+    _EXTRA_SERVER_KEYS = (
+        "map_alert_channel", "status_alert_channel",
+        "last_map", "current_map", "last_map_change",
+    )
+
+    async def _send_alert(self, guild: discord.Guild, channel_id: int, embed: discord.Embed) -> None:
+        channel = guild.get_channel_or_thread(channel_id)
+        if channel is None:
+            return
+        perms = channel.permissions_for(guild.me)
+        if not (perms.send_messages and perms.embed_links):
+            logger.warning(f"Sin permisos para avisos en {channel_id} ({guild.id})")
+            return
+        try:
+            await channel.send(embed=embed)
+        except discord.HTTPException as e:
+            logger.error(f"Error enviando aviso en {channel_id}: {e!r}")
+
+    async def _process_extra_alerts(
+        self,
+        guild: discord.Guild,
+        server_key: str,
+        server_dict: Dict[str, Any],
+        server_data: ServerData,
+        query_result: QueryResult,
+        old_status: Optional[ServerStatus],
+        ip_to_show: str,
+    ) -> Dict[str, Any]:
+        """Cambio de mapa y caidas del servidor. Devuelve las claves extra a guardar."""
+        extras = {k: server_dict[k] for k in self._EXTRA_SERVER_KEYS if k in server_dict}
+        hostname = query_result.hostname if query_result.success else None
+        if hostname == "Unknown Server":
+            hostname = None
+        name = hostname or server_dict.get("last_hostname") or server_key
+        game_name = server_data.game.display_name if server_data.game else ""
+        connect_url = None
+        if server_data.game and server_data.game.supports_connect_button:
+            template = await self.config.guild(guild).connect_url_template()
+            connect_url = template.format(ip=ip_to_show) if template else None
+
+        # En Minecraft map_name es la version: no hay cambios de mapa que avisar.
+        map_name = (query_result.map_name or "").strip() if query_result.success else ""
+        if map_name and map_name != "N/A" and server_data.game != GameType.MINECRAFT:
+            previous = extras.get("last_map")
+            if previous != map_name:
+                extras["last_map_change"] = discord.utils.utcnow().isoformat()
+                if previous and extras.get("map_alert_channel"):
+                    embed = discord.Embed(
+                        title=_("🗺️ Cambio de mapa"),
+                        description=f"**{discord.utils.escape_markdown(name)}**\n{game_name}",
+                        color=discord.Color.green(),
+                        timestamp=discord.utils.utcnow(),
+                    )
+                    embed.add_field(name=_("Mapa anterior"), value=previous, inline=True)
+                    embed.add_field(name=_("Mapa nuevo"), value=f"**{map_name}**", inline=True)
+                    embed.add_field(name=_("Jugadores"), value=query_result.player_display, inline=True)
+                    if connect_url:
+                        embed.add_field(name=_("Conectar"), value=f"[{ip_to_show}]({connect_url})", inline=False)
+                    elif server_data.game == GameType.RUST:
+                        embed.add_field(name=_("Conectar (F1)"), value=f"`client.connect {ip_to_show}`", inline=False)
+                    else:
+                        embed.add_field(name=_("IP"), value=f"`{ip_to_show}`", inline=False)
+                    await self._send_alert(guild, extras["map_alert_channel"], embed)
+            extras["last_map"] = map_name
+            extras["current_map"] = map_name
+
+        new_status = query_result.status
+        channel_id = extras.get("status_alert_channel")
+        if channel_id and old_status is not None and old_status != new_status:
+            went_down = new_status == ServerStatus.OFFLINE
+            came_back = old_status == ServerStatus.OFFLINE and new_status in (ServerStatus.ONLINE, ServerStatus.MAINTENANCE)
+            if went_down or came_back:
+                embed = discord.Embed(
+                    title=_("🔴 Servidor caido") if went_down else _("✅ Servidor de nuevo online"),
+                    description=f"**{discord.utils.escape_markdown(name)}**\n{game_name} · `{ip_to_show}`",
+                    color=discord.Color.red() if went_down else discord.Color.green(),
+                    timestamp=discord.utils.utcnow(),
+                )
+                if came_back and query_result.success:
+                    embed.add_field(name=_("Jugadores"), value=query_result.player_display, inline=True)
+                    if map_name and server_data.game != GameType.MINECRAFT:
+                        embed.add_field(name=_("Mapa"), value=map_name, inline=True)
+                await self._send_alert(guild, channel_id, embed)
+        return extras
+
     async def update_server_status(
         self, 
         guild: discord.Guild, 
@@ -1499,6 +1588,12 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             await self._dispatch_status_event(
                 guild, server_key, old_status, query_result.status
             )
+
+            # Avisos extra (antiguo MapTrack): cambio de mapa y caidas/vuelta
+            extras = await self._process_extra_alerts(
+                guild, server_key, server_dict, server_data,
+                query_result, old_status, ip_to_show
+            )
             
             # Crear embed
             if query_result.success:
@@ -1553,6 +1648,7 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             
             # Guardar datos actualizados (incluyendo server_id si fue generado)
             server_dict_to_save = server_data.to_dict()
+            server_dict_to_save.update(extras)
             server_dict_to_save["server_id"] = server_id
             # Persistir hostname para autocomplete
             if query_result.success and query_result.hostname:
@@ -2038,6 +2134,125 @@ class GameServerMonitor(DashboardIntegration, commands.Cog):
             author=self.__author__
         ))
     
+    # ==================== Avisos extra (antiguo MapTrack) ====================
+
+    async def _alert_target(self, ctx: commands.Context, server: str) -> Optional[str]:
+        key = await self._resolve_server_key_by_id(ctx.guild, server) or await self._resolve_server_key(ctx.guild, server)
+        if not key:
+            await ctx.send(_("❌ No se encontró el servidor **{}**. Usa `ip:puerto` o el server_id (`{}listservers`).").format(server, ctx.clean_prefix))
+        return key
+
+    async def _set_alert_channel(self, ctx, server: str, key_name: str, channel, label: str) -> None:
+        server_key = await self._alert_target(ctx, server)
+        if not server_key:
+            return
+        if channel is not None:
+            perms = channel.permissions_for(ctx.guild.me)
+            if not (perms.send_messages and perms.embed_links):
+                await ctx.send(_("❌ Necesito *Enviar mensajes* e *Insertar enlaces* en {}.").format(channel.mention))
+                return
+        async with self.config.guild(ctx.guild).servers() as servers:
+            if server_key not in servers:
+                await ctx.send(_("❌ Servidor no encontrado."))
+                return
+            servers[server_key][key_name] = channel.id if channel else None
+        if channel:
+            await ctx.send(_("✅ Avisos de {} de **{}** en {}.").format(label, server_key, channel.mention))
+        else:
+            await ctx.send(_("✅ Avisos de {} de **{}** desactivados.").format(label, server_key))
+
+    @commands.group(name="gsmalerts", aliases=["gsmavisos"])
+    @commands.guild_only()
+    @checks.admin_or_permissions(administrator=True)
+    async def gsm_alerts(self, ctx: commands.Context) -> None:
+        """Avisos extra por servidor: cambio de mapa y caidas (sustituye a MapTrack)."""
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help()
+
+    @gsm_alerts.command(name="map")
+    async def gsm_alerts_map(
+        self, ctx: commands.Context, server: str,
+        channel: Optional[typing.Union[discord.TextChannel, discord.Thread]] = None
+    ) -> None:
+        """Avisar en un canal cuando el servidor cambia de mapa. Sin canal lo desactiva.
+
+        Example: `[p]gsmalerts map 1.2.3.4:28015 #cambios-de-mapa`
+        """
+        await self._set_alert_channel(ctx, server, "map_alert_channel", channel, _("cambio de mapa"))
+
+    @gsm_alerts.command(name="status")
+    async def gsm_alerts_status(
+        self, ctx: commands.Context, server: str,
+        channel: Optional[typing.Union[discord.TextChannel, discord.Thread]] = None
+    ) -> None:
+        """Avisar en un canal cuando el servidor se cae o vuelve. Sin canal lo desactiva.
+
+        Example: `[p]gsmalerts status 1.2.3.4:28015 #estado-servers`
+        """
+        await self._set_alert_channel(ctx, server, "status_alert_channel", channel, _("caidas"))
+
+    @gsm_alerts.command(name="list")
+    async def gsm_alerts_list(self, ctx: commands.Context) -> None:
+        """Ver los avisos configurados y el mapa actual de cada servidor."""
+        servers = await self.config.guild(ctx.guild).servers()
+        lines = []
+        for server_key, data in servers.items():
+            map_ch = data.get("map_alert_channel")
+            st_ch = data.get("status_alert_channel")
+            current = data.get("current_map") or "-"
+            name = data.get("last_hostname") or server_key
+            parts = [f"🗺️ {current}"]
+            if map_ch:
+                parts.append(_("mapa → <#{}>").format(map_ch))
+            if st_ch:
+                parts.append(_("caidas → <#{}>").format(st_ch))
+            lines.append(f"**{discord.utils.escape_markdown(name)}** (`{server_key}`)\n" + " · ".join(parts))
+        if not lines:
+            await ctx.send(_("📋 No hay servidores siendo monitoreados."))
+            return
+        for page in pagify("\n\n".join(lines), delims=["\n\n"], page_length=3900):
+            await ctx.send(embed=discord.Embed(title=_("🔔 Avisos de servidores"), description=page, color=discord.Color.blue()))
+
+    @gsm_alerts.command(name="importmaptrack")
+    async def gsm_alerts_import_maptrack(self, ctx: commands.Context) -> None:
+        """Importar los avisos de mapa configurados en el cog MapTrack.
+
+        Busca cada servidor de MapTrack entre los de GameServerMonitor (por ip:puerto
+        o por la IP publica configurada). Los que no esten monitorizados se listan
+        para que los añadas con `addserver`.
+        """
+        mt_config = Config.get_conf(None, identifier=1234567890, cog_name="MapTrack")
+        mt_config.register_guild(map_track_channels={})
+        tracks = await mt_config.guild(ctx.guild).map_track_channels()
+        if not tracks:
+            await ctx.send(_("MapTrack no tiene servidores configurados en este servidor."))
+            return
+        servers = await self.config.guild(ctx.guild).servers()
+        imported, missing = [], []
+        for ip, channel_id in tracks.items():
+            key = ip if ip in servers else await self._resolve_server_key(ctx.guild, ip)
+            if key is None:
+                # MapTrack guardaba a veces la IP interna con otro puerto de query.
+                host, _sep, port = ip.rpartition(":")
+                key = next((k for k, d in servers.items() if str(d.get("query_port")) == port and k.split(":")[0] == host), None)
+            if key is None:
+                missing.append(ip)
+                continue
+            imported.append((key, channel_id))
+        if imported:
+            async with self.config.guild(ctx.guild).servers() as current:
+                for key, channel_id in imported:
+                    if key in current:
+                        current[key]["map_alert_channel"] = channel_id
+        msg = _("✅ {} servidor(es) importados de MapTrack.").format(len(imported))
+        if missing:
+            msg += "\n" + _("⚠️ No monitorizados en GameServerMonitor (añadelos con `{}addserver` y repite): {}").format(
+                ctx.clean_prefix, ", ".join(f"`{m}`" for m in missing)
+            )
+        else:
+            msg += "\n" + _("Ya puedes descargar MapTrack: `{}unload maptrack`.").format(ctx.clean_prefix)
+        await ctx.send(msg)
+
     @commands.command(name="listservers", aliases=["listaserver"])
     async def list_servers(self, ctx: commands.Context) -> None:
         """Lists all monitored servers."""

@@ -137,7 +137,7 @@ MODULES: Dict[str, ModuleInfo] = {
         ModuleInfo("blackjack", "Blackjack", "Blackjack", "Juego de cartas Blackjack.", "Comunidad", "🃏", package="blackjack"),
         ModuleInfo("day_counter", "Day Counter", "DayCounter", "Contador de dias desde/hasta un evento.", "Comunidad", "📆", package="day_counter_cog"),
         ModuleInfo("listroles", "List Roles", "ListRoles", "Lista los roles del servidor con nombre e ID.", "Utilidad", "📋", package="listroles"),
-        ModuleInfo("maptrack", "Map Track", "MapTrack", "Rastrea cambios de mapa en servidores de juego.", "Gaming", "🗺", package="maptrack"),
+        ModuleInfo("maptrack", "Map Track", "MapTrack", "Obsoleto: usa !gsmalerts de GameServerMonitor.", "Gaming", "🗺", package="maptrack"),
         ModuleInfo("rustmaps", "RustMaps Vote", "RustMapsVote", "Votaciones de mapas de Rust con botones.", "Gaming", "🗳", package="rustmaps_vote"),
         ModuleInfo("trickortreat", "Trick or Treat", "TrickOrTreatV2", "Juego de caramelos con tienda, rachas y eventos.", "Comunidad", "🍬", package="trickortreat"),
 
