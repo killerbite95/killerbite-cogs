@@ -1,7 +1,16 @@
 {
     "author": [
-    "Killerbite95"
-  ],
-    "end_user_data_statement": "Este cog almacena la ID de usuario.",
-    "description": "Sistema de registro y limpieza de creditos a usuarios baneados."
+        "Killerbite95"
+    ],
+    "end_user_data_statement": "Este cog guarda la ID de los usuarios baneados, la fecha del ban y su saldo mientras estan en seguimiento.",
+    "description": "Tras N dias baneado (7 por defecto), borra la cuenta del banco de Red del usuario en ese servidor. Sin canales de registro de bans: eso lo hace el modlog.",
+    "name": "AutoPrune",
+    "short": "Borra automaticamente los creditos de los usuarios que siguen baneados.",
+    "min_bot_version": "3.5.0",
+    "tags": [
+        "economy",
+        "bank",
+        "ban",
+        "prune"
+    ]
 }

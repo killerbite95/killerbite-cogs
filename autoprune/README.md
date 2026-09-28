@@ -1,37 +1,53 @@
 # AutoPrune (PruneBans)
 
-Controla a los usuarios baneados y sus creditos del banco de Red: registra cada ban con su saldo, cuenta 7 dias y permite hacer prune de las cuentas de banco de los baneados.
-
-> Prefijo de ejemplo `!` (el de La Trini). Si un comando es hibrido tambien funciona con `/` tras `!slash enablecog <cog>` y `!slash sync`.
+Borra automaticamente los creditos del banco de Red de los usuarios que **siguen baneados** pasados unos dias. No publica nada al banear o desbanear: de eso ya se encarga el modlog. Solo deja un resumen en el canal de logs cuando borra creditos.
 
 ## Instalacion
 
 ```
-!repo update killerbite-cogs
+!repo add killerbite-cogs https://github.com/killerbite95/killerbite-cogs
 !cog install killerbite-cogs autoprune
 !load autoprune
 ```
 
-**Requisitos:** Economia/banco de Red activo. Solo administradores.
+## Requisitos
+
+- El bot necesita **Banear miembros** para ver la lista de baneos: antes de borrar comprueba que el usuario sigue baneado.
+- Usa el banco de Red (`!bank`).
 
 ## Puesta en marcha paso a paso
 
-1. Canal donde se registran los bans y la cuenta atras: `!setbanlog #logs-bans`.
-2. Canal donde se registran los prunes: `!setlogprune #logs-prune`.
-3. A partir de ahora, cada ban se registra solo con el saldo del usuario. Si se desbanea, sale del registro.
-4. Consulta el estado: `!listbans` (baneados y sus creditos) y `!countdown` (cuenta atras de 7 dias). Cada dia el bot avisa en el canal de bans de quien ya ha cumplido los 7 dias.
-5. Antes de hacer prune, mira a quien afectaria: `!prunetest`.
-6. Ejecuta el prune (pide confirmacion): `!prune`.
+1. Activalo: `!autoprune enable`.
+2. (Opcional) Cambia la espera, por defecto 7 dias: `!autoprune days 14`.
+3. (Opcional) Canal donde avisar cuando se borran creditos: `!autoprune logchannel #logs-economia`.
+4. (Opcional) Si ya habia gente baneada, añadela al seguimiento (su cuenta atras empieza hoy): `!autoprune sync`.
+5. Comprueba el estado con `!autoprune` y los pendientes con `!autoprune pending`.
+
+A partir de ahi es automatico. Cada hora el bot revisa los baneos vencidos:
+
+- Si sigue baneado, borra su cuenta del banco en este servidor y lo avisa en el canal de logs.
+- Si lo desbanearon antes, deja de seguirlo y no toca nada.
+
+**Banco global:** con banco global la cuenta es la misma en todos los servidores, y un ban en uno le quitaria los creditos en todos. Por eso, en ese caso no se borra nada hasta que el owner lo permita con `!autoprune globalbank true`. Mientras, el seguimiento se conserva.
+
+> Tambien desde el dashboard: pagina **PruneBans → bans** (los mods la ven y solo los admins la cambian).
 
 ## Referencia completa de comandos
 
-Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]` · `[x=valor]` valor por defecto.
+Prefijo `!` como ejemplo (alias `!prunebans`). `<obligatorio>` · `[opcional]`. Tambien funciona como `/autoprune`.
 
 | Comando | Descripcion | Permiso |
 |---|---|---|
-| `!countdown` | Show a custom 7-day countdown for each ban. | Admin o permiso Administrator |
-| `!listbans` | List banned users with their credits. | Admin o permiso Administrator |
-| `!prune` | Execute prune manually after confirmation. | Admin o permiso Administrator |
-| `!prunetest` | Test command to show users that would be affected by prune. | Admin o permiso Administrator |
-| `!setbanlog <channel>` | Set the channel where ban logs will be sent. | Admin o permiso Administrator |
-| `!setlogprune <channel>` | Set the channel where prune logs will be sent. | Admin o permiso Administrator |
+| `!autoprune` | Estado: activado, dias de espera, canal de logs, pendientes y tipo de banco. | Admin o permiso Gestionar servidor |
+| `!autoprune enable` / `disable` | Activar o desactivar la limpieza automatica en este servidor. | Admin o permiso Gestionar servidor |
+| `!autoprune days <0-365>` | Dias que debe seguir baneado antes de borrar sus creditos. Se recalcula para los pendientes. | Admin o permiso Gestionar servidor |
+| `!autoprune logchannel [canal]` | Canal donde avisar al borrar creditos (sin canal lo quita). | Admin o permiso Gestionar servidor |
+| `!autoprune pending` | Baneos en seguimiento, creditos y cuando se limpiaran. | Admin o permiso Gestionar servidor |
+| `!autoprune sync` | Añadir al seguimiento a los que ya estaban baneados. | Admin o permiso Gestionar servidor |
+| `!autoprune run [true]` | Revisar ya los vencidos; con `true` limpia todos los pendientes sin esperar. | Admin o permiso Gestionar servidor |
+| `!autoprune forget <user_id>` | Dejar de seguir a un usuario (no se le borran los creditos). | Admin o permiso Gestionar servidor |
+| `!autoprune globalbank <true/false>` | Permitir borrar cuentas del banco global. | Owner del bot |
+
+## Cambios respecto a la version 1
+
+Ya no existen `!prune`, `!prunetest`, `!listbans`, `!countdown`, `!setbanlog` ni `!setlogprune`. Si tenias configurado el canal de bans, al actualizar la limpieza queda **activada** y ese canal pasa a ser el de logs. Puedes cambiarlo con `!autoprune logchannel`.

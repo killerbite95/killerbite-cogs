@@ -18,7 +18,7 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | **alienhost** | AlienHost (Pelican) integration: link your client API key via private modal and manage your servers, backups and alerts |
 | **apiv2** | REST API server embedded in the bot for external integrations |
 | **autonick** | Automatically manages user nicknames |
-| **autoprune** | Automatic ban pruning system |
+| **autoprune** | Borra automaticamente los creditos de los usuarios que siguen baneados |
 | **blackjack** | Blackjack card game for Discord |
 | **colacoins** | Virtual currency system with leaderboards |
 | **day_counter_cog** | Counts days since/until events |

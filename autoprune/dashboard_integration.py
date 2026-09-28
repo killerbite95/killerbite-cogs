@@ -3,7 +3,6 @@ Dashboard integration for PruneBans.
 Provides per-guild web interface for monitoring bans and prune status.
 """
 import typing
-import html as html_mod
 import datetime
 from redbot.core import commands
 from redbot.core.bot import Red
@@ -59,8 +58,8 @@ class DashboardIntegration:
 
     @dashboard_page(
         name="bans",
-        description="Seguimiento de baneos y prune",
-        methods=("GET",),
+        description="Limpieza automatica de creditos de baneados",
+        methods=("GET", "POST"),
     )
     async def rpc_bans_page(self, guild_id: int, **kwargs) -> typing.Dict[str, typing.Any]:
         guild = self.bot.get_guild(guild_id)
@@ -70,145 +69,144 @@ class DashboardIntegration:
         if denied:
             return denied
 
-        try:
-            data = await self.config.guild(guild).all()
-        except Exception:
-            return {"status": 0, "web_content": {"source": '<div class="trini-tp-empty"><i class="fa fa-exclamation-triangle fa-3x"></i><p>Error al cargar datos.</p></div>'}}
+        notifications = []
+        can_edit = await self._dashboard_denied(guild, kwargs) is None
+        if kwargs.get("method") == "POST":
+            if not can_edit:
+                notifications.append({"message": "Solo los administradores pueden cambiar la configuracion.", "category": "danger"})
+            else:
+                form = kwargs.get("data", {}).get("form", {})
 
-        ban_track = data.get("ban_track", {})
-        log_ch_id = data.get("log_channel")
-        ban_log_ch_id = data.get("ban_log_channel")
-        now = datetime.datetime.utcnow()
+                def _fv(key, default=""):
+                    value = form.get(key, [default])
+                    return value[0] if isinstance(value, list) else str(value)
 
-        log_ch_name = ""
-        if log_ch_id:
-            ch = guild.get_channel(log_ch_id)
-            log_ch_name = f"#{ch.name}" if ch else f"ID: {log_ch_id}"
+                try:
+                    group = self.config.guild(guild)
+                    await group.enabled.set(_fv("enabled") == "on")
+                    days = max(0, min(365, int(_fv("delay_days", "7") or 7)))
+                    await group.delay_days.set(days)
+                    channel_id = _fv("log_channel")
+                    channel = guild.get_channel(int(channel_id)) if channel_id.isdigit() else None
+                    await group.log_channel.set(channel.id if channel else None)
+                    notifications.append({"message": "Configuracion guardada.", "category": "success"})
+                except (ValueError, TypeError) as e:
+                    notifications.append({"message": f"Error: {e}", "category": "danger"})
 
-        ban_log_ch_name = ""
-        if ban_log_ch_id:
-            ch = guild.get_channel(ban_log_ch_id)
-            ban_log_ch_name = f"#{ch.name}" if ch else f"ID: {ban_log_ch_id}"
-
+        data = await self.config.guild(guild).all()
+        now = datetime.datetime.now(datetime.timezone.utc)
         bans_list = []
-        ready_count = 0
-        for uid_str, binfo in ban_track.items():
+        for uid_str, binfo in data.get("ban_track", {}).items():
             if not isinstance(binfo, dict):
                 continue
+            user = self.bot.get_user(int(uid_str)) if uid_str.isdigit() else None
+            remaining_text, status_class = "?", "info"
             try:
-                user_id = int(uid_str)
-                user = self.bot.get_user(user_id)
-                user_name = html_mod.escape(str(user)) if user else f"ID: {user_id}"
-
-                ban_date_str = str(binfo.get("ban_date", ""))
-                unban_date_str = str(binfo.get("unban_date", ""))
-                balance = binfo.get("balance", "Desconocido")
-
-                remaining_text = "?"
-                is_ready = False
-                status_class = "warning"
-                try:
-                    unban_dt = datetime.datetime.fromisoformat(unban_date_str)
-                    remaining = unban_dt - now
-                    if remaining.total_seconds() <= 0:
-                        remaining_text = "Listo para prune"
-                        is_ready = True
-                        status_class = "danger"
-                        ready_count += 1
-                    else:
-                        days = remaining.days
-                        hours = remaining.seconds // 3600
-                        mins = (remaining.seconds % 3600) // 60
-                        remaining_text = f"{days}d {hours}h {mins}m"
-                        if days <= 1:
-                            status_class = "warning"
-                        else:
-                            status_class = "info"
-                except (ValueError, TypeError):
-                    pass
-
-                bans_list.append({
-                    "user_id": user_id,
-                    "user_name": user_name,
-                    "ban_date": ban_date_str[:10],
-                    "unban_date": unban_date_str[:10],
-                    "balance": str(balance),
-                    "remaining": remaining_text,
-                    "is_ready": is_ready,
-                    "status_class": status_class,
-                })
+                due = datetime.datetime.fromisoformat(str(binfo.get("unban_date", "")))
+                if due.tzinfo is None:
+                    due = due.replace(tzinfo=datetime.timezone.utc)
+                remaining = due - now
+                if remaining.total_seconds() <= 0:
+                    remaining_text, status_class = "En la proxima revision", "danger"
+                else:
+                    remaining_text = f"{remaining.days}d {remaining.seconds // 3600}h"
+                    status_class = "warning" if remaining.days < 1 else "info"
             except (ValueError, TypeError):
-                continue
-
-        bans_list.sort(key=lambda b: (not b["is_ready"], b["ban_date"]))
+                pass
+            bans_list.append({
+                "user_name": str(user) if user else f"ID: {uid_str}",
+                "ban_date": str(binfo.get("ban_date", ""))[:10],
+                "prune_date": str(binfo.get("unban_date", ""))[:10],
+                "balance": str(binfo.get("balance", "?")),
+                "remaining": remaining_text,
+                "status_class": status_class,
+            })
+        bans_list.sort(key=lambda b: b["prune_date"])
+        channels = [
+            {"id": ch.id, "name": f"#{ch.name}", "selected": ch.id == data.get("log_channel")}
+            for ch in sorted(guild.text_channels, key=lambda c: c.position)
+        ]
 
         source = """
 <div class="trini-tp-settings">
-  <h3 class="trini-tp-title"><i class="fa fa-gavel"></i> AutoPrune - Seguimiento de Baneos</h3>
-  <p class="trini-tp-subtitle">
-    {{ total_bans }} baneo{{ "s" if total_bans != 1 else "" }}
-    {% if ready_count > 0 %}
-      &bull; <span class="text-danger">{{ ready_count }} listo{{ "s" if ready_count != 1 else "" }} para prune</span>
-    {% endif %}
-  </p>
+  <h3 class="trini-tp-title"><i class="fa fa-gavel"></i> AutoPrune</h3>
+  <p class="trini-tp-subtitle">Borra los creditos de quien siga baneado pasados unos dias. Los baneos los registra el modlog.</p>
 
-  <div class="row mt-2 mb-2">
-    {% if log_channel %}
-    <div class="col-auto"><small class="text-muted"><i class="fa fa-hashtag"></i> Log prune: {{ log_channel }}</small></div>
-    {% endif %}
-    {% if ban_log_channel %}
-    <div class="col-auto"><small class="text-muted"><i class="fa fa-hashtag"></i> Log baneos: {{ ban_log_channel }}</small></div>
+  <div class="trini-tp-guild-section">
+    <div class="trini-tp-guild-header">
+      <h4><i class="fa fa-cog me-1"></i> Configuracion</h4>
+      {% if enabled %}<span class="badge bg-gradient-success">Activado</span>{% else %}<span class="badge bg-gradient-secondary">Desactivado</span>{% endif %}
+    </div>
+    {% if can_edit %}
+    <form method="POST" class="mt-3">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="row align-items-end">
+        <div class="col-lg-2 col-md-3 mb-3">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" name="enabled" id="ap-enabled" {{ "checked" if enabled }}>
+            <label class="form-check-label" for="ap-enabled">Activado</label>
+          </div>
+        </div>
+        <div class="col-lg-2 col-md-3 mb-3">
+          <label class="form-label text-xs mb-1">Dias de espera</label>
+          <input type="number" class="form-control form-control-sm" name="delay_days" value="{{ delay_days }}" min="0" max="365">
+        </div>
+        <div class="col-lg-4 col-md-6 mb-3">
+          <label class="form-label text-xs mb-1">Canal de logs</label>
+          <select class="form-select form-select-sm" name="log_channel">
+            <option value="">-- Ninguno --</option>
+            {% for ch in channels %}<option value="{{ ch.id }}" {{ "selected" if ch.selected }}>{{ ch.name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div class="col-lg-2 col-12 mb-3">
+          <button type="submit" class="btn btn-xs bg-gradient-info mb-0 w-100"><i class="fa fa-save me-1"></i> Guardar</button>
+        </div>
+      </div>
+    </form>
+    {% else %}
+    <p class="text-sm opacity-6 mt-2">Espera: {{ delay_days }} dias. Solo los administradores pueden cambiar la configuracion.</p>
     {% endif %}
   </div>
 
-  {% if bans|length > 0 %}
-  <div class="table-responsive">
-    <table class="table trini-table trini-tp-table">
-      <thead>
-        <tr>
-          <th>Usuario</th>
-          <th>Fecha baneo</th>
-          <th>Fecha prune</th>
-          <th>Créditos</th>
-          <th>Tiempo restante</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for ban in bans %}
-        <tr>
-          <td>{{ ban.user_name }}</td>
-          <td><small>{{ ban.ban_date }}</small></td>
-          <td><small>{{ ban.unban_date }}</small></td>
-          <td><strong>{{ ban.balance }}</strong></td>
-          <td>
-            {% if ban.is_ready %}
-              <span class="badge bg-gradient-danger"><i class="fa fa-exclamation-triangle me-1"></i>{{ ban.remaining }}</span>
-            {% else %}
-              <span class="badge bg-gradient-{{ ban.status_class }}"><i class="fa fa-clock-o me-1"></i>{{ ban.remaining }}</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+  <div class="trini-tp-guild-section">
+    <div class="trini-tp-guild-header">
+      <h4><i class="fa fa-clock-o me-1"></i> En seguimiento</h4>
+      <span class="badge bg-gradient-info">{{ bans|length }}</span>
+    </div>
+    {% if bans|length > 0 %}
+    <div class="table-responsive">
+      <table class="table trini-table trini-tp-table">
+        <thead><tr><th>Usuario</th><th>Baneado</th><th>Limpieza</th><th>Creditos</th><th>Falta</th></tr></thead>
+        <tbody>
+          {% for ban in bans %}
+          <tr>
+            <td>{{ ban.user_name }}</td>
+            <td><small>{{ ban.ban_date }}</small></td>
+            <td><small>{{ ban.prune_date }}</small></td>
+            <td><strong>{{ ban.balance }}</strong></td>
+            <td><span class="badge bg-gradient-{{ ban.status_class }}">{{ ban.remaining }}</span></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="trini-tp-empty"><i class="fa fa-gavel fa-3x"></i><p>No hay baneos en seguimiento.</p></div>
+    {% endif %}
   </div>
-  {% else %}
-  <div class="trini-tp-empty">
-    <i class="fa fa-gavel fa-3x"></i>
-    <p>No hay baneos en seguimiento en este servidor.</p>
-  </div>
-  {% endif %}
 </div>
 """
-
-        return {
+        result = {
             "status": 0,
             "web_content": {
                 "source": source,
                 "bans": bans_list,
-                "total_bans": len(bans_list),
-                "ready_count": ready_count,
-                "log_channel": log_ch_name,
-                "ban_log_channel": ban_log_ch_name,
+                "enabled": data.get("enabled", False),
+                "delay_days": data.get("delay_days", 7),
+                "channels": channels,
+                "can_edit": can_edit,
             },
         }
+        if notifications:
+            result["notifications"] = notifications
+        return result
