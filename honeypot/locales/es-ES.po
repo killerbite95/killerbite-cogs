@@ -462,3 +462,15 @@ msgstr "**Todo se ve bien.** El honeypot está totalmente operativo."
 #: honeypot.py:855
 msgid "🍯 Honeypot Diagnostic"
 msgstr "🍯 Diagnóstico del Honeypot"
+
+#: i18n_strings.py:11
+msgid "Honeypot Stats"
+msgstr "Estadísticas del Honeypot"
+
+#: i18n_strings.py:12
+msgid ""
+"Set the honeypot settings. Only the server owner can use this command for "
+"security reasons."
+msgstr ""
+"Configurar el honeypot. Por seguridad, solo el dueño del servidor puede usar"
+" este comando."

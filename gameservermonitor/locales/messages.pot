@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-09-28 11:26+0000\n"
+"POT-Creation-Date: 2026-09-28 11:34+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -657,6 +657,50 @@ msgstr ""
 #: gameservermonitor.py:2321 gameservermonitor.py:2376
 #: gameservermonitor.py:2429 gameservermonitor.py:2482
 msgid "❌ Server **{}** not found."
+msgstr ""
+
+#: i18n_strings.py:11
+msgid ""
+"\n"
+"        Shows detailed server statistics.\n"
+"        \n"
+"        You can use the real IP, public IP, or server_id.\n"
+"        \n"
+"        **Example:** `[p]serverstats 192.168.1.1:27015`\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:12
+msgid ""
+"\n"
+"        Shows the player history of a server with an ASCII graph.\n"
+"        \n"
+"        **Examples:**\n"
+"        `[p]gsmhistory 192.168.1.1:27015` - Last 24 hours\n"
+"        `[p]gsmhistory 192.168.1.1:27015 12` - Last 12 hours\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:13
+msgid ""
+"\n"
+"        Shows the list of players connected to a server.\n"
+"        \n"
+"        Displays name, score and connection time.\n"
+"        \n"
+"        **Example:** `[p]gsmplayers 192.168.1.1:27015`\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:14
+msgid ""
+"\n"
+"        Shows the current map of a server.\n"
+"        \n"
+"        For Minecraft servers, shows the version instead.\n"
+"        \n"
+"        **Example:** `[p]gsmmap 192.168.1.1:27015`\n"
+"        "
 msgstr ""
 
 #: models.py:51

@@ -188,7 +188,7 @@ class ColaCoins(DashboardIntegration, commands.Cog):
             else:
                 medal = f"{idx}."
 
-            leaderboard.append(f"{medal} **{username}** - {amount} {emoji} ColaCoins")
+            leaderboard.append(_("{medal} **{username}** - {amount} {emoji} ColaCoins").format(medal=medal, username=username, amount=amount, emoji=emoji))
 
         per_page = 10
         pages = [leaderboard[i:i + per_page] for i in range(0, len(leaderboard), per_page)]

@@ -1,17 +1,37 @@
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: killerbite-cogs\n"
-"POT-Creation-Date: 2026-04-19 00:00+0000\n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:34+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: redgettext\n"
+"Generated-By: redgettext 3.4.2\n"
 
+#: listroles.py:13
+#, docstring
+msgid "Cog to list server roles with their name and ID."
+msgstr ""
+
+#: listroles.py:23
+msgid ""
+"{pre_processed}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+
+#: listroles.py:28
+#, docstring
+msgid "List all server roles with their name and ID."
+msgstr ""
+
+#: listroles.py:31
 msgid "No roles found in this server."
 msgstr ""
 
+#: listroles.py:35 listroles.py:39
 msgid "Server roles:"
 msgstr ""

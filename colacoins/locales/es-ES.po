@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: killerbite-cogs\n"
@@ -10,41 +11,98 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: colacoins.py:16
+msgid "Manage ColaCoins for users."
+msgstr "Gestionar las ColaCoins de los usuarios."
+
+#: colacoins.py:74
+msgid "Give ColaCoins to a user."
+msgstr "Dar ColaCoins a un usuario."
+
+#: colacoins.py:76
 msgid "The amount to give must be positive."
 msgstr "El monto a dar debe ser positivo."
 
-msgid "{amount} {emoji} ColaCoins given to {user}. Now they have {total} {emoji} ColaCoins."
-msgstr "{amount} {emoji} ColaCoins dados a {user}. Ahora tiene {total} {emoji} ColaCoins."
+#: colacoins.py:85
+msgid ""
+"{amount} {emoji} ColaCoins given to {user}. Now they have {total} {emoji} "
+"ColaCoins."
+msgstr ""
+"{amount} {emoji} ColaCoins dados a {user}. Ahora tiene {total} {emoji} "
+"ColaCoins."
 
+#: colacoins.py:96
+msgid "Remove ColaCoins from a user."
+msgstr "Quitar ColaCoins a un usuario."
+
+#: colacoins.py:98
 msgid "The amount to remove must be positive."
 msgstr "El monto a quitar debe ser positivo."
 
-msgid "Cannot remove {amount} {emoji} ColaCoins. {user} does not have enough ColaCoins."
-msgstr "No se puede quitar {amount} {emoji} ColaCoins. {user} no tiene suficientes ColaCoins."
+#: colacoins.py:106
+msgid ""
+"Cannot remove {amount} {emoji} ColaCoins. {user} does not have enough "
+"ColaCoins."
+msgstr ""
+"No se puede quitar {amount} {emoji} ColaCoins. {user} no tiene suficientes "
+"ColaCoins."
 
-msgid "{amount} {emoji} ColaCoins removed from {user}. Now they have {total} {emoji} ColaCoins."
-msgstr "{amount} {emoji} ColaCoins quitadas a {user}. Ahora tiene {total} {emoji} ColaCoins."
+#: colacoins.py:114
+msgid ""
+"{amount} {emoji} ColaCoins removed from {user}. Now they have {total} "
+"{emoji} ColaCoins."
+msgstr ""
+"{amount} {emoji} ColaCoins quitadas a {user}. Ahora tiene {total} {emoji} "
+"ColaCoins."
 
+#: colacoins.py:125
+msgid "Check the ColaCoins amount of a user."
+msgstr "Ver cuántas ColaCoins tiene un usuario."
+
+#: colacoins.py:130
 msgid "{user} has {amount} {emoji} ColaCoins."
 msgstr "{user} tiene {amount} {emoji} ColaCoins."
 
+#: colacoins.py:137
+msgid "See how many ColaCoins you have."
+msgstr "Ver cuántas ColaCoins tienes."
+
+#: colacoins.py:142
 msgid "You have {amount} {emoji} ColaCoins."
 msgstr "Tienes {amount} {emoji} ColaCoins."
 
+#: colacoins.py:148
+msgid "Set the emoji for ColaCoins."
+msgstr "Fijar el emoji de las ColaCoins."
+
+#: colacoins.py:150
 msgid "ColaCoins emoji set to {emoji}."
 msgstr "Emoji de ColaCoins establecido a {emoji}."
 
+#: colacoins.py:155
+msgid "Shows a leaderboard of users with the most ColaCoins."
+msgstr "Muestra la clasificación de usuarios con más ColaCoins."
+
+#: colacoins.py:158
 msgid "There are no users with ColaCoins currently."
 msgstr "No hay usuarios con ColaCoins actualmente."
 
+#: colacoins.py:168
 msgid "There are no users with more than 0 ColaCoins currently."
 msgstr "No hay usuarios con ColaCoins de más de 0 actualmente."
 
+#: colacoins.py:178 colacoins.py:180
 msgid "User ID {user_id}"
 msgstr "Usuario ID {user_id}"
 
+#: colacoins.py:191
+msgid "{medal} **{username}** - {amount} {emoji} ColaCoins"
+msgstr "{medal} **{username}** - {amount} {emoji} ColaCoins"
+
+#: colacoins.py:199
 msgid "🏆 ColaCoins Leaderboard"
 msgstr "🏆 Leaderboard de ColaCoins"
 
+#: colacoins.py:204 colacoins.py:230 colacoins.py:238
 msgid "Page {current} of {total} • Total Users: {users}"
 msgstr "Página {current} de {total} • Total Usuarios: {users}"

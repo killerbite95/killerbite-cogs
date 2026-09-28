@@ -20,7 +20,7 @@ class ListRoles(DashboardIntegration, commands.Cog):
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre_processed = super().format_help_for_context(ctx)
-        return f"{pre_processed}\n\nVersion: {self.__version__}"
+        return _("{pre_processed}\n\nVersion: {version}").format(pre_processed=pre_processed, version=self.__version__)
 
     @commands.guild_only()
     @commands.command(name="listroles")

@@ -32,18 +32,23 @@ class SuggestionStatus(Enum):
     WONT_DO = "wont_do"
 
 
+def N_(text: str) -> str:
+    """Marca un texto de una constante para traducirlo al usarlo con ``_()``."""
+    return text
+
+
 # Status display configuration
 # Labels are in English; use _() at display time for translation
 STATUS_CONFIG = {
-    SuggestionStatus.PENDING: {"color": discord.Color.blue(), "emoji": "🔵", "label": "Pending"},
-    SuggestionStatus.IN_REVIEW: {"color": discord.Color.gold(), "emoji": "🟡", "label": "In Review"},
-    SuggestionStatus.PLANNED: {"color": discord.Color.purple(), "emoji": "🟣", "label": "Planned"},
-    SuggestionStatus.IN_PROGRESS: {"color": discord.Color.orange(), "emoji": "🟠", "label": "In Progress"},
-    SuggestionStatus.APPROVED: {"color": discord.Color.green(), "emoji": "🟢", "label": "Approved"},
-    SuggestionStatus.IMPLEMENTED: {"color": discord.Color.dark_green(), "emoji": "✅", "label": "Implemented"},
-    SuggestionStatus.DENIED: {"color": discord.Color.red(), "emoji": "🔴", "label": "Denied"},
-    SuggestionStatus.DUPLICATE: {"color": discord.Color.greyple(), "emoji": "🔄", "label": "Duplicate"},
-    SuggestionStatus.WONT_DO: {"color": discord.Color.dark_grey(), "emoji": "⛔", "label": "Won't Do"},
+    SuggestionStatus.PENDING: {"color": discord.Color.blue(), "emoji": "🔵", "label": N_("Pending")},
+    SuggestionStatus.IN_REVIEW: {"color": discord.Color.gold(), "emoji": "🟡", "label": N_("In Review")},
+    SuggestionStatus.PLANNED: {"color": discord.Color.purple(), "emoji": "🟣", "label": N_("Planned")},
+    SuggestionStatus.IN_PROGRESS: {"color": discord.Color.orange(), "emoji": "🟠", "label": N_("In Progress")},
+    SuggestionStatus.APPROVED: {"color": discord.Color.green(), "emoji": "🟢", "label": N_("Approved")},
+    SuggestionStatus.IMPLEMENTED: {"color": discord.Color.dark_green(), "emoji": "✅", "label": N_("Implemented")},
+    SuggestionStatus.DENIED: {"color": discord.Color.red(), "emoji": "🔴", "label": N_("Denied")},
+    SuggestionStatus.DUPLICATE: {"color": discord.Color.greyple(), "emoji": "🔄", "label": N_("Duplicate")},
+    SuggestionStatus.WONT_DO: {"color": discord.Color.dark_grey(), "emoji": "⛔", "label": N_("Won't Do")},
 }
 
 

@@ -1,3 +1,4 @@
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: killerbite-cogs\n"
@@ -10,8 +11,28 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: listroles.py:13
+msgid "Cog to list server roles with their name and ID."
+msgstr "Cog para listar los roles del servidor con su nombre e ID."
+
+#: listroles.py:23
+msgid ""
+"{pre_processed}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+"{pre_processed}\n"
+"\n"
+"Versión: {version}"
+
+#: listroles.py:28
+msgid "List all server roles with their name and ID."
+msgstr "Listar todos los roles del servidor con su nombre e ID."
+
+#: listroles.py:31
 msgid "No roles found in this server."
 msgstr "No se encontraron roles en este servidor."
 
+#: listroles.py:35 listroles.py:39
 msgid "Server roles:"
 msgstr "Roles del servidor:"

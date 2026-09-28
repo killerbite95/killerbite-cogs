@@ -4,7 +4,7 @@ Handles buttons, modals, and persistent views.
 """
 import discord
 from discord import ui
-from redbot.core.i18n import Translator
+from redbot.core.i18n import Translator, set_contextual_locales_from_guild
 from typing import Optional, TYPE_CHECKING
 import logging
 
@@ -42,6 +42,11 @@ class SuggestionModal(ui.Modal):
         )
         self.add_item(self.suggestion_text)
     
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
+    
     async def on_submit(self, interaction: discord.Interaction):
         # This will be handled by the cog
         self.interaction = interaction
@@ -65,6 +70,11 @@ class EditSuggestionModal(ui.Modal):
         )
         self.add_item(self.new_content)
     
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
+    
     async def on_submit(self, interaction: discord.Interaction):
         self.interaction = interaction
         self.value = self.new_content.value
@@ -86,6 +96,11 @@ class StatusChangeModal(ui.Modal):
             required=False
         )
         self.add_item(self.reason)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
     
     async def on_submit(self, interaction: discord.Interaction):
         self.interaction = interaction
@@ -147,6 +162,7 @@ class SuggestionView(ui.View):
     
     async def interaction_check(self, interaction: discord.Interaction) -> bool:
         """Check if the interaction is valid."""
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
         if not interaction.guild:
             return False
         return True
@@ -286,6 +302,11 @@ class StaffActionsView(ui.View):
             row=1
         )
         self.add_item(self.status_button)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
 
 
 class StatusSelectView(ui.View):
@@ -313,6 +334,11 @@ class StatusSelectView(ui.View):
         )
         self.select.callback = self.on_select
         self.add_item(self.select)
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
     
     async def on_select(self, interaction: discord.Interaction):
         """Handle status selection from dropdown."""
@@ -436,6 +462,11 @@ class SuggestionListView(ui.View):
         self.total_pages = max(1, (len(suggestions) + per_page - 1) // per_page)
         
         self._update_buttons()
+    
+    async def interaction_check(self, interaction: discord.Interaction) -> bool:
+        # Los callbacks no pasan por un comando: se usa el idioma del servidor.
+        await set_contextual_locales_from_guild(interaction.client, interaction.guild)
+        return await super().interaction_check(interaction)
     
     def _update_buttons(self):
         self.prev_button.disabled = self.page <= 1
@@ -628,6 +659,7 @@ async def handle_suggestion_interaction(cog: "SimpleSuggestions", interaction: d
     
     if not custom_id.startswith("suggestion:"):
         return False
+    await set_contextual_locales_from_guild(interaction.client, interaction.guild)
     
     parts = custom_id.split(":")
     if len(parts) < 3:

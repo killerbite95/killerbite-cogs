@@ -1,0 +1,187 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:35+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: adv_check.py:14
+#, docstring
+msgid ""
+"Advanced cog to run full checks on users with an interactive UI and Slash Command support.\n"
+"\n"
+"    Shows basic info, roles, join date, avatar, permissions, activity\n"
+"    and sanctions. The sanctions section reads the real ban data\n"
+"    (from the PruneBans ban cog) and silently runs the warnings command.\n"
+"    "
+msgstr ""
+
+#: adv_check.py:28
+msgid ""
+"{pre_processed}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+
+#: adv_check.py:69
+msgid "Basic info of {member}"
+msgstr ""
+
+#: adv_check.py:72
+msgid "ID"
+msgstr ""
+
+#: adv_check.py:73
+msgid "Name"
+msgstr ""
+
+#: adv_check.py:74
+msgid "Status"
+msgstr ""
+
+#: adv_check.py:81
+msgid "Has no roles."
+msgstr ""
+
+#: adv_check.py:83
+msgid "Roles of {member}"
+msgstr ""
+
+#: adv_check.py:95
+msgid "Joined on {date} ({days} days ago)"
+msgstr ""
+
+#: adv_check.py:100
+msgid "The join date is not available."
+msgstr ""
+
+#: adv_check.py:102
+msgid "Join date of {member}"
+msgstr ""
+
+#: adv_check.py:112
+msgid "Avatar of {member}"
+msgstr ""
+
+#: adv_check.py:122
+msgid "Has no special permissions."
+msgstr ""
+
+#: adv_check.py:124
+msgid "Permissions of {member}"
+msgstr ""
+
+#: adv_check.py:133
+msgid "Status: {status}\n"
+msgstr ""
+
+#: adv_check.py:136
+msgid "Activity: {name}"
+msgstr ""
+
+#: adv_check.py:140
+msgid "No activity recorded."
+msgstr ""
+
+#: adv_check.py:142
+msgid "Activity of {member}"
+msgstr ""
+
+#: adv_check.py:154
+msgid "No bans recorded."
+msgstr ""
+
+#: adv_check.py:164
+msgid ""
+"**Banned:** Yes\n"
+"**Ban date:** {ban_date}\n"
+"**Cleanup date:** {unban_date}\n"
+"**Credits:** {balance}"
+msgstr ""
+
+#: adv_check.py:166
+msgid "The ban cog was not found."
+msgstr ""
+
+#: adv_check.py:169
+msgid "No warnings recorded."
+msgstr ""
+
+#: adv_check.py:185
+msgid "Error while getting warnings."
+msgstr ""
+
+#: adv_check.py:191
+msgid "The warnings command is not available."
+msgstr ""
+
+#: adv_check.py:193
+msgid ""
+"{ban_info_str}\n"
+"\n"
+"**Warnings:** {warnings_info}"
+msgstr ""
+
+#: adv_check.py:195
+msgid "Sanctions of {member}"
+msgstr ""
+
+#: adv_check.py:214
+msgid "Only whoever ran the command can use this menu."
+msgstr ""
+
+#: adv_check.py:247
+msgid "The selected section was not found."
+msgstr ""
+
+#: i18n_strings.py:11
+msgid ""
+"Run a full check on the given user.\n"
+"\n"
+"Shows an interactive UI (ephemeral message) to browse:\n"
+"  • Basic info\n"
+"  • Roles\n"
+"  • Join date\n"
+"  • Avatar\n"
+"  • Permissions\n"
+"  • Activity\n"
+"  • Sanctions"
+msgstr ""
+
+#: i18n_strings.py:12
+msgid "Choose a section"
+msgstr ""
+
+#: i18n_strings.py:13
+msgid "ℹ️ Basic"
+msgstr ""
+
+#: i18n_strings.py:14
+msgid "👥 Roles"
+msgstr ""
+
+#: i18n_strings.py:15
+msgid "📅 Joined"
+msgstr ""
+
+#: i18n_strings.py:16
+msgid "🖼️ Avatar"
+msgstr ""
+
+#: i18n_strings.py:17
+msgid "🛡️ Permissions"
+msgstr ""
+
+#: i18n_strings.py:18
+msgid "⚡ Activity"
+msgstr ""
+
+#: i18n_strings.py:19
+msgid "🚫 Sanctions"
+msgstr ""

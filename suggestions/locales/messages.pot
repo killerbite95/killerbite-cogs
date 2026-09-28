@@ -1,110 +1,101 @@
-# SimpleSuggestions - Translation Template
-# By Killerbite95
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: SimpleSuggestions\n"
-"POT-Creation-Date: 2025-01-01 00:00+0000\n"
-"PO-Revision-Date: \n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:34+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: redgettext\n"
+"Generated-By: redgettext 3.4.2\n"
 
-# STATUS_CONFIG labels (storage.py)
-msgid "Pending"
-msgstr ""
-
-msgid "In Review"
-msgstr ""
-
-msgid "Planned"
-msgstr ""
-
-msgid "In Progress"
-msgstr ""
-
-msgid "Approved"
-msgstr ""
-
-msgid "Implemented"
-msgstr ""
-
-msgid "Denied"
-msgstr ""
-
-msgid "Duplicate"
-msgstr ""
-
-msgid "Won't Do"
-msgstr ""
-
-# embeds.py
+#: embeds.py:27 simplesuggestions.py:354
 msgid "Suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:41
 msgid "Status"
 msgstr ""
 
+#: embeds.py:49
 msgid "Votes"
 msgstr ""
 
+#: embeds.py:52
 msgid "ID: {suggestion_id} • {label}"
 msgstr ""
 
+#: embeds.py:69
 msgid "{emoji} Vote registered"
 msgstr ""
 
+#: embeds.py:71
 msgid "You voted in favor of suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:73
 msgid "You voted against suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:76
 msgid "🔄 Vote withdrawn"
 msgstr ""
 
+#: embeds.py:77
 msgid "You withdrew your vote from suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:80
 msgid "{emoji} Vote changed"
 msgstr ""
 
+#: embeds.py:82
 msgid "You changed your vote to in favor of suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:84
 msgid "You changed your vote to against suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:93
 msgid "Current votes"
 msgstr ""
 
+#: embeds.py:112
 msgid "📬 Update on your suggestion"
 msgstr ""
 
+#: embeds.py:113
 msgid "**Suggestion #{suggestion_id}** has changed status."
 msgstr ""
 
+#: embeds.py:118 views.py:36
 msgid "Your suggestion"
 msgstr ""
 
+#: embeds.py:124
 msgid "Status change"
 msgstr ""
 
+#: embeds.py:130
 msgid "Reason"
 msgstr ""
 
+#: embeds.py:132
 msgid "Updated by {name}"
 msgstr ""
 
+#: embeds.py:141
 msgid "📊 Votes - Suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:158 embeds.py:170
 msgid "Summary"
 msgstr ""
 
+#: embeds.py:159
 msgid ""
 "**Total:** {total} votes\n"
 "**In favor:** {upvotes} ({up_pct:.1f}%)\n"
@@ -113,262 +104,451 @@ msgid ""
 "{bar}"
 msgstr ""
 
+#: embeds.py:171
 msgid "No votes yet"
 msgstr ""
 
+#: embeds.py:178
 msgid "Score"
 msgstr ""
 
+#: embeds.py:193
 msgid "📋 Suggestion List"
 msgstr ""
 
+#: embeds.py:204
 msgid "No suggestions to show."
 msgstr ""
 
+#: embeds.py:215
 msgid "Page {page}/{total_pages}"
 msgstr ""
 
+#: embeds.py:223
 msgid "📜 History - Suggestion #{suggestion_id}"
 msgstr ""
 
+#: embeds.py:228
 msgid "No changes recorded."
 msgstr ""
 
+#: embeds.py:233
 msgid "Unknown"
 msgstr ""
 
+#: embeds.py:245
 msgid "• {old_emoji} → {new_emoji} by **{user_name}**"
 msgstr ""
 
-# views.py
-msgid "New Suggestion"
-msgstr ""
-
-msgid "Your suggestion"
-msgstr ""
-
-msgid "Describe your suggestion in detail..."
-msgstr ""
-
-msgid "Edit Suggestion"
-msgstr ""
-
-msgid "Suggestion content"
-msgstr ""
-
-msgid "Change to: {label}"
-msgstr ""
-
-msgid "Reason (optional)"
-msgstr ""
-
-msgid "Explain the reason for the status change..."
-msgstr ""
-
-msgid "View votes"
-msgstr ""
-
-msgid "Edit"
-msgstr ""
-
-msgid "❌ Suggestion not found."
-msgstr ""
-
-msgid "❌ Only the author can edit this suggestion."
-msgstr ""
-
-msgid "❌ You cannot edit a suggestion with status: {label}"
-msgstr ""
-
-msgid "✅ Suggestion edited."
-msgstr ""
-
-msgid "Approve"
-msgstr ""
-
-msgid "Deny"
-msgstr ""
-
-msgid "Change status"
-msgstr ""
-
-msgid "Select a status..."
-msgstr ""
-
-msgid "ℹ️ The suggestion already has the status: {emoji} {label}"
-msgstr ""
-
-msgid "❌ Error updating."
-msgstr ""
-
-msgid "✅ Status changed to: {emoji} {label}"
-msgstr ""
-
-msgid "❌ This command can only be used in a server."
-msgstr ""
-
-msgid "❌ Could not verify your membership in the server."
-msgstr ""
-
+#: i18n_strings.py:11
 msgid ""
-"❌ You don't have permission to perform this action.\n"
-"You need to be an **Administrator**, have **Manage Server** permission, "
-"or have the configured staff role."
+"\n"
+"        Submit a new suggestion.\n"
+"        \n"
+"        You can type the suggestion directly or use the interactive modal.\n"
+"        \n"
+"        **Examples:**\n"
+"        - `[p]suggest Add more emojis to the server`\n"
+"        - `[p]suggest` (opens a modal to write)\n"
+"        "
 msgstr ""
 
-msgid "Select the new status:"
+#: i18n_strings.py:12
+msgid ""
+"\n"
+"        Edit your own suggestion (only if pending).\n"
+"        \n"
+"        **Examples:**\n"
+"        - `[p]editsuggest #123 New text for my suggestion`\n"
+"        - `[p]editsuggest 1234567890 New text`\n"
+"        "
 msgstr ""
 
-# simplesuggestions.py
+#: i18n_strings.py:13
+msgid "View your own suggestions."
+msgstr ""
+
+#: i18n_strings.py:14
+msgid ""
+"\n"
+"        Approve a suggestion.\n"
+"        \n"
+"        **Examples:**\n"
+"        - `[p]approve #123`\n"
+"        - `[p]approve #123 Great idea, we'll implement it`\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:15
+msgid ""
+"\n"
+"        Deny a suggestion.\n"
+"        \n"
+"        **Examples:**\n"
+"        - `[p]deny #123`\n"
+"        - `[p]deny #123 Not feasible at this time`\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:16
+msgid ""
+"\n"
+"        Change the status of a suggestion.\n"
+"        \n"
+"        **Available statuses:**\n"
+"        pending, in_review, planned, in_progress, approved, implemented, denied, duplicate, wont_do\n"
+"        "
+msgstr ""
+
+#: i18n_strings.py:17
+msgid "List server suggestions."
+msgstr ""
+
+#: i18n_strings.py:18
+msgid "View detailed information about a suggestion."
+msgstr ""
+
+#: i18n_strings.py:19
+msgid "View the change history of a suggestion."
+msgstr ""
+
+#: i18n_strings.py:20
+msgid "Pending"
+msgstr ""
+
+#: i18n_strings.py:21
+msgid "In Review"
+msgstr ""
+
+#: i18n_strings.py:22
+msgid "Planned"
+msgstr ""
+
+#: i18n_strings.py:23
+msgid "In Progress"
+msgstr ""
+
+#: i18n_strings.py:24
+msgid "Approved"
+msgstr ""
+
+#: i18n_strings.py:25
+msgid "Implemented"
+msgstr ""
+
+#: i18n_strings.py:26
+msgid "Denied"
+msgstr ""
+
+#: i18n_strings.py:27
+msgid "Duplicate"
+msgstr ""
+
+#: i18n_strings.py:28
+msgid "Won't Do"
+msgstr ""
+
+#: simplesuggestions.py:53
+#, docstring
+msgid ""
+"\n"
+"    A comprehensive suggestion system with interactive buttons, persistent voting,\n"
+"    multiple statuses, and web control panel.\n"
+"    \n"
+"    By Killerbite95\n"
+"    "
+msgstr ""
+
+#: simplesuggestions.py:313
 msgid "❌ The suggestion channel has not been configured."
 msgstr ""
 
+#: simplesuggestions.py:327
 msgid "❌ Please include your suggestion: `[p]suggest <your suggestion>`"
 msgstr ""
 
+#: simplesuggestions.py:364
 msgid "✅ Your suggestion **#{suggestion_id}** has been sent in {channel}"
 msgstr ""
 
+#: simplesuggestions.py:393 simplesuggestions.py:556 simplesuggestions.py:670
+#: simplesuggestions.py:705 simplesuggestions.py:771
 msgid "❌ That suggestion was not found."
 msgstr ""
 
+#: simplesuggestions.py:398 simplesuggestions.py:561 simplesuggestions.py:675
+#: simplesuggestions.py:710 simplesuggestions.py:778 views.py:162 views.py:172
+#: views.py:217 views.py:330 views.py:545
+msgid "❌ Suggestion not found."
+msgstr ""
+
+#: simplesuggestions.py:402
 msgid "❌ You can only edit your own suggestions."
 msgstr ""
 
+#: simplesuggestions.py:408 views.py:182
+msgid "❌ You cannot edit a suggestion with status: {label}"
+msgstr ""
+
+#: simplesuggestions.py:430
 msgid "✅ Your suggestion has been edited."
 msgstr ""
 
+#: simplesuggestions.py:443
 msgid "You have no suggestions."
 msgstr ""
 
+#: simplesuggestions.py:539
 msgid "❌ Invalid status: {status}"
 msgstr ""
 
+#: simplesuggestions.py:608
 msgid "✅ Suggestion #{suggestion_id} updated to: {emoji} {label}"
 msgstr ""
 
+#: simplesuggestions.py:650
 msgid "No suggestions found."
 msgstr ""
 
+#: simplesuggestions.py:683
 msgid "📝 Additional information"
 msgstr ""
 
+#: simplesuggestions.py:684
 msgid ""
 "**Message ID:** {message_id}\n"
 "**Thread:** {thread}\n"
 "**Changes:** {changes}"
 msgstr ""
 
+#: simplesuggestions.py:688
 msgid "Yes"
 msgstr ""
 
+#: simplesuggestions.py:688
 msgid "No"
 msgstr ""
 
+#: simplesuggestions.py:721
+#, docstring
+msgid "Suggestion administration commands."
+msgstr ""
+
+#: simplesuggestions.py:727
+#, docstring
+msgid ""
+"\n"
+"        Sync suggestions by verifying which messages still exist.\n"
+"        Marks as deleted those suggestions whose message no longer exists.\n"
+"        "
+msgstr ""
+
+#: simplesuggestions.py:735 simplesuggestions.py:786
 msgid "❌ No suggestion channel configured."
 msgstr ""
 
+#: simplesuggestions.py:738
 msgid "🔄 Syncing suggestions..."
 msgstr ""
 
+#: simplesuggestions.py:755
 msgid ""
 "✅ Sync completed:\n"
 "• Valid suggestions: {valid}\n"
 "• Marked as deleted: {deleted}"
 msgstr ""
 
-msgid "❌ Suggestion not found."
+#: simplesuggestions.py:762
+#, docstring
+msgid ""
+"\n"
+"        Re-publish a deleted suggestion keeping its original ID.\n"
+"        \n"
+"        **Usage:** `[p]suggestadmin repost #123`\n"
+"        "
 msgstr ""
 
+#: simplesuggestions.py:796
 msgid "✅ Suggestion #{suggestion_id} reposted: {url}"
 msgstr ""
 
+#: simplesuggestions.py:802
+#, docstring
+msgid ""
+"\n"
+"        Permanently delete suggestions from the record.\n"
+"        \n"
+"        **Options:**\n"
+"        - `deleted`: Delete suggestions marked as deleted\n"
+"        \n"
+"        **Usage:** `[p]suggestadmin purge deleted`\n"
+"        "
+msgstr ""
+
+#: simplesuggestions.py:812
 msgid ""
 "⚠️ This will permanently delete all suggestions marked as deleted.\n"
 "Are you sure? Reply `confirm` within 30 seconds."
 msgstr ""
 
+#: simplesuggestions.py:822
 msgid "❌ Operation cancelled."
 msgstr ""
 
+#: simplesuggestions.py:825
 msgid "❌ Timed out."
 msgstr ""
 
+#: simplesuggestions.py:829
 msgid "✅ {count} suggestions permanently deleted."
 msgstr ""
 
+#: simplesuggestions.py:831
 msgid "❌ Invalid option. Use: `deleted`"
 msgstr ""
 
+#: simplesuggestions.py:838
+#, docstring
+msgid "Suggestion system configuration."
+msgstr ""
+
+#: simplesuggestions.py:844
+#, docstring
+msgid "Set the suggestion channel."
+msgstr ""
+
+#: simplesuggestions.py:846
 msgid "✅ Suggestion channel: {channel}"
 msgstr ""
 
+#: simplesuggestions.py:850
+#, docstring
+msgid "Set the log channel (or disable with no argument)."
+msgstr ""
+
+#: simplesuggestions.py:853
 msgid "✅ Log channel: {channel}"
 msgstr ""
 
+#: simplesuggestions.py:856
 msgid "✅ Log channel disabled."
 msgstr ""
 
+#: simplesuggestions.py:860
+#, docstring
+msgid "Alternative channel for notifications (if DM fails)."
+msgstr ""
+
+#: simplesuggestions.py:863
 msgid "✅ Notification channel: {channel}"
 msgstr ""
 
+#: simplesuggestions.py:866
 msgid "✅ Notification channel disabled."
 msgstr ""
 
+#: simplesuggestions.py:870
+#, docstring
+msgid "Set the staff role that can manage suggestions."
+msgstr ""
+
+#: simplesuggestions.py:873
 msgid "✅ Staff role: {role}"
 msgstr ""
 
+#: simplesuggestions.py:876
 msgid "✅ Staff role removed."
 msgstr ""
 
+#: simplesuggestions.py:880
+#, docstring
+msgid "Toggle between buttons and reactions."
+msgstr ""
+
+#: simplesuggestions.py:883
 msgid "buttons"
 msgstr ""
 
+#: simplesuggestions.py:883
 msgid "reactions"
 msgstr ""
 
+#: simplesuggestions.py:884
 msgid "✅ Interaction mode: **{mode}**"
 msgstr ""
 
+#: simplesuggestions.py:888
+#, docstring
+msgid "Enable/disable automatic threads."
+msgstr ""
+
+#: simplesuggestions.py:891 simplesuggestions.py:899 simplesuggestions.py:907
 msgid "enabled"
 msgstr ""
 
+#: simplesuggestions.py:891 simplesuggestions.py:899 simplesuggestions.py:907
 msgid "disabled"
 msgstr ""
 
+#: simplesuggestions.py:892
 msgid "✅ Automatic threads: **{state}**"
 msgstr ""
 
+#: simplesuggestions.py:896
+#, docstring
+msgid "Enable/disable automatic thread archiving."
+msgstr ""
+
+#: simplesuggestions.py:900
 msgid "✅ Automatic thread archiving: **{state}**"
 msgstr ""
 
+#: simplesuggestions.py:904
+#, docstring
+msgid "Enable/disable author notifications."
+msgstr ""
+
+#: simplesuggestions.py:908
 msgid "✅ Author notifications: **{state}**"
 msgstr ""
 
+#: simplesuggestions.py:912
+#, docstring
+msgid "Show the current configuration."
+msgstr ""
+
+#: simplesuggestions.py:921
 msgid "⚙️ Suggestion Settings"
 msgstr ""
 
+#: simplesuggestions.py:926
 msgid "📢 Channels"
 msgstr ""
 
+#: simplesuggestions.py:927
 msgid ""
 "**Suggestions:** {suggestions}\n"
 "**Logs:** {logs}\n"
 "**Notifications:** {notifications}"
 msgstr ""
 
+#: simplesuggestions.py:930
 msgid "Not configured"
 msgstr ""
 
+#: simplesuggestions.py:931
 msgid "Disabled"
 msgstr ""
 
+#: simplesuggestions.py:932
 msgid "DM"
 msgstr ""
 
+#: simplesuggestions.py:938
 msgid "🔧 Options"
 msgstr ""
 
+#: simplesuggestions.py:939
 msgid ""
 "**Mode:** {mode}\n"
 "**Automatic threads:** {threads}\n"
@@ -376,25 +556,142 @@ msgid ""
 "**Notify author:** {notify}"
 msgstr ""
 
+#: simplesuggestions.py:943
 msgid "Buttons"
 msgstr ""
 
+#: simplesuggestions.py:943
 msgid "Reactions"
 msgstr ""
 
+#: simplesuggestions.py:952
 msgid "👥 Permissions"
 msgstr ""
 
+#: simplesuggestions.py:953
 msgid "**Staff role:** {role}"
 msgstr ""
 
+#: simplesuggestions.py:954
 msgid "Admins only"
 msgstr ""
 
+#: simplesuggestions.py:960
 msgid "📊 Statistics"
 msgstr ""
 
+#: simplesuggestions.py:961
 msgid ""
 "**Total suggestions:** {total}\n"
 "**Current counter:** #{counter}"
+msgstr ""
+
+#: simplesuggestions.py:976
+#, docstring
+msgid "[Legacy] Use [p]suggestset channel"
+msgstr ""
+
+#: simplesuggestions.py:982
+#, docstring
+msgid "[Legacy] Use [p]suggestset logchannel"
+msgstr ""
+
+#: simplesuggestions.py:988
+#, docstring
+msgid "[Legacy] Use [p]suggestset threads"
+msgstr ""
+
+#: simplesuggestions.py:994
+#, docstring
+msgid "[Legacy] Use [p]suggestset autoarchive"
+msgstr ""
+
+#: views.py:34
+msgid "New Suggestion"
+msgstr ""
+
+#: views.py:38
+msgid "Describe your suggestion in detail..."
+msgstr ""
+
+#: views.py:56
+msgid "Edit Suggestion"
+msgstr ""
+
+#: views.py:59
+msgid "Suggestion content"
+msgstr ""
+
+#: views.py:79
+msgid "Change to: {label}"
+msgstr ""
+
+#: views.py:82
+msgid "Reason (optional)"
+msgstr ""
+
+#: views.py:84
+msgid "Explain the reason for the status change..."
+msgstr ""
+
+#: views.py:131
+msgid "View votes"
+msgstr ""
+
+#: views.py:140
+msgid "Edit"
+msgstr ""
+
+#: views.py:176
+msgid "❌ Only the author can edit this suggestion."
+msgstr ""
+
+#: views.py:202
+msgid "✅ Suggestion edited."
+msgstr ""
+
+#: views.py:264
+msgid "Approve"
+msgstr ""
+
+#: views.py:273
+msgid "Deny"
+msgstr ""
+
+#: views.py:282
+msgid "Change status"
+msgstr ""
+
+#: views.py:310
+msgid "Select a status..."
+msgstr ""
+
+#: views.py:339
+msgid "ℹ️ The suggestion already has the status: {emoji} {label}"
+msgstr ""
+
+#: views.py:363 views.py:571
+msgid "❌ Error updating."
+msgstr ""
+
+#: views.py:410 views.py:611
+msgid "✅ Status changed to: {emoji} {label}"
+msgstr ""
+
+#: views.py:502
+msgid "❌ This command can only be used in a server."
+msgstr ""
+
+#: views.py:514
+msgid "❌ Could not verify your membership in the server."
+msgstr ""
+
+#: views.py:532
+msgid ""
+"❌ You don't have permission to perform this action.\n"
+"You need to be an **Administrator**, have **Manage Server** permission, or have the configured staff role."
+msgstr ""
+
+#: views.py:686
+msgid "Select the new status:"
 msgstr ""

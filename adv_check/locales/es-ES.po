@@ -1,0 +1,212 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: adv_check\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: adv_check.py:14
+msgid ""
+"Advanced cog to run full checks on users with an interactive UI and Slash Command support.\n"
+"\n"
+"    Shows basic info, roles, join date, avatar, permissions, activity\n"
+"    and sanctions. The sanctions section reads the real ban data\n"
+"    (from the PruneBans ban cog) and silently runs the warnings command.\n"
+"    "
+msgstr ""
+"Cog avanzado para realizar verificaciones completas en usuarios con UI interactiva y soporte para Slash Commands.\n"
+"    \n"
+"    Muestra información básica, roles, fecha de ingreso, avatar, permisos, actividad\n"
+"    y sanciones. En el apartado de sanciones se obtiene la información real de baneos\n"
+"    (desde el cog de baneos PruneBans) y se invoca de forma \"invisible\" el comando de warnings.\n"
+"    "
+
+#: adv_check.py:28
+msgid ""
+"{pre_processed}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+"{pre_processed}\n"
+"\n"
+"Versión: {version}"
+
+#: adv_check.py:69
+msgid "Basic info of {member}"
+msgstr "Información Básica de {member}"
+
+#: adv_check.py:72
+msgid "ID"
+msgstr "ID"
+
+#: adv_check.py:73
+msgid "Name"
+msgstr "Nombre"
+
+#: adv_check.py:74
+msgid "Status"
+msgstr "Estado"
+
+#: adv_check.py:81
+msgid "Has no roles."
+msgstr "No tiene roles asignados."
+
+#: adv_check.py:83
+msgid "Roles of {member}"
+msgstr "Roles de {member}"
+
+#: adv_check.py:95
+msgid "Joined on {date} ({days} days ago)"
+msgstr "Se unió el {date} (hace {days} días)"
+
+#: adv_check.py:100
+msgid "The join date is not available."
+msgstr "La fecha de ingreso no está disponible."
+
+#: adv_check.py:102
+msgid "Join date of {member}"
+msgstr "Fecha de Ingreso de {member}"
+
+#: adv_check.py:112
+msgid "Avatar of {member}"
+msgstr "Avatar de {member}"
+
+#: adv_check.py:122
+msgid "Has no special permissions."
+msgstr "No tiene permisos especiales."
+
+#: adv_check.py:124
+msgid "Permissions of {member}"
+msgstr "Permisos de {member}"
+
+#: adv_check.py:133
+msgid "Status: {status}\n"
+msgstr "Estado: {status}\n"
+
+#: adv_check.py:136
+msgid "Activity: {name}"
+msgstr "Actividad: {name}"
+
+#: adv_check.py:140
+msgid "No activity recorded."
+msgstr "No tiene actividad registrada."
+
+#: adv_check.py:142
+msgid "Activity of {member}"
+msgstr "Actividad de {member}"
+
+#: adv_check.py:154
+msgid "No bans recorded."
+msgstr "No hay baneos registrados."
+
+#: adv_check.py:164
+msgid ""
+"**Banned:** Yes\n"
+"**Ban date:** {ban_date}\n"
+"**Cleanup date:** {unban_date}\n"
+"**Credits:** {balance}"
+msgstr ""
+"**Baneado:** Sí\n"
+"**Fecha de baneo:** {ban_date}\n"
+"**Fecha de finalización:** {unban_date}\n"
+"**Créditos:** {balance}"
+
+#: adv_check.py:166
+msgid "The ban cog was not found."
+msgstr "No se encontró el cog de baneos."
+
+#: adv_check.py:169
+msgid "No warnings recorded."
+msgstr "No hay warnings registrados."
+
+#: adv_check.py:185
+msgid "Error while getting warnings."
+msgstr "Error al obtener warnings."
+
+#: adv_check.py:191
+msgid "The warnings command is not available."
+msgstr "El comando warnings no está disponible."
+
+#: adv_check.py:193
+msgid ""
+"{ban_info_str}\n"
+"\n"
+"**Warnings:** {warnings_info}"
+msgstr ""
+"{ban_info_str}\n"
+"\n"
+"**Advertencias:** {warnings_info}"
+
+#: adv_check.py:195
+msgid "Sanctions of {member}"
+msgstr "Sanciones de {member}"
+
+#: adv_check.py:214
+msgid "Only whoever ran the command can use this menu."
+msgstr "Solo quien ejecuto el comando puede usar este menu."
+
+#: adv_check.py:247
+msgid "The selected section was not found."
+msgstr "No se encontró la sección seleccionada."
+
+#: i18n_strings.py:11
+msgid ""
+"Run a full check on the given user.\n"
+"\n"
+"Shows an interactive UI (ephemeral message) to browse:\n"
+"  • Basic info\n"
+"  • Roles\n"
+"  • Join date\n"
+"  • Avatar\n"
+"  • Permissions\n"
+"  • Activity\n"
+"  • Sanctions"
+msgstr ""
+"\n"
+"        Realiza una verificación completa del usuario especificado.\n"
+"\n"
+"        Muestra una UI interactiva (mensaje ephemeral) para navegar entre:\n"
+"          • Información Básica\n"
+"          • Roles\n"
+"          • Fecha de Ingreso\n"
+"          • Avatar\n"
+"          • Permisos\n"
+"          • Actividad\n"
+"          • Sanciones\n"
+"        "
+
+#: i18n_strings.py:12
+msgid "Choose a section"
+msgstr "Selecciona una sección"
+
+#: i18n_strings.py:13
+msgid "ℹ️ Basic"
+msgstr "ℹ️ Básica"
+
+#: i18n_strings.py:14
+msgid "👥 Roles"
+msgstr "👥 Roles"
+
+#: i18n_strings.py:15
+msgid "📅 Joined"
+msgstr "📅 Ingreso"
+
+#: i18n_strings.py:16
+msgid "🖼️ Avatar"
+msgstr "🖼️ Avatar"
+
+#: i18n_strings.py:17
+msgid "🛡️ Permissions"
+msgstr "🛡️ Permisos"
+
+#: i18n_strings.py:18
+msgid "⚡ Activity"
+msgstr "⚡ Actividad"
+
+#: i18n_strings.py:19
+msgid "🚫 Sanctions"
+msgstr "🚫 Sanciones"
