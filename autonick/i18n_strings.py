@@ -1,0 +1,11 @@
+"""Generado automaticamente. No se importa: solo sirve para que ``redgettext``
+extraiga al catalogo los textos que no detecta por si solo (constantes marcadas
+con N_(), docstrings de comandos hibridos y textos dentro de decoradores).
+"""
+from redbot.core.i18n import Translator
+
+_ = Translator("AutoNick", __file__)
+
+
+def _strings() -> None:
+    _("Main AutoNick command group.\nUse `/autonick help` to see every subcommand.")

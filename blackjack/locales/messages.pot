@@ -1,0 +1,295 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-09-28 11:39+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: blackjack.py:42
+msgid ""
+"**Quick Blackjack rules:**\n"
+"• **Hit**: Draw another card.\n"
+"• **Stand**: Keep your current hand.\n"
+"• **Double Down**: Double the bet for this hand, take exactly 1 more card and stand.\n"
+"• **Split**: If your first 2 cards have the same value you can split them into 2 hands (extra bet equal to the base bet).\n"
+"• The dealer stands on 17 or more.\n"
+"• Going over 21 loses.\n"
+"• Blackjack = 21 with 2 cards.\n"
+msgstr ""
+
+#: blackjack.py:62
+msgid "{author}, time is up: you stand automatically."
+msgstr ""
+
+#: blackjack.py:70
+#, docstring
+msgid ""
+"Advanced Blackjack cog with economy, interactive buttons, admin tools and an"
+" improved UI."
+msgstr ""
+
+#: blackjack.py:113
+#, docstring
+msgid ""
+"Start a Blackjack game with the given bet.\n"
+"        Example: `[p]blackjack 100`\n"
+"        "
+msgstr ""
+
+#: blackjack.py:117
+msgid "The bet must be greater than 0."
+msgstr ""
+
+#: blackjack.py:119
+msgid ""
+"You already have a game in progress. Finish it before starting another one."
+msgstr ""
+
+#: blackjack.py:123
+msgid "You don't have enough balance for that bet."
+msgstr ""
+
+#: blackjack.py:149
+msgid "Blackjack: Hand #1"
+msgstr ""
+
+#: blackjack.py:151
+msgid ""
+"Base bet: {bet} | Balance after betting: {value}\n"
+"Use the buttons to play."
+msgstr ""
+
+#: blackjack.py:163 blackjack.py:192 blackjack.py:210 blackjack.py:250
+msgid "You don't have an active game."
+msgstr ""
+
+#: blackjack.py:165 blackjack.py:194 blackjack.py:212 blackjack.py:252
+msgid "That hand is already finished."
+msgstr ""
+
+#: blackjack.py:175
+msgid "Hand #{value} - You busted with {val}."
+msgstr ""
+
+#: blackjack.py:178
+msgid " Playing hand #{value}..."
+msgstr ""
+
+#: blackjack.py:185
+msgid "Blackjack: Hand #{value}"
+msgstr ""
+
+#: blackjack.py:198
+msgid "You stood on hand #{active_hand}."
+msgstr ""
+
+#: blackjack.py:200
+msgid "Hand #{value}..."
+msgstr ""
+
+#: blackjack.py:217
+msgid "You can only double down with 2 cards in hand."
+msgstr ""
+
+#: blackjack.py:219
+msgid "You already doubled down on this hand."
+msgstr ""
+
+#: blackjack.py:224
+msgid "You don't have enough balance to double the bet."
+msgstr ""
+
+#: blackjack.py:233
+msgid "Hand #{value} - You doubled the bet."
+msgstr ""
+
+#: blackjack.py:234 blackjack.py:285
+msgid "Total bet: {total_bet} | Current balance: {value}"
+msgstr ""
+
+#: blackjack.py:236
+msgid " You busted with {val}."
+msgstr ""
+
+#: blackjack.py:240
+msgid " Now hand #{value}..."
+msgstr ""
+
+#: blackjack.py:257
+msgid "You can only split with exactly 2 cards."
+msgstr ""
+
+#: blackjack.py:259
+msgid "You can only split once in this version."
+msgstr ""
+
+#: blackjack.py:261
+msgid "You can only split if both cards have the same value."
+msgstr ""
+
+#: blackjack.py:266
+msgid "You don't have enough balance to split."
+msgstr ""
+
+#: blackjack.py:284
+msgid "You split your hand. You now have {count} hands."
+msgstr ""
+
+#: blackjack.py:316
+msgid "Hand {value}: ❌ You lost (busted)."
+msgstr ""
+
+#: blackjack.py:320
+msgid "Hand {value}: ✅ Dealer busted, you won {value2}!"
+msgstr ""
+
+#: blackjack.py:324
+msgid "Hand {value}: ✅ You won {value2} (your {val} vs dealer {dealer_val})."
+msgstr ""
+
+#: blackjack.py:326
+msgid "Hand {value}: ❌ You lost (your {val} vs dealer {dealer_val})."
+msgstr ""
+
+#: blackjack.py:329
+msgid "Hand {value}: ⚠️ Push, you get {portion_bet} back."
+msgstr ""
+
+#: blackjack.py:343
+msgid "Final result"
+msgstr ""
+
+#: blackjack.py:346
+msgid "Dealer"
+msgstr ""
+
+#: blackjack.py:346
+msgid "Value: **{dealer_val}**"
+msgstr ""
+
+#: blackjack.py:347
+msgid "Summary"
+msgstr ""
+
+#: blackjack.py:348
+msgid "Total winnings: {total_win} credits."
+msgstr ""
+
+#: blackjack.py:407
+msgid "Error: game not found."
+msgstr ""
+
+#: blackjack.py:411
+msgid "**Dealer:** {format_hand}"
+msgstr ""
+
+#: blackjack.py:413
+msgid " (Value: **{hand_value}**)"
+msgstr ""
+
+#: blackjack.py:417
+msgid "**Your hand #{value}**"
+msgstr ""
+
+#: blackjack.py:421
+msgid " - **BUSTED!**"
+msgstr ""
+
+#: blackjack.py:425
+msgid "Value: **{val}**"
+msgstr ""
+
+#: blackjack.py:456
+#, docstring
+msgid ""
+"Blackjack admin commands.\n"
+"        Configure how cards are shown using emojis.\n"
+"        "
+msgstr ""
+
+#: blackjack.py:464
+#, docstring
+msgid ""
+"Set the emoji for a specific rank.\n"
+"        Example: `[p]bjadmin setrank A 🅰️`\n"
+"        Allowed ranks: A, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K.\n"
+"        "
+msgstr ""
+
+#: blackjack.py:470
+msgid "Invalid rank. Allowed ranks: "
+msgstr ""
+
+#: blackjack.py:473
+msgid "Rank **{rank}** set to: {emoji}"
+msgstr ""
+
+#: blackjack.py:477
+#, docstring
+msgid ""
+"Set the emoji for a specific suit.\n"
+"        Example: `[p]bjadmin setsuit ♠️ 🃑`\n"
+"        Allowed suits: ♣, ♦, ♥, ♠.\n"
+"        "
+msgstr ""
+
+#: blackjack.py:483
+msgid "Invalid suit. Allowed suits: "
+msgstr ""
+
+#: blackjack.py:486
+msgid "Suit **{suit}** set to: {emoji}"
+msgstr ""
+
+#: blackjack.py:490
+#, docstring
+msgid "Show the current card emoji settings."
+msgstr ""
+
+#: blackjack.py:491
+msgid ""
+"**Current card settings:**\n"
+"\n"
+"**Ranks:**\n"
+msgstr ""
+
+#: blackjack.py:494
+msgid ""
+"\n"
+"**Suits:**\n"
+msgstr ""
+
+#: blackjack.py:501
+#, docstring
+msgid "Reset the card emoji settings to the defaults."
+msgstr ""
+
+#: blackjack.py:508
+msgid "The card settings have been reset to the defaults."
+msgstr ""
+
+#: i18n_strings.py:11
+msgid "Hit"
+msgstr ""
+
+#: i18n_strings.py:12
+msgid "Stand"
+msgstr ""
+
+#: i18n_strings.py:13
+msgid "Double Down"
+msgstr ""
+
+#: i18n_strings.py:14
+msgid "Split"
+msgstr ""
+
+#: i18n_strings.py:15
+msgid "Help"
+msgstr ""

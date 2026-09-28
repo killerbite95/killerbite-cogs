@@ -4,6 +4,9 @@ import re
 from typing import List, Optional
 from redbot.core import commands, Config, checks
 from .dashboard_integration import DashboardIntegration
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("AutoNick", __file__)
 
 DEFAULT_FORBIDDEN_NAMES = [
     # Palabrotas y ofensas
@@ -15,12 +18,12 @@ DEFAULT_FORBIDDEN_NAMES = [
     "xi jinping"
 ]
 
+@cog_i18n(_)
 class AutoNick(DashboardIntegration, commands.Cog):
-    """
-    Cog que permite a los usuarios establecer su apodo mediante el envío de un mensaje en un canal configurado.
-    Se valida el contenido del nombre para evitar palabrotas y nombres prohibidos (incluyendo dictadores y famosos).
+    """Lets users set their nickname by sending a message in a configured channel.
+    The name is checked to block swear words and forbidden names (including dictators and celebrities).
 
-    Comandos disponibles (como slash o prefijo):
+    Available commands (slash or prefix):
       • /autonick setchannel
       • /autonick setcooldown
       • /autonick info
@@ -101,6 +104,7 @@ class AutoNick(DashboardIntegration, commands.Cog):
             return
         if await self.bot.cog_disabled_in_guild(self, message.guild):
             return
+        await set_contextual_locales_from_guild(self.bot, message.guild)
 
         channel_id = await self.config.guild(message.guild).channel()
         if channel_id is None or message.channel.id != channel_id:
@@ -113,7 +117,7 @@ class AutoNick(DashboardIntegration, commands.Cog):
             try:
                 remaining = int(cooldown - (now - last_used))
                 await message.channel.send(
-                    f"{message.author.mention}, debes esperar {remaining} segundos antes de cambiar tu apodo nuevamente."
+                    _("{author}, you must wait {remaining} seconds before changing your nickname again.").format(author=message.author.mention, remaining=remaining)
                 )
             except Exception:
                 pass
@@ -125,14 +129,14 @@ class AutoNick(DashboardIntegration, commands.Cog):
         mention_only = discord.AllowedMentions(users=[message.author], everyone=False, roles=False)
         if len(new_nick) > 32:
             await message.channel.send(
-                f"{message.author.mention}, el apodo no puede tener mas de 32 caracteres.",
+                _("{author}, the nickname can't be longer than 32 characters.").format(author=message.author.mention),
                 allowed_mentions=mention_only,
             )
             return
 
         if not await self.is_valid_name(new_nick, message.guild):
             await message.channel.send(
-                f"{message.author.mention}, el nombre contiene palabras o nombres no permitidos. Por favor, elige otro."
+                _("{author}, that name contains forbidden words or names. Please choose another one.").format(author=message.author.mention)
             )
             return
 
@@ -141,21 +145,20 @@ class AutoNick(DashboardIntegration, commands.Cog):
         try:
             await message.author.edit(nick=new_nick)
             await message.channel.send(
-                f"{message.author.mention}, tu apodo ha sido cambiado a: **{discord.utils.escape_markdown(new_nick)}**",
+                _("{author}, your nickname has been changed to: **{escape_markdown}**").format(author=message.author.mention, escape_markdown=discord.utils.escape_markdown(new_nick)),
                 allowed_mentions=mention_only,
             )
         except discord.Forbidden:
             await message.channel.send(
-                f"{message.author.mention}, no tengo permisos para cambiar tu apodo."
+                _("{author}, I don't have permission to change your nickname.").format(author=message.author.mention)
             )
         except Exception as e:
-            await message.channel.send(f"Error al cambiar el apodo: {str(e)}")
+            await message.channel.send(_("Error while changing the nickname: {e}").format(e=str(e)))
 
     @commands.hybrid_group(name="autonick", with_app_command=True)
     async def autonick(self, ctx: commands.Context):
-        """
-        Grupo principal de comandos de AutoNick.
-        Usa `/autonick help` para ver todos los subcomandos.
+        """Main AutoNick command group.
+        Use `/autonick help` to see every subcommand.
         """
         if ctx.invoked_subcommand is None:
             await ctx.send_help("autonick")
@@ -163,45 +166,41 @@ class AutoNick(DashboardIntegration, commands.Cog):
     @autonick.command(name="setchannel")
     @checks.admin_or_permissions(manage_guild=True)
     async def set_channel(self, ctx: commands.Context, channel: discord.TextChannel):
-        """
-        Establece el canal donde se escucharán los mensajes para cambiar el apodo.
-        Ejemplo: `/autonick setchannel #nombre-del-canal`
+        """Set the channel where nickname messages are read.
+        Example: `/autonick setchannel #channel-name`
         """
         await self.config.guild(ctx.guild).channel.set(channel.id)
-        await ctx.send(f"El canal para AutoNick ha sido establecido a {channel.mention}.")
+        await ctx.send(_("The AutoNick channel has been set to {channel}.").format(channel=channel.mention))
 
     @autonick.command(name="setcooldown")
     @checks.admin_or_permissions(manage_guild=True)
     async def set_cooldown(self, ctx: commands.Context, seconds: int):
-        """
-        Establece el cooldown (en segundos) entre cambios de apodo.
-        Ejemplo: `/autonick setcooldown 30`
+        """Set the cooldown (in seconds) between nickname changes.
+        Example: `/autonick setcooldown 30`
         """
         if seconds < 0:
-            return await ctx.send("El cooldown debe ser un número positivo.")
+            return await ctx.send(_("The cooldown must be a positive number."))
         await self.config.guild(ctx.guild).cooldown.set(seconds)
-        await ctx.send(f"El cooldown ha sido establecido a {seconds} segundos.")
+        await ctx.send(_("The cooldown has been set to {seconds} seconds.").format(seconds=seconds))
 
     @autonick.command(name="info")
     async def info(self, ctx: commands.Context):
-        """
-        Muestra la configuración actual del cog AutoNick.
-        Ejemplo: `/autonick info`
+        """Show the current AutoNick settings.
+        Example: `/autonick info`
         """
         channel_id = await self.config.guild(ctx.guild).channel()
         cooldown = await self.config.guild(ctx.guild).cooldown()
         channel = ctx.guild.get_channel(channel_id) if channel_id else None
-        embed = discord.Embed(title="Configuración de AutoNick", color=discord.Color.blue())
-        embed.add_field(name="Canal", value=channel.mention if channel else "No configurado", inline=False)
-        embed.add_field(name="Cooldown", value=f"{cooldown} segundos", inline=False)
+        embed = discord.Embed(title=_("AutoNick settings"), color=discord.Color.blue())
+        embed.add_field(name=_("Channel"), value=channel.mention if channel else _("Not set"), inline=False)
+        embed.add_field(name=_("Cooldown"), value=_("{cooldown} seconds").format(cooldown=cooldown), inline=False)
         await ctx.send(embed=embed)
 
     @autonick.group(name="admin", invoke_without_command=True, with_app_command=True)
     @checks.admin_or_permissions(manage_guild=True)
     async def admin(self, ctx: commands.Context):
-        """
-        Comandos administrativos para AutoNick.
-        Uso: `/autonick admin <subcomando>`
+        """AutoNick admin commands.
+        Usage: `/autonick admin <subcommand>`
         """
         if ctx.invoked_subcommand is None:
             await ctx.send_help("autonick admin")
@@ -209,46 +208,43 @@ class AutoNick(DashboardIntegration, commands.Cog):
     @admin.command(name="addforbidden")
     @checks.admin_or_permissions(manage_guild=True)
     async def add_forbidden(self, ctx: commands.Context, *, word: str):
-        """
-        Añade una palabra o frase a la lista de nombres prohibidos.
-        Ejemplo: `/autonick admin addforbidden [palabra o frase]`
+        """Add a word or phrase to the forbidden names list.
+        Example: `/autonick admin addforbidden [word or phrase]`
         """
         word = word.lower().strip()
         forbidden = await self.get_forbidden_names(ctx.guild)
         if word in forbidden:
-            return await ctx.send("Esa palabra ya se encuentra en la lista de prohibidos.")
+            return await ctx.send(_("That word is already in the forbidden list."))
         forbidden.append(word)
         await self.set_forbidden_names(ctx.guild, forbidden)
-        await ctx.send(f"La palabra '{word}' ha sido añadida a la lista de prohibidos.")
+        await ctx.send(_("The word '{word}' has been added to the forbidden list.").format(word=word))
 
     @admin.command(name="removeforbidden")
     @checks.admin_or_permissions(manage_guild=True)
     async def remove_forbidden(self, ctx: commands.Context, *, word: str):
-        """
-        Elimina una palabra o frase de la lista de nombres prohibidos.
-        Ejemplo: `/autonick admin removeforbidden [palabra o frase]`
+        """Remove a word or phrase from the forbidden names list.
+        Example: `/autonick admin removeforbidden [word or phrase]`
         """
         word = word.lower().strip()
         forbidden = await self.get_forbidden_names(ctx.guild)
         if word not in forbidden:
-            return await ctx.send("Esa palabra no se encuentra en la lista de prohibidos.")
+            return await ctx.send(_("That word is not in the forbidden list."))
         forbidden.remove(word)
         await self.set_forbidden_names(ctx.guild, forbidden)
-        await ctx.send(f"La palabra '{word}' ha sido eliminada de la lista de prohibidos.")
+        await ctx.send(_("The word '{word}' has been removed from the forbidden list.").format(word=word))
 
     @admin.command(name="listforbidden")
     async def list_forbidden(self, ctx: commands.Context):
-        """
-        Muestra la lista de todas las palabras o frases prohibidas.
-        Ejemplo: `/autonick admin listforbidden`
+        """Show every forbidden word or phrase.
+        Example: `/autonick admin listforbidden`
         """
         forbidden = await self.get_forbidden_names(ctx.guild)
         if not forbidden:
-            return await ctx.send("La lista de palabras prohibidas está vacía.")
+            return await ctx.send(_("The forbidden words list is empty."))
         formatted = "\n".join(f"- {word}" for word in forbidden)
         if len(formatted) > 4000:
             formatted = formatted[:3990] + "\n…"
-        embed = discord.Embed(title="Palabras prohibidas", description=formatted, color=discord.Color.red())
+        embed = discord.Embed(title=_("Forbidden words"), description=formatted, color=discord.Color.red())
         await ctx.send(embed=embed)
 
 async def setup(bot):

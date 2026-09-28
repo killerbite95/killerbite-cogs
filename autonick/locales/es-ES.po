@@ -1,0 +1,212 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: autonick\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: autonick.py:23
+msgid ""
+"Lets users set their nickname by sending a message in a configured channel.\n"
+"    The name is checked to block swear words and forbidden names (including dictators and celebrities).\n"
+"\n"
+"    Available commands (slash or prefix):\n"
+"      • /autonick setchannel\n"
+"      • /autonick setcooldown\n"
+"      • /autonick info\n"
+"      • /autonick admin addforbidden\n"
+"      • /autonick admin removeforbidden\n"
+"      • /autonick admin listforbidden\n"
+"    "
+msgstr ""
+"\n"
+"    Cog que permite a los usuarios establecer su apodo mediante el envío de un mensaje en un canal configurado.\n"
+"    Se valida el contenido del nombre para evitar palabrotas y nombres prohibidos (incluyendo dictadores y famosos).\n"
+"\n"
+"    Comandos disponibles (como slash o prefijo):\n"
+"      • /autonick setchannel\n"
+"      • /autonick setcooldown\n"
+"      • /autonick info\n"
+"      • /autonick admin addforbidden\n"
+"      • /autonick admin removeforbidden\n"
+"      • /autonick admin listforbidden\n"
+"    "
+
+#: autonick.py:119
+msgid ""
+"{author}, you must wait {remaining} seconds before changing your nickname "
+"again."
+msgstr ""
+"{author}, debes esperar {remaining} segundos antes de cambiar tu apodo "
+"nuevamente."
+
+#: autonick.py:131
+msgid "{author}, the nickname can't be longer than 32 characters."
+msgstr "{author}, el apodo no puede tener mas de 32 caracteres."
+
+#: autonick.py:138
+msgid ""
+"{author}, that name contains forbidden words or names. Please choose another"
+" one."
+msgstr ""
+"{author}, el nombre contiene palabras o nombres no permitidos. Por favor, "
+"elige otro."
+
+#: autonick.py:147
+msgid "{author}, your nickname has been changed to: **{escape_markdown}**"
+msgstr "{author}, tu apodo ha sido cambiado a: **{escape_markdown}**"
+
+#: autonick.py:152
+msgid "{author}, I don't have permission to change your nickname."
+msgstr "{author}, no tengo permisos para cambiar tu apodo."
+
+#: autonick.py:155
+msgid "Error while changing the nickname: {e}"
+msgstr "Error al cambiar el apodo: {e}"
+
+#: autonick.py:168
+msgid ""
+"Set the channel where nickname messages are read.\n"
+"        Example: `/autonick setchannel #channel-name`\n"
+"        "
+msgstr ""
+"\n"
+"        Establece el canal donde se escucharán los mensajes para cambiar el apodo.\n"
+"        Ejemplo: `/autonick setchannel #nombre-del-canal`\n"
+"        "
+
+#: autonick.py:172
+msgid "The AutoNick channel has been set to {channel}."
+msgstr "El canal para AutoNick ha sido establecido a {channel}."
+
+#: autonick.py:177
+msgid ""
+"Set the cooldown (in seconds) between nickname changes.\n"
+"        Example: `/autonick setcooldown 30`\n"
+"        "
+msgstr ""
+"\n"
+"        Establece el cooldown (en segundos) entre cambios de apodo.\n"
+"        Ejemplo: `/autonick setcooldown 30`\n"
+"        "
+
+#: autonick.py:181
+msgid "The cooldown must be a positive number."
+msgstr "El cooldown debe ser un número positivo."
+
+#: autonick.py:183
+msgid "The cooldown has been set to {seconds} seconds."
+msgstr "El cooldown ha sido establecido a {seconds} segundos."
+
+#: autonick.py:187
+msgid ""
+"Show the current AutoNick settings.\n"
+"        Example: `/autonick info`\n"
+"        "
+msgstr ""
+"\n"
+"        Muestra la configuración actual del cog AutoNick.\n"
+"        Ejemplo: `/autonick info`\n"
+"        "
+
+#: autonick.py:193
+msgid "AutoNick settings"
+msgstr "Configuración de AutoNick"
+
+#: autonick.py:194
+msgid "Channel"
+msgstr "Canal"
+
+#: autonick.py:194
+msgid "Not set"
+msgstr "No configurado"
+
+#: autonick.py:195
+msgid "Cooldown"
+msgstr "Cooldown"
+
+#: autonick.py:195
+msgid "{cooldown} seconds"
+msgstr "{cooldown} segundos"
+
+#: autonick.py:201
+msgid ""
+"AutoNick admin commands.\n"
+"        Usage: `/autonick admin <subcommand>`\n"
+"        "
+msgstr ""
+"\n"
+"        Comandos administrativos para AutoNick.\n"
+"        Uso: `/autonick admin <subcomando>`\n"
+"        "
+
+#: autonick.py:210
+msgid ""
+"Add a word or phrase to the forbidden names list.\n"
+"        Example: `/autonick admin addforbidden [word or phrase]`\n"
+"        "
+msgstr ""
+"\n"
+"        Añade una palabra o frase a la lista de nombres prohibidos.\n"
+"        Ejemplo: `/autonick admin addforbidden [palabra o frase]`\n"
+"        "
+
+#: autonick.py:216
+msgid "That word is already in the forbidden list."
+msgstr "Esa palabra ya se encuentra en la lista de prohibidos."
+
+#: autonick.py:219
+msgid "The word '{word}' has been added to the forbidden list."
+msgstr "La palabra '{word}' ha sido añadida a la lista de prohibidos."
+
+#: autonick.py:224
+msgid ""
+"Remove a word or phrase from the forbidden names list.\n"
+"        Example: `/autonick admin removeforbidden [word or phrase]`\n"
+"        "
+msgstr ""
+"\n"
+"        Elimina una palabra o frase de la lista de nombres prohibidos.\n"
+"        Ejemplo: `/autonick admin removeforbidden [palabra o frase]`\n"
+"        "
+
+#: autonick.py:230
+msgid "That word is not in the forbidden list."
+msgstr "Esa palabra no se encuentra en la lista de prohibidos."
+
+#: autonick.py:233
+msgid "The word '{word}' has been removed from the forbidden list."
+msgstr "La palabra '{word}' ha sido eliminada de la lista de prohibidos."
+
+#: autonick.py:237
+msgid ""
+"Show every forbidden word or phrase.\n"
+"        Example: `/autonick admin listforbidden`\n"
+"        "
+msgstr ""
+"\n"
+"        Muestra la lista de todas las palabras o frases prohibidas.\n"
+"        Ejemplo: `/autonick admin listforbidden`\n"
+"        "
+
+#: autonick.py:242
+msgid "The forbidden words list is empty."
+msgstr "La lista de palabras prohibidas está vacía."
+
+#: autonick.py:246
+msgid "Forbidden words"
+msgstr "Palabras prohibidas"
+
+#: i18n_strings.py:11
+msgid ""
+"Main AutoNick command group.\n"
+"Use `/autonick help` to see every subcommand."
+msgstr ""
+"\n"
+"        Grupo principal de comandos de AutoNick.\n"
+"        Usa `/autonick help` para ver todos los subcomandos.\n"
+"        "

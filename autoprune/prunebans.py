@@ -16,6 +16,9 @@ from redbot.core.bot import Red
 from redbot.core.utils.chat_formatting import humanize_number, pagify
 
 from .dashboard_integration import DashboardIntegration
+from redbot.core.i18n import Translator, cog_i18n, set_contextual_locales_from_guild
+
+_ = Translator("PruneBans", __file__)
 
 log = logging.getLogger("red.killerbite.autoprune")
 
@@ -39,8 +42,9 @@ def _parse_dt(value: Any) -> Optional[datetime.datetime]:
     return dt
 
 
+@cog_i18n(_)
 class PruneBans(DashboardIntegration, commands.Cog):
-    """Borra automaticamente los creditos de los usuarios que siguen baneados pasados unos dias."""
+    """Automatically deletes the credits of users who are still banned after some days."""
 
     __author__ = "Killerbite95"
     __version__ = "2.0.0"
@@ -62,7 +66,7 @@ class PruneBans(DashboardIntegration, commands.Cog):
         self.prune_loop.start()
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
-        return f"{super().format_help_for_context(ctx)}\n\nVersion: {self.__version__}"
+        return _("{format_help_for_context}\n\nVersion: {version}").format(format_help_for_context=super().format_help_for_context(ctx), version=self.__version__)
 
     async def cog_load(self) -> None:
         await super().cog_load()
@@ -209,7 +213,7 @@ class PruneBans(DashboardIntegration, commands.Cog):
             lines.append(f"<@{user_id}> (`{user_id}`) · {amount} {await bank.get_currency_name(guild)}")
         for page in pagify("\n".join(lines), page_length=3900):
             embed = discord.Embed(
-                title="🧹 Creditos de usuarios baneados eliminados",
+                title=_("🧹 Banned users' credits deleted"),
                 description=page,
                 color=COLOR,
                 timestamp=_utcnow(),
@@ -230,6 +234,7 @@ class PruneBans(DashboardIntegration, commands.Cog):
             try:
                 if await self.bot.cog_disabled_in_guild(self, guild):
                     continue
+                await set_contextual_locales_from_guild(self.bot, guild)
                 await self.process_guild(guild)
             except Exception:
                 log.exception("Error limpiando los baneos de %s", guild_id)
@@ -254,52 +259,48 @@ class PruneBans(DashboardIntegration, commands.Cog):
         conf = await self.config.guild(guild).all()
         channel = guild.get_channel(conf["log_channel"]) if conf["log_channel"] else None
         global_bank = await bank.is_global()
-        embed = discord.Embed(title="🧹 AutoPrune", color=COLOR)
-        embed.description = (
-            "Borra los creditos de los usuarios que siguen baneados pasados unos dias.\n"
-            "Los baneos y desbaneos los registra el modlog; aqui solo se avisa al limpiar."
-        )
-        embed.add_field(name="Estado", value="🟢 Activado" if conf["enabled"] else "🔴 Desactivado")
-        embed.add_field(name="Espera", value=f"{conf['delay_days']} dias")
-        embed.add_field(name="Canal de logs", value=channel.mention if channel else "Ninguno")
-        embed.add_field(name="En seguimiento", value=str(len(conf["ban_track"])))
+        embed = discord.Embed(title=_("🧹 AutoPrune"), color=COLOR)
+        embed.description = _("Deletes the credits of users who are still banned after some days.\nBans and unbans are logged by modlog; this only reports cleanups.")
+        embed.add_field(name=_("Status"), value=_("🟢 Enabled") if conf["enabled"] else _("🔴 Disabled"))
+        embed.add_field(name=_("Wait"), value=_("{delay_days} days").format(delay_days=conf['delay_days']))
+        embed.add_field(name=_("Log channel"), value=channel.mention if channel else "Ninguno")
+        embed.add_field(name=_("Tracked"), value=str(len(conf["ban_track"])))
         if global_bank:
             allowed = await self.config.prune_global_bank()
             embed.add_field(
-                name="Banco",
-                value="Global · " + ("se borran las cuentas" if allowed else "⚠️ no se borra nada (el owner puede activarlo con `autoprune globalbank true`)"),
+                name=_("Bank"),
+                value=_("Global · ") + (_("accounts are deleted") if allowed else _("⚠️ nothing is deleted (the owner can enable it with `autoprune globalbank true`)")),
                 inline=False,
             )
         else:
-            embed.add_field(name="Banco", value="Local (por servidor)", inline=False)
+            embed.add_field(name=_("Bank"), value=_("Local (per server)"), inline=False)
         return embed
 
     @commands.guild_only()
     @commands.admin_or_permissions(manage_guild=True)
     @commands.hybrid_group(name="autoprune", aliases=["prunebans"], invoke_without_command=True)
     async def autoprune(self, ctx: commands.Context):
-        """Limpieza automatica de creditos de usuarios baneados."""
+        """Automatic cleanup of banned users' credits."""
         await ctx.send(embed=await self._status_embed(ctx.guild))
 
     @autoprune.command(name="enable")
     async def autoprune_enable(self, ctx: commands.Context):
-        """Activar la limpieza automatica en este servidor."""
+        """Enable automatic cleanup in this server."""
         await self.config.guild(ctx.guild).enabled.set(True)
         days = await self.config.guild(ctx.guild).delay_days()
         await ctx.send(
-            f"✅ Activado. Los creditos de quien siga baneado se borraran a los **{days}** dias.\n"
-            f"Para seguir tambien a los que ya estaban baneados: `{ctx.clean_prefix}autoprune sync`."
+            _("✅ Enabled. Credits of users who are still banned will be deleted after **{days}** days.\nTo also track users who were already banned: `{clean_prefix}autoprune sync`.").format(days=days, clean_prefix=ctx.clean_prefix)
         )
 
     @autoprune.command(name="disable")
     async def autoprune_disable(self, ctx: commands.Context):
-        """Desactivar la limpieza automatica (no borra el seguimiento)."""
+        """Disable automatic cleanup (tracking is kept)."""
         await self.config.guild(ctx.guild).enabled.set(False)
-        await ctx.send("⏸️ Desactivado. No se borrara nada hasta que lo vuelvas a activar.")
+        await ctx.send(_("⏸️ Disabled. Nothing will be deleted until you enable it again."))
 
     @autoprune.command(name="days")
     async def autoprune_days(self, ctx: commands.Context, days: commands.Range[int, 0, MAX_DELAY_DAYS]):
-        """Dias que tiene que seguir baneado antes de borrar sus creditos (0 = en la siguiente revision)."""
+        """Days a user must stay banned before their credits are deleted (0 = next check)."""
         await self.config.guild(ctx.guild).delay_days.set(days)
         # Recalcula la fecha de limpieza de los que ya estan en seguimiento.
         async with self.config.guild(ctx.guild).ban_track() as ban_track:
@@ -307,35 +308,35 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 start = _parse_dt(info.get("ban_date"))
                 if start is not None:
                     info["unban_date"] = (start + datetime.timedelta(days=days)).isoformat()
-        await ctx.send(f"✅ Espera fijada en **{days}** dias (aplicado tambien a los baneos pendientes).")
+        await ctx.send(_("✅ Wait set to **{days}** days (also applied to pending bans).").format(days=days))
 
     @autoprune.command(name="logchannel")
     async def autoprune_logchannel(self, ctx: commands.Context, channel: Optional[discord.TextChannel] = None):
-        """Canal donde avisar cuando se borran creditos. Sin canal lo quita."""
+        """Channel to report deleted credits. Without a channel it is removed."""
         await self.config.guild(ctx.guild).log_channel.set(channel.id if channel else None)
-        await ctx.send(f"✅ Canal de logs: {channel.mention}." if channel else "✅ Canal de logs quitado.")
+        await ctx.send(_("✅ Log channel: {channel}.").format(channel=channel.mention) if channel else _("✅ Log channel removed."))
 
     @autoprune.command(name="pending")
     async def autoprune_pending(self, ctx: commands.Context):
-        """Baneos en seguimiento y cuando se limpiaran."""
+        """Tracked bans and when they will be cleaned up."""
         ban_track = await self.config.guild(ctx.guild).ban_track()
         if not ban_track:
-            return await ctx.send("No hay baneos en seguimiento.")
+            return await ctx.send(_("There are no tracked bans."))
         rows = []
         for uid_str, info in sorted(ban_track.items(), key=lambda kv: str(kv[1].get("unban_date", ""))):
             due = _parse_dt(info.get("unban_date"))
             when = discord.utils.format_dt(due, "R") if due else "?"
             balance = info.get("balance")
             amount = humanize_number(balance) if isinstance(balance, int) else "?"
-            rows.append(f"<@{uid_str}> (`{uid_str}`) · {amount} · limpieza {when}")
+            rows.append(_("<@{uid_str}> (`{uid_str}`) · {amount} · cleanup {when}").format(uid_str=uid_str, amount=amount, when=when))
         for page in pagify("\n".join(rows), page_length=3900):
-            embed = discord.Embed(title=f"⏳ Baneos en seguimiento ({len(ban_track)})", description=page, color=COLOR)
+            embed = discord.Embed(title=_("⏳ Tracked bans ({count})").format(count=len(ban_track)), description=page, color=COLOR)
             await ctx.send(embed=embed, allowed_mentions=discord.AllowedMentions.none())
 
     @autoprune.command(name="sync")
     @commands.bot_has_permissions(ban_members=True)
     async def autoprune_sync(self, ctx: commands.Context):
-        """Empieza a seguir a los usuarios que ya estaban baneados (la cuenta atras empieza hoy)."""
+        """Start tracking users who were already banned (the countdown starts today)."""
         async with ctx.typing():
             tracked = await self.config.guild(ctx.guild).ban_track()
             added = 0
@@ -343,31 +344,31 @@ class PruneBans(DashboardIntegration, commands.Cog):
                 if str(entry.user.id) not in tracked:
                     await self.track(ctx.guild, entry.user.id)
                     added += 1
-        await ctx.send(f"✅ {added} baneos añadidos al seguimiento.")
+        await ctx.send(_("✅ {added} bans added to tracking.").format(added=added))
 
     @autoprune.command(name="run")
     async def autoprune_run(self, ctx: commands.Context, now: bool = False):
-        """Revisar ya los baneos vencidos. Con `true` limpia todos los pendientes sin esperar."""
+        """Check expired bans now. With `true` it cleans every pending one without waiting."""
         if not await self._can_prune_bank():
-            return await ctx.send("⚠️ El banco es global y el owner no ha permitido borrar cuentas globales.")
+            return await ctx.send(_("⚠️ The bank is global and the owner has not allowed deleting global accounts."))
         async with ctx.typing():
             pruned = await self.process_guild(ctx.guild, force=now)
-        await ctx.send(f"🧹 Creditos eliminados de {len(pruned)} usuario(s).")
+        await ctx.send(_("🧹 Credits deleted from {count} user(s).").format(count=len(pruned)))
 
     @autoprune.command(name="forget")
     async def autoprune_forget(self, ctx: commands.Context, user_id: int):
-        """Dejar de seguir a un usuario (no se le borraran los creditos)."""
+        """Stop tracking a user (their credits will not be deleted)."""
         async with self.config.guild(ctx.guild).ban_track() as ban_track:
             removed = ban_track.pop(str(user_id), None)
-        await ctx.send("✅ Quitado del seguimiento." if removed else "No estaba en seguimiento.")
+        await ctx.send(_("✅ Removed from tracking.") if removed else _("It was not tracked."))
 
     @commands.is_owner()
     @autoprune.command(name="globalbank")
     async def autoprune_globalbank(self, ctx: commands.Context, allow: bool):
-        """(Owner) Permitir borrar cuentas cuando el banco de Red es global.
+        """(Owner) Allow deleting accounts when Red's bank is global.
 
-        Con banco global la cuenta es la misma en todos los servidores: un ban en
-        un servidor le quitaria los creditos en todos.
+        With a global bank the account is the same in every server: a ban in
+        one server would remove their credits everywhere.
         """
         await self.config.prune_global_bank.set(allow)
-        await ctx.send("✅ Se borraran cuentas del banco global." if allow else "✅ No se tocaran cuentas del banco global.")
+        await ctx.send(_("✅ Global bank accounts will be deleted.") if allow else _("✅ Global bank accounts will not be touched."))

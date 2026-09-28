@@ -1,0 +1,291 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: day_counter_cog\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: day_counter.py:78 day_counter.py:92
+msgid "year"
+msgstr "año"
+
+#: day_counter.py:78 day_counter.py:92
+msgid "years"
+msgstr "años"
+
+#: day_counter.py:80
+msgid "month"
+msgstr "mes"
+
+#: day_counter.py:80
+msgid "months"
+msgstr "meses"
+
+#: day_counter.py:82 day_counter.py:214 day_counter.py:226 day_counter.py:357
+#: day_counter.py:359
+msgid "day"
+msgstr "día"
+
+#: day_counter.py:82 day_counter.py:214 day_counter.py:226 day_counter.py:357
+#: day_counter.py:359
+msgid "days"
+msgstr "días"
+
+#: day_counter.py:85
+msgid " and "
+msgstr " y "
+
+#: day_counter.py:92
+msgid "🎂 {value}!"
+msgstr "🎂 ¡{value}!"
+
+#: day_counter.py:94
+msgid "🎉 {value} days!"
+msgstr "🎉 ¡{value} días!"
+
+#: day_counter.py:112
+msgid ""
+"Day counters and countdowns with embeds, milestones and a channel counter."
+msgstr ""
+"Contadores de dias y cuentas atras con embeds, hitos y canal contador."
+
+#: day_counter.py:130
+msgid ""
+"{format_help_for_context}\n"
+"\n"
+"Version: {version}"
+msgstr ""
+"{format_help_for_context}\n"
+"\n"
+"Version: {version}"
+
+#: day_counter.py:180
+msgid "Day counter"
+msgstr "Contador de días"
+
+#: day_counter.py:212
+msgid "It's today!"
+msgstr "¡Es hoy!"
+
+#: day_counter.py:214
+msgid "Remaining"
+msgstr "Faltan"
+
+#: day_counter.py:215
+msgid "Date"
+msgstr "Fecha"
+
+#: day_counter.py:216 day_counter.py:221
+msgid "Breakdown"
+msgstr "Desglose"
+
+#: day_counter.py:218
+msgid "Days"
+msgstr "Días"
+
+#: day_counter.py:219
+msgid "Since"
+msgstr "Desde"
+
+#: day_counter.py:220
+msgid "Weeks"
+msgstr "Semanas"
+
+#: day_counter.py:225
+msgid "Next milestone"
+msgstr "Próximo hito"
+
+#: day_counter.py:226
+msgid "{value} **{value2}** days ({value3} left)"
+msgstr "{value} **{value2}** días (faltan {value3})"
+
+#: day_counter.py:231
+msgid "Today"
+msgstr "Hoy"
+
+#: day_counter.py:232
+msgid "Counter: {name}"
+msgstr "Contador: {name}"
+
+#: day_counter.py:273
+msgid "🎉 Today is the day!"
+msgstr "🎉 ¡Hoy es el día!"
+
+#: day_counter.py:327
+msgid ""
+"There are no counters. Create one with `{clean_prefix}dias crear <name> "
+"<date>` (for example `{clean_prefix}dias crear anniversary 2024-06-15`)."
+msgstr ""
+"No hay contadores. Crea uno con `{clean_prefix}dias crear <nombre> <fecha>` "
+"(por ejemplo `{clean_prefix}dias crear aniversario 2024-06-15`)."
+
+#: day_counter.py:334
+msgid ""
+"Counter `{name}` does not exist. See the list with `{clean_prefix}dias "
+"lista`."
+msgstr ""
+"No existe el contador `{name}`. Mira la lista con `{clean_prefix}dias "
+"lista`."
+
+#: day_counter.py:348
+msgid "Every counter in the server."
+msgstr "Todos los contadores del servidor."
+
+#: day_counter.py:351
+msgid ""
+"There are no counters. Create one with `{clean_prefix}dias crear <name> "
+"<date>`."
+msgstr ""
+"No hay contadores. Crea uno con `{clean_prefix}dias crear <nombre> <fecha>`."
+
+#: day_counter.py:352
+msgid "📅 Counters of {guild_name}"
+msgstr "📅 Contadores de {guild_name}"
+
+#: day_counter.py:357
+msgid "**{value}** left · {isoformat}"
+msgstr "Faltan **{value}** · {isoformat}"
+
+#: day_counter.py:359
+msgid "**{value}** since {isoformat}"
+msgstr "**{value}** desde {isoformat}"
+
+#: day_counter.py:366
+msgid ""
+"Create or change a counter. Date YYYY-MM-DD or DD/MM/YYYY; a future date is "
+"a countdown."
+msgstr ""
+"Crea o cambia un contador. Fecha AAAA-MM-DD o DD/MM/AAAA; si es futura es "
+"una cuenta atrás."
+
+#: day_counter.py:369
+msgid ""
+"The name must be a single word of up to 32 characters (letters, numbers, `-`"
+" or `_`)."
+msgstr ""
+"El nombre debe ser una sola palabra de hasta 32 caracteres (letras, números,"
+" `-` o `_`)."
+
+#: day_counter.py:372
+msgid ""
+"Invalid date. Use `YYYY-MM-DD` or `DD/MM/YYYY`, for example `2024-06-15`."
+msgstr ""
+"Fecha no válida. Usa `AAAA-MM-DD` o `DD/MM/AAAA`, por ejemplo `2024-06-15`."
+
+#: day_counter.py:375
+msgid "Maximum {MAX_COUNTERS} counters per server."
+msgstr "Máximo {MAX_COUNTERS} contadores por servidor."
+
+#: day_counter.py:383
+msgid "✅ Counter `{nombre}` saved."
+msgstr "✅ Contador `{nombre}` guardado."
+
+#: day_counter.py:388
+msgid ""
+"Edit a field: titulo, descripcion, color (#hex), emoji or fecha. No value "
+"clears it."
+msgstr ""
+"Edita un contador: `titulo`, `descripcion`, `color` (#hex), `emoji` o "
+"`fecha`. Sin valor lo borra."
+
+#: day_counter.py:393
+msgid ""
+"Invalid field. Use `titulo`, `descripcion`, `color`, `emoji` or `fecha`."
+msgstr ""
+"Campo no válido. Usa `titulo`, `descripcion`, `color`, `emoji` o `fecha`."
+
+#: day_counter.py:401
+msgid "Invalid color. Use hexadecimal, for example `#3498db`."
+msgstr "Color no válido. Usa hexadecimal, por ejemplo `#3498db`."
+
+#: day_counter.py:405
+msgid "Invalid date. Use `YYYY-MM-DD` or `DD/MM/YYYY`."
+msgstr "Fecha no válida. Usa `AAAA-MM-DD` o `DD/MM/AAAA`."
+
+#: day_counter.py:414
+msgid "The date is required."
+msgstr "La fecha es obligatoria."
+
+#: day_counter.py:417 day_counter.py:432 day_counter.py:464
+msgid "Counter `{nombre}` does not exist."
+msgstr "No existe el contador `{nombre}`."
+
+#: day_counter.py:423
+msgid "✅ Counter updated."
+msgstr "✅ Contador actualizado."
+
+#: day_counter.py:428
+msgid "Delete a counter."
+msgstr "Borra un contador."
+
+#: day_counter.py:432
+msgid "🗑️ Counter `{nombre}` deleted."
+msgstr "🗑️ Contador `{nombre}` borrado."
+
+#: day_counter.py:437
+msgid ""
+"Channel to announce milestones (100, 365, 1000 days, anniversaries). No "
+"channel disables it."
+msgstr ""
+"Canal donde anunciar los hitos (100, 365, 1000 días, aniversarios...). Sin "
+"canal lo desactiva."
+
+#: day_counter.py:439
+msgid "✅ Milestones will be announced in {canal}."
+msgstr "✅ Los hitos se anunciarán en {canal}."
+
+#: day_counter.py:439
+msgid "✅ Milestone announcements disabled."
+msgstr "✅ Anuncios de hitos desactivados."
+
+#: day_counter.py:451
+msgid ""
+"Rename a channel every day with the counter. Format: `{days}`, `{weeks}`, `{months}`, `{years}`.\n"
+"\n"
+"        Example: `[p]dias canal #days-online principal 📅 Day {days}`. Without a channel it is disabled.\n"
+"        "
+msgstr ""
+"Renombra un canal cada día con el contador. Formato: `{days}`, `{weeks}`, `{months}`, `{years}`.\n"
+"\n"
+"        Ejemplo: `[p]dias canal #dias-online principal 📅 Día {days}`. Sin canal lo desactiva.\n"
+"        "
+
+#: day_counter.py:458
+msgid "✅ Channel counter disabled."
+msgstr "✅ Canal contador desactivado."
+
+#: day_counter.py:460
+msgid "I need *Manage Channels* in {canal}."
+msgstr "Necesito *Gestionar canales* en {canal}."
+
+#: day_counter.py:469
+msgid ""
+"✅ {canal} will show counter `{nombre}` and will be updated once a day "
+"(Discord limits channel renames)."
+msgstr ""
+"✅ {canal} mostrará el contador `{nombre}` y se actualizará una vez al día "
+"(Discord limita los cambios de nombre de canal)."
+
+#: day_counter.py:478
+msgid "(v1) Set the date of the main counter. Use `dias crear`."
+msgstr "(v1) Fija la fecha del contador principal. Usa `dias crear`."
+
+#: day_counter.py:482
+msgid "❌ Invalid date. Check that the day and month are correct."
+msgstr "❌ Fecha inválida. Verificá que el día y mes sean correctos."
+
+#: day_counter.py:489
+msgid "(v1) Delete the main counter. Use `dias borrar`."
+msgstr "(v1) Borra el contador principal. Usa `dias borrar`."
+
+#: i18n_strings.py:11
+msgid "📅 Day {days}"
+msgstr "📅 Día {days}"
+
+#: i18n_strings.py:12
+msgid "Show a day counter (the main one if no name is given)."
+msgstr "Muestra un contador de días (el principal si no indicas nombre)."

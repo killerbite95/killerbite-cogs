@@ -1,0 +1,328 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: blackjack\n"
+"Last-Translator: Killerbite95\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: blackjack.py:42
+msgid ""
+"**Quick Blackjack rules:**\n"
+"• **Hit**: Draw another card.\n"
+"• **Stand**: Keep your current hand.\n"
+"• **Double Down**: Double the bet for this hand, take exactly 1 more card and stand.\n"
+"• **Split**: If your first 2 cards have the same value you can split them into 2 hands (extra bet equal to the base bet).\n"
+"• The dealer stands on 17 or more.\n"
+"• Going over 21 loses.\n"
+"• Blackjack = 21 with 2 cards.\n"
+msgstr ""
+"**Reglas rápidas de Blackjack:**\n"
+"• **Hit**: Pides otra carta.\n"
+"• **Stand**: Te plantas con tu mano actual.\n"
+"• **Double Down**: Duplicas la apuesta para la mano actual, recibes solo 1 carta más y te plantas.\n"
+"• **Split**: Si tus 2 primeras cartas tienen el mismo valor, puedes dividirlas en 2 manos (apuesta adicional igual a la base).\n"
+"• El Dealer se planta en 17 o más.\n"
+"• Si superas 21, pierdes.\n"
+"• Blackjack = 21 con 2 cartas.\n"
+
+#: blackjack.py:62
+msgid "{author}, time is up: you stand automatically."
+msgstr "{author}, se acabo el tiempo: te plantas automaticamente."
+
+#: blackjack.py:70
+msgid ""
+"Advanced Blackjack cog with economy, interactive buttons, admin tools and an"
+" improved UI."
+msgstr ""
+"Cog de Blackjack avanzado con economía, botones interactivos, sistema de "
+"administración y una UI mejorada."
+
+#: blackjack.py:113
+msgid ""
+"Start a Blackjack game with the given bet.\n"
+"        Example: `[p]blackjack 100`\n"
+"        "
+msgstr ""
+"\n"
+"        Inicia una partida de Blackjack con la apuesta indicada.\n"
+"        Ejemplo: `[p]blackjack 100`\n"
+"        "
+
+#: blackjack.py:117
+msgid "The bet must be greater than 0."
+msgstr "La apuesta debe ser mayor que 0."
+
+#: blackjack.py:119
+msgid ""
+"You already have a game in progress. Finish it before starting another one."
+msgstr "Ya tienes una partida en curso. Terminala antes de empezar otra."
+
+#: blackjack.py:123
+msgid "You don't have enough balance for that bet."
+msgstr "No tienes suficiente saldo para esa apuesta."
+
+#: blackjack.py:149
+msgid "Blackjack: Hand #1"
+msgstr "Blackjack: Mano #1"
+
+#: blackjack.py:151
+msgid ""
+"Base bet: {bet} | Balance after betting: {value}\n"
+"Use the buttons to play."
+msgstr ""
+"Apuesta base: {bet} | Saldo tras apostar: {value}\n"
+"Usa los botones para jugar."
+
+#: blackjack.py:163 blackjack.py:192 blackjack.py:210 blackjack.py:250
+msgid "You don't have an active game."
+msgstr "No tienes una partida activa."
+
+#: blackjack.py:165 blackjack.py:194 blackjack.py:212 blackjack.py:252
+msgid "That hand is already finished."
+msgstr "Esa mano ya ha terminado."
+
+#: blackjack.py:175
+msgid "Hand #{value} - You busted with {val}."
+msgstr "Mano #{value} - Te pasaste con {val}."
+
+#: blackjack.py:178
+msgid " Playing hand #{value}..."
+msgstr " Jugando mano #{value}..."
+
+#: blackjack.py:185
+msgid "Blackjack: Hand #{value}"
+msgstr "Blackjack: Mano #{value}"
+
+#: blackjack.py:198
+msgid "You stood on hand #{active_hand}."
+msgstr "Te has plantado en la mano #{active_hand}."
+
+#: blackjack.py:200
+msgid "Hand #{value}..."
+msgstr "Mano #{value}..."
+
+#: blackjack.py:217
+msgid "You can only double down with 2 cards in hand."
+msgstr "Solo puedes doblar con 2 cartas en la mano."
+
+#: blackjack.py:219
+msgid "You already doubled down on this hand."
+msgstr "Ya has doblado en esta mano."
+
+#: blackjack.py:224
+msgid "You don't have enough balance to double the bet."
+msgstr "No tienes saldo suficiente para doblar la apuesta."
+
+#: blackjack.py:233
+msgid "Hand #{value} - You doubled the bet."
+msgstr "Mano #{value} - Doblaste la apuesta."
+
+#: blackjack.py:234 blackjack.py:285
+msgid "Total bet: {total_bet} | Current balance: {value}"
+msgstr "Apuesta total: {total_bet} | Saldo actual: {value}"
+
+#: blackjack.py:236
+msgid " You busted with {val}."
+msgstr " Te pasaste con {val}."
+
+#: blackjack.py:240
+msgid " Now hand #{value}..."
+msgstr " Ahora mano #{value}..."
+
+#: blackjack.py:257
+msgid "You can only split with exactly 2 cards."
+msgstr "Solo puedes dividir con exactamente 2 cartas."
+
+#: blackjack.py:259
+msgid "You can only split once in this version."
+msgstr "Solo se permite dividir una vez en esta versión."
+
+#: blackjack.py:261
+msgid "You can only split if both cards have the same value."
+msgstr "Solo puedes dividir si ambas cartas tienen el mismo valor."
+
+#: blackjack.py:266
+msgid "You don't have enough balance to split."
+msgstr "No tienes suficiente saldo para dividir (split)."
+
+#: blackjack.py:284
+msgid "You split your hand. You now have {count} hands."
+msgstr "Has dividido tu mano. Ahora tienes {count} manos."
+
+#: blackjack.py:316
+msgid "Hand {value}: ❌ You lost (busted)."
+msgstr "Mano {value}: ❌ Perdiste (te pasaste)."
+
+#: blackjack.py:320
+msgid "Hand {value}: ✅ Dealer busted, you won {value2}!"
+msgstr "Mano {value}: ✅ Dealer se pasó, ganaste {value2}!"
+
+#: blackjack.py:324
+msgid "Hand {value}: ✅ You won {value2} (your {val} vs dealer {dealer_val})."
+msgstr "Mano {value}: ✅ Ganaste {value2} (tu {val} vs dealer {dealer_val})."
+
+#: blackjack.py:326
+msgid "Hand {value}: ❌ You lost (your {val} vs dealer {dealer_val})."
+msgstr "Mano {value}: ❌ Perdiste (tu {val} vs dealer {dealer_val})."
+
+#: blackjack.py:329
+msgid "Hand {value}: ⚠️ Push, you get {portion_bet} back."
+msgstr "Mano {value}: ⚠️ Empate, recuperas {portion_bet}."
+
+#: blackjack.py:343
+msgid "Final result"
+msgstr "Resultado Final"
+
+#: blackjack.py:346
+msgid "Dealer"
+msgstr "Dealer"
+
+#: blackjack.py:346
+msgid "Value: **{dealer_val}**"
+msgstr "Valor: **{dealer_val}**"
+
+#: blackjack.py:347
+msgid "Summary"
+msgstr "Resumen"
+
+#: blackjack.py:348
+msgid "Total winnings: {total_win} credits."
+msgstr "Ganancia total: {total_win} créditos."
+
+#: blackjack.py:407
+msgid "Error: game not found."
+msgstr "Error: no se encontró la partida."
+
+#: blackjack.py:411
+msgid "**Dealer:** {format_hand}"
+msgstr "**Dealer:** {format_hand}"
+
+#: blackjack.py:413
+msgid " (Value: **{hand_value}**)"
+msgstr " (Valor: **{hand_value}**)"
+
+#: blackjack.py:417
+msgid "**Your hand #{value}**"
+msgstr "**Tu mano #{value}**"
+
+#: blackjack.py:421
+msgid " - **BUSTED!**"
+msgstr " - **BUSTED!**"
+
+#: blackjack.py:425
+msgid "Value: **{val}**"
+msgstr "Valor: **{val}**"
+
+#: blackjack.py:456
+msgid ""
+"Blackjack admin commands.\n"
+"        Configure how cards are shown using emojis.\n"
+"        "
+msgstr ""
+"\n"
+"        Comandos de administración para Blackjack.\n"
+"        Permite configurar la representación de las cartas mediante emojis.\n"
+"        "
+
+#: blackjack.py:464
+msgid ""
+"Set the emoji for a specific rank.\n"
+"        Example: `[p]bjadmin setrank A 🅰️`\n"
+"        Allowed ranks: A, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K.\n"
+"        "
+msgstr ""
+"\n"
+"        Configura el emoji para un valor (rank) específico.\n"
+"        Ejemplo: `[p]bjadmin setrank A 🅰️`\n"
+"        Valores permitidos: A, 2, 3, 4, 5, 6, 7, 8, 9, 10, J, Q, K.\n"
+"        "
+
+#: blackjack.py:470
+msgid "Invalid rank. Allowed ranks: "
+msgstr "Valor (rank) inválido. Los valores permitidos son: "
+
+#: blackjack.py:473
+msgid "Rank **{rank}** set to: {emoji}"
+msgstr "El valor **{rank}** se ha configurado a: {emoji}"
+
+#: blackjack.py:477
+msgid ""
+"Set the emoji for a specific suit.\n"
+"        Example: `[p]bjadmin setsuit ♠️ 🃑`\n"
+"        Allowed suits: ♣, ♦, ♥, ♠.\n"
+"        "
+msgstr ""
+"\n"
+"        Configura el emoji para un palo (suit) específico.\n"
+"        Ejemplo: `[p]bjadmin setsuit ♠️ 🃑`\n"
+"        Palos permitidos: ♣, ♦, ♥, ♠.\n"
+"        "
+
+#: blackjack.py:483
+msgid "Invalid suit. Allowed suits: "
+msgstr "Palo (suit) inválido. Los palos permitidos son: "
+
+#: blackjack.py:486
+msgid "Suit **{suit}** set to: {emoji}"
+msgstr "El palo **{suit}** se ha configurado a: {emoji}"
+
+#: blackjack.py:490
+msgid "Show the current card emoji settings."
+msgstr ""
+"\n"
+"        Muestra la configuración actual de emojis para las cartas.\n"
+"        "
+
+#: blackjack.py:491
+msgid ""
+"**Current card settings:**\n"
+"\n"
+"**Ranks:**\n"
+msgstr ""
+"**Configuración actual de cartas:**\n"
+"\n"
+"**Valores (Ranks):**\n"
+
+#: blackjack.py:494
+msgid ""
+"\n"
+"**Suits:**\n"
+msgstr ""
+"\n"
+"**Palos (Suits):**\n"
+
+#: blackjack.py:501
+msgid "Reset the card emoji settings to the defaults."
+msgstr ""
+"\n"
+"        Restablece la configuración de emojis de las cartas a los valores por defecto.\n"
+"        "
+
+#: blackjack.py:508
+msgid "The card settings have been reset to the defaults."
+msgstr ""
+"La configuración de cartas se ha restablecido a los valores por defecto."
+
+#: i18n_strings.py:11
+msgid "Hit"
+msgstr "Hit"
+
+#: i18n_strings.py:12
+msgid "Stand"
+msgstr "Stand"
+
+#: i18n_strings.py:13
+msgid "Double Down"
+msgstr "Double Down"
+
+#: i18n_strings.py:14
+msgid "Split"
+msgstr "Split"
+
+#: i18n_strings.py:15
+msgid "Help"
+msgstr "Help"
