@@ -626,19 +626,15 @@ class SupportButton(Button):
             )
             return await interaction.response.send_message(embed=em, ephemeral=True)
 
-        for rid_uid in conf["blacklist"]:
-            if rid_uid == user.id:
-                em = discord.Embed(
-                    description=_("You been blacklisted from creating tickets!"),
-                    color=discord.Color.red(),
-                )
-                return await interaction.response.send_message(embed=em, ephemeral=True)
-            elif rid_uid in roles:
-                em = discord.Embed(
-                    description=_("You have a role that has been blacklisted from creating tickets!"),
-                    color=discord.Color.red(),
-                )
-                return await interaction.response.send_message(embed=em, ephemeral=True)
+        is_allowed, block_reason = await check_blacklist(
+            user, conf, self.view.config, guild
+        )
+        if not is_allowed:
+            em = discord.Embed(
+                description=block_reason,
+                color=discord.Color.red(),
+            )
+            return await interaction.response.send_message(embed=em, ephemeral=True)
 
         panel = conf["panels"][self.panel_name]
         if required_roles := panel.get("required_roles", []):

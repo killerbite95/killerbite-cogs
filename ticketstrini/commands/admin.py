@@ -2002,60 +2002,41 @@ class AdminCommands(MixinMeta):
         - `[p]tickets blacklist add @user` - permanent ban
         - `[p]tickets blacklist add @user 7d spamming` - 7 day ban with reason
         """
-        expires_at = None
+        parsed = None
         if duration and duration.lower() != "permanent":
             parsed = TimeParser.parse(duration)
-            if parsed:
-                expires_at = datetime.now() + parsed
-            else:
+            if not parsed:
                 return await ctx.send(_("Invalid duration format. Use: 1h, 2d, 1w, 30d, or permanent"))
-        
-        success, message = await add_to_blacklist(
+
+        await add_to_blacklist(
             guild=ctx.guild,
-            user=user,
-            moderator=ctx.author,
-            reason=reason,
-            expires_at=expires_at,
+            target=user,
             config=self.config,
+            added_by=ctx.author,
+            reason=reason,
+            duration=parsed,
         )
-        
-        if success:
-            # Log the action
-            conf = await self.config.guild(ctx.guild).all()
-            await log_audit_action(
-                guild=ctx.guild,
-                action="blacklist_add",
-                user=user,
-                moderator=ctx.author,
-                details=_("Duration: {value}, Reason: {value2}").format(value=duration or 'permanent', value2=reason or 'None'),
-                config=self.config,
-                conf=conf,
-            )
-        
-        await ctx.send(message)
+        await ctx.send(
+            _("{user} has been added to the ticket blacklist.").format(user=user.mention)
+        )
 
     @blacklist_cmd.command(name="remove")
     async def blacklist_remove(self, ctx: commands.Context, user: discord.Member):
         """Remove a user from the ticket blacklist"""
-        success, message = await remove_from_blacklist(
+        removed = await remove_from_blacklist(
             guild=ctx.guild,
-            user=user,
+            target=user,
             config=self.config,
+            removed_by=ctx.author,
         )
-        
-        if success:
-            conf = await self.config.guild(ctx.guild).all()
-            await log_audit_action(
-                guild=ctx.guild,
-                action="blacklist_remove",
-                user=user,
-                moderator=ctx.author,
-                details=_("User removed from blacklist"),
-                config=self.config,
-                conf=conf,
+        if removed:
+            await ctx.send(
+                _("{user} has been removed from the ticket blacklist.").format(user=user.mention)
             )
-        
-        await ctx.send(message)
+        else:
+            await ctx.send(
+                _("{user} is not in the ticket blacklist.").format(user=user.mention)
+            )
 
     @blacklist_cmd.command(name="list")
     async def blacklist_list(self, ctx: commands.Context):
@@ -2098,7 +2079,7 @@ class AdminCommands(MixinMeta):
             else:
                 remaining = "Permanent"
             
-            reason = data.get("reason", "No reason")[:50]
+            reason = (data.get("reason") or _("No reason"))[:50]
             lines.append(f"• **{name}** - {remaining}\n  └ {reason}")
         
         if lines:
@@ -2569,12 +2550,10 @@ class AdminCommands(MixinMeta):
         if success:
             await log_audit_action(
                 guild=ctx.guild,
-                action="config_import",
-                user=ctx.author,
-                moderator=ctx.author,
-                details=_("Configuration imported"),
                 config=self.config,
-                conf=await self.config.guild(ctx.guild).all(),
+                action="config_change",
+                user=ctx.author,
+                details={"action": "config_import"},
             )
             await self.initialize(ctx.guild)
         
