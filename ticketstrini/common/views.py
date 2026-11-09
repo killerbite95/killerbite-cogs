@@ -602,9 +602,21 @@ class SupportButton(Button):
         try:
             await self.create_ticket(interaction)
         except Exception as e:
-            guild = interaction.guild.name
-            user = self.mock_user.name if self.mock_user else interaction.user.name
-            log.exception(f"Failed to create ticket in {guild} for {user}", exc_info=e)
+            guild_name = interaction.guild.name if interaction.guild else "unknown guild"
+            user_name = self.mock_user.name if self.mock_user else interaction.user.name
+            log.exception(f"Failed to create ticket in {guild_name} for {user_name}", exc_info=e)
+            em = discord.Embed(
+                description=_(
+                    "Something went wrong while opening your ticket. "
+                    "Please try again or contact an administrator."
+                ),
+                color=discord.Color.red(),
+            )
+            with contextlib.suppress(discord.HTTPException):
+                if interaction.response.is_done():
+                    await interaction.followup.send(embed=em, ephemeral=True)
+                else:
+                    await interaction.response.send_message(embed=em, ephemeral=True)
 
     async def create_ticket(self, interaction: Interaction):
         guild = interaction.guild
@@ -1062,11 +1074,28 @@ class PanelView(View):
             self.add_item(SupportButton(panel, mock_user=mock_user))
 
     async def start(self):
-        chan = self.guild.get_channel(self.panels[0]["channel_id"])
+        channel_id = self.panels[0]["channel_id"]
+        message_id = self.panels[0]["message_id"]
+        chan = self.guild.get_channel(channel_id)
         if not isinstance(chan, discord.TextChannel):
+            log.error(
+                f"Panel message {message_id} was not deployed in {self.guild.name}: "
+                f"channel {channel_id} is missing or is not a text channel"
+            )
             return
-        message = await chan.fetch_message(self.panels[0]["message_id"])
-        await message.edit(view=self)
+        try:
+            message = await chan.fetch_message(message_id)
+            await message.edit(view=self)
+        except discord.Forbidden:
+            log.error(
+                f"Panel message {message_id} was not deployed in {self.guild.name}: "
+                f"the bot cannot edit it (is the message sent by another user or bot?)"
+            )
+        except discord.NotFound:
+            log.error(
+                f"Panel message {message_id} was not deployed in {self.guild.name}: "
+                f"message not found in channel {channel_id}"
+            )
 
 
 class LogView(View):
