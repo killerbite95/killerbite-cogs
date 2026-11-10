@@ -1,0 +1,16 @@
+{
+    "author": ["Killerbite95"],
+    "name": "ScrimsLoL",
+    "short": "Board de scrims de League of Legends por servidor, con equipos, roster y suplentes.",
+    "description": "Gestiona scrims de League of Legends dentro de un servidor. Incluye equipos con capitan, roster de titulares y suplentes, y la base para la board de scrims: posts de equipo, mix o abiertos, apuntados gestionados por el bot, cierre de partida con marcador y fotos opcionales como prueba.",
+    "install_msg": "ScrimsLoL instalado.\n\nCrea tu equipo con `[p]team create <nombre>`.",
+    "end_user_data_statement": "Este cog guarda los IDs de usuario de los capitanes y miembros de cada equipo de scrims, y de los jugadores apuntados a cada scrim.",
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 10, 0],
+    "requirements": [],
+    "permissions": ["embed_links"],
+    "tags": ["trini", "scrims", "lol", "league of legends", "esports"],
+    "type": "COG",
+    "hidden": false,
+    "disabled": false
+}

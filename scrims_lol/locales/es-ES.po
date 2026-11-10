@@ -1,0 +1,171 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: ScrimsLoL\n"
+"POT-Creation-Date: 2026-11-10 00:00+0000\n"
+"PO-Revision-Date: 2026-11-10 00:00+0000\n"
+"Last-Translator: Killerbite95\n"
+"Language-Team: Spanish (Spain)\n"
+"Language: es-ES\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Add a member to your team (captain only)."
+msgstr "Añade un miembro a tu equipo (solo el capitán)."
+
+msgid "Cancel"
+msgstr "Cancelar"
+
+msgid "Cancelled."
+msgstr "Cancelado."
+
+msgid "Create a team. You become its captain."
+msgstr "Crea un equipo. Tú serás el capitán."
+
+msgid "Delete"
+msgstr "Eliminar"
+
+msgid "Delete the team {name}?"
+msgstr "¿Eliminar el equipo {name}?"
+
+msgid "Delete your team (captain only)."
+msgstr "Elimina tu equipo (solo el capitán)."
+
+msgid "Its {count} members lose the team. This cannot be undone."
+msgstr "Sus {count} miembros pierden el equipo. No se puede deshacer."
+
+msgid "Leave your team."
+msgstr "Sal de tu equipo."
+
+msgid "List the teams of this server."
+msgstr "Lista los equipos de este servidor."
+
+msgid "Manage scrim teams."
+msgstr "Gestiona los equipos de scrims."
+
+msgid "Only the captain can do this."
+msgstr "Solo el capitán puede hacer esto."
+
+msgid "Player"
+msgstr "Jugador"
+
+msgid "Remove a member from your team (captain only)."
+msgstr "Elimina un miembro de tu equipo (solo el capitán)."
+
+msgid "Role must be `player` or `sub`."
+msgstr "El rol debe ser `player` o `sub`."
+
+msgid "Scrim board for League of Legends: teams, sign-ups and match records."
+msgstr "Board de scrims de League of Legends: equipos, apuntados y registro de partidas."
+
+msgid "Scrims LoL"
+msgstr "Scrims LoL"
+
+msgid "Scrims LoL · Team #{id}"
+msgstr "Scrims LoL · Equipo #{id}"
+
+msgid "Scrims of League of Legends."
+msgstr "Scrims de League of Legends."
+
+msgid "Show a team and its roster."
+msgstr "Muestra un equipo y su plantilla."
+
+msgid "Sub"
+msgstr "Suplente"
+
+msgid "That member is already the captain."
+msgstr "Ese miembro ya es el capitán."
+
+msgid "That user cannot be added to a team."
+msgstr "Ese usuario no se puede añadir a un equipo."
+
+msgid "The captain cannot be removed. Transfer the captaincy first."
+msgstr "No se puede eliminar al capitán. Transfiere primero la capitanía."
+
+msgid "The roster is full (15 members)."
+msgstr "La plantilla está llena (15 miembros)."
+
+msgid "The team name must be between 2 and 32 characters."
+msgstr "El nombre del equipo debe tener entre 2 y 32 caracteres."
+
+msgid "There is already a team named **{name}**."
+msgstr "Ya existe un equipo con el nombre **{name}**."
+
+msgid "There is already a team with the tag **{tag}**."
+msgstr "Ya existe un equipo con la etiqueta **{tag}**."
+
+msgid "This command only works in a server."
+msgstr "Este comando solo funciona en un servidor."
+
+msgid "This confirmation is not for you."
+msgstr "Esta confirmación no es para ti."
+
+msgid "This server has no teams yet. Create the first one with `{cmd}`."
+msgstr "Este servidor todavía no tiene equipos. Crea el primero con `{cmd}`."
+
+msgid "This team no longer exists."
+msgstr "Este equipo ya no existe."
+
+msgid "Transfer the captaincy to another member."
+msgstr "Transfiere la capitanía a otro miembro."
+
+msgid "You are already in the team **{team}**. Leave it before creating another one."
+msgstr "Ya estás en el equipo **{team}**. Sal de él antes de crear otro."
+
+msgid "You cannot leave a team you captain. Transfer the captaincy or delete the team."
+msgstr "No puedes salir de un equipo que capitaneas. Transfiere la capitanía o elimina el equipo."
+
+msgid "You do not belong to any team. Create one with `{cmd}`."
+msgstr "No perteneces a ningún equipo. Crea uno con `{cmd}`."
+
+msgid "{index}. **{name}** — {captain} · {count} members"
+msgstr "{index}. **{name}** — {captain} · {count} miembros"
+
+msgid "{member} does not belong to any team."
+msgstr "{member} no pertenece a ningún equipo."
+
+msgid "{member} is already in the team **{team}**."
+msgstr "{member} ya está en el equipo **{team}**."
+
+msgid "{member} is not in your team."
+msgstr "{member} no está en tu equipo."
+
+msgid "{pre}\n\nVersion: {version}"
+msgstr "{pre}\n\nVersión: {version}"
+
+msgid "✅ Team **{name}** created. You are the captain."
+msgstr "✅ Equipo **{name}** creado. Eres el capitán."
+
+msgid "✅ Team **{name}** deleted."
+msgstr "✅ Equipo **{name}** eliminado."
+
+msgid "✅ You left the team **{name}**."
+msgstr "✅ Has salido del equipo **{name}**."
+
+msgid "✅ {member} is now the captain of **{name}**."
+msgstr "✅ {member} es ahora el capitán de **{name}**."
+
+msgid "✅ {member} joined the team as {role}."
+msgstr "✅ {member} se ha unido al equipo como {role}."
+
+msgid "✅ {member} was removed from the team."
+msgstr "✅ {member} se ha eliminado del equipo."
+
+msgid "🎯 Starters ({count}/{total})"
+msgstr "🎯 Titulares ({count}/{total})"
+
+msgid "🏷️ Tag"
+msgstr "🏷️ Etiqueta"
+
+msgid "📋 Teams ({count})"
+msgstr "📋 Equipos ({count})"
+
+msgid "🛡️ {name}"
+msgstr "🛡️ {name}"
+
+msgid "🛡️ {name} · [{tag}]"
+msgstr "🛡️ {name} · [{tag}]"
+
+msgid "🪑 Subs ({count})"
+msgstr "🪑 Suplentes ({count})"
