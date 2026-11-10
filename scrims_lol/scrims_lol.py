@@ -378,15 +378,24 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             timezone="Europe/Madrid",
         )
         self._locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
+        self._view: Optional[discord.ui.View] = None
 
     async def cog_load(self) -> None:
         await super().cog_load()
-        self.bot.add_view(ScrimView(self))
+        self._view = ScrimView(self)
+        self.bot.add_view(self._view)
         if not self.expire_loop.is_running():
             self.expire_loop.start()
+        await self._sweep_all()
 
     def cog_unload(self) -> None:
         self.expire_loop.cancel()
+        if self._view is not None:
+            try:
+                self.bot.remove_view(self._view)
+            except Exception:
+                pass
+            self._view = None
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
@@ -924,31 +933,39 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
 
     # ------------------------------------------------------------------- loops
 
-    @tasks.loop(minutes=1)
-    async def expire_loop(self) -> None:
+    async def _sweep_scrims(self, guild: discord.Guild) -> bool:
+        """Caduca las scrims vencidas de un servidor y devuelve si cambió algo."""
         now = int(time.time())
+        scrims = await self.config.guild(guild).scrims()
+        changed = False
+        for scrim in scrims.values():
+            status = scrim.get("status")
+            start = int(scrim.get("start", 0))
+            if status == "open" and now >= start:
+                scrim["status"] = "expired"
+                changed = True
+                await self._refresh_board(guild, scrim)
+            elif status == "matched" and now >= start + GRACE_SECONDS:
+                scrim["status"] = "expired"
+                changed = True
+                await self._refresh_board(guild, scrim)
+        if changed:
+            await self.config.guild(guild).scrims.set(scrims)
+        return changed
+
+    async def _sweep_all(self) -> None:
         for guild in self.bot.guilds:
             try:
                 if await self.bot.cog_disabled_in_guild(self, guild):
                     continue
                 await set_contextual_locales_from_guild(self.bot, guild)
-                scrims = await self.config.guild(guild).scrims()
-                changed = False
-                for scrim in scrims.values():
-                    status = scrim.get("status")
-                    start = int(scrim.get("start", 0))
-                    if status == "open" and now >= start:
-                        scrim["status"] = "expired"
-                        changed = True
-                        await self._refresh_board(guild, scrim)
-                    elif status == "matched" and now >= start + GRACE_SECONDS:
-                        scrim["status"] = "expired"
-                        changed = True
-                        await self._refresh_board(guild, scrim)
-                if changed:
-                    await self.config.guild(guild).scrims.set(scrims)
+                await self._sweep_scrims(guild)
             except Exception:
                 log.exception("Fallo en el TTL de scrims del servidor %s", guild.id)
+
+    @tasks.loop(minutes=1)
+    async def expire_loop(self) -> None:
+        await self._sweep_all()
 
     # --------------------------------------------------------------- commands
 
