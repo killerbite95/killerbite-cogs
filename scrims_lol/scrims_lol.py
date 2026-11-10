@@ -571,7 +571,15 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             return "—"
         if side.get("kind") == "team":
             return _("🛡️ **{name}**").format(name=side.get("label", "?"))
-        return _mentions([int(uid) for uid in side.get("signups", [])])
+        signups = [int(uid) for uid in side.get("signups", [])]
+        lines = [
+            "{bar} {count}/{total}".format(
+                bar=_bar(len(signups), STARTER_SLOTS), count=len(signups), total=STARTER_SLOTS
+            )
+        ]
+        if signups:
+            lines.append(_mentions(signups))
+        return "\n".join(lines)
 
     def _scrim_embed(self, guild: discord.Guild, scrim: dict) -> discord.Embed:
         status = scrim.get("status", "open")
@@ -583,11 +591,14 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         embed.add_field(name=_("Format"), value=self._format_text(scrim), inline=True)
 
         embed.add_field(name=_("My side"), value=self._side_value(guild, scrim.get("side")), inline=False)
-        embed.add_field(
-            name=_("Opponent"),
-            value=self._side_value(guild, scrim.get("rival")) if scrim.get("rival") else _("Not claimed yet."),
-            inline=False,
-        )
+        rival_side = scrim.get("rival")
+        if rival_side:
+            rival_value = self._side_value(guild, rival_side)
+        elif scrim.get("looks_for") == "team":
+            rival_value = _("Not claimed yet.")
+        else:
+            rival_value = self._side_value(guild, {"kind": scrim.get("looks_for"), "signups": []})
+        embed.add_field(name=_("Opponent"), value=rival_value, inline=False)
 
         start = int(scrim.get("start", 0))
         embed.add_field(
