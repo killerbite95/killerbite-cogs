@@ -40,6 +40,7 @@ def _strings() -> None:
     _("Scrims LoL")
     _("Scrims LoL · Team #{id}")
     _("📋 Teams ({count})")
+    _("… and {n} more.")
     _("{index}. **{name}** — {captain} · {count} members")
     _("This server has no teams yet. Create the first one with `{cmd}`.")
     _("Role must be `player` or `sub`.")

@@ -161,6 +161,9 @@ msgstr "🏷️ Etiqueta"
 msgid "📋 Teams ({count})"
 msgstr "📋 Equipos ({count})"
 
+msgid "… and {n} more."
+msgstr "… y {n} más."
+
 msgid "🛡️ {name}"
 msgstr "🛡️ {name}"
 

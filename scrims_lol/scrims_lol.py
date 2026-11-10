@@ -365,9 +365,12 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             if len("\n".join(body_lines + [line])) > 3500:
                 break
             body_lines.append(line)
+        description = "\n".join(body_lines) or "—"
+        if len(body_lines) < len(ordered):
+            description += "\n" + _("… and {n} more.").format(n=len(ordered) - len(body_lines))
         embed = discord.Embed(
             title=_("📋 Teams ({count})").format(count=len(ordered)),
-            description="\n".join(body_lines) or "—",
+            description=description,
             colour=COLOR_TEAM,
         )
         embed.set_footer(text=_("Scrims LoL"))

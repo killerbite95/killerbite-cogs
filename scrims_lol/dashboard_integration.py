@@ -93,7 +93,7 @@ class DashboardIntegration:
                 "tag": team.get("tag") or "",
                 "captain": name_of(team.get("captain_id", 0)),
                 "count": len(members),
-                "players": ", ".join(name_of(uid) for uid, role in members.items() if role == "player"),
+                "players": ", ".join(name_of(uid) for uid, role in members.items() if role in ("player", "captain")),
                 "subs": ", ".join(name_of(uid) for uid, role in members.items() if role == "sub"),
             })
 
@@ -101,7 +101,7 @@ class DashboardIntegration:
 <div class="trini-tp-settings">
   <h3 class="trini-tp-title"><i class="fa fa-users"></i> Scrims LoL · Equipos</h3>
   <p class="trini-tp-subtitle">
-    {{ teams|length }} equipos registrados. Crear y editar equipos: <code>team create</code> en Discord.
+    {{ teams|length }} equipos registrados. Crear y editar equipos: <code>scrims team create</code> en Discord.
   </p>
   {% if teams|length > 0 %}
   <div class="table-responsive"><table class="table trini-table trini-tp-table">
@@ -116,7 +116,7 @@ class DashboardIntegration:
         <td>{{ t.subs or "—" }}</td>
       </tr>
     {% endfor %}</tbody></table></div>
-  {% else %}<p class="text-sm opacity-6">Todavia no hay equipos.</p>{% endif %}
+  {% else %}<p class="text-sm opacity-6">Todavía no hay equipos.</p>{% endif %}
 </div>
 """
         return {"status": 0, "web_content": {"source": source, "teams": rows}}
