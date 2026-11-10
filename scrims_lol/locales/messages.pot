@@ -1,0 +1,228 @@
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-11-10 22:47+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: redgettext 3.4.2\n"
+
+#: scrims_lol.py:108 i18n_strings.py:22
+msgid "Delete"
+msgstr ""
+
+#: scrims_lol.py:109 i18n_strings.py:23
+msgid "Cancel"
+msgstr ""
+
+#: scrims_lol.py:148 i18n_strings.py:25
+msgid "{pre}\n\nVersion: {version}"
+msgstr ""
+
+#: scrims_lol.py:376 scrims_lol.py:229 i18n_strings.py:40
+msgid "Scrims LoL"
+msgstr ""
+
+#: scrims_lol.py:113 i18n_strings.py:24
+msgid "This confirmation is not for you."
+msgstr ""
+
+#: scrims_lol.py:172 i18n_strings.py:26
+msgid "This command only works in a server."
+msgstr ""
+
+#: scrims_lol.py:203 i18n_strings.py:36
+msgid "🛡️ {name} · [{tag}]"
+msgstr ""
+
+#: scrims_lol.py:203 i18n_strings.py:35
+msgid "🛡️ {name}"
+msgstr ""
+
+#: scrims_lol.py:222 i18n_strings.py:39
+msgid "🏷️ Tag"
+msgstr ""
+
+#: scrims_lol.py:241 i18n_strings.py:29
+msgid "Only the captain can do this."
+msgstr ""
+
+#: scrims_lol.py:272 i18n_strings.py:30
+msgid "The team name must be between 2 and 32 characters."
+msgstr ""
+
+#: scrims_lol.py:399 i18n_strings.py:46
+msgid "Role must be `player` or `sub`."
+msgstr ""
+
+#: scrims_lol.py:402 i18n_strings.py:47
+msgid "That user cannot be added to a team."
+msgstr ""
+
+#: scrims_lol.py:542 i18n_strings.py:62
+msgid "Cancelled."
+msgstr ""
+
+#: scrims_lol.py:212 i18n_strings.py:37
+msgid "🎯 Starters ({count}/{total})"
+msgstr ""
+
+#: scrims_lol.py:217 i18n_strings.py:38
+msgid "🪑 Subs ({count})"
+msgstr ""
+
+#: scrims_lol.py:224 i18n_strings.py:41
+msgid "Scrims LoL · Team #{id}"
+msgstr ""
+
+#: scrims_lol.py:307 i18n_strings.py:34
+msgid "✅ Team **{name}** created. You are the captain."
+msgstr ""
+
+#: scrims_lol.py:355 i18n_strings.py:44
+msgid "{index}. **{name}** — {captain} · {count} members"
+msgstr ""
+
+#: scrims_lol.py:370 i18n_strings.py:43
+msgid "… and {n} more."
+msgstr ""
+
+#: scrims_lol.py:372 i18n_strings.py:42
+msgid "📋 Teams ({count})"
+msgstr ""
+
+#: scrims_lol.py:409 scrims_lol.py:442 scrims_lol.py:499 i18n_strings.py:48
+msgid "This team no longer exists."
+msgstr ""
+
+#: scrims_lol.py:418 i18n_strings.py:50
+msgid "The roster is full (15 members)."
+msgstr ""
+
+#: scrims_lol.py:423 i18n_strings.py:51
+msgid "✅ {member} joined the team as {role}."
+msgstr ""
+
+#: scrims_lol.py:449 i18n_strings.py:53
+msgid "The captain cannot be removed. Transfer the captaincy first."
+msgstr ""
+
+#: scrims_lol.py:454 i18n_strings.py:54
+msgid "✅ {member} was removed from the team."
+msgstr ""
+
+#: scrims_lol.py:474 i18n_strings.py:55
+msgid "You cannot leave a team you captain. Transfer the captaincy or delete the team."
+msgstr ""
+
+#: scrims_lol.py:480 i18n_strings.py:56
+msgid "✅ You left the team **{name}**."
+msgstr ""
+
+#: scrims_lol.py:506 i18n_strings.py:57
+msgid "That member is already the captain."
+msgstr ""
+
+#: scrims_lol.py:514 i18n_strings.py:58
+msgid "✅ {member} is now the captain of **{name}**."
+msgstr ""
+
+#: scrims_lol.py:529 i18n_strings.py:59
+msgid "Delete the team {name}?"
+msgstr ""
+
+#: scrims_lol.py:530 i18n_strings.py:60
+msgid "Its {count} members lose the team. This cannot be undone."
+msgstr ""
+
+#: scrims_lol.py:550 i18n_strings.py:61
+msgid "✅ Team **{name}** deleted."
+msgstr ""
+
+#: scrims_lol.py:237 scrims_lol.py:323 scrims_lol.py:467 i18n_strings.py:27
+msgid "You do not belong to any team. Create one with `{cmd}`."
+msgstr ""
+
+#: scrims_lol.py:341 i18n_strings.py:45
+msgid "This server has no teams yet. Create the first one with `{cmd}`."
+msgstr ""
+
+#: scrims_lol.py:281 i18n_strings.py:31
+msgid "You are already in the team **{team}**. Leave it before creating another one."
+msgstr ""
+
+#: scrims_lol.py:287 i18n_strings.py:32
+msgid "There is already a team named **{name}**."
+msgstr ""
+
+#: scrims_lol.py:290 i18n_strings.py:33
+msgid "There is already a team with the tag **{tag}**."
+msgstr ""
+
+#: scrims_lol.py:328 i18n_strings.py:28
+msgid "{member} does not belong to any team."
+msgstr ""
+
+#: scrims_lol.py:414 i18n_strings.py:49
+msgid "{member} is already in the team **{team}**."
+msgstr ""
+
+#: scrims_lol.py:446 scrims_lol.py:503 i18n_strings.py:52
+msgid "{member} is not in your team."
+msgstr ""
+
+#: i18n_strings.py:11
+msgid "Scrim board for League of Legends: teams, sign-ups and match records."
+msgstr ""
+
+#: i18n_strings.py:12
+msgid "Scrims of League of Legends."
+msgstr ""
+
+#: i18n_strings.py:13
+msgid "Manage scrim teams."
+msgstr ""
+
+#: i18n_strings.py:14
+msgid "Create a team. You become its captain."
+msgstr ""
+
+#: i18n_strings.py:15
+msgid "Show a team and its roster."
+msgstr ""
+
+#: i18n_strings.py:16
+msgid "List the teams of this server."
+msgstr ""
+
+#: i18n_strings.py:17
+msgid "Add a member to your team (captain only)."
+msgstr ""
+
+#: i18n_strings.py:18
+msgid "Remove a member from your team (captain only)."
+msgstr ""
+
+#: i18n_strings.py:19
+msgid "Leave your team."
+msgstr ""
+
+#: i18n_strings.py:20
+msgid "Transfer the captaincy to another member."
+msgstr ""
+
+#: i18n_strings.py:21
+msgid "Delete your team (captain only)."
+msgstr ""
+
+#: i18n_strings.py:63
+msgid "Player"
+msgstr ""
+
+#: i18n_strings.py:64
+msgid "Sub"
+msgstr ""

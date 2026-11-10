@@ -6,7 +6,7 @@
     "install_msg": "ScrimsLoL instalado.\n\nCrea tu equipo con `/scrims team create <nombre>` (también vale `[p]scrims team create`).",
     "end_user_data_statement": "Este cog guarda los IDs de usuario de los capitanes y miembros de cada equipo de scrims, y de los jugadores apuntados a cada scrim.",
     "min_bot_version": "3.5.0",
-    "min_python_version": [3, 10, 0],
+    "min_python_version": [3, 9, 0],
     "requirements": [],
     "permissions": ["embed_links"],
     "tags": ["trini", "scrims", "lol", "league of legends", "esports"],
