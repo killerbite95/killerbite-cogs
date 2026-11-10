@@ -281,8 +281,17 @@ msgstr "El lado y la búsqueda deben ser equipo, mix o abierto."
 msgid "The score must look like `2-1`."
 msgstr "El marcador debe tener el formato `2-1`."
 
-msgid "The opponent side is full."
-msgstr "El lado rival está completo."
+msgid "The scrim is full."
+msgstr "La scrim está completa."
+
+msgid "You cannot leave your own scrim."
+msgstr "No puedes salir de tu propia scrim."
+
+msgid "This scrim already has a rival."
+msgstr "Esta scrim ya tiene rival."
+
+msgid "✅ Team accepted. Waiting for your side to be complete."
+msgstr "✅ Equipo aceptado. Falta completar tu lado."
 
 msgid "The game must be between 1 and 9."
 msgstr "La partida debe estar entre 1 y 9."
@@ -292,9 +301,6 @@ msgstr "Ya estás apuntado."
 
 msgid "You are not signed up."
 msgstr "No estás apuntado."
-
-msgid "You cannot join your own scrim."
-msgstr "No puedes apuntarte a tu propia scrim."
 
 msgid "You cannot accept your own scrim."
 msgstr "No puedes aceptar tu propia scrim."
@@ -409,6 +415,21 @@ msgstr "Cancela una scrim que hayas publicado."
 
 msgid "Attach an optional screenshot to a game."
 msgstr "Adjunta una captura opcional a una partida."
+
+msgid "Set the timezone for interpreting scrim times."
+msgstr "Define la zona horaria para interpretar las horas de las scrims."
+
+msgid "Only admins can change the timezone."
+msgstr "Solo los administradores pueden cambiar la zona horaria."
+
+msgid "The timezone is `{tz}`."
+msgstr "La zona horaria es `{tz}`."
+
+msgid "That timezone is not valid. Use an IANA name like `Europe/Madrid`."
+msgstr "Esa zona horaria no es válida. Usa un nombre IANA como `Europe/Madrid`."
+
+msgid "✅ Timezone set to `{tz}`."
+msgstr "✅ Zona horaria establecida a `{tz}`."
 
 msgid "**Scrims**\n`{create}` — publish a scrim.\n`{list}` — see the open scrims.\n`{info}` — details of one scrim.\n`{join}` / `{leave}` — sign up or leave the opponent side.\n`{close}` — close it with a score.\n`{cancel}` — cancel it.\n`{photo}` — attach a screenshot of a game.\n`{team}` — manage teams."
 msgstr "**Scrims**\n`{create}` — publica una scrim.\n`{list}` — mira las scrims abiertas.\n`{info}` — detalles de una scrim.\n`{join}` / `{leave}` — apúntate o sal del lado rival.\n`{close}` — ciérrala con el marcador.\n`{cancel}` — cancélala.\n`{photo}` — adjunta una captura de una partida.\n`{team}` — gestiona los equipos."

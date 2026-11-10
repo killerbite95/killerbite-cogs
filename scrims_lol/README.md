@@ -29,6 +29,7 @@ Los mensajes de gestión (crear equipo, ver equipos, errores, confirmaciones) so
 5. Al emparejar se crea un **hilo privado** con los dos lados, el contacto y el formato.
 6. Al terminar, **Cerrar** (pide el marcador) y, si quieres, adjunta capturas con `!scrims photo`.
 7. La scrim caduca sola: al llegar la hora, o 3 horas después si ya estaba emparejada.
+8. (Opcional, admins) La hora se interpreta en la zona horaria del servidor (por defecto `Europe/Madrid`). Cámbiala con `!scrims timezone Europe/Madrid` o consulta la actual con `!scrims timezone`.
 
 Todo está también en el dashboard, página **ScrimsLoL → teams** (solo lectura, para mods/admins).
 
@@ -48,6 +49,7 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]`.
 | `!scrims close <id> <marcador>` | Cierra con marcador (por ejemplo `2-1`). | Participantes o staff |
 | `!scrims cancel <id>` | Cancela la scrim. | Autor o staff |
 | `!scrims photo <id> <partida> [enlace]` | Guarda una captura. En prefijo puedes adjuntar la imagen al comando. | Participantes o staff |
+| `!scrims timezone [zona]` | Muestra o fija la zona horaria para interpretar las horas. | Admins |
 
 ### Equipos
 

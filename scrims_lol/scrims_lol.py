@@ -51,6 +51,7 @@ import re
 import time
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple
+from zoneinfo import ZoneInfo
 
 import discord
 from discord import app_commands
@@ -108,10 +109,14 @@ def _clean(value: str) -> str:
     return " ".join(str(value).split())
 
 
-def _parse_when(value: str) -> int:
+def _parse_when(value: str, tz: str = "UTC") -> int:
     """Convierte +90, +2h30, 21:00, 15/11 21:00 o 2026-11-15 21:00 a epoch UTC."""
     raw = value.strip().lower()
     now = datetime.datetime.now(datetime.timezone.utc)
+    try:
+        zone = ZoneInfo(tz)
+    except Exception:
+        zone = datetime.timezone.utc
 
     if raw.startswith("+"):
         body = raw[1:].replace(" ", "")
@@ -134,8 +139,9 @@ def _parse_when(value: str) -> int:
         hour, minute = int(match.group(1)), int(match.group(2))
         if hour > 23 or minute > 59:
             raise ValueError("when")
-        start = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        if start <= now:
+        now_local = now.astimezone(zone)
+        start = now_local.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        if start <= now_local:
             start += datetime.timedelta(days=1)
         return int(start.timestamp())
 
@@ -144,9 +150,7 @@ def _parse_when(value: str) -> int:
         year, month, day = int(match.group(1)), int(match.group(2)), int(match.group(3))
         hour, minute = int(match.group(4)), int(match.group(5))
         try:
-            start = now.replace(
-                year=year, month=month, day=day, hour=hour, minute=minute, second=0, microsecond=0
-            )
+            start = datetime.datetime(year, month, day, hour, minute, tzinfo=zone)
         except ValueError:
             raise ValueError("when")
         return int(start.timestamp())
@@ -154,15 +158,15 @@ def _parse_when(value: str) -> int:
     match = _WHEN_DATE.fullmatch(raw)
     if match:
         day, month = int(match.group(1)), int(match.group(2))
-        year = int(match.group(3)) if match.group(3) else now.year
+        year = int(match.group(3)) if match.group(3) else now.astimezone(zone).year
         if year < 100:
             year += 2000
         hour, minute = int(match.group(4)), int(match.group(5))
         try:
-            start = now.replace(year=year, month=month, day=day, hour=hour, minute=minute, second=0, microsecond=0)
+            start = datetime.datetime(year, month, day, hour, minute, tzinfo=zone)
         except ValueError:
             raise ValueError("when")
-        if not match.group(3) and start <= now:
+        if not match.group(3) and start.timestamp() <= now.timestamp():
             try:
                 start = start.replace(year=year + 1)
             except ValueError:
@@ -371,6 +375,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             next_team_id=1,
             scrims={},
             next_scrim_id=1,
+            timezone="Europe/Madrid",
         )
         self._locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
 
@@ -622,6 +627,37 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             return "{low} – {high}".format(low=low, high=high)
         return low or high or ""
 
+    @staticmethod
+    def _my_side_full(scrim: dict) -> bool:
+        side = scrim.get("side") or {}
+        if side.get("kind") == "team":
+            return True
+        return len(side.get("signups", [])) >= STARTER_SLOTS
+
+    @staticmethod
+    def _rival_full(scrim: dict) -> bool:
+        if scrim.get("looks_for") == "team":
+            return (scrim.get("rival") or {}).get("kind") == "team"
+        return len((scrim.get("rival") or {}).get("signups", [])) >= STARTER_SLOTS
+
+    def _board_view(self, scrim: dict) -> Optional[discord.ui.View]:
+        status = scrim.get("status")
+        if status in ("closed", "cancelled", "expired"):
+            return None
+        view = ScrimView(self)
+        if status != "open":
+            # Emparejada: solo quedan Cerrar y Cancelar.
+            view.remove_item(view.join_button)
+            view.remove_item(view.leave_button)
+            view.remove_item(view.accept_button)
+            return view
+        if scrim.get("looks_for") == "team":
+            view.remove_item(view.join_button)
+            view.remove_item(view.leave_button)
+        else:
+            view.remove_item(view.accept_button)
+        return view
+
     async def _refresh_board(self, guild: discord.Guild, scrim: dict) -> None:
         channel = guild.get_channel(int(scrim.get("channel_id") or 0))
         if channel is None or not scrim.get("message_id"):
@@ -630,7 +666,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             message = await channel.fetch_message(int(scrim["message_id"]))
         except (discord.NotFound, discord.HTTPException, ValueError):
             return
-        view = None if scrim.get("status") in ("closed", "cancelled", "expired") else ScrimView(self)
+        view = self._board_view(scrim)
         try:
             await message.edit(embed=self._scrim_embed(guild, scrim), view=view)
         except discord.HTTPException:
@@ -707,22 +743,35 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                 return False, _("That scrim does not exist.")
             if scrim.get("status") != "open":
                 return False, _("That scrim is not open.")
-            if scrim.get("looks_for") == "team":
-                return False, _("This scrim is looking for a team: a captain has to accept it.")
             if user.id == scrim.get("author_id"):
-                return False, _("You cannot join your own scrim.")
-            rival = scrim.get("rival") or {"kind": "mix", "team_id": None, "label": _("Mix"), "signups": []}
-            signups = [int(value) for value in rival.get("signups", [])]
-            if user.id in signups:
                 return False, _("You are already signed up.")
-            if len(signups) >= STARTER_SLOTS:
-                return False, _("The opponent side is full.")
-            signups.append(user.id)
-            rival["signups"] = signups
-            rival["kind"] = scrim.get("looks_for")
-            rival["label"] = _side_kind_label(scrim.get("looks_for", "mix"))
-            scrim["rival"] = rival
-            if len(signups) >= STARTER_SLOTS:
+
+            side = scrim.get("side") or {}
+            rival = scrim.get("rival") or {}
+            my_open = side.get("kind") in ("mix", "open")
+            rival_open = scrim.get("looks_for") in ("mix", "open")
+            my_signups = [int(value) for value in side.get("signups", [])]
+            rival_signups = [int(value) for value in rival.get("signups", [])]
+
+            if user.id in my_signups or user.id in rival_signups:
+                return False, _("You are already signed up.")
+
+            if my_open and len(my_signups) < STARTER_SLOTS:
+                my_signups.append(user.id)
+                side["signups"] = my_signups
+                scrim["side"] = side
+            elif rival_open and len(rival_signups) < STARTER_SLOTS:
+                rival_signups.append(user.id)
+                rival["signups"] = rival_signups
+                rival["kind"] = scrim.get("looks_for")
+                rival["label"] = _side_kind_label(scrim.get("looks_for", "mix"))
+                scrim["rival"] = rival
+            elif not my_open and not rival_open:
+                return False, _("This scrim is looking for a team: a captain has to accept it.")
+            else:
+                return False, _("The scrim is full.")
+
+            if self._my_side_full(scrim) and self._rival_full(scrim):
                 scrim["status"] = "matched"
             await self.config.guild(guild).scrims.set(scrims)
 
@@ -748,13 +797,24 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                 return False, _("That scrim does not exist.")
             if scrim.get("status") != "open":
                 return False, _("That scrim is not open.")
+            if user.id == scrim.get("author_id"):
+                return False, _("You cannot leave your own scrim.")
+
+            side = scrim.get("side") or {}
             rival = scrim.get("rival") or {}
-            signups = [int(value) for value in rival.get("signups", [])]
-            if user.id not in signups:
+            my_signups = [int(value) for value in side.get("signups", [])]
+            rival_signups = [int(value) for value in rival.get("signups", [])]
+
+            if user.id in my_signups:
+                my_signups.remove(user.id)
+                side["signups"] = my_signups
+                scrim["side"] = side
+            elif user.id in rival_signups:
+                rival_signups.remove(user.id)
+                rival["signups"] = rival_signups
+                scrim["rival"] = rival
+            else:
                 return False, _("You are not signed up.")
-            signups.remove(user.id)
-            rival["signups"] = signups
-            scrim["rival"] = rival
             await self.config.guild(guild).scrims.set(scrims)
         await self._refresh_board(guild, scrim)
         return True, _("✅ You left the scrim.")
@@ -769,6 +829,8 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                 return False, _("That scrim is not open.")
             if scrim.get("looks_for") != "team":
                 return False, _("This scrim is not looking for a team.")
+            if scrim.get("rival"):
+                return False, _("This scrim already has a rival.")
             teams = await self.config.guild(guild).teams()
             found = self._find_by_user(teams, user.id)
             if found is None:
@@ -784,19 +846,23 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                 "label": team.get("name", "?"),
                 "signups": [],
             }
-            scrim["status"] = "matched"
+            if self._my_side_full(scrim) and self._rival_full(scrim):
+                scrim["status"] = "matched"
             await self.config.guild(guild).scrims.set(scrims)
 
-        thread_id = await self._open_thread(guild, scrim)
-        if thread_id:
-            async with self._locks[guild.id]:
-                scrims = await self.config.guild(guild).scrims()
-                if str(scrim_id) in scrims:
-                    scrims[str(scrim_id)]["thread_id"] = thread_id
-                    await self.config.guild(guild).scrims.set(scrims)
-            scrim["thread_id"] = thread_id
+        if scrim.get("status") == "matched":
+            thread_id = await self._open_thread(guild, scrim)
+            if thread_id:
+                async with self._locks[guild.id]:
+                    scrims = await self.config.guild(guild).scrims()
+                    if str(scrim_id) in scrims:
+                        scrims[str(scrim_id)]["thread_id"] = thread_id
+                        await self.config.guild(guild).scrims.set(scrims)
+                scrim["thread_id"] = thread_id
         await self._refresh_board(guild, scrim)
-        return True, _("✅ Scrim matched. A private thread was created.")
+        if scrim.get("status") == "matched":
+            return True, _("✅ Scrim matched. A private thread was created.")
+        return True, _("✅ Team accepted. Waiting for your side to be complete.")
 
     async def apply_cancel(self, guild: discord.Guild, scrim_id: int, user: discord.abc.User) -> Tuple[bool, str]:
         scrim = await self._get_scrim(guild, scrim_id)
@@ -974,8 +1040,9 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         if side not in SIDE_KINDS or looks_for not in SIDE_KINDS:
             await self._reply(ctx, _("The side and the search must be team, mix or open."))
             return
+        tz = await self.config.guild(guild).timezone()
         try:
-            start = _parse_when(when)
+            start = _parse_when(when, tz)
         except ValueError:
             await self._reply(
                 ctx,
@@ -1034,7 +1101,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             await self.config.guild(guild).next_scrim_id.set(scrim_id + 1)
             scrim = scrims[str(scrim_id)]
 
-        message = await ctx.send(embed=self._scrim_embed(guild, scrim), view=ScrimView(self))
+        message = await ctx.send(embed=self._scrim_embed(guild, scrim), view=self._board_view(scrim))
         async with self._locks[guild.id]:
             scrims = await self.config.guild(guild).scrims()
             if str(scrim_id) in scrims:
@@ -1217,6 +1284,34 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             fresh = scrim
         await self._refresh_board(guild, fresh)
         await self._reply(ctx, _("✅ Screenshot saved for game {game}.").format(game=game))
+
+    @scrims.command(name="timezone")
+    @app_commands.rename(tz="zona")
+    @app_commands.describe(tz="Zona horaria IANA, p. ej. Europe/Madrid o America/Buenos_Aires.")
+    async def scrims_timezone(self, ctx: commands.Context, tz: Optional[str] = None) -> None:
+        """Set the timezone for interpreting scrim times."""
+        guild = await self._require_guild(ctx)
+        if guild is None:
+            return
+        member = ctx.author
+        if not (
+            member.guild_permissions.manage_guild
+            or await self.bot.is_mod(member)
+            or await self.bot.is_admin(member)
+        ):
+            await self._reply(ctx, _("Only admins can change the timezone."))
+            return
+        if tz is None:
+            current = await self.config.guild(guild).timezone()
+            await self._reply(ctx, _("The timezone is `{tz}`.").format(tz=current))
+            return
+        try:
+            ZoneInfo(tz)
+        except Exception:
+            await self._reply(ctx, _("That timezone is not valid. Use an IANA name like `Europe/Madrid`."))
+            return
+        await self.config.guild(guild).timezone.set(tz)
+        await self._reply(ctx, _("✅ Timezone set to `{tz}`.").format(tz=tz))
 
     # -------------------------------------------------------------------- team
 
