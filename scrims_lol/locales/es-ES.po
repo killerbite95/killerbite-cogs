@@ -401,8 +401,8 @@ msgstr "Lista las scrims abiertas de este servidor."
 msgid "Show one scrim."
 msgstr "Muestra una scrim."
 
-msgid "Join the opponent side of a mix or open scrim."
-msgstr "Apúntate al lado rival de una scrim mix o abierta."
+msgid "Join a side of a mix or open scrim with your role."
+msgstr "Apúntate a un lado de una scrim mix o abierta con tu rol."
 
 msgid "Leave the opponent side of a scrim."
 msgstr "Sal del lado rival de una scrim."
@@ -431,5 +431,32 @@ msgstr "Esa zona horaria no es válida. Usa un nombre IANA como `Europe/Madrid`.
 msgid "✅ Timezone set to `{tz}`."
 msgstr "✅ Zona horaria establecida a `{tz}`."
 
-msgid "**Scrims**\n`{create}` — publish a scrim.\n`{list}` — see the open scrims.\n`{info}` — details of one scrim.\n`{join}` / `{leave}` — sign up or leave the opponent side.\n`{close}` — close it with a score.\n`{cancel}` — cancel it.\n`{photo}` — attach a screenshot of a game.\n`{team}` — manage teams."
-msgstr "**Scrims**\n`{create}` — publica una scrim.\n`{list}` — mira las scrims abiertas.\n`{info}` — detalles de una scrim.\n`{join}` / `{leave}` — apúntate o sal del lado rival.\n`{close}` — ciérrala con el marcador.\n`{cancel}` — cancélala.\n`{photo}` — adjunta una captura de una partida.\n`{team}` — gestiona los equipos."
+msgid "**Scrims**\n`{create}` — publish a scrim.\n`{list}` — see the open scrims.\n`{info}` — details of one scrim.\n`{join}` / `{leave}` — sign up (with your role) or leave the opponent side.\n`{close}` — close it with a score.\n`{cancel}` — cancel it.\n`{photo}` — attach a screenshot of a game.\n`{team}` — manage teams."
+msgstr "**Scrims**\n`{create}` — publica una scrim.\n`{list}` — mira las scrims abiertas.\n`{info}` — detalles de una scrim.\n`{join}` / `{leave}` — apúntate (con tu rol) o sal del lado rival.\n`{close}` — ciérrala con el marcador.\n`{cancel}` — cancélala.\n`{photo}` — adjunta una captura de una partida.\n`{team}` — gestiona los equipos."
+
+msgid "ADC"
+msgstr "ADC"
+
+msgid "Jungle"
+msgstr "Jungla"
+
+msgid "Mid"
+msgstr "Mid"
+
+msgid "Pick your role (top, jungle, mid, adc or support)."
+msgstr "Elige tu rol (top, jungla, mid, adc o support)."
+
+msgid "Pick your side and role"
+msgstr "Elige tu lado y tu rol"
+
+msgid "Support"
+msgstr "Soporte"
+
+msgid "That role is already taken."
+msgstr "Ese rol ya está ocupado."
+
+msgid "This side is not open."
+msgstr "Este lado no está abierto."
+
+msgid "Top"
+msgstr "Top"

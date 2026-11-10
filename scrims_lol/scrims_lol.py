@@ -13,7 +13,7 @@ Modelo de un scrim::
         "channel_id": int,
         "message_id": int | None,
         "side": {"kind": "team" | "mix" | "open", "team_id": int | None,
-                  "label": str, "signups": [int, ...]},
+                  "label": str, "signups": {role: int, ...}},
         "looks_for": "team" | "mix" | "open",
         "start": int,                       # timestamp UTC
         "bo": int,                          # 1, 3 o 5
@@ -31,8 +31,8 @@ Modelo de un scrim::
 
 El registro depende del tipo de lado: un lado de equipo se guarda como equipo
 (no importa quien jugo, representa al equipo), y un lado mixto o abierto se
-guarda con los apuntados uno a uno. Las fotos son opcionales y solo sirven
-como prueba.
+guarda con los apuntados uno por rol (top, jungla, mid, adc o support). Las
+fotos son opcionales y solo sirven como prueba.
 
 Comandos: /scrims create, /scrims list, /scrims info, /scrims join,
 /scrims leave, /scrims close, /scrims cancel, /scrims photo y /scrims team ...
@@ -71,6 +71,8 @@ MAX_MEMBERS = 15
 STARTER_SLOTS = 5
 MEMBERSHIP_ROLES = ("player", "sub")
 ROLE_LABELS = {"player": "Player", "sub": "Sub"}
+LANE_ROLES = ("top", "jungle", "mid", "adc", "support")
+LANE_EMOJI = {"top": "🗡️", "jungle": "🌲", "mid": "🔮", "adc": "🏹", "support": "🛡️"}
 
 SIDE_KINDS = ("team", "mix", "open")
 GRACE_SECONDS = 3 * 3600
@@ -103,6 +105,36 @@ def _bar(filled: int, total: int = STARTER_SLOTS) -> str:
 
 def _role_label(role: str) -> str:
     return _(ROLE_LABELS.get(role, "Player"))
+
+
+def _lane_label(lane: str) -> str:
+    labels = {"top": _("Top"), "jungle": _("Jungle"), "mid": _("Mid"), "adc": _("ADC"), "support": _("Support")}
+    return labels.get(lane, _("Top"))
+
+
+def _signups_of(side: Optional[dict]) -> Dict[str, int]:
+    raw = (side or {}).get("signups")
+    if isinstance(raw, dict):
+        return {lane: int(uid) for lane, uid in raw.items() if lane in LANE_ROLES}
+    return {}
+
+
+def joinable_slots(scrim: dict) -> List[Tuple[str, str]]:
+    """Devuelve los huecos libres como pares (lado, rol): ('side', 'top'), ('rival', 'mid'), ..."""
+    slots: List[Tuple[str, str]] = []
+    side = scrim.get("side") or {}
+    rival = scrim.get("rival") or {}
+    if side.get("kind") in ("mix", "open"):
+        taken = set(_signups_of(side))
+        for lane in LANE_ROLES:
+            if lane not in taken:
+                slots.append(("side", lane))
+    if scrim.get("looks_for") in ("mix", "open"):
+        taken = set(_signups_of(rival))
+        for lane in LANE_ROLES:
+            if lane not in taken:
+                slots.append(("rival", lane))
+    return slots
 
 
 def _clean(value: str) -> str:
@@ -224,10 +256,6 @@ def _member_lines(guild: discord.Guild, user_ids: List[str], captain_id: Optiona
     return "\n".join(lines) or "—"
 
 
-def _mentions(user_ids: List[int]) -> str:
-    return "\n".join(f"<@{uid}>" for uid in user_ids) or "—"
-
-
 def _command_path(ctx: commands.Context, *parts: str) -> str:
     base = f"{ctx.clean_prefix}scrims team"
     return " ".join([base, *parts])
@@ -289,6 +317,44 @@ class ConfirmView(discord.ui.View):
         await interaction.response.defer()
 
 
+class SlotSelect(discord.ui.Select):
+    """Desplegable para elegir lado y rol (línea) al apuntarse a una scrim."""
+
+    def __init__(self, cog: "ScrimsLoL", scrim_id: int, slots: List[Tuple[str, str]]) -> None:
+        self.cog = cog
+        self.scrim_id = scrim_id
+        options = []
+        for side_key, lane in slots:
+            side_label = _("My side") if side_key == "side" else _("Opponent")
+            options.append(
+                discord.SelectOption(
+                    label="{side} · {lane}".format(side=side_label, lane=_lane_label(lane)),
+                    emoji=LANE_EMOJI.get(lane),
+                    value="{side}:{lane}".format(side=side_key, lane=lane),
+                )
+            )
+        super().__init__(placeholder=_("Pick your side and role"), min_values=1, max_values=1, options=options)
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        if interaction.guild is None:
+            await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+        side_key, lane = self.values[0].split(":", 1)
+        ok, message = await self.cog.apply_join(
+            interaction.guild, self.scrim_id, interaction.user, side_key, lane
+        )
+        await interaction.followup.send(message, ephemeral=True)
+
+
+class SlotView(discord.ui.View):
+    """Vista efímera que envuelve el selector de lado y rol."""
+
+    def __init__(self, cog: "ScrimsLoL", scrim_id: int, slots: List[Tuple[str, str]]) -> None:
+        super().__init__(timeout=180.0)
+        self.add_item(SlotSelect(cog, scrim_id, slots))
+
+
 class ScrimView(discord.ui.View):
     """Botones persistentes de un post de scrim."""
 
@@ -316,9 +382,11 @@ class ScrimView(discord.ui.View):
         scrim = await self._scrim(interaction)
         if scrim is None:
             return
-        await interaction.response.defer(ephemeral=True)
-        ok, message = await self.cog.apply_join(interaction.guild, scrim["id"], interaction.user)
-        await interaction.followup.send(message, ephemeral=True)
+        slots = joinable_slots(scrim)
+        if not slots:
+            await interaction.response.send_message(_("The scrim is full."), ephemeral=True)
+            return
+        await interaction.response.send_message(view=SlotView(self.cog, scrim["id"], slots), ephemeral=True)
 
     @discord.ui.button(label="Leave", emoji="🚪", style=discord.ButtonStyle.secondary, custom_id="scrims:leave")
     async def leave_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -365,7 +433,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
     """Scrim board for League of Legends: teams, sign-ups and match records."""
 
     __author__ = "Killerbite95"
-    __version__ = "0.3.0"
+    __version__ = "0.4.0"
 
     def __init__(self, bot: Red) -> None:
         self.bot = bot
@@ -386,6 +454,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         self.bot.add_view(self._view)
         if not self.expire_loop.is_running():
             self.expire_loop.start()
+        await self._migrate_signups()
         await self._sweep_all()
 
     def cog_unload(self) -> None:
@@ -428,7 +497,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                         side = scrim.get(side_key)
                         if not side:
                             continue
-                        side["signups"] = [value for value in side.get("signups", []) if int(value) != user_id]
+                        side["signups"] = {lane: uid for lane, uid in _signups_of(side).items() if uid != user_id}
 
     # ------------------------------------------------------------------ helpers
 
@@ -537,6 +606,23 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         scrims = await self.config.guild(guild).scrims()
         return scrims.get(str(scrim_id))
 
+    async def _migrate_signups(self) -> None:
+        """Convierte los apuntados guardados como lista al formato por rol."""
+        for guild in self.bot.guilds:
+            scrims = await self.config.guild(guild).scrims()
+            changed = False
+            for scrim in scrims.values():
+                for key in ("side", "rival"):
+                    side = scrim.get(key)
+                    if not side:
+                        continue
+                    raw = side.get("signups")
+                    if isinstance(raw, list):
+                        side["signups"] = {lane: int(uid) for lane, uid in zip(LANE_ROLES, raw)}
+                        changed = True
+            if changed:
+                await self.config.guild(guild).scrims.set(scrims)
+
     async def _side_user_ids(self, guild: discord.Guild, side: Optional[dict]) -> List[int]:
         if not side:
             return []
@@ -545,7 +631,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             team = teams.get(str(side["team_id"]))
             if team:
                 return [int(uid) for uid in team.get("members", {})]
-        return [int(uid) for uid in side.get("signups", [])]
+        return list(_signups_of(side).values())
 
     async def can_manage(self, guild: discord.Guild, user: discord.abc.User, scrim: dict) -> bool:
         if user.id == scrim.get("author_id"):
@@ -557,7 +643,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         teams = await self.config.guild(guild).teams()
         for side_key in ("side", "rival"):
             side = scrim.get(side_key) or {}
-            if user.id in [int(value) for value in side.get("signups", [])]:
+            if user.id in _signups_of(side).values():
                 return True
             team_id = side.get("team_id")
             if team_id and str(team_id) in teams and str(user.id) in teams[str(team_id)].get("members", {}):
@@ -571,14 +657,20 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             return "—"
         if side.get("kind") == "team":
             return _("🛡️ **{name}**").format(name=side.get("label", "?"))
-        signups = [int(uid) for uid in side.get("signups", [])]
+        signups = _signups_of(side)
         lines = [
             "{bar} {count}/{total}".format(
                 bar=_bar(len(signups), STARTER_SLOTS), count=len(signups), total=STARTER_SLOTS
             )
         ]
-        if signups:
-            lines.append(_mentions(signups))
+        for lane in LANE_ROLES:
+            uid = signups.get(lane)
+            if uid is None:
+                who = "—"
+            else:
+                member = guild.get_member(uid)
+                who = member.mention if member else f"<@{uid}>"
+            lines.append("{emoji} {label} · {who}".format(emoji=LANE_EMOJI.get(lane, ""), label=_lane_label(lane), who=who))
         return "\n".join(lines)
 
     def _scrim_embed(self, guild: discord.Guild, scrim: dict) -> discord.Embed:
@@ -597,7 +689,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         elif scrim.get("looks_for") == "team":
             rival_value = _("Not claimed yet.")
         else:
-            rival_value = self._side_value(guild, {"kind": scrim.get("looks_for"), "signups": []})
+            rival_value = self._side_value(guild, {"kind": scrim.get("looks_for"), "signups": {}})
         embed.add_field(name=_("Opponent"), value=rival_value, inline=False)
 
         start = int(scrim.get("start", 0))
@@ -652,13 +744,13 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         side = scrim.get("side") or {}
         if side.get("kind") == "team":
             return True
-        return len(side.get("signups", [])) >= STARTER_SLOTS
+        return len(_signups_of(side)) >= STARTER_SLOTS
 
     @staticmethod
     def _rival_full(scrim: dict) -> bool:
         if scrim.get("looks_for") == "team":
             return (scrim.get("rival") or {}).get("kind") == "team"
-        return len((scrim.get("rival") or {}).get("signups", [])) >= STARTER_SLOTS
+        return len(_signups_of(scrim.get("rival"))) >= STARTER_SLOTS
 
     def _board_view(self, scrim: dict) -> Optional[discord.ui.View]:
         status = scrim.get("status")
@@ -755,7 +847,14 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
 
     # ---------------------------------------------------------------- mutations
 
-    async def apply_join(self, guild: discord.Guild, scrim_id: int, user: discord.abc.User) -> Tuple[bool, str]:
+    async def apply_join(
+        self,
+        guild: discord.Guild,
+        scrim_id: int,
+        user: discord.abc.User,
+        side_key: str,
+        role: str,
+    ) -> Tuple[bool, str]:
         async with self._locks[guild.id]:
             scrims = await self.config.guild(guild).scrims()
             scrim = scrims.get(str(scrim_id))
@@ -765,31 +864,30 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                 return False, _("That scrim is not open.")
             if user.id == scrim.get("author_id"):
                 return False, _("You are already signed up.")
+            if side_key not in ("side", "rival") or role not in LANE_ROLES:
+                return False, _("Pick your side and role")
 
-            side = scrim.get("side") or {}
-            rival = scrim.get("rival") or {}
-            my_open = side.get("kind") in ("mix", "open")
-            rival_open = scrim.get("looks_for") in ("mix", "open")
-            my_signups = [int(value) for value in side.get("signups", [])]
-            rival_signups = [int(value) for value in rival.get("signups", [])]
-
-            if user.id in my_signups or user.id in rival_signups:
+            if user.id in _signups_of(scrim.get("side")).values() or user.id in _signups_of(
+                scrim.get("rival")
+            ).values():
                 return False, _("You are already signed up.")
 
-            if my_open and len(my_signups) < STARTER_SLOTS:
-                my_signups.append(user.id)
-                side["signups"] = my_signups
-                scrim["side"] = side
-            elif rival_open and len(rival_signups) < STARTER_SLOTS:
-                rival_signups.append(user.id)
-                rival["signups"] = rival_signups
-                rival["kind"] = scrim.get("looks_for")
-                rival["label"] = _side_kind_label(scrim.get("looks_for", "mix"))
-                scrim["rival"] = rival
-            elif not my_open and not rival_open:
-                return False, _("This scrim is looking for a team: a captain has to accept it.")
-            else:
-                return False, _("The scrim is full.")
+            side = scrim.get(side_key) or {}
+            if side_key == "side" and side.get("kind") not in ("mix", "open"):
+                return False, _("This side is not open.")
+            if side_key == "rival" and scrim.get("looks_for") not in ("mix", "open"):
+                return False, _("This side is not open.")
+
+            signups = _signups_of(side)
+            if role in signups:
+                return False, _("That role is already taken.")
+
+            signups[role] = user.id
+            side["signups"] = signups
+            if side_key == "rival":
+                side["kind"] = scrim.get("looks_for")
+                side["label"] = _side_kind_label(scrim.get("looks_for", "mix"))
+            scrim[side_key] = side
 
             if self._my_side_full(scrim) and self._rival_full(scrim):
                 scrim["status"] = "matched"
@@ -822,16 +920,14 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
 
             side = scrim.get("side") or {}
             rival = scrim.get("rival") or {}
-            my_signups = [int(value) for value in side.get("signups", [])]
-            rival_signups = [int(value) for value in rival.get("signups", [])]
+            my_signups = _signups_of(side)
+            rival_signups = _signups_of(rival)
 
-            if user.id in my_signups:
-                my_signups.remove(user.id)
-                side["signups"] = my_signups
+            if user.id in my_signups.values():
+                side["signups"] = {ln: uid for ln, uid in my_signups.items() if uid != user.id}
                 scrim["side"] = side
-            elif user.id in rival_signups:
-                rival_signups.remove(user.id)
-                rival["signups"] = rival_signups
+            elif user.id in rival_signups.values():
+                rival["signups"] = {ln: uid for ln, uid in rival_signups.items() if uid != user.id}
                 scrim["rival"] = rival
             else:
                 return False, _("You are not signed up.")
@@ -864,7 +960,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
                 "kind": "team",
                 "team_id": int(team_id),
                 "label": team.get("name", "?"),
-                "signups": [],
+                "signups": {},
             }
             if self._my_side_full(scrim) and self._rival_full(scrim):
                 scrim["status"] = "matched"
@@ -992,7 +1088,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             "`{create}` — publish a scrim.\n"
             "`{list}` — see the open scrims.\n"
             "`{info}` — details of one scrim.\n"
-            "`{join}` / `{leave}` — sign up or leave the opponent side.\n"
+            "`{join}` / `{leave}` — sign up (with your role) or leave the opponent side.\n"
             "`{close}` — close it with a score.\n"
             "`{cancel}` — cancel it.\n"
             "`{photo}` — attach a screenshot of a game.\n"
@@ -1019,6 +1115,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         tier_min="rango_min",
         tier_max="rango_max",
         contact="contacto",
+        role="rol",
     )
     @app_commands.describe(
         side="Cómo se presenta tu lado.",
@@ -1029,6 +1126,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         tier_min="Rango mínimo (opcional).",
         tier_max="Rango máximo (opcional).",
         contact="Contacto (por defecto, se avisa al autor).",
+        role="Tu rol (Top, Jungla, Mid, ADC o Support).",
     )
     @app_commands.choices(
         side=[
@@ -1046,6 +1144,13 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             app_commands.Choice(name="BO3", value=3),
             app_commands.Choice(name="BO5", value=5),
         ],
+        role=[
+            app_commands.Choice(name="Top", value="top"),
+            app_commands.Choice(name="Jungla", value="jungle"),
+            app_commands.Choice(name="Mid", value="mid"),
+            app_commands.Choice(name="ADC", value="adc"),
+            app_commands.Choice(name="Support", value="support"),
+        ],
     )
     async def scrims_create(
         self,
@@ -1058,6 +1163,7 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         tier_min: Optional[str] = None,
         tier_max: Optional[str] = None,
         contact: Optional[str] = None,
+        role: Optional[str] = None,
     ) -> None:
         """Publish a scrim on the board."""
         guild = await self._require_guild(ctx)
@@ -1091,13 +1197,17 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
             if team.get("captain_id") != ctx.author.id:
                 await self._reply(ctx, _("Only the captain can post a scrim for the team."))
                 return
-            my_side = {"kind": "team", "team_id": int(team_id), "label": team.get("name", "?"), "signups": []}
+            my_side = {"kind": "team", "team_id": int(team_id), "label": team.get("name", "?"), "signups": {}}
         else:
+            lane = role if role in LANE_ROLES else None
+            if lane is None:
+                await self._reply(ctx, _("Pick your role (top, jungle, mid, adc or support)."))
+                return
             my_side = {
                 "kind": side,
                 "team_id": None,
                 "label": _side_kind_label(side),
-                "signups": [ctx.author.id],
+                "signups": {lane: ctx.author.id},
             }
 
         clean_contact = _clean(contact)[:100] if contact else ""
@@ -1182,16 +1292,52 @@ class ScrimsLoL(DashboardIntegration, commands.Cog):
         await self._reply(ctx, embed=self._scrim_embed(guild, scrim))
 
     @scrims.command(name="join")
-    @app_commands.rename(scrim_id="id")
-    @app_commands.describe(scrim_id="ID of the scrim.")
-    async def scrims_join(self, ctx: commands.Context, scrim_id: int) -> None:
-        """Join the opponent side of a mix or open scrim."""
+    @app_commands.rename(scrim_id="id", side="lado", role="rol")
+    @app_commands.describe(
+        scrim_id="ID of the scrim.",
+        side="Lado al que te apuntas: Mi lado o Rival.",
+        role="Tu rol (Top, Jungla, Mid, ADC o Support).",
+    )
+    @app_commands.choices(
+        side=[
+            app_commands.Choice(name="Mi lado", value="side"),
+            app_commands.Choice(name="Rival", value="rival"),
+        ],
+        role=[
+            app_commands.Choice(name="Top", value="top"),
+            app_commands.Choice(name="Jungla", value="jungle"),
+            app_commands.Choice(name="Mid", value="mid"),
+            app_commands.Choice(name="ADC", value="adc"),
+            app_commands.Choice(name="Support", value="support"),
+        ],
+    )
+    async def scrims_join(
+        self, ctx: commands.Context, scrim_id: int, side: Optional[str] = None, role: Optional[str] = None
+    ) -> None:
+        """Join a side of a mix or open scrim with your role."""
         guild = await self._require_guild(ctx)
         if guild is None:
             return
-        await ctx.defer(ephemeral=True)
-        ok, message = await self.apply_join(guild, scrim_id, ctx.author)
-        await self._reply(ctx, message)
+        if side is not None and role is not None:
+            await ctx.defer(ephemeral=True)
+            ok, message = await self.apply_join(guild, scrim_id, ctx.author, side, role)
+            await self._reply(ctx, message)
+            return
+        scrim = await self._get_scrim(guild, scrim_id)
+        if scrim is None:
+            await self._reply(ctx, _("That scrim does not exist."))
+            return
+        if scrim.get("status") != "open":
+            await self._reply(ctx, _("That scrim is not open."))
+            return
+        slots = joinable_slots(scrim)
+        if not slots:
+            if (scrim.get("side") or {}).get("kind") == "team" and scrim.get("looks_for") == "team":
+                await self._reply(ctx, _("This scrim is looking for a team: a captain has to accept it."))
+                return
+            await self._reply(ctx, _("The scrim is full."))
+            return
+        await self._reply(ctx, view=SlotView(self, scrim_id, slots), keep=True)
 
     @scrims.command(name="leave")
     @app_commands.rename(scrim_id="id")
