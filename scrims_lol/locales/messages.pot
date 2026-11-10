@@ -2,7 +2,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-11-10 22:47+0000\n"
+"POT-Creation-Date: 2026-11-10 23:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -11,167 +11,455 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: redgettext 3.4.2\n"
 
-#: scrims_lol.py:108 i18n_strings.py:22
+#: scrims_lol.py:194 i18n_strings.py:65
+msgid "Team"
+msgstr ""
+
+#: scrims_lol.py:194 scrims_lol.py:195 scrims_lol.py:714 i18n_strings.py:66
+msgid "Mix"
+msgstr ""
+
+#: scrims_lol.py:194 scrims_lol.py:200 i18n_strings.py:67
+msgid "Open"
+msgstr ""
+
+#: scrims_lol.py:201 i18n_strings.py:69
+msgid "Matched"
+msgstr ""
+
+#: scrims_lol.py:202 i18n_strings.py:68
+msgid "Closed"
+msgstr ""
+
+#: scrims_lol.py:203 i18n_strings.py:70
+msgid "Cancelled"
+msgstr ""
+
+#: scrims_lol.py:204 i18n_strings.py:71
+msgid "Expired"
+msgstr ""
+
+#: scrims_lol.py:266 i18n_strings.py:22
 msgid "Delete"
 msgstr ""
 
-#: scrims_lol.py:109 i18n_strings.py:23
+#: scrims_lol.py:267 scrims_lol.py:298 i18n_strings.py:23
 msgid "Cancel"
 msgstr ""
 
-#: scrims_lol.py:148 i18n_strings.py:25
+#: scrims_lol.py:294 i18n_strings.py:72
+msgid "Join"
+msgstr ""
+
+#: scrims_lol.py:295 i18n_strings.py:73
+msgid "Leave"
+msgstr ""
+
+#: scrims_lol.py:296 i18n_strings.py:74
+msgid "Accept as team"
+msgstr ""
+
+#: scrims_lol.py:297 i18n_strings.py:75
+msgid "Close"
+msgstr ""
+
+#: scrims_lol.py:741 i18n_strings.py:119
+msgid "✅ You joined the scrim."
+msgstr ""
+
+#: scrims_lol.py:760 i18n_strings.py:121
+msgid "✅ You left the scrim."
+msgstr ""
+
+#: scrims_lol.py:799 i18n_strings.py:122
+msgid "✅ Scrim matched. A private thread was created."
+msgstr ""
+
+#: scrims_lol.py:817 i18n_strings.py:123
+msgid "✅ Scrim cancelled."
+msgstr ""
+
+#: scrims_lol.py:243 i18n_strings.py:86
+msgid "Our maps"
+msgstr ""
+
+#: scrims_lol.py:244 i18n_strings.py:87
+msgid "Their maps"
+msgstr ""
+
+#: scrims_lol.py:388 i18n_strings.py:25
 msgid "{pre}\n\nVersion: {version}"
 msgstr ""
 
-#: scrims_lol.py:376 scrims_lol.py:229 i18n_strings.py:40
+#: scrims_lol.py:564 i18n_strings.py:126
+msgid "🎯 Scrim #{id} · {side}"
+msgstr ""
+
+#: scrims_lol.py:567 i18n_strings.py:76
+msgid "Status"
+msgstr ""
+
+#: scrims_lol.py:568 i18n_strings.py:77
+msgid "Looking for"
+msgstr ""
+
+#: scrims_lol.py:569 scrims_lol.py:695 i18n_strings.py:78
+msgid "Format"
+msgstr ""
+
+#: scrims_lol.py:571 scrims_lol.py:691 i18n_strings.py:84
+msgid "My side"
+msgstr ""
+
+#: scrims_lol.py:573 scrims_lol.py:692 i18n_strings.py:85
+msgid "Opponent"
+msgstr ""
+
+#: scrims_lol.py:580 scrims_lol.py:694 i18n_strings.py:79
+msgid "Start"
+msgstr ""
+
+#: scrims_lol.py:689 i18n_strings.py:93
+msgid "This private thread is for both sides to agree on the details."
+msgstr ""
+
+#: scrims_lol.py:740 i18n_strings.py:120
+msgid "✅ You joined and the scrim is complete."
+msgstr ""
+
+#: scrims_lol.py:804 scrims_lol.py:828 scrims_lol.py:707 scrims_lol.py:748 scrims_lol.py:767 scrims_lol.py:811 scrims_lol.py:835 scrims_lol.py:1085 scrims_lol.py:1154 i18n_strings.py:94
+msgid "That scrim does not exist."
+msgstr ""
+
+#: scrims_lol.py:806 i18n_strings.py:108
+msgid "Only the author or the staff can cancel this scrim."
+msgstr ""
+
+#: scrims_lol.py:830 scrims_lol.py:344 i18n_strings.py:109
+msgid "Only the participants or the staff can close this scrim."
+msgstr ""
+
+#: scrims_lol.py:896 i18n_strings.py:144
+msgid "**Scrims**\n`{create}` — publish a scrim.\n`{list}` — see the open scrims.\n`{info}` — details of one scrim.\n`{join}` / `{leave}` — sign up or leave the opponent side.\n`{close}` — close it with a score.\n`{cancel}` — cancel it.\n`{photo}` — attach a screenshot of a game.\n`{team}` — manage teams."
+msgstr ""
+
+#: scrims_lol.py:1357 scrims_lol.py:499 i18n_strings.py:40
 msgid "Scrims LoL"
 msgstr ""
 
-#: scrims_lol.py:113 i18n_strings.py:24
+#: scrims_lol.py:250 scrims_lol.py:302 i18n_strings.py:89
+msgid "This only works in a server."
+msgstr ""
+
+#: scrims_lol.py:271 i18n_strings.py:24
 msgid "This confirmation is not for you."
 msgstr ""
 
-#: scrims_lol.py:172 i18n_strings.py:26
+#: scrims_lol.py:306 i18n_strings.py:90
+msgid "This scrim no longer exists."
+msgstr ""
+
+#: scrims_lol.py:442 i18n_strings.py:26
 msgid "This command only works in a server."
 msgstr ""
 
-#: scrims_lol.py:203 i18n_strings.py:36
+#: scrims_lol.py:473 i18n_strings.py:36
 msgid "🛡️ {name} · [{tag}]"
 msgstr ""
 
-#: scrims_lol.py:203 i18n_strings.py:35
+#: scrims_lol.py:473 i18n_strings.py:35
 msgid "🛡️ {name}"
 msgstr ""
 
-#: scrims_lol.py:222 i18n_strings.py:39
+#: scrims_lol.py:492 i18n_strings.py:39
 msgid "🏷️ Tag"
 msgstr ""
 
-#: scrims_lol.py:241 i18n_strings.py:29
+#: scrims_lol.py:511 i18n_strings.py:29
 msgid "Only the captain can do this."
 msgstr ""
 
-#: scrims_lol.py:272 i18n_strings.py:30
+#: scrims_lol.py:559 i18n_strings.py:135
+msgid "🛡️ **{name}**"
+msgstr ""
+
+#: scrims_lol.py:574 i18n_strings.py:88
+msgid "Not claimed yet."
+msgstr ""
+
+#: scrims_lol.py:587 i18n_strings.py:80
+msgid "Rank"
+msgstr ""
+
+#: scrims_lol.py:589 scrims_lol.py:697 i18n_strings.py:81
+msgid "Contact"
+msgstr ""
+
+#: scrims_lol.py:594 i18n_strings.py:82
+msgid "Score"
+msgstr ""
+
+#: scrims_lol.py:599 i18n_strings.py:83
+msgid "Photos"
+msgstr ""
+
+#: scrims_lol.py:709 scrims_lol.py:750 scrims_lol.py:769 i18n_strings.py:95
+msgid "That scrim is not open."
+msgstr ""
+
+#: scrims_lol.py:711 i18n_strings.py:91
+msgid "This scrim is looking for a team: a captain has to accept it."
+msgstr ""
+
+#: scrims_lol.py:713 i18n_strings.py:105
+msgid "You cannot join your own scrim."
+msgstr ""
+
+#: scrims_lol.py:717 i18n_strings.py:103
+msgid "You are already signed up."
+msgstr ""
+
+#: scrims_lol.py:719 i18n_strings.py:101
+msgid "The opponent side is full."
+msgstr ""
+
+#: scrims_lol.py:754 i18n_strings.py:104
+msgid "You are not signed up."
+msgstr ""
+
+#: scrims_lol.py:771 i18n_strings.py:92
+msgid "This scrim is not looking for a team."
+msgstr ""
+
+#: scrims_lol.py:775 i18n_strings.py:107
+msgid "You do not belong to any team."
+msgstr ""
+
+#: scrims_lol.py:778 i18n_strings.py:111
+msgid "Only the captain can accept a scrim."
+msgstr ""
+
+#: scrims_lol.py:780 i18n_strings.py:106
+msgid "You cannot accept your own scrim."
+msgstr ""
+
+#: scrims_lol.py:813 scrims_lol.py:837 i18n_strings.py:96
+msgid "That scrim is already finished."
+msgstr ""
+
+#: scrims_lol.py:825 i18n_strings.py:100
+msgid "The score must look like `2-1`."
+msgstr ""
+
+#: scrims_lol.py:839 i18n_strings.py:97
+msgid "The scrim has no opponent yet."
+msgstr ""
+
+#: scrims_lol.py:845 i18n_strings.py:124
+msgid "✅ Scrim closed with {us}-{them}."
+msgstr ""
+
+#: scrims_lol.py:975 i18n_strings.py:99
+msgid "The side and the search must be team, mix or open."
+msgstr ""
+
+#: scrims_lol.py:986 i18n_strings.py:98
+msgid "The scrim must start in the future."
+msgstr ""
+
+#: scrims_lol.py:1056 i18n_strings.py:114
+msgid "There are no open scrims right now."
+msgstr ""
+
+#: scrims_lol.py:1157 i18n_strings.py:110
+msgid "Only the participants or the staff can add photos."
+msgstr ""
+
+#: scrims_lol.py:1160 i18n_strings.py:102
+msgid "The game must be between 1 and 9."
+msgstr ""
+
+#: scrims_lol.py:1182 i18n_strings.py:115
+msgid "I cannot find the channel of that scrim."
+msgstr ""
+
+#: scrims_lol.py:1248 i18n_strings.py:30
 msgid "The team name must be between 2 and 32 characters."
 msgstr ""
 
-#: scrims_lol.py:399 i18n_strings.py:46
+#: scrims_lol.py:1380 i18n_strings.py:46
 msgid "Role must be `player` or `sub`."
 msgstr ""
 
-#: scrims_lol.py:402 i18n_strings.py:47
+#: scrims_lol.py:1383 i18n_strings.py:47
 msgid "That user cannot be added to a team."
 msgstr ""
 
-#: scrims_lol.py:542 i18n_strings.py:62
+#: scrims_lol.py:1534 i18n_strings.py:62
 msgid "Cancelled."
 msgstr ""
 
-#: scrims_lol.py:212 i18n_strings.py:37
+#: scrims_lol.py:240 i18n_strings.py:132
+msgid "Close scrim #{id}"
+msgstr ""
+
+#: scrims_lol.py:482 i18n_strings.py:37
 msgid "🎯 Starters ({count}/{total})"
 msgstr ""
 
-#: scrims_lol.py:217 i18n_strings.py:38
+#: scrims_lol.py:487 i18n_strings.py:38
 msgid "🪑 Subs ({count})"
 msgstr ""
 
-#: scrims_lol.py:224 i18n_strings.py:41
+#: scrims_lol.py:494 i18n_strings.py:41
 msgid "Scrims LoL · Team #{id}"
 msgstr ""
 
-#: scrims_lol.py:307 i18n_strings.py:34
+#: scrims_lol.py:581 i18n_strings.py:130
+msgid "{time} ({relative})"
+msgstr ""
+
+#: scrims_lol.py:601 i18n_strings.py:134
+msgid "Scrims LoL · #{id}"
+msgstr ""
+
+#: scrims_lol.py:687 i18n_strings.py:131
+msgid "Scrim #{id} matched"
+msgstr ""
+
+#: scrims_lol.py:982 i18n_strings.py:117
+msgid "I could not read that time. Use `+90`, `+2h`, `21:00`, `15/11 21:00` or `2026-11-15 21:00`."
+msgstr ""
+
+#: scrims_lol.py:993 i18n_strings.py:113
+msgid "To post as a team you must belong to one."
+msgstr ""
+
+#: scrims_lol.py:997 i18n_strings.py:112
+msgid "Only the captain can post a scrim for the team."
+msgstr ""
+
+#: scrims_lol.py:1061 i18n_strings.py:128
+msgid "#{id} · {side} → {looks} · {start}"
+msgstr ""
+
+#: scrims_lol.py:1069 i18n_strings.py:127
+msgid "🎯 Open scrims ({count})"
+msgstr ""
+
+#: scrims_lol.py:1186 i18n_strings.py:133
+msgid "Scrim #{id} · Game {game}"
+msgstr ""
+
+#: scrims_lol.py:1196 i18n_strings.py:116
+msgid "I could not post the image."
+msgstr ""
+
+#: scrims_lol.py:1219 i18n_strings.py:125
+msgid "✅ Screenshot saved for game {game}."
+msgstr ""
+
+#: scrims_lol.py:1285 i18n_strings.py:34
 msgid "✅ Team **{name}** created. You are the captain."
 msgstr ""
 
-#: scrims_lol.py:355 i18n_strings.py:44
+#: scrims_lol.py:1336 i18n_strings.py:44
 msgid "{index}. **{name}** — {captain} · {count} members"
 msgstr ""
 
-#: scrims_lol.py:370 i18n_strings.py:43
+#: scrims_lol.py:1351 i18n_strings.py:43
 msgid "… and {n} more."
 msgstr ""
 
-#: scrims_lol.py:372 i18n_strings.py:42
+#: scrims_lol.py:1353 i18n_strings.py:42
 msgid "📋 Teams ({count})"
 msgstr ""
 
-#: scrims_lol.py:409 scrims_lol.py:442 scrims_lol.py:499 i18n_strings.py:48
+#: scrims_lol.py:1390 scrims_lol.py:1429 scrims_lol.py:1487 i18n_strings.py:48
 msgid "This team no longer exists."
 msgstr ""
 
-#: scrims_lol.py:418 i18n_strings.py:50
+#: scrims_lol.py:1402 i18n_strings.py:50
 msgid "The roster is full (15 members)."
 msgstr ""
 
-#: scrims_lol.py:423 i18n_strings.py:51
+#: scrims_lol.py:1409 i18n_strings.py:51
 msgid "✅ {member} joined the team as {role}."
 msgstr ""
 
-#: scrims_lol.py:449 i18n_strings.py:53
+#: scrims_lol.py:1436 i18n_strings.py:53
 msgid "The captain cannot be removed. Transfer the captaincy first."
 msgstr ""
 
-#: scrims_lol.py:454 i18n_strings.py:54
+#: scrims_lol.py:1441 i18n_strings.py:54
 msgid "✅ {member} was removed from the team."
 msgstr ""
 
-#: scrims_lol.py:474 i18n_strings.py:55
+#: scrims_lol.py:1462 i18n_strings.py:55
 msgid "You cannot leave a team you captain. Transfer the captaincy or delete the team."
 msgstr ""
 
-#: scrims_lol.py:480 i18n_strings.py:56
+#: scrims_lol.py:1468 i18n_strings.py:56
 msgid "✅ You left the team **{name}**."
 msgstr ""
 
-#: scrims_lol.py:506 i18n_strings.py:57
+#: scrims_lol.py:1494 i18n_strings.py:57
 msgid "That member is already the captain."
 msgstr ""
 
-#: scrims_lol.py:514 i18n_strings.py:58
+#: scrims_lol.py:1503 i18n_strings.py:58
 msgid "✅ {member} is now the captain of **{name}**."
 msgstr ""
 
-#: scrims_lol.py:529 i18n_strings.py:59
+#: scrims_lol.py:1519 i18n_strings.py:59
 msgid "Delete the team {name}?"
 msgstr ""
 
-#: scrims_lol.py:530 i18n_strings.py:60
+#: scrims_lol.py:1520 i18n_strings.py:60
 msgid "Its {count} members lose the team. This cannot be undone."
 msgstr ""
 
-#: scrims_lol.py:550 i18n_strings.py:61
+#: scrims_lol.py:1542 i18n_strings.py:61
 msgid "✅ Team **{name}** deleted."
 msgstr ""
 
-#: scrims_lol.py:237 scrims_lol.py:323 scrims_lol.py:467 i18n_strings.py:27
+#: scrims_lol.py:507 scrims_lol.py:1303 scrims_lol.py:1455 i18n_strings.py:27
 msgid "You do not belong to any team. Create one with `{cmd}`."
 msgstr ""
 
-#: scrims_lol.py:341 i18n_strings.py:45
+#: scrims_lol.py:595 i18n_strings.py:129
+msgid "{us} - {them}"
+msgstr ""
+
+#: scrims_lol.py:1322 i18n_strings.py:45
 msgid "This server has no teams yet. Create the first one with `{cmd}`."
 msgstr ""
 
-#: scrims_lol.py:281 i18n_strings.py:31
+#: scrims_lol.py:1171 i18n_strings.py:118
+msgid "Attach the image in prefix or pass an `https://` link with `{cmd}`."
+msgstr ""
+
+#: scrims_lol.py:1258 i18n_strings.py:31
 msgid "You are already in the team **{team}**. Leave it before creating another one."
 msgstr ""
 
-#: scrims_lol.py:287 i18n_strings.py:32
+#: scrims_lol.py:1264 i18n_strings.py:32
 msgid "There is already a team named **{name}**."
 msgstr ""
 
-#: scrims_lol.py:290 i18n_strings.py:33
+#: scrims_lol.py:1267 i18n_strings.py:33
 msgid "There is already a team with the tag **{tag}**."
 msgstr ""
 
-#: scrims_lol.py:328 i18n_strings.py:28
+#: scrims_lol.py:1308 i18n_strings.py:28
 msgid "{member} does not belong to any team."
 msgstr ""
 
-#: scrims_lol.py:414 i18n_strings.py:49
+#: scrims_lol.py:1396 i18n_strings.py:49
 msgid "{member} is already in the team **{team}**."
 msgstr ""
 
-#: scrims_lol.py:446 scrims_lol.py:503 i18n_strings.py:52
+#: scrims_lol.py:1433 scrims_lol.py:1491 i18n_strings.py:52
 msgid "{member} is not in your team."
 msgstr ""
 
@@ -225,4 +513,36 @@ msgstr ""
 
 #: i18n_strings.py:64
 msgid "Sub"
+msgstr ""
+
+#: i18n_strings.py:136
+msgid "Publish a scrim on the board."
+msgstr ""
+
+#: i18n_strings.py:137
+msgid "List the open scrims of this server."
+msgstr ""
+
+#: i18n_strings.py:138
+msgid "Show one scrim."
+msgstr ""
+
+#: i18n_strings.py:139
+msgid "Join the opponent side of a mix or open scrim."
+msgstr ""
+
+#: i18n_strings.py:140
+msgid "Leave the opponent side of a scrim."
+msgstr ""
+
+#: i18n_strings.py:141
+msgid "Close a scrim with its score."
+msgstr ""
+
+#: i18n_strings.py:142
+msgid "Cancel a scrim you posted."
+msgstr ""
+
+#: i18n_strings.py:143
+msgid "Attach an optional screenshot to a game."
 msgstr ""

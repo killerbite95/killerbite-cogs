@@ -172,3 +172,243 @@ msgstr "🛡️ {name} · [{tag}]"
 
 msgid "🪑 Subs ({count})"
 msgstr "🪑 Suplentes ({count})"
+
+msgid "Team"
+msgstr "Equipo"
+
+msgid "Mix"
+msgstr "Mix"
+
+msgid "Open"
+msgstr "Abierta"
+
+msgid "Closed"
+msgstr "Cerrada"
+
+msgid "Matched"
+msgstr "Emparejada"
+
+msgid "Cancelled"
+msgstr "Cancelada"
+
+msgid "Expired"
+msgstr "Caducada"
+
+msgid "Join"
+msgstr "Apuntarme"
+
+msgid "Leave"
+msgstr "Salir"
+
+msgid "Accept as team"
+msgstr "Aceptar como equipo"
+
+msgid "Close"
+msgstr "Cerrar"
+
+msgid "Status"
+msgstr "Estado"
+
+msgid "Looking for"
+msgstr "Busca"
+
+msgid "Format"
+msgstr "Formato"
+
+msgid "Start"
+msgstr "Inicio"
+
+msgid "Rank"
+msgstr "Rango"
+
+msgid "Contact"
+msgstr "Contacto"
+
+msgid "Score"
+msgstr "Marcador"
+
+msgid "Photos"
+msgstr "Fotos"
+
+msgid "My side"
+msgstr "Mi lado"
+
+msgid "Opponent"
+msgstr "Rival"
+
+msgid "Our maps"
+msgstr "Nuestros mapas"
+
+msgid "Their maps"
+msgstr "Sus mapas"
+
+msgid "Not claimed yet."
+msgstr "Todavía sin rival."
+
+msgid "This only works in a server."
+msgstr "Esto solo funciona en un servidor."
+
+msgid "This scrim no longer exists."
+msgstr "Esta scrim ya no existe."
+
+msgid "This scrim is looking for a team: a captain has to accept it."
+msgstr "Esta scrim busca un equipo: tiene que aceptarla un capitán."
+
+msgid "This scrim is not looking for a team."
+msgstr "Esta scrim no busca un equipo."
+
+msgid "This private thread is for both sides to agree on the details."
+msgstr "Este hilo privado es para que ambos lados acordéis los detalles."
+
+msgid "That scrim does not exist."
+msgstr "Esa scrim no existe."
+
+msgid "That scrim is not open."
+msgstr "Esa scrim no está abierta."
+
+msgid "That scrim is already finished."
+msgstr "Esa scrim ya está terminada."
+
+msgid "The scrim has no opponent yet."
+msgstr "La scrim todavía no tiene rival."
+
+msgid "The scrim must start in the future."
+msgstr "La scrim debe empezar en el futuro."
+
+msgid "The side and the search must be team, mix or open."
+msgstr "El lado y la búsqueda deben ser equipo, mix o abierto."
+
+msgid "The score must look like `2-1`."
+msgstr "El marcador debe tener el formato `2-1`."
+
+msgid "The opponent side is full."
+msgstr "El lado rival está completo."
+
+msgid "The game must be between 1 and 9."
+msgstr "La partida debe estar entre 1 y 9."
+
+msgid "You are already signed up."
+msgstr "Ya estás apuntado."
+
+msgid "You are not signed up."
+msgstr "No estás apuntado."
+
+msgid "You cannot join your own scrim."
+msgstr "No puedes apuntarte a tu propia scrim."
+
+msgid "You cannot accept your own scrim."
+msgstr "No puedes aceptar tu propia scrim."
+
+msgid "You do not belong to any team."
+msgstr "No perteneces a ningún equipo."
+
+msgid "Only the author or the staff can cancel this scrim."
+msgstr "Solo el autor o el staff pueden cancelar esta scrim."
+
+msgid "Only the participants or the staff can close this scrim."
+msgstr "Solo los participantes o el staff pueden cerrar esta scrim."
+
+msgid "Only the participants or the staff can add photos."
+msgstr "Solo los participantes o el staff pueden añadir fotos."
+
+msgid "Only the captain can accept a scrim."
+msgstr "Solo el capitán puede aceptar una scrim."
+
+msgid "Only the captain can post a scrim for the team."
+msgstr "Solo el capitán puede publicar una scrim del equipo."
+
+msgid "To post as a team you must belong to one."
+msgstr "Para publicar como equipo tienes que pertenecer a uno."
+
+msgid "There are no open scrims right now."
+msgstr "Ahora mismo no hay scrims abiertas."
+
+msgid "I cannot find the channel of that scrim."
+msgstr "No encuentro el canal de esa scrim."
+
+msgid "I could not post the image."
+msgstr "No he podido publicar la imagen."
+
+msgid "I could not read that time. Use `+90`, `+2h`, `21:00`, `15/11 21:00` or `2026-11-15 21:00`."
+msgstr "No he entendido la hora. Usa `+90`, `+2h`, `21:00`, `15/11 21:00` o `2026-11-15 21:00`."
+
+msgid "Attach the image in prefix or pass an `https://` link with `{cmd}`."
+msgstr "Adjunta la imagen en prefijo o pasa un enlace `https://` con `{cmd}`."
+
+msgid "✅ You joined the scrim."
+msgstr "✅ Te has apuntado a la scrim."
+
+msgid "✅ You joined and the scrim is complete."
+msgstr "✅ Te has apuntado y la scrim está completa."
+
+msgid "✅ You left the scrim."
+msgstr "✅ Has salido de la scrim."
+
+msgid "✅ Scrim matched. A private thread was created."
+msgstr "✅ Scrim emparejada. Se ha creado un hilo privado."
+
+msgid "✅ Scrim cancelled."
+msgstr "✅ Scrim cancelada."
+
+msgid "✅ Scrim closed with {us}-{them}."
+msgstr "✅ Scrim cerrada con {us}-{them}."
+
+msgid "✅ Screenshot saved for game {game}."
+msgstr "✅ Captura guardada para la partida {game}."
+
+msgid "🎯 Scrim #{id} · {side}"
+msgstr "🎯 Scrim #{id} · {side}"
+
+msgid "🎯 Open scrims ({count})"
+msgstr "🎯 Scrims abiertas ({count})"
+
+msgid "#{id} · {side} → {looks} · {start}"
+msgstr "#{id} · {side} → {looks} · {start}"
+
+msgid "{us} - {them}"
+msgstr "{us} - {them}"
+
+msgid "{time} ({relative})"
+msgstr "{time} ({relative})"
+
+msgid "Scrim #{id} matched"
+msgstr "Scrim #{id} emparejada"
+
+msgid "Close scrim #{id}"
+msgstr "Cerrar scrim #{id}"
+
+msgid "Scrim #{id} · Game {game}"
+msgstr "Scrim #{id} · Partida {game}"
+
+msgid "Scrims LoL · #{id}"
+msgstr "Scrims LoL · #{id}"
+
+msgid "🛡️ **{name}**"
+msgstr "🛡️ **{name}**"
+
+msgid "Publish a scrim on the board."
+msgstr "Publica una scrim en la board."
+
+msgid "List the open scrims of this server."
+msgstr "Lista las scrims abiertas de este servidor."
+
+msgid "Show one scrim."
+msgstr "Muestra una scrim."
+
+msgid "Join the opponent side of a mix or open scrim."
+msgstr "Apúntate al lado rival de una scrim mix o abierta."
+
+msgid "Leave the opponent side of a scrim."
+msgstr "Sal del lado rival de una scrim."
+
+msgid "Close a scrim with its score."
+msgstr "Cierra una scrim con su marcador."
+
+msgid "Cancel a scrim you posted."
+msgstr "Cancela una scrim que hayas publicado."
+
+msgid "Attach an optional screenshot to a game."
+msgstr "Adjunta una captura opcional a una partida."
+
+msgid "**Scrims**\n`{create}` — publish a scrim.\n`{list}` — see the open scrims.\n`{info}` — details of one scrim.\n`{join}` / `{leave}` — sign up or leave the opponent side.\n`{close}` — close it with a score.\n`{cancel}` — cancel it.\n`{photo}` — attach a screenshot of a game.\n`{team}` — manage teams."
+msgstr "**Scrims**\n`{create}` — publica una scrim.\n`{list}` — mira las scrims abiertas.\n`{info}` — detalles de una scrim.\n`{join}` / `{leave}` — apúntate o sal del lado rival.\n`{close}` — ciérrala con el marcador.\n`{cancel}` — cancélala.\n`{photo}` — adjunta una captura de una partida.\n`{team}` — gestiona los equipos."
