@@ -475,7 +475,13 @@ class LogChannelSelect(discord.ui.ChannelSelect):
             await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
-        channel = self.values[0]
+        # ChannelSelect yields AppCommandChannel, so resolve the real channel first.
+        channel = interaction.guild.get_channel(self.values[0].id) if self.values else None
+        if channel is None:
+            await interaction.followup.send(
+                _("That channel is not a text channel."), ephemeral=True
+            )
+            return
         if not self.cog._channel_ready(interaction.guild, channel):
             await interaction.followup.send(
                 _("I cannot post in that channel. Check my permissions there."), ephemeral=True
@@ -512,7 +518,14 @@ class PanelChannelSelect(discord.ui.ChannelSelect):
             await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
-        ok, message = await self.cog.publish_panel(interaction.guild, self.values[0])
+        # ChannelSelect yields AppCommandChannel, so resolve the real channel first.
+        channel = interaction.guild.get_channel(self.values[0].id) if self.values else None
+        if channel is None:
+            await interaction.followup.send(
+                _("That channel is not a text channel."), ephemeral=True
+            )
+            return
+        ok, message = await self.cog.publish_panel(interaction.guild, channel)
         await interaction.followup.send(message, ephemeral=True)
 
 
