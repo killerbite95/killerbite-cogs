@@ -22,6 +22,7 @@ Collection of cogs for [Red-DiscordBot](https://github.com/Cog-Creators/Red-Disc
 | **blackjack** | Blackjack card game for Discord |
 | **colacoins** | Virtual currency system with leaderboards |
 | **day_counter_cog** | Contadores de dias y cuentas atras con embeds, hitos y canal contador |
+| **equipos_roles** | Solicitudes de rol de equipo: el jugador pide, el equipo confirma o rechaza en su canal privado |
 | **gameservermonitor** | Monitors game servers (CS2, Minecraft, DayZ, Valheim, ARK, TF2, L4D2, 7DTD, Palworld, etc.) with live embeds, slash commands, and interactive buttons |
 | **listroles** | Lists server roles and their members |
 | **maptrack** | Obsoleto: integrado en GameServerMonitor (`!gsmalerts`) |

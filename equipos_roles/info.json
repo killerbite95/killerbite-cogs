@@ -1,0 +1,16 @@
+{
+    "author": ["Killerbite95"],
+    "name": "EquiposRoles",
+    "short": "Solicitudes de rol de equipo confirmadas por el propio equipo.",
+    "description": "Los jugadores piden el rol de su equipo desde un panel y la peticion llega al canal privado del equipo, donde sus miembros la confirman o rechazan. Incluye cooldown por usuario, caducidad de solicitudes, auditoria y pagina de dashboard.",
+    "install_msg": "EquiposRoles instalado.\n\nRegistra un equipo con `/teamroles add <nombre> <rol> <canal>` y publica el panel con `/teamroles panel`.",
+    "end_user_data_statement": "Este cog guarda los IDs de usuario de quien pide un rol de equipo, el estado de la solicitud y el ID de quien la resolvio, ademas de los equipos y roles configurados por servidor.",
+    "min_bot_version": "3.5.0",
+    "min_python_version": [3, 9, 0],
+    "requirements": [],
+    "permissions": ["embed_links", "manage_roles"],
+    "tags": ["trini", "roles", "teams", "equipos", "solicitudes", "esports"],
+    "type": "COG",
+    "hidden": false,
+    "disabled": false
+}
