@@ -320,6 +320,37 @@ class TeamNameModal(discord.ui.Modal):
         )
 
 
+class TeamRoleSelect(discord.ui.RoleSelect):
+    """Picks the role of the team being registered."""
+
+    def __init__(self, view: "RoleChannelView") -> None:
+        super().__init__(placeholder=_("Pick the role"), min_values=1, max_values=1)
+        self.parent_view = view
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        if self.values:
+            self.parent_view.selected_role = self.values[0]
+        await interaction.response.defer()
+
+
+class TeamChannelSelect(discord.ui.ChannelSelect):
+    """Picks the private channel of the team being registered."""
+
+    def __init__(self, view: "RoleChannelView") -> None:
+        super().__init__(
+            placeholder=_("Pick the channel"),
+            channel_types=[discord.ChannelType.text],
+            min_values=1,
+            max_values=1,
+        )
+        self.parent_view = view
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        if self.values:
+            self.parent_view.selected_channel = self.values[0]
+        await interaction.response.defer()
+
+
 class RoleChannelView(discord.ui.View):
     """Picks the role and the channel, then registers the team."""
 
@@ -327,15 +358,10 @@ class RoleChannelView(discord.ui.View):
         super().__init__(timeout=300.0)
         self.cog = cog
         self.name = name
-        self.role_select = discord.ui.RoleSelect(
-            placeholder=_("Pick the role"), min_values=1, max_values=1
-        )
-        self.channel_select = discord.ui.ChannelSelect(
-            placeholder=_("Pick the channel"),
-            channel_types=[discord.ChannelType.text],
-            min_values=1,
-            max_values=1,
-        )
+        self.selected_role: Optional[discord.Role] = None
+        self.selected_channel: Optional[discord.TextChannel] = None
+        self.role_select = TeamRoleSelect(self)
+        self.channel_select = TeamChannelSelect(self)
         self.add_item(self.role_select)
         self.add_item(self.channel_select)
         self.register_button.label = _("Register")
@@ -346,15 +372,17 @@ class RoleChannelView(discord.ui.View):
             await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
             return
         await interaction.response.defer(ephemeral=True)
-        if not self.role_select.values:
+        if self.selected_role is None:
             await interaction.followup.send(_("Pick the role first."), ephemeral=True)
             return
-        if not self.channel_select.values:
+        if self.selected_channel is None:
             await interaction.followup.send(_("Pick the channel first."), ephemeral=True)
             return
-        role = self.role_select.values[0]
-        channel = self.channel_select.values[0]
-        ok, message = await self.cog.add_team(interaction.guild, self.name, role, channel)
+        channel = interaction.guild.get_channel(self.selected_channel.id)
+        if channel is None:
+            await interaction.followup.send(_("Pick the channel first."), ephemeral=True)
+            return
+        ok, message = await self.cog.add_team(interaction.guild, self.name, self.selected_role, channel)
         await interaction.followup.send(message, ephemeral=True)
 
 
