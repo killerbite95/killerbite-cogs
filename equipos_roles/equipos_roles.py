@@ -458,7 +458,7 @@ class ExpiryModal(discord.ui.Modal):
         await interaction.followup.send(embed=await self.cog.config_embed(interaction.guild), ephemeral=True)
 
 
-class LogChannelSelect(discord.ui.Select):
+class LogChannelSelect(discord.ui.ChannelSelect):
     """Picks the audit log channel."""
 
     def __init__(self, cog: "EquiposRoles") -> None:
@@ -495,7 +495,7 @@ class LogChannelView(discord.ui.View):
         self.add_item(LogChannelSelect(cog))
 
 
-class PanelChannelSelect(discord.ui.Select):
+class PanelChannelSelect(discord.ui.ChannelSelect):
     """Picks the channel where the panel is published."""
 
     def __init__(self, cog: "EquiposRoles") -> None:
