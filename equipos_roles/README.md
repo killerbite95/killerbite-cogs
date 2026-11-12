@@ -32,8 +32,9 @@ La petición **no da el rol por sí sola**: siempre necesita la confirmación de
 1. Abre el panel de administración: `!teamroles admin` (o `/teamroles admin`).
 2. Pulsa **Registrar equipo**: escribe el nombre y elige el rol y el canal con los desplegables.
 3. Pulsa **Publicar panel** y elige el canal de solicitudes.
-4. Los jugadores pulsan el botón y eligen su equipo.
-5. El equipo confirma o rechaza en su canal privado.
+4. Puedes quitarlo cuando quieras con **Eliminar panel** (borra el mensaje y limpia los ids).
+5. Los jugadores pulsan el botón y eligen su equipo.
+6. El equipo confirma o rechaza en su canal privado.
 
 También puedes hacerlo por comandos: `!teamroles add "La Trini" @RolLaTrini #canal-la-trini` y `!teamroles panel #pedir-rol`.
 

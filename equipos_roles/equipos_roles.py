@@ -636,6 +636,7 @@ class AdminView(discord.ui.View):
         super().__init__(timeout=600.0)
         self.cog = cog
         self.panel_button.label = _("Publish panel")
+        self.delete_panel_button.label = _("Delete panel")
         self.add_button.label = _("Register team")
         self.delete_button.label = _("Delete team")
         self.requests_button.label = _("Requests")
@@ -646,6 +647,15 @@ class AdminView(discord.ui.View):
         await interaction.response.send_message(
             _("Pick the panel channel."), view=PanelChannelView(self.cog), ephemeral=True
         )
+
+    @discord.ui.button(label="Delete panel", emoji="🗑️", style=discord.ButtonStyle.danger)
+    async def delete_panel_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        if interaction.guild is None:
+            await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+        ok, message = await self.cog.unpublish_panel(interaction.guild)
+        await interaction.followup.send(message, ephemeral=True)
 
     @discord.ui.button(label="Register team", emoji="➕", style=discord.ButtonStyle.success)
     async def add_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -672,7 +682,7 @@ class AdminView(discord.ui.View):
             _("Pick a status."), view=RequestsView(self.cog), ephemeral=True
         )
 
-    @discord.ui.button(label="Settings", emoji="⚙️", style=discord.ButtonStyle.secondary)
+    @discord.ui.button(label="Settings", emoji="⚙️", style=discord.ButtonStyle.secondary, row=1)
     async def settings_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.send_message(
             _("Team role settings."), view=SettingsView(self.cog), ephemeral=True
@@ -1030,6 +1040,20 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         await self.config.guild(guild).panel_channel_id.set(channel.id)
         await self.config.guild(guild).panel_message_id.set(message.id)
         return True, _("✅ Panel published in {channel}.").format(channel=channel.mention)
+
+    async def unpublish_panel(self, guild: discord.Guild) -> Tuple[bool, str]:
+        channel_id = await self.config.guild(guild).panel_channel_id()
+        message_id = await self.config.guild(guild).panel_message_id()
+        if not channel_id or not message_id:
+            return False, _("There is no published panel.")
+        channel = guild.get_channel(int(channel_id))
+        if isinstance(channel, discord.TextChannel):
+            with contextlib.suppress(discord.HTTPException):
+                message = await channel.fetch_message(int(message_id))
+                await message.delete()
+        await self.config.guild(guild).panel_channel_id.set(None)
+        await self.config.guild(guild).panel_message_id.set(None)
+        return True, _("✅ Panel deleted.")
 
     # ------------------------------------------------------------------- teams
 
