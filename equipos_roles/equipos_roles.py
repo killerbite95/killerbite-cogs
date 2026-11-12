@@ -232,7 +232,7 @@ class RequestView(discord.ui.View):
             return None
         if not await self.cog.can_resolve(interaction.guild, interaction.user, request):
             await interaction.response.send_message(
-                _("Only members with the team role can resolve this request."), ephemeral=True
+                _("Only members with the team role or bot staff can resolve this request."), ephemeral=True
             )
             return None
         return request
@@ -907,6 +907,11 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         return None
 
     async def can_resolve(self, guild: discord.Guild, user: discord.abc.User, request: dict) -> bool:
+        member = guild.get_member(user.id)
+        if member is None:
+            return False
+        if await self.bot.is_mod(member) or await self.bot.is_admin(member):
+            return True
         teams = await self.config.guild(guild).teams()
         team = teams.get(str(request.get("team_id")))
         if team is None:
@@ -1226,7 +1231,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             if team is None:
                 return False, _("That team no longer exists.")
             if not self._is_team_member(guild, actor, team):
-                return False, _("Only members with the team role can resolve this request.")
+                return False, _("Only members with the team role or bot staff can resolve this request.")
 
             target = guild.get_member(int(request.get("user_id", 0)))
             role = guild.get_role(int(team.get("role_id", 0)))

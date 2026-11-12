@@ -58,7 +58,7 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]`.
 
 ## Límites y detalles
 
-- **Sin capitanes:** cualquier miembro con el rol del equipo puede confirmar o rechazar.
+- **Sin capitanes:** cualquier miembro con el rol del equipo puede confirmar o rechazar. También puede hacerlo un admin o moderador del bot (los de `!set addadmin` / `!set addmod`), sin pertenecer al equipo.
 - **Anti-spam:** una sola solicitud pendiente por usuario y una espera configurable entre solicitudes (60 minutos por defecto). El límite se aplica aunque la anterior se haya rechazado.
 - **Caducidad:** 48 horas por defecto. Al caducar se desactivan los botones y la solicitud queda como `expired`.
 - **Auditoría:** si configuras `canal_log`, cada creación, aprobación, rechazo, caducidad y cancelación deja un embed con quién la resolvió.
