@@ -1260,7 +1260,9 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                     old_message = await old_channel.fetch_message(int(previous_message))
                     await old_message.delete()
 
-        message = await channel.send(embed=await self._panel_embed(guild), view=self._make_panel_view())
+        message = await channel.send(embed=await self._panel_embed(guild))
+        with contextlib.suppress(discord.HTTPException):
+            await message.edit(view=self._make_panel_view())
         await self.config.guild(guild).panel_channel_id.set(channel.id)
         await self.config.guild(guild).panel_message_id.set(message.id)
         return True, _("✅ Panel published in {channel}.").format(channel=channel.mention)
@@ -1428,29 +1430,25 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                 len(view.children),
                 len(view.to_components()),
             )
+            # Post the embed first, then attach the view with an edit: `send(view=...)`
+            # has proven unreliable in some environments, while `edit(view=...)` works.
             try:
-                message = await channel.send(
-                    embed=self._request_embed(guild, request, team),
-                    view=view,
-                )
+                message = await channel.send(embed=self._request_embed(guild, request, team))
             except discord.HTTPException:
                 log.exception("Could not post a team role request in guild %s", guild.id)
                 return False, _("I could not post the request. Tell an admin.")
-            await self._debug(guild, "apply #%s: sent components=%s", request_id, len(message.components))
-            log.info("apply_request SENT #%s: components=%s", request_id, len(message.components))
-            # Verify against the live message: some send responses don't report components.
+            log.info("apply_request CREATED #%s (embed only)", request_id)
+            with contextlib.suppress(discord.HTTPException):
+                await message.edit(view=view)
             try:
                 live = await channel.fetch_message(message.id)
             except discord.HTTPException:
                 live = message
-            await self._debug(guild, "apply #%s: fetched components=%s", request_id, len(live.components))
+            log.info("apply_request SENT #%s: components=%s", request_id, len(live.components))
             if not live.components:
-                log.error("Request card #%s has no components; re-attaching the buttons", request_id)
+                log.error("Request card #%s has no components; re-attaching via fallback", request_id)
                 with contextlib.suppress(discord.HTTPException):
-                    await message.edit(
-                        embed=self._request_embed(guild, request, team),
-                        view=self._fallback_request_view(),
-                    )
+                    await message.edit(view=self._fallback_request_view())
             request["message_id"] = message.id
             requests[str(request_id)] = request
             cooldowns[str(user.id)] = now
