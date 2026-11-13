@@ -774,6 +774,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         self._panel_view: Optional[PanelView] = None
         self._request_view: Optional[RequestView] = None
         self._views_registered = False
+        self._ready_task: Optional[asyncio.Task] = None
         self._ensure_views()
 
     async def cog_load(self) -> None:
@@ -787,11 +788,26 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         )
         if not self.expire_loop.is_running():
             self.expire_loop.start()
+        if self.bot.is_ready():
+            await self._sweep_all()
+            await self._repair_all()
+        else:
+            # On a full restart guilds aren't cached yet; sweep and repair after ready.
+            self._ready_task = asyncio.create_task(self._sweep_and_repair_when_ready())
+
+    async def _sweep_and_repair_when_ready(self) -> None:
+        try:
+            await self.bot.wait_until_ready()
+        except Exception:
+            log.exception("equipos_roles: failed waiting for the bot to be ready")
+            return
         await self._sweep_all()
         await self._repair_all()
 
     def cog_unload(self) -> None:
         self.expire_loop.cancel()
+        if self._ready_task is not None and not self._ready_task.done():
+            self._ready_task.cancel()
         for view in (self._panel_view, self._request_view):
             if view is not None:
                 try:
