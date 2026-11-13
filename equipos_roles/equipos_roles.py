@@ -751,7 +751,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
     """Team role requests confirmed by the team itself."""
 
     __author__ = "Killerbite95"
-    __version__ = "0.2.0"
+    __version__ = "0.2.1"
 
     def __init__(self, bot: Red) -> None:
         self.bot = bot
@@ -875,6 +875,22 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         role = guild.get_role(int(team.get("role_id", 0)))
         return role is not None and role in member.roles
 
+    async def _is_staff_member(self, member: Optional[discord.Member]) -> bool:
+        """Bot owner, guild owner, Discord admin or Red admin/mod role."""
+        if member is None:
+            return False
+        if member.guild is not None:
+            if member.guild.owner_id == member.id:
+                return True
+            if member.guild_permissions.administrator:
+                return True
+        try:
+            if await self.bot.is_owner(member):
+                return True
+        except Exception:
+            pass
+        return bool(await self.bot.is_mod(member) or await self.bot.is_admin(member))
+
     async def _log_action(
         self,
         guild: discord.Guild,
@@ -985,7 +1001,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         member = guild.get_member(user.id)
         if member is None:
             return False
-        if await self.bot.is_mod(member) or await self.bot.is_admin(member):
+        if await self._is_staff_member(member):
             return True
         teams = await self.config.guild(guild).teams()
         team = teams.get(str(request.get("team_id")))
@@ -1368,9 +1384,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             cooldowns = await self.config.guild(guild).cooldowns()
             cooldown = int(await self.config.guild(guild).cooldown_seconds())
             last = int(cooldowns.get(str(user.id), 0))
-            is_staff = member is not None and (
-                await self.bot.is_mod(member) or await self.bot.is_admin(member)
-            )
+            is_staff = await self._is_staff_member(member)
             await self._debug(
                 guild,
                 "cooldown: last=%s cooldown=%s elapsed=%s is_staff=%s",
