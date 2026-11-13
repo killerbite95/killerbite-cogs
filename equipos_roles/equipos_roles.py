@@ -1041,6 +1041,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         panel_channel = await config.panel_channel_id()
         log_channel = await config.log_channel_id()
         extra_role_id = await config.approved_role_id()
+        debug_state = bool(await config.debug())
         embed = discord.Embed(title=_("⚙️ Team role settings"), colour=COLOR_PENDING)
         embed.add_field(
             name=_("Panel channel"),
@@ -1055,6 +1056,11 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         embed.add_field(
             name=_("Extra role"),
             value=f"<@&{extra_role_id}>" if extra_role_id else _("not set"),
+            inline=True,
+        )
+        embed.add_field(
+            name=_("Debug"),
+            value=_("on") if debug_state else _("off"),
             inline=True,
         )
         embed.add_field(
@@ -1187,7 +1193,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             if await self.config.guild(guild).debug():
                 log.info("equipos_roles[%s] " + message, guild.id, *args)
         except Exception:
-            pass
+            log.exception("debug log failed")
 
     async def _repair_guild(self, guild: discord.Guild) -> int:
         """Re-attaches the views to the panel and to every pending card."""
@@ -1338,6 +1344,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         self, guild: discord.Guild, team_id: int, user: discord.abc.User
     ) -> Tuple[bool, str]:
         async with self._locks[guild.id]:
+            log.info("apply_request START: team_id=%s user_id=%s", team_id, user.id)
             teams = await self.config.guild(guild).teams()
             team = teams.get(str(team_id))
             if team is None:
@@ -1416,6 +1423,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                 log.exception("Could not post a team role request in guild %s", guild.id)
                 return False, _("I could not post the request. Tell an admin.")
             await self._debug(guild, "apply #%s: sent components=%s", request_id, len(message.components))
+            log.info("apply_request SENT #%s: components=%s", request_id, len(message.components))
             # Verify against the live message: some send responses don't report components.
             try:
                 live = await channel.fetch_message(message.id)
