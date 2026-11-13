@@ -597,6 +597,43 @@ class ConfirmDeleteView(discord.ui.View):
         await interaction.response.edit_message(content=_("Cancelled."), view=None)
 
 
+class ExtraRoleSelect(discord.ui.RoleSelect):
+    """Picks the optional role granted on every approval."""
+
+    def __init__(self, cog: "EquiposRoles") -> None:
+        super().__init__(placeholder=_("Pick the extra role"), min_values=1, max_values=1)
+        self.cog = cog
+
+    async def callback(self, interaction: discord.Interaction) -> None:
+        if interaction.guild is None:
+            await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+        role = self.values[0]
+        await self.cog.config.guild(interaction.guild).approved_role_id.set(role.id)
+        await interaction.followup.send(
+            _("✅ Extra role set to {role}.").format(role=role.mention), ephemeral=True
+        )
+
+
+class ExtraRoleView(discord.ui.View):
+    """Board to pick or clear the extra role."""
+
+    def __init__(self, cog: "EquiposRoles") -> None:
+        super().__init__(timeout=300.0)
+        self.cog = cog
+        self.add_item(ExtraRoleSelect(cog))
+
+    @discord.ui.button(label="Clear", emoji="🚫", style=discord.ButtonStyle.secondary, row=1)
+    async def clear_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        if interaction.guild is None:
+            await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+        await self.cog.config.guild(interaction.guild).approved_role_id.set(None)
+        await interaction.followup.send(_("✅ Extra role cleared."), ephemeral=True)
+
+
 class SettingsView(discord.ui.View):
     """Board with the admin settings actions."""
 
@@ -606,6 +643,7 @@ class SettingsView(discord.ui.View):
         self.cooldown_button.label = _("Set cooldown")
         self.expiry_button.label = _("Set expiry")
         self.log_button.label = _("Set log channel")
+        self.extra_role_button.label = _("Set extra role")
         self.show_button.label = _("Show settings")
 
     @discord.ui.button(label="Set cooldown", emoji="⏱️", style=discord.ButtonStyle.primary)
@@ -619,6 +657,12 @@ class SettingsView(discord.ui.View):
     @discord.ui.button(label="Set log channel", emoji="📜", style=discord.ButtonStyle.primary)
     async def log_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
         await interaction.response.send_message(_("Pick the log channel."), view=LogChannelView(self.cog), ephemeral=True)
+
+    @discord.ui.button(label="Set extra role", emoji="➕", style=discord.ButtonStyle.primary)
+    async def extra_role_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        await interaction.response.send_message(
+            _("Pick the extra role."), view=ExtraRoleView(self.cog), ephemeral=True
+        )
 
     @discord.ui.button(label="Show settings", emoji="📊", style=discord.ButtonStyle.secondary)
     async def show_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
@@ -710,6 +754,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             panel_channel_id=None,
             panel_message_id=None,
             log_channel_id=None,
+            approved_role_id=None,
         )
         self._locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
         self._panel_view: Optional[PanelView] = None
@@ -980,6 +1025,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         pending = sum(1 for request in requests.values() if request.get("status") == "pending")
         panel_channel = await config.panel_channel_id()
         log_channel = await config.log_channel_id()
+        extra_role_id = await config.approved_role_id()
         embed = discord.Embed(title=_("⚙️ Team role settings"), colour=COLOR_PENDING)
         embed.add_field(
             name=_("Panel channel"),
@@ -989,6 +1035,11 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         embed.add_field(
             name=_("Audit log"),
             value=f"<#{log_channel}>" if log_channel else _("not set"),
+            inline=True,
+        )
+        embed.add_field(
+            name=_("Extra role"),
+            value=f"<@&{extra_role_id}>" if extra_role_id else _("not set"),
             inline=True,
         )
         embed.add_field(
@@ -1360,7 +1411,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             team = teams.get(str(request.get("team_id")))
             if team is None:
                 return False, _("That team no longer exists.")
-            if not self._is_team_member(guild, actor, team):
+            if not await self.can_resolve(guild, actor, request):
                 return False, _("Only members with the team role or bot staff can resolve this request.")
 
             target = guild.get_member(int(request.get("user_id", 0)))
@@ -1383,6 +1434,21 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                     except discord.HTTPException:
                         log.exception("Could not assign a team role in guild %s", guild.id)
                         return False, _("Discord rejected the role assignment. Tell an admin.")
+                extra_id = await self.config.guild(guild).approved_role_id()
+                extra_role = guild.get_role(int(extra_id)) if extra_id else None
+                if extra_role is not None and extra_role != role and target is not None and extra_role not in target.roles:
+                    if guild.me is None or extra_role >= guild.me.top_role or extra_role.managed:
+                        log.warning("Cannot assign extra role %s in guild %s (hierarchy or managed)", extra_role.id, guild.id)
+                    else:
+                        try:
+                            await target.add_roles(
+                                extra_role,
+                                reason=_("Team role request #{id} approved by {user}").format(
+                                    id=request_id, user=str(actor)
+                                ),
+                            )
+                        except (discord.Forbidden, discord.HTTPException):
+                            log.exception("Could not assign the extra role in guild %s", guild.id)
 
             now = int(time.time())
             request["status"] = "approved" if approved else "rejected"

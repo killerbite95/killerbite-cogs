@@ -55,6 +55,8 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]`.
 | `!teamroles config [canal_panel] [canal_log] [cooldown] [caducidad] [quitar_log]` | Muestra o cambia los ajustes. `cooldown` en minutos, `caducidad` en horas. | Admin |
 | `!teamroles solicitudes [estado]` | Lista solicitudes por estado: `pending`, `approved`, `rejected`, `expired`, `cancelled` o `all`. | Admin |
 | `!teamroles cancelar <id>` | Cancela una solicitud pendiente. | Admin |
+| `!teamroles reparar` | Vuelve a enganchar los botones al panel y a las tarjetas pendientes. | Admin |
+| `!teamroles diagnostico` | Muestra el estado de las vistas persistentes. | Admin |
 
 ## Límites y detalles
 
@@ -62,5 +64,6 @@ Prefijo `!` como ejemplo. `<obligatorio>` · `[opcional]`.
 - **Anti-spam:** una sola solicitud pendiente por usuario y una espera configurable entre solicitudes (60 minutos por defecto). El límite se aplica aunque la anterior se haya rechazado.
 - **Caducidad:** 48 horas por defecto. Al caducar se desactivan los botones y la solicitud queda como `expired`.
 - **Auditoría:** si configuras `canal_log`, cada creación, aprobación, rechazo, caducidad y cancelación deja un embed con quién la resolvió.
+- **Rol extra (opcional):** en el panel de admin, **Ajustes → Configurar rol extra** define un rol que se añade automáticamente a cada solicitud **aprobada**, además del rol del equipo. Se puede quitar con el botón **Quitar**.
 - **Persistencia:** las vistas son persistentes y el cog barre las solicitudes al cargarse, así que un reload o un reinicio no deja tarjetas muertas.
 - Si un equipo pierde su rol o su canal, sus solicitudes fallan con un aviso claro y un admin puede cancelarlas.
