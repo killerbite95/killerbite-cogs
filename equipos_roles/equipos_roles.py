@@ -714,16 +714,21 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         self._locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
         self._panel_view: Optional[PanelView] = None
         self._request_view: Optional[RequestView] = None
+        self._views_registered = False
+        self._ensure_views()
 
     async def cog_load(self) -> None:
         await super().cog_load()
-        self._panel_view = PanelView(self)
-        self._request_view = RequestView(self)
-        self.bot.add_view(self._panel_view)
-        self.bot.add_view(self._request_view)
+        self._ensure_views()
+        log.info(
+            "equipos_roles views: panel=%s request=%s",
+            len(self._panel_view.children) if self._panel_view else -1,
+            len(self._request_view.children) if self._request_view else -1,
+        )
         if not self.expire_loop.is_running():
             self.expire_loop.start()
         await self._sweep_all()
+        await self._repair_all()
 
     def cog_unload(self) -> None:
         self.expire_loop.cancel()
@@ -735,6 +740,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                     pass
         self._panel_view = None
         self._request_view = None
+        self._views_registered = False
 
     def format_help_for_context(self, ctx: commands.Context) -> str:
         pre = super().format_help_for_context(ctx)
@@ -893,11 +899,20 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                 message = await channel.fetch_message(int(request.get("message_id") or 0))
             except (discord.NotFound, discord.Forbidden, discord.HTTPException):
                 return
-        view = self._request_view if request.get("status") == "pending" else discord.ui.View()
+        pending = request.get("status") == "pending"
+        view = self._make_request_view() if pending else discord.ui.View()
         try:
-            await message.edit(embed=self._request_embed(guild, request, team), view=view)
+            edited = await message.edit(embed=self._request_embed(guild, request, team), view=view)
         except discord.HTTPException:
             log.warning("Could not edit team role request card #%s in guild %s", request.get("id"), guild.id)
+            return
+        if pending and not edited.components:
+            log.error("Request card #%s still has no components after edit", request.get("id"))
+            with contextlib.suppress(discord.HTTPException):
+                await edited.edit(
+                    embed=self._request_embed(guild, request, team),
+                    view=self._fallback_request_view(),
+                )
 
     async def request_by_message(self, guild: discord.Guild, message_id: int) -> Optional[dict]:
         requests = await self.config.guild(guild).requests()
@@ -1023,6 +1038,114 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             embed.set_author(name=_("EquiposRoles"), icon_url=self.bot.user.display_avatar.url)
         return embed
 
+    def _ensure_views(self) -> None:
+        """Creates and registers the persistent views even if cog_load never ran."""
+        if self._panel_view is None:
+            self._panel_view = PanelView(self)
+        if self._request_view is None:
+            self._request_view = RequestView(self)
+        if not self._views_registered:
+            for view in (self._panel_view, self._request_view):
+                try:
+                    self.bot.add_view(view)
+                except Exception:
+                    log.exception("Could not register a persistent view")
+            self._views_registered = True
+
+    def _make_panel_view(self) -> "discord.ui.View":
+        """Returns a panel view that is guaranteed to carry its button."""
+        self._ensure_views()
+        if self._panel_view is None or not self._panel_view.children:
+            log.error("PanelView has no children; using the imperative fallback")
+            return self._fallback_panel_view()
+        return self._panel_view
+
+    def _make_request_view(self) -> "discord.ui.View":
+        """Returns a request view that is guaranteed to carry its buttons."""
+        self._ensure_views()
+        if self._request_view is None or not self._request_view.children:
+            log.error("RequestView has no children; using the imperative fallback")
+            return self._fallback_request_view()
+        return self._request_view
+
+    def _fallback_panel_view(self) -> discord.ui.View:
+        source = PanelView(self)
+        view = discord.ui.View(timeout=None)
+        button = discord.ui.Button(
+            label=_("Request team role"),
+            emoji="🎟️",
+            style=discord.ButtonStyle.primary,
+            custom_id=PANEL_ID,
+        )
+
+        async def _on_click(interaction: discord.Interaction) -> None:
+            await PanelView.request_button(source, interaction, button)  # type: ignore[misc]
+
+        button.callback = _on_click
+        view.add_item(button)
+        self._register_view_quietly(view)
+        return view
+
+    def _fallback_request_view(self) -> discord.ui.View:
+        source = RequestView(self)
+        view = discord.ui.View(timeout=None)
+        confirm = discord.ui.Button(
+            label=_("Confirm"), emoji="✅", style=discord.ButtonStyle.success, custom_id=CONFIRM_ID
+        )
+        reject = discord.ui.Button(
+            label=_("Reject"), emoji="✖️", style=discord.ButtonStyle.danger, custom_id=REJECT_ID
+        )
+
+        async def _on_confirm(interaction: discord.Interaction) -> None:
+            await RequestView.confirm_button(source, interaction, confirm)  # type: ignore[misc]
+
+        async def _on_reject(interaction: discord.Interaction) -> None:
+            await RequestView.reject_button(source, interaction, reject)  # type: ignore[misc]
+
+        confirm.callback = _on_confirm
+        reject.callback = _on_reject
+        view.add_item(confirm)
+        view.add_item(reject)
+        self._register_view_quietly(view)
+        return view
+
+    def _register_view_quietly(self, view: discord.ui.View) -> None:
+        try:
+            self.bot.add_view(view)
+        except Exception:
+            log.exception("Could not register a fallback view")
+
+    async def _repair_guild(self, guild: discord.Guild) -> int:
+        """Re-attaches the views to the panel and to every pending card."""
+        fixed = 0
+        channel_id = await self.config.guild(guild).panel_channel_id()
+        message_id = await self.config.guild(guild).panel_message_id()
+        if channel_id and message_id:
+            channel = guild.get_channel(int(channel_id))
+            if isinstance(channel, discord.TextChannel):
+                with contextlib.suppress(discord.HTTPException):
+                    message = await channel.fetch_message(int(message_id))
+                    if not message.components:
+                        await message.edit(embed=await self._panel_embed(guild), view=self._make_panel_view())
+                        fixed += 1
+        requests = await self.config.guild(guild).requests()
+        teams = await self.config.guild(guild).teams()
+        for request in requests.values():
+            if request.get("status") != "pending":
+                continue
+            await self._edit_card(guild, request, teams.get(str(request.get("team_id"))))
+            fixed += 1
+        return fixed
+
+    async def _repair_all(self) -> None:
+        for guild in list(self.bot.guilds):
+            try:
+                fixed = await self._repair_guild(guild)
+                if fixed:
+                    log.info("Repaired %s view messages in guild %s", fixed, guild.id)
+            except Exception:
+                log.exception("Could not repair views in guild %s", guild.id)
+
     async def publish_panel(
         self, guild: discord.Guild, channel: discord.TextChannel
     ) -> Tuple[bool, str]:
@@ -1041,7 +1164,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                     old_message = await old_channel.fetch_message(int(previous_message))
                     await old_message.delete()
 
-        message = await channel.send(embed=await self._panel_embed(guild), view=self._panel_view)
+        message = await channel.send(embed=await self._panel_embed(guild), view=self._make_panel_view())
         await self.config.guild(guild).panel_channel_id.set(channel.id)
         await self.config.guild(guild).panel_message_id.set(message.id)
         return True, _("✅ Panel published in {channel}.").format(channel=channel.mention)
@@ -1193,11 +1316,18 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             try:
                 message = await channel.send(
                     embed=self._request_embed(guild, request, team),
-                    view=self._request_view,
+                    view=self._make_request_view(),
                 )
             except discord.HTTPException:
                 log.exception("Could not post a team role request in guild %s", guild.id)
                 return False, _("I could not post the request. Tell an admin.")
+            if not message.components:
+                log.error("Request card #%s was posted without components", request_id)
+                with contextlib.suppress(discord.HTTPException):
+                    await message.edit(
+                        embed=self._request_embed(guild, request, team),
+                        view=self._fallback_request_view(),
+                    )
             request["message_id"] = message.id
             requests[str(request_id)] = request
             cooldowns[str(user.id)] = now
@@ -1620,3 +1750,37 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         if self.bot.user is not None:
             embed.set_author(name=_("EquiposRoles"), icon_url=self.bot.user.display_avatar.url)
         await self._reply(ctx, embed=embed, view=AdminView(self), delete_after=600.0)
+
+    @teamroles.command(name="reparar")
+    @commands.admin_or_permissions(manage_guild=True)
+    async def teamroles_reparar(self, ctx: commands.Context) -> None:
+        """Re-attach the buttons to the panel and to every pending card."""
+        guild = await self._require_guild(ctx)
+        if guild is None:
+            return
+        fixed = await self._repair_guild(guild)
+        await self._reply(ctx, _("✅ Refreshed {count} messages.").format(count=fixed))
+
+    @teamroles.command(name="diagnostico")
+    @commands.admin_or_permissions(manage_guild=True)
+    async def teamroles_diagnostico(self, ctx: commands.Context) -> None:
+        """Show the state of the persistent views."""
+        guild = await self._require_guild(ctx)
+        if guild is None:
+            return
+        self._ensure_views()
+        panel_children = len(self._panel_view.children) if self._panel_view else -1
+        request_children = len(self._request_view.children) if self._request_view else -1
+        lines = [
+            _("Panel view children: {n}").format(n=panel_children),
+            _("Request view children: {n}").format(n=request_children),
+        ]
+        channel_id = await self.config.guild(guild).panel_channel_id()
+        message_id = await self.config.guild(guild).panel_message_id()
+        if channel_id and message_id:
+            channel = guild.get_channel(int(channel_id))
+            if isinstance(channel, discord.TextChannel):
+                with contextlib.suppress(discord.HTTPException):
+                    message = await channel.fetch_message(int(message_id))
+                    lines.append(_("Panel message components: {n}").format(n=len(message.components)))
+        await self._reply(ctx, "\n".join(lines))
