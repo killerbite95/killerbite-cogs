@@ -1363,6 +1363,14 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             is_staff = member is not None and (
                 await self.bot.is_mod(member) or await self.bot.is_admin(member)
             )
+            await self._debug(
+                guild,
+                "cooldown: last=%s cooldown=%s elapsed=%s is_staff=%s",
+                last,
+                cooldown,
+                int(time.time()) - last,
+                is_staff,
+            )
             if last and int(time.time()) - last < cooldown and not is_staff:
                 return False, _("You can request again <t:{ts}:R>.").format(ts=last + cooldown)
 
