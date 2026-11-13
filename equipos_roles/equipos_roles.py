@@ -1360,7 +1360,10 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             cooldowns = await self.config.guild(guild).cooldowns()
             cooldown = int(await self.config.guild(guild).cooldown_seconds())
             last = int(cooldowns.get(str(user.id), 0))
-            if last and int(time.time()) - last < cooldown:
+            is_staff = member is not None and (
+                await self.bot.is_mod(member) or await self.bot.is_admin(member)
+            )
+            if last and int(time.time()) - last < cooldown and not is_staff:
                 return False, _("You can request again <t:{ts}:R>.").format(ts=last + cooldown)
 
             channel = guild.get_channel(int(team.get("channel_id", 0)))
