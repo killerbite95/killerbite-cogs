@@ -1372,8 +1372,13 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             except discord.HTTPException:
                 log.exception("Could not post a team role request in guild %s", guild.id)
                 return False, _("I could not post the request. Tell an admin.")
-            if not message.components:
-                log.error("Request card #%s was posted without components", request_id)
+            # Verify against the live message: some send responses don't report components.
+            try:
+                live = await channel.fetch_message(message.id)
+            except discord.HTTPException:
+                live = message
+            if not live.components:
+                log.error("Request card #%s has no components; re-attaching the buttons", request_id)
                 with contextlib.suppress(discord.HTTPException):
                     await message.edit(
                         embed=self._request_embed(guild, request, team),
@@ -1849,4 +1854,15 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                 with contextlib.suppress(discord.HTTPException):
                     message = await channel.fetch_message(int(message_id))
                     lines.append(_("Panel message components: {n}").format(n=len(message.components)))
+        requests = await self.config.guild(guild).requests()
+        pending = [r for r in requests.values() if r.get("status") == "pending"]
+        if pending:
+            latest = max(pending, key=lambda r: int(r.get("id", 0)))
+            card_channel = guild.get_channel(int(latest.get("channel_id") or 0))
+            if isinstance(card_channel, discord.TextChannel):
+                with contextlib.suppress(discord.HTTPException):
+                    card = await card_channel.fetch_message(int(latest.get("message_id") or 0))
+                    lines.append(
+                        _("Card #{id} components: {n}").format(id=latest.get("id", "?"), n=len(card.components))
+                    )
         await self._reply(ctx, "\n".join(lines))
