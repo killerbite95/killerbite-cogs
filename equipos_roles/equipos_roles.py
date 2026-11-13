@@ -751,7 +751,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
     """Team role requests confirmed by the team itself."""
 
     __author__ = "Killerbite95"
-    __version__ = "0.1.0"
+    __version__ = "0.2.0"
 
     def __init__(self, bot: Red) -> None:
         self.bot = bot
@@ -780,7 +780,8 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         await super().cog_load()
         self._ensure_views()
         log.info(
-            "equipos_roles views: panel=%s request=%s",
+            "equipos_roles v%s loaded: views panel=%s request=%s",
+            self.__version__,
             len(self._panel_view.children) if self._panel_view else -1,
             len(self._request_view.children) if self._request_view else -1,
         )
