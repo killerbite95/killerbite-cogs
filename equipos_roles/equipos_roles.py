@@ -672,6 +672,19 @@ class SettingsView(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
         await interaction.followup.send(embed=await self.cog.config_embed(interaction.guild), ephemeral=True)
 
+    @discord.ui.button(label="Debug", emoji="🐞", style=discord.ButtonStyle.secondary, row=1)
+    async def debug_button(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        if interaction.guild is None:
+            await interaction.response.send_message(_("This only works in a server."), ephemeral=True)
+            return
+        await interaction.response.defer(ephemeral=True)
+        enabled = await self.cog.config.guild(interaction.guild).debug()
+        await self.cog.config.guild(interaction.guild).debug.set(not enabled)
+        if enabled:
+            await interaction.followup.send(_("🐞 Debug desactivado."), ephemeral=True)
+        else:
+            await interaction.followup.send(_("🐞 Debug activado. Los detalles saldrán en la consola."), ephemeral=True)
+
 
 class AdminView(discord.ui.View):
     """Main admin board: everything through buttons."""
@@ -755,6 +768,7 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
             panel_message_id=None,
             log_channel_id=None,
             approved_role_id=None,
+            debug=False,
         )
         self._locks: Dict[int, asyncio.Lock] = defaultdict(asyncio.Lock)
         self._panel_view: Optional[PanelView] = None
@@ -1166,6 +1180,14 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         except Exception:
             log.exception("Could not register a fallback view")
 
+    async def _debug(self, guild: discord.Guild, message: str, *args: object) -> None:
+        """Logs extra detail to the console when debug mode is on for the guild."""
+        try:
+            if await self.config.guild(guild).debug():
+                log.info("equipos_roles[%s] " + message, guild.id, *args)
+        except Exception:
+            pass
+
     async def _repair_guild(self, guild: discord.Guild) -> int:
         """Re-attaches the views to the panel and to every pending card."""
         fixed = 0
@@ -1364,19 +1386,30 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
                 "channel_id": channel.id,
                 "message_id": None,
             }
+            view = self._make_request_view()
+            await self._debug(
+                guild,
+                "apply #%s: view=%s children=%s to_components=%s",
+                request_id,
+                type(view).__name__,
+                len(view.children),
+                len(view.to_components()),
+            )
             try:
                 message = await channel.send(
                     embed=self._request_embed(guild, request, team),
-                    view=self._make_request_view(),
+                    view=view,
                 )
             except discord.HTTPException:
                 log.exception("Could not post a team role request in guild %s", guild.id)
                 return False, _("I could not post the request. Tell an admin.")
+            await self._debug(guild, "apply #%s: sent components=%s", request_id, len(message.components))
             # Verify against the live message: some send responses don't report components.
             try:
                 live = await channel.fetch_message(message.id)
             except discord.HTTPException:
                 live = message
+            await self._debug(guild, "apply #%s: fetched components=%s", request_id, len(live.components))
             if not live.components:
                 log.error("Request card #%s has no components; re-attaching the buttons", request_id)
                 with contextlib.suppress(discord.HTTPException):
@@ -1842,9 +1875,11 @@ class EquiposRoles(DashboardIntegration, commands.Cog):
         self._ensure_views()
         panel_children = len(self._panel_view.children) if self._panel_view else -1
         request_children = len(self._request_view.children) if self._request_view else -1
+        debug_state = bool(await self.config.guild(guild).debug())
         lines = [
             _("Panel view children: {n}").format(n=panel_children),
             _("Request view children: {n}").format(n=request_children),
+            _("Debug: {state}").format(state=_("on") if debug_state else _("off")),
         ]
         channel_id = await self.config.guild(guild).panel_channel_id()
         message_id = await self.config.guild(guild).panel_message_id()

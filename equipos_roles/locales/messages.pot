@@ -35,15 +35,15 @@ msgstr ""
 msgid "Created"
 msgstr ""
 
-#: equipos_roles.py:195 equipos_roles.py:1126
+#: equipos_roles.py:195 equipos_roles.py:1140
 msgid "Request team role"
 msgstr ""
 
-#: equipos_roles.py:219 equipos_roles.py:1144
+#: equipos_roles.py:219 equipos_roles.py:1158
 msgid "Confirm"
 msgstr ""
 
-#: equipos_roles.py:220 equipos_roles.py:1147
+#: equipos_roles.py:220 equipos_roles.py:1161
 msgid "Reject"
 msgstr ""
 
@@ -79,27 +79,27 @@ msgstr ""
 msgid "Show settings"
 msgstr ""
 
-#: equipos_roles.py:682
+#: equipos_roles.py:695
 msgid "Publish panel"
 msgstr ""
 
-#: equipos_roles.py:683
+#: equipos_roles.py:696
 msgid "Delete panel"
 msgstr ""
 
-#: equipos_roles.py:684 equipos_roles.py:302
+#: equipos_roles.py:697 equipos_roles.py:302
 msgid "Register team"
 msgstr ""
 
-#: equipos_roles.py:685
+#: equipos_roles.py:698
 msgid "Delete team"
 msgstr ""
 
-#: equipos_roles.py:686
+#: equipos_roles.py:699
 msgid "Requests"
 msgstr ""
 
-#: equipos_roles.py:687
+#: equipos_roles.py:700
 msgid "Settings"
 msgstr ""
 
@@ -111,7 +111,7 @@ msgstr ""
 msgid "{hours} h"
 msgstr ""
 
-#: equipos_roles.py:1235
+#: equipos_roles.py:1257
 msgid "✅ Panel deleted."
 msgstr ""
 
@@ -119,7 +119,7 @@ msgstr ""
 msgid "Teams {start}-{end} of {total}"
 msgstr ""
 
-#: equipos_roles.py:209 equipos_roles.py:1605
+#: equipos_roles.py:209 equipos_roles.py:1638
 msgid "Pick your team."
 msgstr ""
 
@@ -163,7 +163,7 @@ msgstr ""
 msgid "Pick the panel channel"
 msgstr ""
 
-#: equipos_roles.py:550 equipos_roles.py:720
+#: equipos_roles.py:550 equipos_roles.py:733
 msgid "Pick the team to delete."
 msgstr ""
 
@@ -187,143 +187,143 @@ msgstr ""
 msgid "Pick the extra role."
 msgstr ""
 
-#: equipos_roles.py:692
+#: equipos_roles.py:705
 msgid "Pick the panel channel."
 msgstr ""
 
-#: equipos_roles.py:726
+#: equipos_roles.py:739
 msgid "Pick a status."
 msgstr ""
 
-#: equipos_roles.py:732
+#: equipos_roles.py:745
 msgid "Team role settings."
 msgstr ""
 
-#: equipos_roles.py:792
+#: equipos_roles.py:806
 msgid "{pre}\n\nVersion: {version}"
 msgstr ""
 
-#: equipos_roles.py:883
+#: equipos_roles.py:897
 msgid "Request"
 msgstr ""
 
-#: equipos_roles.py:884 equipos_roles.py:901
+#: equipos_roles.py:898 equipos_roles.py:915
 msgid "Player"
 msgstr ""
 
-#: equipos_roles.py:885 equipos_roles.py:903
+#: equipos_roles.py:899 equipos_roles.py:917
 msgid "Team"
 msgstr ""
 
-#: equipos_roles.py:904
+#: equipos_roles.py:918
 msgid "Status"
 msgstr ""
 
-#: equipos_roles.py:908
+#: equipos_roles.py:922
 msgid "Requested"
 msgstr ""
 
-#: equipos_roles.py:1029
+#: equipos_roles.py:1043
 msgid "⚙️ Team role settings"
 msgstr ""
 
-#: equipos_roles.py:1031
+#: equipos_roles.py:1045
 msgid "Panel channel"
 msgstr ""
 
-#: equipos_roles.py:1036
+#: equipos_roles.py:1050
 msgid "Audit log"
 msgstr ""
 
-#: equipos_roles.py:1041
+#: equipos_roles.py:1055
 msgid "Extra role"
 msgstr ""
 
-#: equipos_roles.py:1046 equipos_roles.py:1085
+#: equipos_roles.py:1060 equipos_roles.py:1099
 msgid "Cooldown"
 msgstr ""
 
-#: equipos_roles.py:1051 equipos_roles.py:1086
+#: equipos_roles.py:1065 equipos_roles.py:1100
 msgid "Expiry"
 msgstr ""
 
-#: equipos_roles.py:1055
+#: equipos_roles.py:1069
 msgid "Teams"
 msgstr ""
 
-#: equipos_roles.py:1056
+#: equipos_roles.py:1070
 msgid "Pending requests"
 msgstr ""
 
-#: equipos_roles.py:1064
+#: equipos_roles.py:1078
 msgid "🎟️ Team role request"
 msgstr ""
 
-#: equipos_roles.py:1072
+#: equipos_roles.py:1086
 msgid "How it works"
 msgstr ""
 
-#: equipos_roles.py:1073
+#: equipos_roles.py:1087
 msgid "1. Press **Request team role**.\n2. Pick your team.\n3. The team confirms or rejects it in its private channel."
 msgstr ""
 
-#: equipos_roles.py:1084
+#: equipos_roles.py:1098
 msgid "Registered teams"
 msgstr ""
 
-#: equipos_roles.py:1205 equipos_roles.py:205 equipos_roles.py:716 equipos_roles.py:1600 equipos_roles.py:1626
+#: equipos_roles.py:1227 equipos_roles.py:205 equipos_roles.py:729 equipos_roles.py:1633 equipos_roles.py:1659
 msgid "There are no teams registered yet. Tell an admin."
 msgstr ""
 
-#: equipos_roles.py:1207 equipos_roles.py:1254 equipos_roles.py:487 equipos_roles.py:1746 equipos_roles.py:1749
+#: equipos_roles.py:1229 equipos_roles.py:1276 equipos_roles.py:487 equipos_roles.py:1779 equipos_roles.py:1782
 msgid "I cannot post in that channel. Check my permissions there."
 msgstr ""
 
-#: equipos_roles.py:1227
+#: equipos_roles.py:1249
 msgid "There is no published panel."
 msgstr ""
 
-#: equipos_roles.py:1248
+#: equipos_roles.py:1270
 msgid "The team name must be between 2 and 64 characters."
 msgstr ""
 
-#: equipos_roles.py:1250
+#: equipos_roles.py:1272
 msgid "That role cannot be assigned by the bot."
 msgstr ""
 
-#: equipos_roles.py:1252
+#: equipos_roles.py:1274
 msgid "That role is above my highest role. Move my role higher."
 msgstr ""
 
-#: equipos_roles.py:1574
+#: equipos_roles.py:1607
 msgid "**Team roles**\n`{pedir}` — request a team role.\n`{lista}` — see the registered teams.\n`{admin}` — open the admin board (admin).\n`{panel}` — publish the request panel (admin).\n`{config}` — show or change the settings (admin).\n`{solicitudes}` — list requests (admin)."
 msgstr ""
 
-#: equipos_roles.py:1814
+#: equipos_roles.py:1847
 msgid "🛠️ Team role admin"
 msgstr ""
 
-#: equipos_roles.py:1815
+#: equipos_roles.py:1848
 msgid "Everything from here: publish the panel, register or delete teams, review requests and change the settings."
 msgstr ""
 
-#: equipos_roles.py:169 equipos_roles.py:200 equipos_roles.py:224 equipos_roles.py:280 equipos_roles.py:314 equipos_roles.py:372 equipos_roles.py:405 equipos_roles.py:441 equipos_roles.py:475 equipos_roles.py:518 equipos_roles.py:558 equipos_roles.py:589 equipos_roles.py:609 equipos_roles.py:630 equipos_roles.py:670 equipos_roles.py:698 equipos_roles.py:711
+#: equipos_roles.py:169 equipos_roles.py:200 equipos_roles.py:224 equipos_roles.py:280 equipos_roles.py:314 equipos_roles.py:372 equipos_roles.py:405 equipos_roles.py:441 equipos_roles.py:475 equipos_roles.py:518 equipos_roles.py:558 equipos_roles.py:589 equipos_roles.py:609 equipos_roles.py:630 equipos_roles.py:670 equipos_roles.py:678 equipos_roles.py:711 equipos_roles.py:724
 msgid "This only works in a server."
 msgstr ""
 
-#: equipos_roles.py:228 equipos_roles.py:1412 equipos_roles.py:1490
+#: equipos_roles.py:228 equipos_roles.py:1445 equipos_roles.py:1523
 msgid "That request no longer exists."
 msgstr ""
 
-#: equipos_roles.py:231 equipos_roles.py:1414 equipos_roles.py:1492
+#: equipos_roles.py:231 equipos_roles.py:1447 equipos_roles.py:1525
 msgid "That request is already resolved."
 msgstr ""
 
-#: equipos_roles.py:235 equipos_roles.py:1420
+#: equipos_roles.py:235 equipos_roles.py:1453
 msgid "Only members with the team role or bot staff can resolve this request."
 msgstr ""
 
-#: equipos_roles.py:285 equipos_roles.py:1791
+#: equipos_roles.py:285 equipos_roles.py:1824
 msgid "There are no requests with that status."
 msgstr ""
 
@@ -335,7 +335,7 @@ msgstr ""
 msgid "Pick the channel first."
 msgstr ""
 
-#: equipos_roles.py:482 equipos_roles.py:525 equipos_roles.py:1667
+#: equipos_roles.py:482 equipos_roles.py:525 equipos_roles.py:1700
 msgid "That channel is not a text channel."
 msgstr ""
 
@@ -343,76 +343,88 @@ msgstr ""
 msgid "Cancelled."
 msgstr ""
 
-#: equipos_roles.py:837
+#: equipos_roles.py:684
+msgid "🐞 Debug desactivado."
+msgstr ""
+
+#: equipos_roles.py:686
+msgid "🐞 Debug activado. Los detalles saldrán en la consola."
+msgstr ""
+
+#: equipos_roles.py:851
 msgid "This command only works in a server."
 msgstr ""
 
-#: equipos_roles.py:887
+#: equipos_roles.py:901
 msgid "By"
 msgstr ""
 
-#: equipos_roles.py:914
+#: equipos_roles.py:928
 msgid "Expires"
 msgstr ""
 
-#: equipos_roles.py:917
+#: equipos_roles.py:931
 msgid "Resolved"
 msgstr ""
 
-#: equipos_roles.py:926 equipos_roles.py:1089 equipos_roles.py:1647 equipos_roles.py:1822
+#: equipos_roles.py:940 equipos_roles.py:1103 equipos_roles.py:1680 equipos_roles.py:1855
 msgid "EquiposRoles"
 msgstr ""
 
-#: equipos_roles.py:1032 equipos_roles.py:1037 equipos_roles.py:1042
+#: equipos_roles.py:1046 equipos_roles.py:1051 equipos_roles.py:1056
 msgid "not set"
 msgstr ""
 
-#: equipos_roles.py:1221
+#: equipos_roles.py:1243
 msgid "✅ Panel published in {channel}."
 msgstr ""
 
-#: equipos_roles.py:1275
+#: equipos_roles.py:1297
 msgid "✅ Team **{name}** registered with role {role} in {channel}."
 msgstr ""
 
-#: equipos_roles.py:1295
+#: equipos_roles.py:1317
 msgid "There is no team with that id."
 msgstr ""
 
-#: equipos_roles.py:1310
+#: equipos_roles.py:1332
 msgid "✅ Team **{name}** deleted."
 msgstr ""
 
-#: equipos_roles.py:1321 equipos_roles.py:1418
+#: equipos_roles.py:1343 equipos_roles.py:1451
 msgid "That team no longer exists."
 msgstr ""
 
-#: equipos_roles.py:1324
+#: equipos_roles.py:1346
 msgid "I cannot find you in this server."
 msgstr ""
 
-#: equipos_roles.py:1395
+#: equipos_roles.py:1428
 msgid "✅ Request sent to **{team}**. Its members will confirm or reject it."
 msgstr ""
 
-#: equipos_roles.py:1481
+#: equipos_roles.py:1514
 msgid "✅ Request #{id} rejected."
 msgstr ""
 
-#: equipos_roles.py:1511
+#: equipos_roles.py:1544
 msgid "✅ Request #{id} cancelled."
 msgstr ""
 
-#: equipos_roles.py:1727
+#: equipos_roles.py:1760
 msgid "You cannot set and remove the log channel at the same time."
 msgstr ""
 
-#: equipos_roles.py:1846
+#: equipos_roles.py:1880
 msgid "Panel view children: {n}"
 msgstr ""
 
-#: equipos_roles.py:1847
+#: equipos_roles.py:1881
 msgid "Request view children: {n}"
+msgstr ""
+
+#: equipos_roles.py:1882
+msgid "Debug: {state}"
 msgstr ""
 
 #: equipos_roles.py:411
@@ -431,171 +443,179 @@ msgstr ""
 msgid "✅ Extra role set to {role}."
 msgstr ""
 
-#: equipos_roles.py:879
+#: equipos_roles.py:893
 msgid "Team role request · {action}"
 msgstr ""
 
-#: equipos_roles.py:894
+#: equipos_roles.py:908
 msgid "Team role request · {team}"
 msgstr ""
 
-#: equipos_roles.py:909
+#: equipos_roles.py:923
 msgid "<t:{ts}:F> (<t:{ts}:R>)"
 msgstr ""
 
-#: equipos_roles.py:920
+#: equipos_roles.py:934
 msgid "Resolved by"
 msgstr ""
 
-#: equipos_roles.py:924
+#: equipos_roles.py:938
 msgid "EquiposRoles · Request #{id}"
 msgstr ""
 
-#: equipos_roles.py:994
+#: equipos_roles.py:1008
 msgid "🎟️ Requests · {status} ({count})"
 msgstr ""
 
-#: equipos_roles.py:1065
+#: equipos_roles.py:1079
 msgid "Press the button, pick your team and wait for its members to confirm you. You can request again after {cooldown}."
 msgstr ""
 
-#: equipos_roles.py:1083 equipos_roles.py:1018 equipos_roles.py:1645
+#: equipos_roles.py:1097 equipos_roles.py:1032 equipos_roles.py:1678
 msgid "… and {n} more."
 msgstr ""
 
-#: equipos_roles.py:1087
+#: equipos_roles.py:1101
 msgid "EquiposRoles · {count} teams"
 msgstr ""
 
-#: equipos_roles.py:1374
+#: equipos_roles.py:1405
 msgid "I could not post the request. Tell an admin."
 msgstr ""
 
-#: equipos_roles.py:1480
+#: equipos_roles.py:1513
 msgid "✅ Request #{id} approved."
 msgstr ""
 
-#: equipos_roles.py:1629
+#: equipos_roles.py:1662
 msgid "🎟️ Teams ({count})"
 msgstr ""
 
-#: equipos_roles.py:1833
+#: equipos_roles.py:1866
 msgid "✅ Refreshed {count} messages."
 msgstr ""
 
-#: equipos_roles.py:272 equipos_roles.py:995
+#: equipos_roles.py:1882
+msgid "on"
+msgstr ""
+
+#: equipos_roles.py:1882
+msgid "off"
+msgstr ""
+
+#: equipos_roles.py:272 equipos_roles.py:1009
 msgid "All"
 msgstr ""
 
-#: equipos_roles.py:415 equipos_roles.py:1732
+#: equipos_roles.py:415 equipos_roles.py:1765
 msgid "The cooldown must be between {min} and {max} minutes."
 msgstr ""
 
-#: equipos_roles.py:451 equipos_roles.py:1740
+#: equipos_roles.py:451 equipos_roles.py:1773
 msgid "The expiry must be between {min} and {max} hours."
 msgstr ""
 
-#: equipos_roles.py:914 equipos_roles.py:917 equipos_roles.py:1013
+#: equipos_roles.py:928 equipos_roles.py:931 equipos_roles.py:1027
 msgid "<t:{ts}:R>"
 msgstr ""
 
-#: equipos_roles.py:1005
+#: equipos_roles.py:1019
 msgid "{emoji} #{id} · {status}"
 msgstr ""
 
-#: equipos_roles.py:1010
+#: equipos_roles.py:1024
 msgid "{user} · {team} · {when}"
 msgstr ""
 
-#: equipos_roles.py:1264
+#: equipos_roles.py:1286
 msgid "The maximum of {max} teams is reached."
 msgstr ""
 
-#: equipos_roles.py:1284 equipos_roles.py:1612
+#: equipos_roles.py:1306 equipos_roles.py:1645
 msgid "There is no team named **{name}**."
 msgstr ""
 
-#: equipos_roles.py:1327 equipos_roles.py:1426
+#: equipos_roles.py:1349 equipos_roles.py:1459
 msgid "The role of **{team}** no longer exists."
 msgstr ""
 
-#: equipos_roles.py:1329
+#: equipos_roles.py:1351
 msgid "You already have the role of **{team}**."
 msgstr ""
 
-#: equipos_roles.py:1342
+#: equipos_roles.py:1364
 msgid "You can request again <t:{ts}:R>."
 msgstr ""
 
-#: equipos_roles.py:1346
+#: equipos_roles.py:1368
 msgid "The channel of **{team}** no longer exists."
 msgstr ""
 
-#: equipos_roles.py:1348
+#: equipos_roles.py:1370
 msgid "I cannot post in the channel of **{team}**. Tell an admin."
 msgstr ""
 
-#: equipos_roles.py:1638
+#: equipos_roles.py:1671
 msgid "{role} · {channel}"
 msgstr ""
 
-#: equipos_roles.py:1787
+#: equipos_roles.py:1820
 msgid "Status must be one of: {values}."
 msgstr ""
 
-#: equipos_roles.py:1260
+#: equipos_roles.py:1282
 msgid "There is already a team named **{name}**."
 msgstr ""
 
-#: equipos_roles.py:1262
+#: equipos_roles.py:1284
 msgid "That role is already linked to **{team}**."
 msgstr ""
 
-#: equipos_roles.py:1336
+#: equipos_roles.py:1358
 msgid "You already have a pending request for **{team}**."
 msgstr ""
 
-#: equipos_roles.py:1428
+#: equipos_roles.py:1461
 msgid "I cannot assign **{role}**: it is above my role."
 msgstr ""
 
-#: equipos_roles.py:1438
+#: equipos_roles.py:1471
 msgid "I do not have permission to assign that role. Tell an admin."
 msgstr ""
 
-#: equipos_roles.py:1441
+#: equipos_roles.py:1474
 msgid "Discord rejected the role assignment. Tell an admin."
 msgstr ""
 
-#: equipos_roles.py:1506
+#: equipos_roles.py:1539
 msgid "ℹ️ Your request for **{team}** was cancelled."
 msgstr ""
 
-#: equipos_roles.py:1639
+#: equipos_roles.py:1672
 msgid "role missing"
 msgstr ""
 
-#: equipos_roles.py:1640
+#: equipos_roles.py:1673
 msgid "channel missing"
 msgstr ""
 
-#: equipos_roles.py:1856
+#: equipos_roles.py:1891
 msgid "Panel message components: {n}"
 msgstr ""
 
-#: equipos_roles.py:1866
+#: equipos_roles.py:1901
 msgid "Card #{id} components: {n}"
 msgstr ""
 
-#: equipos_roles.py:1470
+#: equipos_roles.py:1503
 msgid "✅ Your request for **{team}** was approved. You now have the role."
 msgstr ""
 
-#: equipos_roles.py:1476
+#: equipos_roles.py:1509
 msgid "❌ Your request for **{team}** was rejected."
 msgstr ""
 
-#: equipos_roles.py:1433 equipos_roles.py:1451
+#: equipos_roles.py:1466 equipos_roles.py:1484
 msgid "Team role request #{id} approved by {user}"
 msgstr ""
 
